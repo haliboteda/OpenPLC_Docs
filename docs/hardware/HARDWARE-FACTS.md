@@ -88,21 +88,19 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 
 PG9 配成 input 不影响复位行为：**复位那一刻 MCU 所有 GPIO 都回到默认态**，固件配的推挽输出在那个瞬间并不存在，压住这条网的始终只有 R58 那个 10k 下拉。
 
-**2026-09-16 起，这件事在 `.ioc` 里**：`PG9.Signal=GPIO_Input`，生成的 `MX_GPIO_Init()` 直接配成
-`GPIO_MODE_INPUT` + `GPIO_NOPULL`。原先那个 USER CODE 块里的 `BOOT0_ConfigureAsInput()`
-（2026-08-18 起的过渡做法）已连同调用一起删除 —— 生成区做了同样的事，它成了多余的重复配置。
+**PG9 的输入配置在 `.ioc` 里**：`PG9.Signal=GPIO_Input`，生成的 `MX_GPIO_Init()` 直接配成
+`GPIO_MODE_INPUT` + `GPIO_NOPULL`。实测（2026-09-16，SWD 直读）：
+bootloader 阶段 `GPIOG_MODER` 的 PG9 位是 `00`，松开 `IDR` bit9 = 0、按住 = 1，启动日志同步报
+`BOOT0 button is pressed!`。
+
+⚠️ **app 跑起来之后，PG9 回到模拟模式（`MODER` 位 = `11`），`IDR` 恒读 0。**
+Arduino core 不配这个脚，它停在复位默认值，而**模拟模式断开数字输入缓冲器**。
+**所以要量 BOOT0，只能在 bootloader 阶段量** —— 在 app 阶段读 IDR 会得到「没按」的假象。
 
 ### 有过一份「改成输入把 RESET 键弄坏了」的报告，那是误判
 
 ⚠️ **真因是同一次改动里删掉了 `SystemClock_Config()`** —— MCU 因此在 VOS3 + 64 MHz + 0 等待周期
 下读 flash，超出规格。**和这个引脚无关。**
-
-这条以前只写在那个函数的注释里，2026-09-16 函数删除时移到这里。
-
-⚠️ **改成 `.ioc` 之后，「按下时读到 1」这一半还没验。** 松开时实测为 0（SWD 直读 `GPIOG->IDR` 543 次），
-启动日志也照常打出「BOOT0 button is not pressed.」；按下那一半要人伸手，见 `$PROD/waiting/WAITING-ON.md`。
-
-> **为什么要改成 input**：owner 槽的恢复出厂要按住 BOOT0 约 10 秒。推挽输出时按住 = 3V3 经引脚对地短路 10 秒。
 
 ## SDRAM 占掉的 39 个脚（用户 sketch 碰得到）
 
