@@ -1,6 +1,8 @@
 """Refuse a placeholder that admits something has nowhere to go.
 
 Writing "no destination yet" in a table is how a whole category goes quiet:
+the words, not a status symbol -- an empty checkbox means not started, which is
+a legitimate thing for a status column to say.
 the marker stays, nobody is on the hook, and the gap surfaces months later at
 the bench. A placeholder is allowed only when the same row names the ticket that owns it.
 Only table rows are checked: a cell is where a destination gets declared, and
@@ -19,7 +21,7 @@ import os
 import re
 import sys
 
-MARKERS = ("⬜", "没有去处", "TBD", "暂无去处")
+MARKERS = ("没有去处", "TBD", "暂无去处")
 TICKET_REF = re.compile(r"[A-Z]{2,5}-\d{2}")
 
 

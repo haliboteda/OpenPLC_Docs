@@ -64,7 +64,7 @@ python tools/list_wayfinder_map_frontier.py
 
 ## 编号和文件名
 
-- 票号带图前缀（`MIG-` 是文档搬迁那张图的），全局唯一。**这个项目的编号撞过车** —— 见 `$PROD/docs/ID-MAP.md`，曾有 13 套编号混用，`A1` 同时是四样东西
+- 票号带图前缀（`MIG-` 是文档搬迁那张图的），全局唯一。**这个项目的编号撞过车** —— 见 `$PROD/docs/tables/ID-MAP.md`，曾有 13 套编号混用，`A1` 同时是四样东西
 - **编号只活在文件名里。** 图的正文、提交说明、对话里一律用票的**标题**
 - 脚本文件名写长一点，说清它干什么 —— `list_wayfinder_map_frontier.py`，不是 `frontier.py`
 

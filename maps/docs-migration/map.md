@@ -9,7 +9,7 @@
 
 **为什么开这张图**（2026-09-16 定）：旧框架是**产物导向**的 —— `DECISIONS.md` 记已定的、`STATUS.md` 记已跑的、`ISSUES.md` 记已发现的。
 **整套里没有一个位置放「我知道有件事要弄清楚，但现在还问不清楚」**，所以没做的事在系统里不存在，等它在工位上冒出来才补一条。
-现成的样本：`$PROD/docs/ID-MAP.md` 里三张验收单的「结果记在哪」写着 ⬜「没有去处」，需求 F2 因此一直是 🟡。
+现成的样本：`$PROD/docs/tables/ID-MAP.md` 里三张验收单的「结果记在哪」写着 ⬜「没有去处」，需求 F2 因此一直是 🟡。
 
 **这张图上的规矩**：
 
@@ -35,12 +35,15 @@
 - [关票时怎么强制回答「引出什么新未知」](issues/MIG-08-fog-graduation-on-close.md)：做成 pre-commit 钩子，缺了那一节**提交就过不去**，不是约定里写着。脚本是 [check_wayfinder_ticket_hygiene.py](../../tools/check_wayfinder_ticket_hygiene.py)
 - [「没有去处」怎么报错](issues/MIG-07-no-destination-must-fail.md)：路由表补第六问「跑出来的数据」，并规定**占位符同一行必须指出一张票**，由 [check_no_orphan_placeholders.py](../../tools/check_no_orphan_placeholders.py) 在 pre-commit 上拦住
 - [P7/P8/P9 和 selfcheck 怎么跟着搬](issues/MIG-05-doc-checks-follow.md)：`$PROD` 改指向本仓（不新造变量），脚本各留各家，新增 **P12** 把本仓的检查搬进 `selfcheck`，搬迁顺序定为**加 → 搬 → 减**
+- [各仓 CLAUDE.md 改成什么](issues/MIG-04-claude-md-entrypoints.md)：四个入口各留一句**短**指针，不复述内容 —— 写成同一句长话时 P8 当场报重复
+- [AI-Skills/OpenPLC 搬空后剩什么](issues/MIG-06-ai-skills-openplc-remainder.md)：**什么都不剩，目录已删**。`/openplc:*` skill 早在 2026-08-25 就退役了
 
 ## Not yet specified
 
-- 现有 10 套编号在新框架下要不要合并，`$PROD/docs/ID-MAP.md` 本身往哪去（`MIG-` 是第 11 套，还没登记）
+- 现有 10 套编号在新框架下要不要合并，`$PROD/docs/tables/ID-MAP.md` 本身往哪去（`MIG-` 是第 11 套，还没登记）
 - 给人扫的那一面 —— 要不要一个索引页，长什么样
 - 下一张图开什么（等工装的使用反馈 / 等校准那条线）
+- **不属于任何一张图的孤立决策住哪** —— `ISS-B1`（电荷泵余电）和 `ISS-C1`（校准值）是等用户拍板的决策，但它们不共享任何一张图的终点。执行时暂放进 `waiting/`，那不是最终答案
 - **新增编号没人提醒去登记** —— `P12` 已经是第 12 个 P 号，`ID-MAP.md` 只登记到 `P11`
 - **`ID-MAP.md` 该不该改成脚本扫出来** —— 手维护已经漂了：多列七条早删掉的，漏了一条真实存在的
 - **IAP 协议在参考层没有独立文档** —— 产品核心协议只活在代码注释和决策条目里。要不要补一份、补成什么样

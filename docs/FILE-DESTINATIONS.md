@@ -4,7 +4,7 @@
 `maps/docs-migration/issues/MIG-03-file-by-file-destination.md` 这张票敲定。
 
 分类依据见 [REFERENCE-LAYER-TAXONOMY.md](REFERENCE-LAYER-TAXONOMY.md)。
-**43 行全部定死，没有 ⏸。** 去处的定义见 [../WHERE-THINGS-LIVE.md](../WHERE-THINGS-LIVE.md)。
+**43 行全部定死，没有 ⏸。** 2026-09-16 已全部执行完毕；**已删掉的两份不加反引号也不加链接**，那是区分「搬走了」和「删了」的唯一依据。 去处的定义见 [../WHERE-THINGS-LIVE.md](../WHERE-THINGS-LIVE.md)。
 
 | 现在在哪 | 去哪 | 备注 |
 |---|---|---|
@@ -31,25 +31,25 @@
 | `IAPTranfer_Tool/TestCase/TEST-CASES.md` | docs/tables/TEST-CASES.md | 编号写死在 Go 代码里，不能改 |
 | `IAPTranfer_Tool/TestCase/acceptance/checklist.md` | docs/tables/ACCEPTANCE-CHECKLIST.md | 改名已批准 |
 | `AI-Skills/OpenPLC/docs/ID-MAP.md` | docs/tables/ID-MAP.md | 要加一行登记 MIG- 前缀 |
-| `AI-Skills/OpenPLC/docs/STATUS.md` | docs/tables/REQUIREMENTS.md（需求那 53 条） | 「最近结果 / 证据日期」两列**原样留在原仓不动** —— 生成器还不存在，现在删掉等于丢掉已有记录 |
+| `AI-Skills/OpenPLC/docs/STATUS.md` | docs/tables/STATUS.md（整份） | ⚠️ **执行时反转**：需求和结果是同一行的不同列，劈不开。理由写在 MIG-03 的 Answer 里 |
 | `open_plc_cube_ide/RELEASE-NOTES.md` | 留在原仓 | 对外、英文、自成一体，跟着版本走 |
 | `open_plc_cube_ide/CLAUDE.md` | 留在原仓（入口） | 内容改写是另一张票 |
 | `open_plc_arduino/CLAUDE.md` | 留在原仓（入口） | 同上 |
 | `IAPTranfer_Tool/CLAUDE.md` | 留在原仓（入口） | 同上 |
 | `open_plc_cube_ide/README.md` | 留在原仓（门面） |  |
 | `IAPTranfer_Tool/README.md` | 留在原仓（门面） |  |
-| `open_plc_cube_ide/docs/design/PRODUCTION-TEST-GAP.md` | 转成票 | 「要什么/有什么」的差距 → 一张图 |
+| `open_plc_cube_ide/docs/design/PRODUCTION-TEST-GAP.md` | maps/production-test-gap/ | 开成第二张图，⏸ 暂停等使用反馈。原文留作当天的差距快照 |
 | `open_plc_cube_ide/docs/test/PORT-BRINGUP-PLAN.md` | 进 `work/` | 每个端口卡在哪 = 工作项 |
 | `open_plc_cube_ide/docs/test/PORTTOOL-FIRST-BENCH.md` | 进 `waiting/` | 「只有真硬件能回答的问题」= 等外部条件 |
 | `open_plc_cube_ide/docs/test/DO-PWM-SCOPE-STEPS.md` | 进 `waiting/` | 等示波器实测；VNQ5160K-E 的 PWM 上限无数据手册可查 |
-| `open_plc_cube_ide/docs/work/ISSUES.md` | **拆开分流** | 6 条逐条分流：B1/C1 转票、B2 进 `waiting/`、A3/D1/D2 进 `work/`。文件删掉 |
+| `open_plc_cube_ide/docs/work/ISSUES.md` | **拆开分流，文件删掉** | A3/D1/D2 → `work/TODO.md`；B2 → `waiting/WAITING-ON.md`。⚠️ **B1/C1 原定「转票」，执行时放进了 `waiting/`** —— 它们是决策，但不属于任何一张图，框架没有这一格。已记进迷雾 |
 | `open_plc_cube_ide/docs/work/BACKLOG.md` | **删** | 唯一一条（C12 等真实需求）进迷雾。见 `WHERE-THINGS-LIVE.md` |
 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/HOST-C-TESTS.md` | 留在原地 | 它描述的就是所在目录，`docs/build/` 放指针 |
 | `IAPTranfer_Tool/TestCase/host/crypto_ref/CROSS-CHECK.md` | 留在原地 | 同上，`docs/security/` 放指针 |
 | `IAPTranfer_Tool/TestCase/host/fakeboard/KEY-MATCH.md` | 留在原地 | 同上，`docs/security/` 放指针 |
 | `IAPTranfer_Tool/TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md` | 留在原地 | 同上，`docs/production/` 放指针 |
-| `open_plc_cube_ide/docs/INDEX.md` | **删** | 搬完目录结构就回答了「去哪查」，留着是第二份会漂的地图。git 里取得回来 |
-| `AI-Skills/OpenPLC/docs/OVERVIEW.md` | **删** | 同上，由本仓 `README.md` 取代 |
+| open_plc_cube_ide/docs/INDEX.md（已删） | **删** | 搬完目录结构就回答了「去哪查」，留着是第二份会漂的地图。git 里取得回来 |
+| AI-Skills/OpenPLC/docs/OVERVIEW.md（已删） | **删** | 同上，由本仓 `README.md` 取代 |
 | `AI-Skills/OpenPLC/docs/process/WRAP-UP.md` | docs/repo/WRAP-UP.md（逐条对后的剩余） | 被新关票流程接管的条目删掉并指过去；「不要假设用户要推送」这类新框架里没有位置的**必须保留** |
 
 **合计 43 行。** 覆盖三个仓全部 `.md`，没有一份没被提到。
