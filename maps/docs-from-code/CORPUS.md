@@ -8,6 +8,11 @@
 
 **227 个文件，8611 行。**
 
+⚠️ **2026-09-16 补充：单位是「段」，不是「文件」。** 6 个文件里生成的和我们写的混在一起
+（`LWIP/Target/ethernetif.c` 153 行注释里既有 ST 的 `@brief` 模板，也有 USER CODE MACADDRESS
+块 —— 那块是九条跨仓镜像之一）。**不能整份排除，要按段判。**
+判据见 `issues/DFC-01-what-counts-as-design.md`。
+
 | 注释行 | 文件 |
 |---:|---|
 | 301 | `open_plc_cube_ide/TestCase/KNX/knx_test.c` |

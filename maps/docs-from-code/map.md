@@ -27,7 +27,7 @@ ST HAL / FatFs / micro-ecc / lan8742 / lwipopts；只数长度 ≥ 25 字符的�
 
 ## Decisions so far
 
-（还没有）
+- [哪些注释算设计/需求/测试，哪些本来就该留在代码里](issues/DFC-01-what-counts-as-design.md)：**三分**（结论+一句话留 / 成段论证搬 / 抄原理图的给链接不抄原文），**单位是段不是文件**
 
 ## Not yet specified
 
