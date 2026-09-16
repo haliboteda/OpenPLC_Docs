@@ -66,3 +66,38 @@
 ⚠️ **留给「测试设计文档」的一条**（用户 2026-09-16 定批 3–5 汇总进那份）：
 `iapcert` 做成 package 而不是 main 的一部分，是为了让用例能 `import` 它 ——
 **一个自己重新实现了密码学的用例，只能证明那个重新实现和它自己一致。** 这是测试设计原则，不是安全设计。
+
+## 批 3–5 · 汇总进测试设计文档（2026-09-16）
+
+用户当天定：「其他部分可以**提取出来总结放在测试设计文档里面**。**原注释只做统一和查找错误修改**。」
+所以这三批**不逐文件搬**，而是把 175 个文件里的**设计理由**汇总成一份。
+
+**做法**：在 6,985 行注释里筛出带设计理由信号的段落（`rather than` / `on purpose` /
+`deliberately` / `the point` / `used to` 等），**得到 482 段、分布在 125 个文件**，
+再按主题归并。产物：[../../docs/production/TEST-DESIGN.md](../../docs/production/TEST-DESIGN.md)。
+
+收进去的主题：一条判据只存在一份 · 模拟板是真固件编到 PC 上 · 桩要响亮失败 ·
+C harness 为什么不挨着 Go 测试 · 会话参数只在启动时收 · 跑起来要看得见 · 搭台与用例分开 · 面板取舍。
+
+### 查出来的错误，已改
+
+⚠️ **`entries_stub.c` 的注释引用了 `porttool_handover.c`，那个文件上一轮已随 `pt.handover` 删净。**
+注释已改成照实说，并补了指向测试设计文档的引用位置。
+改完 `porttool_caps/build.py` 重跑：固件侧全过，Go 侧 `-race` 通过。
+
+### 等用户定：11 个死桩
+
+那十四个 bring-up 入口里，**只有 3 个仍被工装源码引用**
+（`BringUp_Test_Run` / `RS485_Test_Run` / `SDRAM_Test_Retention`），
+**另外 11 个没有任何工装源码再提到**，是交权表删掉之后的残留。
+
+| 还在用 | 没人用了 |
+|---|---|
+| BringUp_Test_Run · RS485_Test_Run · SDRAM_Test_Retention | CAN_Test_Run · CAN_Test_Soak_Run · CAN_Test_Scope_Run · CAN_Test_Echo_Run · KNX_Test_Run · RS232_Test_Run · PWM_Test_Run · SD_Test_Info · SD_Test_FileIntegrity · SDRAM_Test_Capacity · SDRAM_Test_CubeProgrammerVerify |
+
+**删之前问用户**，没动。
+
+### 另外记一笔
+
+`E:\WorkSpace\Schaeffer-AG\.scratch/porttool-ui-audit/` 有 8 份 markdown，
+**在工作区根目录、不属于任何仓库，因此不在版本控制里**。没动，等用户处理。
