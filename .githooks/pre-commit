@@ -1,0 +1,8 @@
+#!/bin/sh
+# Block a commit that closes a ticket without recording what it opened up.
+python tools/check_wayfinder_ticket_hygiene.py || {
+    echo ""
+    echo "Commit refused. Fix the tickets above, or use --no-verify only if you"
+    echo "have a reason you can write down."
+    exit 1
+}
