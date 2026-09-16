@@ -2,9 +2,9 @@
 
 **总分两部分。** [A 部分](#a-总--上位机怎么控制板子)讲**上位机和板子之间的完整契约**：控制什么、怎么控制、如何响应、响应什么 —— 只看这一部分就够写上位机。[B 部分](#b-分--每个端口怎么测)讲**每一个端口具体怎么测**：怎么接、敲什么、看到什么算过、哪些坑会让判据静默失效。[C 部分](#c-附--镜像开关物理连接用法)是环境与前提。
 
-代码在 `TestCase/porttool/`（固件侧）和 `$TOOL` 的 `internal/pt*` + `cmd/porttool`（上位机侧）。形态与分发方式见 [C.4](#c4-上位机怎么分发怎么起来)，待办见 [C.5](#c5-还没做的--三期计划)。
+代码在 `TestCase/porttool/`（固件侧）和 `$TOOL` 的 `internal/pt*` + `cmd/porttool`（上位机侧）。形态与分发方式见 [C.4](#c4-上位机怎么分发怎么起来)。**待办不在本文** —— 见 `$PROD/work/TODO.md` 和 `$PROD/maps/INDEX.md`。
 
-> 本文描述固件 **`0.5.0`** 的现状。取舍理由在 [DECISIONS.md 第 9–15 条](../tables/DECISIONS.md)，还没做的在 [C.5](#c5-还没做的--三期计划)。
+> 本文描述固件 **`0.5.0`** 的现状。取舍理由在 [DECISIONS.md 第 9–15 条](../tables/DECISIONS.md)。⚠️ **原来这里指着 C.5「还没做的 — 三期计划」，那一节 2026-09-15 已删** —— 还没做的现在在 `$PROD/work/TODO.md` 和各张图里。
 引脚事实以 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 为准，本文不重复推导，只引用结论。
 专用镜像（一次烧一个用例）的接线细节在 [BOARD-BRINGUP-CASES.md](BOARD-BRINGUP-CASES.md)，B 部分链过去，不抄。
 
@@ -58,7 +58,7 @@ flowchart TB
 | | ✅ **会话** | 🎯 **一次性动作** |
 |---|---|---|
 | 是什么 | 一个可启停的周期采样器，`porttool_port_t` 结构（porttool.h:52-77（`$BOOT/TestCase/porttool/porttool.h`）） | 一个跑完就返回、把量到的数写成一行 `OK` 的函数 | 一个独占的传统 bring-up 测试入口函数 |
-| 现有几个 | **13 个**：`din`、`dout`、`relay`、`ain`、`aout`、`temp`、`rs232`、`rs485`、`can`、`knx`、`eth`、`usb`、`sd` | **8 个**：见 [A.3](#a3-怎么控制--全部-9-条命令) 的 `pt.run` 表 |
+| 现有几个 | **13 个**：`din`、`dout`、`relay`、`ain`、`aout`、`temp`、`rs232`、`rs485`、`can`、`knx`、`eth`、`usb`、`sd` | **8 个**：见 [A.3](#a3-怎么控制--全部-8-条命令) 的 `pt.run` 表 |
 | 怎么启动 | `pt.start <port> [k=v …]` | `pt.run <target>` |
 | 能并存吗 | **能**，多个会话同时跑，主循环轮流 tick | 跑的时候独占 CPU，跑完就还回来 |
 | 参数能热改吗 | **能**，`pt.set` 不重启会话 | **不收参数**，尺度编在固件里并写进应答 |
