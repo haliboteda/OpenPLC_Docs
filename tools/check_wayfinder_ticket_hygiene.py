@@ -47,6 +47,16 @@ def main():
 
     problems = []
     checked = 0
+
+    # A map has to say how its scope was computed, as a command that can be run
+    # again -- a hand-written list narrows the same way the author's memory did.
+    for map_path in sorted(glob.glob("maps/*/map.md")):
+        rel = map_path.replace("\\", "/")
+        text = io.open(map_path, encoding="utf-8").read()
+        for section in ("## Destination", "## 全集"):
+            if section not in text:
+                problems.append("%s: map is missing %s" % (rel, section))
+
     for path in sorted(glob.glob("maps/*/issues/*.md")):
         rel = path.replace("\\", "/")
         effort = rel.split("/")[1]
