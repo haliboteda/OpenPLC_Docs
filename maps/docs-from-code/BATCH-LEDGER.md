@@ -44,3 +44,21 @@
 - ⚠️ **core 没有被编译过。** `P5`（Arduino 示例构建）根本没出现在这次 `selfcheck` 里 ——
   改的是 `.c` 文件里的注释，风险接近零，**但这是推测，不是实测**。
   要证明得单独跑 `TestCase/host/examples_build/build.py`
+
+## 批 2 · security（2026-09-16）
+
+35 个文件、729 行。⚠️ **和批 1 不一样：这个域本来就有像样的文档**
+（`OWNERSHIP.md` 264 行 + `KEYS.md` + 配图 html），所以这批是真的**比对补全**。
+
+| 文件 | 注释行 | 处理 |
+|---|---|---|
+| `IAPServer/iap_auth.{c,h}` | 75 | ✅ **整套挑战应答机制文档里几乎不存在** —— `nonce` 全文只出现过 1 次、`RNG` **0 次**。新建 [../../docs/security/CHALLENGE-AUTH.md](../../docs/security/CHALLENGE-AUTH.md) |
+| `IAPServer/iap_cert.h` | 36 | ✅ 取出：一个镜像要过的两道检查、为什么两条缺一不可、为什么拆成两个函数 → `CHALLENGE-AUTH.md` |
+| `IAPServer/owner_slot.h` | 104 | 🟡 绝大部分 `OWNERSHIP.md` 已有（签名前缀 88、uid 绑板、format_ver、告警判据）。**补了三条**：记录必须是整数个 flash 字（H7 一次编程 256 位）、签 `generation` 是为了挡重放进后面的槽、`format_ver` 从第一版就在是刻意的 |
+| `iapcert/iapcert.go`、`owner.go`、`auth.go` | 124 | 🟡 大部分已有。**补了两条**：签名必须覆盖板子最终写入的确切字节（`uid` 是板子自己填的）、流水号写失败只报警告不当错误 |
+| `IAPServer/owner_slot.c` | 141 | ✅ **什么都没搬** —— 逐段比对后 `OWNERSHIP.md` 的状态机 / 三个操作 / 记录格式 / 诚实的上限四节已经覆盖 |
+| 其余 29 个小文件 | 249 | ⏸ **本轮未逐个过**，多是 core 侧镜像头和主机测试桩 |
+
+⚠️ **留给「测试设计文档」的一条**（用户 2026-09-16 定批 3–5 汇总进那份）：
+`iapcert` 做成 package 而不是 main 的一部分，是为了让用例能 `import` 它 ——
+**一个自己重新实现了密码学的用例，只能证明那个重新实现和它自己一致。** 这是测试设计原则，不是安全设计。
