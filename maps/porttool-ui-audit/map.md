@@ -9,6 +9,14 @@
 
 ## Notes
 
+⏸ **2026-09-16 起暂停，等硬件工程师用过工装之后的反馈。**
+
+用户当天原话：「**工装暂时到此。等使用反馈。**」这张图整个就是工装面板的事，
+所以剩下三张票**不要主动开工**：`04` 等他在面板上验收、`05` 要决定这轮测哪些端口、
+`06` 和 `$PROD/work/TODO.md` 里「面板按九类分段」是同一件事。
+
+反馈回来之前，它们在 `$PROD/waiting/WAITING-ON.md` 的「等硬件工程师用过工装之后的反馈」那一行底下。
+
 **域**：工装测试（PortTool）。固件在 `$BOOT/TestCase/porttool/`，上位机在 `$TOOL/internal/` 下 pt 开头的那几个包，判据在 `$PROD/docs/tables/TEST-CASES.md`。
 
 **⛔ 不在域内**：bootloader / IAP 产品路径（`$BOOT/IAPServer/`、`IAPTool`）、Arduino 板卡包。
