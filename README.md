@@ -6,6 +6,7 @@ The single entry point for OpenPLC documentation and open questions.
 
 | Path | What lives there |
 |---|---|
+| `GLOSSARY.md` | Terms you cannot guess: this project's, and the ones this way of working brings |
 | `maps/INDEX.md` | Every map, live and archived |
 | `maps/<effort>/map.md` | One effort: its destination, the decisions made so far, and the fog ahead |
 | `maps/<effort>/issues/` | One file per open question |
