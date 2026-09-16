@@ -64,21 +64,35 @@
 
 ## 跨仓镜像的代码
 
-因为没有共享构建，下面这些东西在多个仓库里各有一份拷贝，**只能靠注释交叉引用约束，机制上无法强制同步**。改一处必须改另一处，否则会静默分叉 —— 不会编译报错，只会在运行时表现成别的症状。
+因为没有共享构建，下面这些东西在多个仓库里各有一份拷贝。改一处必须改另一处，
+否则会静默分叉 —— **不会编译报错**，只会在运行时表现成别的症状。
 
-下表的 "core" 指 `$CORE_LIVE` 和 `$CORE_REPO` 两份（先改前者，验证过再同步到后者）。
+**同步的规矩（2026-09-16 定）**：
 
-| 内容 | 在哪几份 |
-|---|---|
-| MAC 从 UID 派生的算法 | bootloader `LWIP/Target/ethernetif.c`（USER CODE MACADDRESS 块）、core `libraries/OpenPLC_Net/src/ethernetif.c` |
-| 发现回复限流 `discovery_reply_allowed()` | bootloader `IAPServer/udp_server.c`、core `libraries/OpenPLC_IAP/src/udp_server.c` |
-| 身份字符串格式 `name_uid_role_version` | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`、core `libraries/OpenPLC_IAP/src/udp_server.c`、Go 侧解析 |
-| SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`、core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` |
-| 上传锁的文件名和过期时间 | `$TOOL/uploadlock.go`、core `tools/discovery/network_discovery.go` |
-| 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`、core `libraries/OpenPLC_IAP/src/iap_keyderive.c` |
-| 证书线格式（132 字节，签名覆盖前 68） | bootloader `IAPServer/iap_cert.h`、core `libraries/OpenPLC_IAP/src/iap_cert.h`、`$TOOL/iapcert/iapcert.go` |
-| owner 记录格式（v2，签名前缀 88） | bootloader `IAPServer/owner_slot.h`、core `libraries/OpenPLC_IAP/src/owner_root_ro.c`、`$TOOL/owner.go` |
-| **RTC 备份寄存器的分配** | 见下表 —— **认领任何一个之前先看这里** |
+1. **bootloader 是源。** 先在 `$BOOT` 里调试清楚，再同步给其他仓。
+2. **改动了下表任何一处，当场问用户要不要同步其余位置** —— 不要自行决定。
+3. **不做共享文件**（submodule / 生成拷贝那类），2026-09-16 明确放弃。
+
+**下表 22 个位置 2026-09-16 逐个核实过，全部存在。** "core" 指 `$CORE_LIVE` 和
+`$CORE_REPO` 两份（先改前者，验证过再同步到后者）。
+
+「谁在查」一栏是实测的，不是推测 —— 跑 `$TOOL/TestCase/tools/check_mirror_sync.py`（用例 **P2**），
+它自己会在输出末尾列出没查的项。
+
+| # | 内容 | 在哪几份（源在最前） | 谁在查 |
+|---|---|---|---|
+| 1 | MAC 从 UID 派生的算法 | bootloader `LWIP/Target/ethernetif.c`（USER CODE MACADDRESS 块）<br>core `libraries/OpenPLC_Net/src/ethernetif.c` | P2 |
+| 2 | 发现回复限流 `discovery_reply_allowed()` | bootloader `IAPServer/udp_server.c`<br>core `libraries/OpenPLC_IAP/src/udp_server.c` | P2（上限 + 窗口两项）。⚠️ **只比数值，不比注释** —— 两边的解释 2026-09-16 已经分叉（core 那份丢了「at 115200 baud」） |
+| 3 | 身份字符串格式 `name_uid_role_version` | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`<br>core `libraries/OpenPLC_IAP/src/udp_server.c`<br>tool `IAP_Ether.go` 的 `strings.Split(raw, "_")`、`IAP_CDC.go` | P2 |
+| 4 | SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
+| 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
+| 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | ❌ **没有任何东西在比两份 C。** H2 只编 bootloader 那份。⚠️ 正文目前一字不差，差别只有 `#include` |
+| 7 | 证书线格式（132 字节，签名覆盖前 68） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
+| 8 | owner 记录格式（v2，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
+| 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
+
+> ✅ **9 条里 7 条 P2 真的在查，第 6 条完全没查，第 9 条只查一半。**
+> 所以「只能靠注释约束」这个旧说法对多数条目已经不成立 —— **但第 6、9 两条仍然只靠人。**
 
 ### RTC 备份寄存器分配表
 

@@ -36,6 +36,7 @@ ST HAL / FatFs / micro-ecc / lan8742 / lwipopts；只数长度 ≥ 25 字符的�
 
 ## Decisions so far
 
+- [跨仓镜像的约束现在到底靠什么](issues/DFC-02-do-mirrors-still-need-comments.md)：**9 条里 7 条 P2 真的在查**，第 6 条完全没查、第 9 条只查一半。表已重排并逐位置核实，同步规矩改成「boot 为源 + 改动时问用户」
 - [哪些注释算设计/需求/测试，哪些本来就该留在代码里](issues/DFC-01-what-counts-as-design.md)：**三分**（结论+一句话留 / 成段论证搬 / 抄原理图的给链接不抄原文），**单位是段不是文件**
 
 ## Not yet specified
@@ -53,3 +54,4 @@ ST HAL / FatFs / micro-ecc / lan8742 / lwipopts；只数长度 ≥ 25 字符的�
   它们不是我们的设计，改了下次升级就没了
 - 代码行为本身。这张图只动文档，不动逻辑
 - **删注释**。2026-09-16 用户定了现有注释内容不动 —— 这张图只比对和补全文档
+- **共享文件**（submodule / 一处为源生成拷贝）。2026-09-16 用户明确放弃：不共享，改成 bootloader 为源、改动时人工确认同步
