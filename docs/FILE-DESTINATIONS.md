@@ -4,8 +4,7 @@
 `maps/docs-migration/issues/MIG-03-file-by-file-destination.md` 这张票敲定。
 
 分类依据见 [REFERENCE-LAYER-TAXONOMY.md](REFERENCE-LAYER-TAXONOMY.md)。
-⏸ = 还没定。2026-09-16 只剩一处：六份「转成票」的具体去处，等
-`MIG-09` 那张票答完。其余全部定死。
+**43 行全部定死，没有 ⏸。** 去处的定义见 [../WHERE-THINGS-LIVE.md](../WHERE-THINGS-LIVE.md)。
 
 | 现在在哪 | 去哪 | 备注 |
 |---|---|---|
@@ -39,12 +38,12 @@
 | `IAPTranfer_Tool/CLAUDE.md` | 留在原仓（入口） | 同上 |
 | `open_plc_cube_ide/README.md` | 留在原仓（门面） |  |
 | `IAPTranfer_Tool/README.md` | 留在原仓（门面） |  |
-| `open_plc_cube_ide/docs/design/PRODUCTION-TEST-GAP.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 逐条转，见下 |
-| `open_plc_cube_ide/docs/test/PORT-BRINGUP-PLAN.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 |
-| `open_plc_cube_ide/docs/test/PORTTOOL-FIRST-BENCH.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 |
-| `open_plc_cube_ide/docs/test/DO-PWM-SCOPE-STEPS.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 |
-| `open_plc_cube_ide/docs/work/ISSUES.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 11 条 ISS-* |
-| `open_plc_cube_ide/docs/work/BACKLOG.md` | 转成票 | ⏸ 等「已知问题和待立项模块在新框架里住哪」 M1–M8 |
+| `open_plc_cube_ide/docs/design/PRODUCTION-TEST-GAP.md` | 转成票 | 「要什么/有什么」的差距 → 一张图 |
+| `open_plc_cube_ide/docs/test/PORT-BRINGUP-PLAN.md` | 进 `work/` | 每个端口卡在哪 = 工作项 |
+| `open_plc_cube_ide/docs/test/PORTTOOL-FIRST-BENCH.md` | 进 `waiting/` | 「只有真硬件能回答的问题」= 等外部条件 |
+| `open_plc_cube_ide/docs/test/DO-PWM-SCOPE-STEPS.md` | 进 `waiting/` | 等示波器实测；VNQ5160K-E 的 PWM 上限无数据手册可查 |
+| `open_plc_cube_ide/docs/work/ISSUES.md` | **拆开分流** | 6 条逐条分流：B1/C1 转票、B2 进 `waiting/`、A3/D1/D2 进 `work/`。文件删掉 |
+| `open_plc_cube_ide/docs/work/BACKLOG.md` | **删** | 唯一一条（C12 等真实需求）进迷雾。见 `WHERE-THINGS-LIVE.md` |
 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/HOST-C-TESTS.md` | 留在原地 | 它描述的就是所在目录，`docs/build/` 放指针 |
 | `IAPTranfer_Tool/TestCase/host/crypto_ref/CROSS-CHECK.md` | 留在原地 | 同上，`docs/security/` 放指针 |
 | `IAPTranfer_Tool/TestCase/host/fakeboard/KEY-MATCH.md` | 留在原地 | 同上，`docs/security/` 放指针 |

@@ -26,12 +26,14 @@
 
 - [tracker 约定怎么写](issues/MIG-01-tracker-convention.md)：票的头部恰好四个字段，blocking 只写单向，前沿由脚本算且不进 `selfcheck`，关掉的票原地改状态不移走。约定落在 [MAP-AND-TICKET-CONVENTION.md](../MAP-AND-TICKET-CONVENTION.md)
 - [参考层按什么分类](issues/MIG-02-reference-layer-taxonomy.md)：准入判据是「不会因为工作推进而变」，按**问题域**分成八类，总表不拆、状态表拆两半。分类表落在 [REFERENCE-LAYER-TAXONOMY.md](../../docs/REFERENCE-LAYER-TAXONOMY.md)
+- [已知问题和待立项模块在新框架里住哪](issues/MIG-09-where-do-defects-and-modules-live.md)：「已知问题」不是一类东西，拆成五个去处（票 / 参考层 / `work/` / `waiting/` / 迷雾）。路由表落在 [WHERE-THINGS-LIVE.md](../../WHERE-THINGS-LIVE.md)
 
 ## Not yet specified
 
-- 现有 10 套编号在新框架下要不要合并，`$PROD/docs/ID-MAP.md` 本身往哪去
+- 现有 10 套编号在新框架下要不要合并，`$PROD/docs/ID-MAP.md` 本身往哪去（`MIG-` 是第 11 套，还没登记）
 - 给人扫的那一面 —— 要不要一个索引页，长什么样
 - 下一张图开什么（等工装的使用反馈 / 等校准那条线）
+- **`ID-MAP.md` 该不该改成脚本扫出来** —— 手维护已经漂了：多列七条早删掉的，漏了一条真实存在的
 - **IAP 协议在参考层没有独立文档** —— 产品核心协议只活在代码注释和决策条目里。要不要补一份、补成什么样
 - **`STATUS.md` 的「最近结果」该由脚本生成，但生成器不存在** —— 现在手抄，这是三个数字对不上的原因
 - **一张图走完之后怎么归档** —— `INDEX.md` 里标什么、`maps/<effort>/` 目录动不动。第二张图开起来之前要定
