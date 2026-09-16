@@ -33,6 +33,7 @@
 - [已知问题和待立项模块在新框架里住哪](issues/MIG-09-where-do-defects-and-modules-live.md)：「已知问题」不是一类东西，拆成五个去处（票 / 参考层 / `work/` / `waiting/` / 迷雾）。路由表落在 [WHERE-THINGS-LIVE.md](../../WHERE-THINGS-LIVE.md)
 - [三十多份文件逐份定去向](issues/MIG-03-file-by-file-destination.md)：43 份逐一定死，零待定。表落在 [FILE-DESTINATIONS.md](../../docs/FILE-DESTINATIONS.md)
 - [关票时怎么强制回答「引出什么新未知」](issues/MIG-08-fog-graduation-on-close.md)：做成 pre-commit 钩子，缺了那一节**提交就过不去**，不是约定里写着。脚本是 [check_wayfinder_ticket_hygiene.py](../../tools/check_wayfinder_ticket_hygiene.py)
+- [「没有去处」怎么报错](issues/MIG-07-no-destination-must-fail.md)：路由表补第六问「跑出来的数据」，并规定**占位符同一行必须指出一张票**，由 [check_no_orphan_placeholders.py](../../tools/check_no_orphan_placeholders.py) 在 pre-commit 上拦住
 
 ## Not yet specified
 
@@ -48,3 +49,4 @@
 
 - 工装的三条待办（异常可恢复、失败码、面板按九类分段）—— 2026-09-16 定为**等使用反馈**，不在这张图上
 - 任何代码改动。这张图只动文档和记录方式
+- **逐板验收记录（`CHK-*` 的结果）到底存在哪** —— 那是产测那条线的事（需求 F2），不是文档框架的事。见 [「没有去处」怎么报错](issues/MIG-07-no-destination-must-fail.md)。搬迁时检查会拦住它，逼着当时回答
