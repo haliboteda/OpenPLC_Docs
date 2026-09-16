@@ -34,12 +34,14 @@
 - [三十多份文件逐份定去向](issues/MIG-03-file-by-file-destination.md)：43 份逐一定死，零待定。表落在 [FILE-DESTINATIONS.md](../../docs/FILE-DESTINATIONS.md)
 - [关票时怎么强制回答「引出什么新未知」](issues/MIG-08-fog-graduation-on-close.md)：做成 pre-commit 钩子，缺了那一节**提交就过不去**，不是约定里写着。脚本是 [check_wayfinder_ticket_hygiene.py](../../tools/check_wayfinder_ticket_hygiene.py)
 - [「没有去处」怎么报错](issues/MIG-07-no-destination-must-fail.md)：路由表补第六问「跑出来的数据」，并规定**占位符同一行必须指出一张票**，由 [check_no_orphan_placeholders.py](../../tools/check_no_orphan_placeholders.py) 在 pre-commit 上拦住
+- [P7/P8/P9 和 selfcheck 怎么跟着搬](issues/MIG-05-doc-checks-follow.md)：`$PROD` 改指向本仓（不新造变量），脚本各留各家，新增 **P12** 把本仓的检查搬进 `selfcheck`，搬迁顺序定为**加 → 搬 → 减**
 
 ## Not yet specified
 
 - 现有 10 套编号在新框架下要不要合并，`$PROD/docs/ID-MAP.md` 本身往哪去（`MIG-` 是第 11 套，还没登记）
 - 给人扫的那一面 —— 要不要一个索引页，长什么样
 - 下一张图开什么（等工装的使用反馈 / 等校准那条线）
+- **新增编号没人提醒去登记** —— `P12` 已经是第 12 个 P 号，`ID-MAP.md` 只登记到 `P11`
 - **`ID-MAP.md` 该不该改成脚本扫出来** —— 手维护已经漂了：多列七条早删掉的，漏了一条真实存在的
 - **IAP 协议在参考层没有独立文档** —— 产品核心协议只活在代码注释和决策条目里。要不要补一份、补成什么样
 - **`STATUS.md` 的「最近结果」该由脚本生成，但生成器不存在** —— 现在手抄，这是三个数字对不上的原因
