@@ -4,7 +4,7 @@
 
 **为什么需要这份文件**：清点时发现全项目有 **13 套编号**在混用，其中 `A1` 同时是四样东西 ——「USB CDC 能烧写」（需求）、「go test」（selfcheck 第 1 步）、「主机侧 Go 测试」（验收单第 1 项）、「已修的版本号问题」（待办）。**说"A7 过了"字面上有四个意思。**
 
-2026-08-22 消掉了三套：**selfcheck 的步骤号整套删除**（每一步本来就只是某个用例的别名）、待办加 `ISS-` 前缀、验收单加 `CHK-` 前缀。**还剩 10 套，两两不撞。**
+2026-08-22 消掉了三套：**selfcheck 的步骤号整套删除**（每一步本来就只是某个用例的别名）、待办加 `ISS-` 前缀、验收单加 `CHK-` 前缀。**还剩 10 套，两两不撞。** 2026-09-16 加了第 11 套：wayfinder 的票号（见下表首行）。
 
 ---
 
@@ -19,7 +19,8 @@
 | `OW1` `OW1-neg` `OW2` `OW2-attack` `OW3` | **所有权用例** | `$PROD/docs/tables/TEST-CASES.md` | `python tools/run_takeown.py`、`run_setowner.py`、`inject_owner_record.py` | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `AU1` | **nonce 跨掉电不重复** | `$PROD/docs/tables/TEST-CASES.md` | `$TOOL:TestCase/nonce_replay.go`，由 `python tools/run_au1.py` 编排 | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `H1` `H2` `H3` `K1`–`K6` `X1` `X2` | **主机侧用例**（不需要板子） | `$PROD/docs/tables/TEST-CASES.md` | H1 → `go test ./TestCase/...`；**H3 → `go vet ./...`（2026-08-22 新建）**；H2 → `host/bootloader_unit/build.py`；K → `host/fakeboard/run_cases.py`；X → `host/crypto_ref/run_checks.py` | [STATUS.md](STATUS.md) 的「最近结果」列 |
-| `P1`–`P11` | **静态检查**（P1–P6 看代码，P7–P9 看文档，**P10 看本机 `.claude/` 权限配置，纯建议性、不进 selfcheck**——那份文件本机专属不进 git，不能当发版门禁）| `$PROD/docs/tables/TEST-CASES.md` | `tools/check_version_sync.py`(P1)、`check_mirror_sync.py`(P2)、`check_core_sync.py`(P3)、`host/variant_check/build.py`(P4)、`host/examples_build/build.py`(P5)、`check_public_root.py`(P6)、`check_status_sync.py`(P7)、`check_doc_dupes.py`(P8)、`check_doc_paths.py`(P9)、`check_allow_hygiene.py`(P10) | [STATUS.md](STATUS.md) 的「最近结果」列 |
+| `MIG-NN` `PTG-NN` | **wayfinder 的票**，一张票一个待决的问题。前缀就是它所属那张图 | `$PROD/maps/<图>/issues/` 一张票一个文件 | — 它们是问题，不是测试 | 票自己的 `## Answer`，图的 `Decisions so far` 只放一行摘要 |
+| `P1`–`P11` | **静态检查**（P1–P6 看代码，P7–P9 看文档，**P10 看本机 `.claude/` 权限配置，纯建议性、不进 selfcheck**——那份文件本机专属不进 git，不能当发版门禁）| `$PROD/docs/tables/TEST-CASES.md` | `tools/check_version_sync.py`(P1)、`check_mirror_sync.py`(P2)、`check_core_sync.py`(P3)、`host/variant_check/build.py`(P4)、`host/examples_build/build.py`(P5)、`check_public_root.py`(P6)、`check_status_sync.py`(P7)、`check_doc_dupes.py`(P8)、`check_doc_paths.py`(P9)、`check_allow_hygiene.py`(P10)、`$PROD/tools/check_wayfinder_ticket_hygiene.py` 与 `check_no_orphan_placeholders.py`(P12) | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `BG1` | **启动门禁**（SDRAM 自检 + 日志口通不通） | `$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md` 的「BG1 · 启动门禁」节 | `tools/flash_bootloader.py` 判读；日志文案在 `Core/Src/fmc.c` | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `SD1` `M3` `M5` `O1` `EV1` | **零散的板级用例** | `$PROD/docs/tables/TEST-CASES.md` | SD1 → `onboard/sdram/`，由 `tools/run_sdram.py` 跑；M3 要第二块板；M5 → `onboard/`；O1 → `onboard/rs232/SerialPort`；EV1 ⛔ 难以构造 | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `CHK-A1`–`A7` `CHK-B1`–`B7` `CHK-C1`–`C7` | **三张验收单**（改动后自检 / 发版 / 单板出厂） | `$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md` | 大部分是"跑某条命令"或人工 | ⬜ **还没有去处**，由 `PTG-01` 回答（`$PROD/maps/production-test-gap/issues/PTG-01-where-do-per-board-records-go.md`）。F2 因此一直是 🟡 |
