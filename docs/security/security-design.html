@@ -157,7 +157,7 @@
   <div class="bar">
     <div>
       <h1>OpenPLC bootloader · 安全流程与设计</h1>
-      <p class="sub">前半回答「怎么走」（场景索引 + 泳道流程），后半回答「具体是什么」（格式、布局、边界）。事实来源在 docs/design/ 和 IAPServer/SECURITY.md</p>
+      <p class="sub">前半回答「怎么走」（场景索引 + 泳道流程），后半回答「具体是什么」（格式、布局、边界）。事实来源在 $PROD/docs/security/ 和 $BOOT/IAPServer/SECURITY.md</p>
     </div>
     <div class="spacer"></div>
     <button id="out" title="缩小">&minus;</button>
@@ -851,7 +851,7 @@
     <tspan x="836" dy="23">▸ <tspan class="em">不告警，也不需要 takeown</tspan></tspan>
     <tspan x="836" dy="23">　 ⇒ 直接进状态 B，跳过整个不设防阶段</tspan>
   </text>
-  <text class="t-ref" x="836" y="271">IAPServer/keys/rotate_keys.sh · docs/design/KEYS.md</text>
+  <text class="t-ref" x="836" y="271">IAPServer/keys/rotate_keys.sh · $PROD/docs/security/KEYS.md</text>
 
   <!-- ============ 状态 A ============ -->
   <path class="edge" d="M470,286 L470,338" marker-end="url(#ah)"/>
@@ -1397,7 +1397,7 @@
     <tspan x="758" dy="21">⇒ <tspan class="t-mono em">IAP_NONE</tspan>　"APP Mod ..."</tspan>
     <tspan x="758" dy="21" class="t-s">跳转进 app。这是唯一会离开 bootloader 的出口。</tspan>
   </text>
-  <text class="t-ref" x="1412" y="616" text-anchor="end">IAP_server.c:490-608 · docs/design/JOURNAL.md「拿它决定跳不跳」</text>
+  <text class="t-ref" x="1412" y="616" text-anchor="end">IAP_server.c:490-608 · $PROD/docs/boot/JOURNAL.md「拿它决定跳不跳」</text>
 </svg>
 </section>
 
@@ -1457,7 +1457,7 @@
     <tspan x="48" dy="22">▸ 新开专用扇区 ⇒ 可行，但白付 128K</tspan>
     <tspan x="48" dy="22">▸ <tspan class="em">bootloader 扇区尾部 ⇒ ✅ 净增 0 扇区</tspan></tspan>
   </text>
-  <text class="t-ref" x="48" y="446">docs/design/OWNERSHIP.md「owner 记录区」</text>
+  <text class="t-ref" x="48" y="446">$PROD/docs/security/OWNERSHIP.md「owner 记录区」</text>
 
   <rect class="band" x="740" y="230" width="690" height="230" rx="12"/>
   <text class="t-h" x="758" y="260">那片空地为什么天然可用</text>
@@ -1517,7 +1517,7 @@
     <tspan x="48" dy="24"><tspan class="em">三处地址守卫全部锚在 IAP_STATE_SECTOR_ADDR 上，一个都不看 RESERVED_TAIL_SECTORS。</tspan></tspan>
     <tspan x="48" dy="24">⇒ 改那个常量<tspan class="em">保护不了任何东西</tspan>，只会静默弄坏 reclaim，<tspan class="em">而且不会编译报错</tspan>。</tspan>
   </text>
-  <text class="t-ref" x="48" y="836">Core/Inc/usbd_cdc_flash.h:74-76 · docs/design/OWNERSHIP.md</text>
+  <text class="t-ref" x="48" y="836">Core/Inc/usbd_cdc_flash.h:74-76 · $PROD/docs/security/OWNERSHIP.md</text>
 </svg>
 </section>
 
@@ -1637,7 +1637,7 @@
   <rect class="card red" x="30" y="1012" width="1400" height="98" rx="8"/>
   <text class="t-h ink-red" x="48" y="1042">⚠ 文档漂移：JOURNAL.md 里 M 记录还写着 4 格</text>
   <text class="t-b" x="48" y="1070">
-    <tspan x="48">同一份文件里 <tspan class="t-mono">docs/design/JOURNAL.md</tspan> 的类型表说 8 格，但上电扫描树和写入流程图仍写着「'M'（4格）」「剩余格子 &lt; 4」「追加 M 记录（4格）」。</tspan>
+    <tspan x="48">同一份文件里 <tspan class="t-mono">$PROD/docs/boot/JOURNAL.md</tspan> 的类型表说 8 格，但上电扫描树和写入流程图仍写着「'M'（4格）」「剩余格子 &lt; 4」「追加 M 记录（4格）」。</tspan>
     <tspan x="48" dy="24">代码是 <tspan class="t-mono em">IAP_METADATA_SLOTS 8U</tspan>（bootloader_state.h:48）。<tspan class="em">本图按代码画。</tspan>那三处该改，不在本次范围。</tspan>
   </text>
 </svg>
@@ -1933,7 +1933,7 @@
     <tspan x="48" dy="22">96 位对「<tspan class="em">能不能察觉被动过</tspan>」足够 —— 它不需要抗</tspan>
     <tspan x="48" dy="22">碰撞到密码学签名那个级别。</tspan>
   </text>
-  <text class="t-ref" x="48" y="206">bootloader_state.h:108-121 · docs/design/JOURNAL.md:39</text>
+  <text class="t-ref" x="48" y="206">bootloader_state.h:108-121 · $PROD/docs/boot/JOURNAL.md:39</text>
 
   <rect class="card blue" x="740" y="20" width="690" height="200" rx="10"/>
   <text class="t-h ink-blue" x="758" y="50">认证失败只记在 RAM 里</text>
