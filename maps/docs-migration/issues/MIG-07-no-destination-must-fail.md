@@ -1,6 +1,7 @@
 # 「没有去处」怎么报错
 
 Type: grilling
+Opened: 2026-09-16
 Status: open
 Blocked by: MIG-02
 

@@ -1,6 +1,7 @@
 # 各仓 CLAUDE.md 改成什么
 
 Type: grilling
+Opened: 2026-09-16
 Status: open
 Blocked by: MIG-03
 

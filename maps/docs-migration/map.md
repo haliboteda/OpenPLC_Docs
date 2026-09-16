@@ -24,13 +24,14 @@
 
 <!-- 一张已关的票一行：一句话摘要 + 链接。详情在票里，这里不重复 -->
 
-（还没有）
+- [tracker 约定怎么写](issues/MIG-01-tracker-convention.md)：票的头部恰好四个字段，blocking 只写单向，前沿由脚本算且不进 `selfcheck`，关掉的票原地改状态不移走。约定落在 [MAP-AND-TICKET-CONVENTION.md](../MAP-AND-TICKET-CONVENTION.md)
 
 ## Not yet specified
 
 - 现有 10 套编号在新框架下要不要合并，`$PROD/docs/ID-MAP.md` 本身往哪去
 - 给人扫的那一面 —— 要不要一个索引页，长什么样
 - 下一张图开什么（等工装的使用反馈 / 等校准那条线）
+- **一张图走完之后怎么归档** —— `INDEX.md` 里标什么、`maps/<effort>/` 目录动不动。第二张图开起来之前要定
 
 ## Out of scope
 

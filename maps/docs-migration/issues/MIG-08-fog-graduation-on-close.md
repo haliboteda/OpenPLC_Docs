@@ -1,6 +1,7 @@
 # 关票时怎么强制回答「引出什么新未知」
 
 Type: grilling
+Opened: 2026-09-16
 Status: open
 Blocked by: MIG-01
 

@@ -1,6 +1,7 @@
 # AI-Skills/OpenPLC 搬空后剩什么
 
 Type: grilling
+Opened: 2026-09-16
 Status: open
 Blocked by: MIG-03
 

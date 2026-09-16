@@ -1,6 +1,7 @@
 # 参考层按什么分类
 
 Type: grilling
+Opened: 2026-09-16
 Status: open
 Blocked by: -
 

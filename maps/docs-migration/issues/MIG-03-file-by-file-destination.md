@@ -1,6 +1,7 @@
 # 三十多份文件逐份定去向
 
 Type: task
+Opened: 2026-09-16
 Status: open
 Blocked by: MIG-02
 
