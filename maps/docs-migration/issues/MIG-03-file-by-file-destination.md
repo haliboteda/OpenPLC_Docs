@@ -3,7 +3,7 @@
 Type: task
 Opened: 2026-09-16
 Status: open
-Blocked by: MIG-02
+Blocked by: MIG-02, MIG-09
 
 ## Question
 
