@@ -33,6 +33,7 @@ python tools/list_wayfinder_map_frontier.py --all  ＋  maps/*/map.md
 
 ## Decisions so far
 
+- [不属于任何一张图的决策住哪](issues/FG-03-where-do-orphan-decisions-live.md)：**`waiting/` 就是对的**，票的前提错了。分票和 `waiting/` 的线只有一条 —— **有没有图在等它**
 - [检查只读 `.md` 是个盲区](issues/FG-02-checks-only-read-markdown.md)：**P9 扩到源码注释**，只认带 `docs/` 的窄形态。零误报，退回一处必报。顺带抓出 4 处搬迁漏掉的真断链
 - [一张图怎么算「全做完」](issues/FG-01-what-makes-a-map-done.md)：**全集必须是一条能重跑的命令**，按「找什么」写不按「在哪找」写；关票前重跑对账；检查强制每张图都有 `## 全集`
 
