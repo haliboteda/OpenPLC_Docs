@@ -112,8 +112,8 @@ Phase 1 里先在开机继电器窗口内反复轮询 BOOT0，再把结果交给
 一整段启动 596 字节里，bootloader 自己那 502 字节**一个坏字节都没有**，
 唯一的非 ASCII 出现在偏移 502 —— 正好是 app 打出第一行的位置（`[` `0xC2`，然后才是完整的 `[BOOT] millis=`）。
 
-**不是收发器被关掉造成的** —— 在 core 里先拉高 PB10 再打印，试过，坏字节一模一样。
-是引脚从浮空转成被驱动时的线路跳变。取舍见 `$PROD/docs/tables/DECISIONS.md` 第 49 条。
+**原因未知。** 已排除的假设见 `$PROD/waiting/WAITING-ON.md`；取舍见
+`$PROD/docs/tables/DECISIONS.md` 第 49 条。
 
 ### 跳转函数必须是 `naked`，这是踩出来的
 

@@ -2204,8 +2204,8 @@ bootloader 自己的 502 字节一个坏字节都没有。
 **试过提议的改法**：在 core 的 `openplc_diag_begin_uart()` 里 `pinMode(PB10, OUTPUT)` + `digitalWrite(HIGH)` + `delay(2)`，
 重建烧录后测三次 —— **坏字节纹丝不动**（`millis` 从 12 变 14，正是那 2 ms 延时）。
 
-**所以那两个字节不是「收发器被关着」造成的**，是交接瞬间引脚从浮空转成被驱动时的线路跳变，
-接收端把它框成了一两个字符。改动已撤回，`check_core_sync` 确认 live 与 repo 一致。
+**所以那两个字节不是「收发器被关着」造成的。真正的原因没找到** —— 已排除的假设见
+`$PROD/waiting/WAITING-ON.md`。改动已撤回，`check_core_sync` 确认 live 与 repo 一致。
 
 ### 结论
 
