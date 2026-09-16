@@ -29,7 +29,7 @@
 | 测试脚本、自动化工具 | `$TOOL/TestCase/tools/` 或 `host/<主题>/`，判据写进 `$PROD/docs/tables/TEST-CASES.md` |
 | 一次性探查脚本，但值得留 | 同上，并补一份 README 说清"验证什么 / 前置 / 判据" |
 | 新的设计决策与否决理由 | `$PROD/docs/tables/DEFERRED-DESIGNS.md` 或对应模块的 Todo 文件 |
-| 新发现的问题 | ISSUES.md（零散）或 BACKLOG.md（要立项） |
+| 新发现的问题 | **按 `$PROD/WHERE-THINGS-LIVE.md` 的六问走** —— 要定的事开票，知道怎么做的进 `$PROD/work/TODO.md`，等外部条件的进 `$PROD/waiting/WAITING-ON.md` |
 | 需求状态变化 | `$PROD/docs/tables/STATUS.md` 的状态列 |
 | 用例跑出来的结果 | `$PROD/docs/tables/STATUS.md` 的「最近结果」和「证据日期」两列 |
 | 协作方式上的教训 | 只对本产品成立的进 `$PROD/docs/repo/CONVENTIONS.md`；换个项目也成立的进 `<AI-Skills>/_shared/rules/`，然后跑 `_shared/sync_rules.py` |

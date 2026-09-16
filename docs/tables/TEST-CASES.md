@@ -47,7 +47,7 @@ TestCase/
 ├── onboard/              ← 需要烧到板子上跑
 │   └── rs232/SerialPort/ ← O1  UART + CDC 回显 sketch
 └── acceptance/
-    └── checklist.md      ← 出厂 / 量产验收单
+    （验收单已搬走：`$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md`）
 ```
 
 > **需求、覆盖矩阵和最近结果在一张表里：[open_plc_cube_ide/docs/STATUS.md](STATUS.md)** —— 要做到什么、每条用例覆盖哪条需求、跑出什么结果、还欠哪些用例。
@@ -307,7 +307,7 @@ python tools/check_version_sync.py       # 或 python tools/check_version_sync.p
 python tools/check_mirror_sync.py        # 或 python tools/check_mirror_sync.py
 ```
 
-`open_plc_cube_ide/docs/design/ARCHITECTURE.md` 列出的跨仓镜像代码，三个仓库没有共享构建系统，一侧改了另一侧不会报错，只会在运行时表现成不相关的症状。比的不是整份文件（C++ 侧有 `extern "C"`，两边 API 也不一样），是**每一项一个语义锚点**——只要求锚点一致。**没被检查覆盖的锚点会在输出末尾点名列出**，全绿不代表全覆盖。对应 **CHK-B2**。退出码：0 全部锚点一致，1 至少一处分叉，2 缺文件。
+`$PROD/docs/repo/ARCHITECTURE.md` 列出的跨仓镜像代码，三个仓库没有共享构建系统，一侧改了另一侧不会报错，只会在运行时表现成不相关的症状。比的不是整份文件（C++ 侧有 `extern "C"`，两边 API 也不一样），是**每一项一个语义锚点**——只要求锚点一致。**没被检查覆盖的锚点会在输出末尾点名列出**，全绿不代表全覆盖。对应 **CHK-B2**。退出码：0 全部锚点一致，1 至少一处分叉，2 缺文件。
 
 ### P3 · core live 与 git 仓库一致
 
@@ -315,7 +315,7 @@ python tools/check_mirror_sync.py        # 或 python tools/check_mirror_sync.py
 python tools/check_core_sync.py          # 或 python tools/check_core_sync.py
 ```
 
-比对 Arduino IDE **真正加载**的那份（`$CORE_LIVE`）和本仓库 git 版（`$CORE_REPO`）。方向天生单向：改动在 `$CORE_LIVE` 里做、验证、再拷回仓库提交——`$CORE_LIVE` 不进版本控制，验证过忘了拷回来，那段代码就只活在这台机器上，重装一次 IDE 就没了。六类刻意排除在比对之外：IDE 自己的安装元数据、Go 构建产物、编辑器备份、`.claude/`、`.vscode/`。对应 **CHK-B3**。退出码：0 一致，1 有差异，2 仓库路径不对。
+比对 Arduino IDE **真正加载**的那份（`$CORE_LIVE`）和板卡包的 git 版（`$CORE_REPO`）。方向天生单向：改动在 `$CORE_LIVE` 里做、验证、再拷回仓库提交——`$CORE_LIVE` 不进版本控制，验证过忘了拷回来，那段代码就只活在这台机器上，重装一次 IDE 就没了。六类刻意排除在比对之外：IDE 自己的安装元数据、Go 构建产物、编辑器备份、`.claude/`、`.vscode/`。对应 **CHK-B3**。退出码：0 一致，1 有差异，2 仓库路径不对。
 
 ### P7 · 总表和用例名单不得漂
 

@@ -22,7 +22,7 @@
 | CHK-A2 | 主机侧 C 测试（用例 **H2**） | 全过 | `host/bootloader_unit/build.py` —— 编译器路径填 `config/machine.py` 的 `HOST_CC` |
 | CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `go vet ./...` |
 | CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **122,880 B** | `tools/build_image.py`（自己按链接脚本判尺寸），或 `tools/flash_bootloader.py` 的构建阶段 |
-| CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，且 `.bin` ≤ **122,880 B** | `tools/build_image.py --porttool`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节，见 PORTTOOL-FIRST-BENCH.md |
+| CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，且 `.bin` ≤ **122,880 B** | `tools/build_image.py --porttool`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
 | CHK-A5 | 烧写 + 启动日志 | 见 [BG1](#bg1--启动门禁) | `tools/flash_bootloader.py` |
 | CHK-A6 | 设备行为用例 | 全过 | `TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
 | CHK-A7 | 变体断言 + 公开根指纹（用例 **P4** / **P6**） | 全过 | 都在 `tools/selfcheck.py` 里 |
@@ -42,7 +42,7 @@
 | # | 做什么 | 判据 |
 |---|---|---|
 | CHK-B1 | 版本号三处一致（用例 **P1**） | `IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明 |
-| CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `open_plc_cube_ide/docs/design/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
+| CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
 | CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） |
 | CHK-B4 | **公开根告警仍然会响**（用例 **P6**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/security/OWNERSHIP.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
 | CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与当前 journal 格式相符 |

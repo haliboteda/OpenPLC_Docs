@@ -24,8 +24,8 @@
 | `BG1` | **启动门禁**（SDRAM 自检 + 日志口通不通） | `$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md` 的「BG1 · 启动门禁」节 | `tools/flash_bootloader.py` 判读；日志文案在 `Core/Src/fmc.c` | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `SD1` `M3` `M5` `O1` `EV1` | **零散的板级用例** | `$PROD/docs/tables/TEST-CASES.md` | SD1 → `onboard/sdram/`，由 `tools/run_sdram.py` 跑；M3 要第二块板；M5 → `onboard/`；O1 → `onboard/rs232/SerialPort`；EV1 ⛔ 难以构造 | [STATUS.md](STATUS.md) 的「最近结果」列 |
 | `CHK-A1`–`A7` `CHK-B1`–`B7` `CHK-C1`–`C7` | **三张验收单**（改动后自检 / 发版 / 单板出厂） | `$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md` | 大部分是"跑某条命令"或人工 | ⬜ **还没有去处**，由 `PTG-01` 回答（`$PROD/maps/production-test-gap/issues/PTG-01-where-do-per-board-records-go.md`）。F2 因此一直是 🟡 |
-| `ISS-A3` `ISS-B1` `ISS-B2` `ISS-C1` `ISS-D1` `ISS-E1` `ISS-F1` `ISS-F2` `ISS-F3` `ISS-F4` `ISS-F5` | **已知问题 / 技术债** | ISSUES.md | — 它们是问题，不是测试 | 同一个文件，做完就删 |
-| `M1`–`M8` | **设计模块**（要立项、分步做的） | BACKLOG.md，一个模块一份 `work/M<n>-*.md` | 每份自己的「分步计划」 | 各自的「验收」节 + BACKLOG 的状态列 |
+| ~~`ISS-*`~~ | **2026-09-16 整套废除。** 「已知问题」不是一类东西 —— 拆进了票 / `$PROD/work/TODO.md` / `$PROD/waiting/WAITING-ON.md`，各有各的关闭条件 | — | — | — |
+| ~~`M1`–`M8`~~ | **2026-09-16 整套废除。** 八个模块全部完成；待立项而没有真实需求的进图的迷雾 | — | — | — |
 
 ---
 
@@ -63,8 +63,8 @@
 
 ### 待办和验收单加前缀
 
-- 原来 docs/TODO.md 里的裸 `A1`/`B4`/`C2` → `work/ISSUES.md` 的 `ISS-A3`/`ISS-B4`/…。**字母数字保留没变**，这样旧提交信息和聊天记录里的编号还查得到。
-- `checklist.md` 的三张表 → `CHK-A*`/`CHK-B*`/`CHK-C*`。
+- 原来 docs/TODO.md 里的裸 `A1`/`B4`/`C2` → 曾改成 `ISS-A3`/`ISS-B4`/…，**2026-09-16 连 `ISS-` 一起废除**。旧提交信息里的这些编号只能当历史读。
+- 验收单（现 `ACCEPTANCE-CHECKLIST.md`）的三张表 → `CHK-A*`/`CHK-B*`/`CHK-C*`。
 
 ---
 
@@ -76,7 +76,7 @@
 |---|---|---|
 | **`M3`** | ① **用例**：两块板的 MAC 不同<br>② **设计模块**：app 侧 SDRAM 库 | 上下文提"MAC"或"第二块板"→ 用例；提"SDRAM 库"或"链接脚本"→ 模块。两者不相关 |
 | **`M5`** | ① **用例**：`Serial_Test` 抗 `Serial4.begin()`<br>② **设计模块**：串口冲突 | **两者是同一个主题**，不会导致误解 |
-| **`D1`** | ① **需求**：journal metadata 一次升级 5 槽<br>② **已知问题** `ISS-D1`：限流是固定窗口<br>③ **硬件网络名**：SDRAM 的第 1 根数据线（`PD15`） | ③ 是最常出现的那个。提"线""`PD15`""SDRAM"→ 硬件网络。⚠️ `D0`–`D15` 整套都是网络名 |
+| **`D1`** | ① **需求**：journal metadata 一次升级 5 槽<br>② **原已知问题** `ISS-D1`（编号已废除）：限流是固定窗口<br>③ **硬件网络名**：SDRAM 的第 1 根数据线（`PD15`） | ③ 是最常出现的那个。提"线""`PD15`""SDRAM"→ 硬件网络。⚠️ `D0`–`D15` 整套都是网络名 |
 
 `CHK-B1`/`CHK-B2`/`CHK-B3` 和 `P1`/`P2`/`P3` **是同一批检查的两个名字**（`TEST-CASES.md` 明说了"前三个对应发版检查单的 B1/B2/B3"）。**没有合并** —— 按 `$PROD/docs/repo/CONVENTIONS.md` 的「不要擅自 dedup 或删除」，这个要单独问过再动。
 
@@ -99,7 +99,7 @@
 |---|---|
 | 需求 A1–A7 B1–B11 C1–C14 D1–D9 E1–E8 F1–F5 | `$PROD/docs/tables/STATUS.md` —— 连同用例、状态、最近结果 |
 | 用例的判据和怎么跑 | `$PROD/docs/tables/TEST-CASES.md`（跨仓，贴着代码走） |
-| 已知问题 `ISS-*` | ISSUES.md |
-| 模块 M1–M8 | BACKLOG.md 及同目录各自一份 |
+| 待办、在等什么 | `$PROD/work/TODO.md`、`$PROD/waiting/WAITING-ON.md` |
+| 待决的问题 | `$PROD/maps/<图>/issues/` |
 
 实现在哪：T/N/S/AU1 → `TestCase/*.go`；K → `TestCase/host/fakeboard/`；H2 → `TestCase/host/bootloader_unit/`；X → `TestCase/host/crypto_ref/`；P → `TestCase/tools/check_*`。

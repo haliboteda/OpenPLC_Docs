@@ -2,7 +2,7 @@
 
 **这份文件定义上位机产线侧的形状**：一份方案文件怎么写、有哪些步骤类型、执行语义是什么。
 
-- 要什么 vs 有什么 → PRODUCTION-TEST-GAP.md
+- 要什么 vs 有什么 → `$PROD/maps/production-test-gap/`（那条线 2026-09-16 起 ⏸ 等使用反馈）
 - `pt.*` 协议本身 → [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) 的 A 部分
 - 取舍理由 → [DECISIONS.md](../tables/DECISIONS.md) 第 22–25 条
 
@@ -210,4 +210,4 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 - **报告推给谁、什么格式**（`PushResult` 的 `sink`）—— 等产线那边的系统确定
 - **仪器与工装板的调用形态** —— `Tool` 类型起进程是兜底方案；工装板若走串口协议，可能值得一个 `Fixture` 类型。等 [FIXTURE-INTERFACE.md](../outbound/FIXTURE-INTERFACE.md) 第三节那几个问题有回音
-- **AI / AO 逐板校准** —— 整块挂起，见 PRODUCTION-TEST-GAP.md 的 Q2
+- **AI / AO 逐板校准** —— 整块挂起，见 `$PROD/maps/production-test-gap/GAP-AS-OF-2026-09-16.md` 的 Q2

@@ -2,19 +2,19 @@
 
 **这份只讲"工程长什么样"**：怎么构建、有哪些文件、编出来多大、lwIP 怎么配的。
 
-⚠️ **行为、安全模型、验证状态一律不写在这里，看 docs/INDEX.md** —— 同一件事写两遍，第二遍必然漂移。
+⚠️ **行为、安全模型、验证状态一律不写在这里，看 `$PROD/README.md` 指的那几层** —— 同一件事写两遍，第二遍必然漂移。
 
 | 想知道 | 去哪 |
 |---|---|
-| 启动怎么决策、签名怎么验、journal 怎么记 | [docs/design/JOURNAL.md](../boot/JOURNAL.md)、[docs/design/OWNERSHIP.md](../security/OWNERSHIP.md) |
+| 启动怎么决策、签名怎么验、journal 怎么记 | [JOURNAL.md](../boot/JOURNAL.md)、[OWNERSHIP.md](../security/OWNERSHIP.md) |
 | 三个仓库在哪、哪些代码是跨仓镜像 | `$PROD/docs/repo/ARCHITECTURE.md` |
-| 引脚、串口、启动模式的实测事实 | [docs/design/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) |
+| 引脚、串口、启动模式的实测事实 | [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) |
 | 需求清单和测试矩阵 | `$PROD/docs/tables/STATUS.md` |
 
 ## 1. 项目定位
 
 - 目标芯片：STM32H743IIKx（Cortex-M7，2 MB Flash / 1 MB RAM）
-- 本仓库是 **Bootloader**，和 Application 分开的工程（app 侧是 Arduino core，见 ARCHITECTURE.md）
+- 它讲的是 **bootloader** 工程（`$BOOT`），和 Application 分开（app 侧是 Arduino core，见 [ARCHITECTURE.md](../repo/ARCHITECTURE.md)）
 - 构建：STM32CubeIDE 经典 Managed Build（`.cproject` + `Debug/`）。仓库里那份 `CMakeLists.txt` 是 CubeMX 生成的，**当前构建不用它**
 
 ## 2. Flash 分区

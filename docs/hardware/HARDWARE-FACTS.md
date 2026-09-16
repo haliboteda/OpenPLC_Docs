@@ -286,7 +286,7 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 
 ⚠️ **`Klemmenbezeichnungen-R.pdf` 和 `Klemmblockzuordnung.pdf` 这两张图在这里是错的**（用户 2026-09-11 确认）：它们**漏标了 `CAN_GND`**，于是 09 号往后整体错开一位，把 RS485 A/B 标成了 C09/C10。正确的是 **C09=CAN_GND、C10=RS485 A、C11=RS485 B**。同一份图还把 **A08 的 "Digital Out 6" 印成 "Digital Out 3"**。图纸不改（要和生产方对得上），以这里为准。
 
-> 这处陷阱最早写在 `TestCase/CAN/can_test.h:59-63` 的注释里，但一直没传出来 —— 2026-09-11 发现时，错的 C09/C10 还住在 `FIXTURE-INTERFACE.md`、`PORTTOOL-FLOW.md`（两处）、`PORT-BRINGUP-PLAN.md`（四处，含一条让人接线的指令）、固件两处 `term=`、面板的接线提示、以及两份假板子测试夹具里。
+> 这处陷阱最早写在 `TestCase/CAN/can_test.h:59-63` 的注释里，但一直没传出来 —— 2026-09-11 发现时，错的 C09/C10 还住在 `FIXTURE-INTERFACE.md`、`PORTTOOL-FLOW.md`（两处）、PORT-BRINGUP-PLAN.md（四处，含一条让人接线的指令；该文件已删）、固件两处 `term=`、面板的接线提示、以及两份假板子测试夹具里。
 
 CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_PI9）**（`netlist.ipc:391-392`）。
 
@@ -378,7 +378,7 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 2. **`PI2 = RS485_EN` 在这块板上不存在。** 表里有，Bridge 板布到了 J2，但 UpperDeck 一根没接。**这是「xlsx 只说 MCU 侧」的典型例子。**
 3. **RS485 两根信号有两套标签。** xlsx 叫 `RS485_TX`（PD5）/ `RS485_RX`（PD6）；网表叫 `RS485_DI_PD5` / `RS485_RO_PD6`。同一条网，看哪份文件用哪个名。
 
-### xlsx 有、本仓库以前没记过的脚
+### xlsx 有、这份文档以前没记过的脚
 
 多数是以太网 / FMC / 晶体 / NC，不必单独记。有实际功能的这几个记一下：
 

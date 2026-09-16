@@ -17,7 +17,7 @@
 | `$IDE` | Arduino IDE 2.x 的安装根目录 |
 | `$A15` | Arduino 的数据目录（装着 `packages/` 那个） |
 | `$PKGIDX` | `package_index_json` 的 clone —— 只在发板卡包时用 |
-| `$PROD` | `AI-Skills` checkout 里的 `OpenPLC/` —— 产品级文档在它的 `docs/` 下 |
+| `$PROD` | `OpenPLC_Docs` 仓库 —— 全部文档和待决的问题。2026-09-16 从 `AI-Skills` 搬出来独立成仓 |
 
 ⚠️ **这里刻意不写任何一条本机的实际路径。** 以前这张表带一列「本机当前值」，也就是把九条 `E:\...` / `C:\Users\...` 写进了一个会被 clone 到别处的仓库 —— 而它自己下一段就说脚本不读它。**这台机器上每一项解析成了什么，问 `$TOOL/TestCase` 里的 `python tools/common.py --probe`**，它是唯一会照实回答的。
 
