@@ -228,6 +228,16 @@ R3 挡不住的那条**必须接受** —— `keys/README.md` 已把"防不住�
 
 **v1 没有兼容路径。** `record_is_structurally_valid()` 见到 `format_ver != 2` 直接判无效，理由是 v1 记录没有 uid 字段，拿它没有任何安全的事可做。现场没有 v1 记录，所以这是一次硬切而不是迁移。
 
+## 两条实现上的硬规矩
+
+**验签必须用 `owner_slot_root()`，不能用编译进去的 `fw_public_key`。**
+在一块已认领的板子上这两者是不同的 ——
+**拿内置的那把去验，认领就成了纯粹的摆设**：板子照样会接受出厂密钥签的镜像。
+
+**core 侧有一份只读镜像**：`core:libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}`，
+把 owner 记录链的解析抄了一份出来，**给需要知道「当前信任哪把根」但不写记录的 app 代码用**。
+它的常量必须和 `$BOOT/IAPServer/owner_slot.h` 完全一致。
+
 ## 诚实的上限
 
 > **owner 槽的安全上限 = "这块板子上能不能跑任意代码"。**

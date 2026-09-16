@@ -57,7 +57,11 @@
 | `IAPServer/owner_slot.h` | 104 | 🟡 绝大部分 `OWNERSHIP.md` 已有（签名前缀 88、uid 绑板、format_ver、告警判据）。**补了三条**：记录必须是整数个 flash 字（H7 一次编程 256 位）、签 `generation` 是为了挡重放进后面的槽、`format_ver` 从第一版就在是刻意的 |
 | `iapcert/iapcert.go`、`owner.go`、`auth.go` | 124 | 🟡 大部分已有。**补了两条**：签名必须覆盖板子最终写入的确切字节（`uid` 是板子自己填的）、流水号写失败只报警告不当错误 |
 | `IAPServer/owner_slot.c` | 141 | ✅ **什么都没搬** —— 逐段比对后 `OWNERSHIP.md` 的状态机 / 三个操作 / 记录格式 / 诚实的上限四节已经覆盖 |
-| 其余 29 个小文件 | 249 | ⏸ **本轮未逐个过**，多是 core 侧镜像头和主机测试桩 |
+| 其余 24 个小文件 | 216 | ✅ 逐个扫过。绝大多数是「Mirrors X」式的镜像指针，已足够。**补了两条**：验签必须用 `owner_slot_root()` 不能用内置的 `fw_public_key`（否则认领是摆设）、core 侧 `owner_root_ro` 只读镜像的存在与约束 |
+
+**批 2 结果：35 / 35 全部过完。** 新增 `CHALLENGE-AUTH.md`，`OWNERSHIP.md` 补了 7 条。
+其中 5 个测试侧文件（`iapcert_test.go` / `run_cases.py` / `sha256_ref.py` / `fake_board.py` / `ecdsa_verify.py`）
+的内容**归到测试设计文档**，见批 3–5。
 
 ⚠️ **留给「测试设计文档」的一条**（用户 2026-09-16 定批 3–5 汇总进那份）：
 `iapcert` 做成 package 而不是 main 的一部分，是为了让用例能 `import` 它 ——
