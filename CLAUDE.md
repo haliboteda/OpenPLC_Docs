@@ -41,3 +41,15 @@ python tools/list_wayfinder_map_frontier.py --all    # 连被挡的和已关的�
 
 `core.hooksPath = .githooks`，提交时跑两条检查：票关得诚不诚实、占位符有没有人认领。
 它们也在 `selfcheck` 里（用例 **P12**），因为 `--no-verify` 跳得过钩子。
+
+## Agent skills
+
+### Issue tracker
+
+问题和地图都是本仓的 markdown，落在 `maps/<effort>/`，**不用 GitHub Issues 也不用 `.scratch/`**。
+见 [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md)。
+
+### Domain docs
+
+单上下文。**不用 `CONTEXT.md` / `docs/adr/`** —— 术语进 [GLOSSARY.md](GLOSSARY.md)，
+决策追加进 `$PROD/docs/tables/DECISIONS.md`。见 [docs/agents/domain.md](docs/agents/domain.md)。
