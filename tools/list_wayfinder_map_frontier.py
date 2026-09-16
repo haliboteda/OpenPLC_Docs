@@ -87,7 +87,18 @@ def main():
 
     for effort in sorted(maps):
         tickets = maps[effort]
-        print("=== %s ===" % effort)
+        # A map can be paused. Without this the tool still calls its tickets
+        # takeable, and the tool is what people run -- prose alone does not stop
+        # anyone starting work the user put on hold.
+        paused = ""
+        map_file = os.path.join("maps", effort, "map.md")
+        if os.path.isfile(map_file):
+            head = io.open(map_file, encoding="utf-8").read()
+            m = re.search(r"^Status:\s*paused\s*$", head, re.M)
+            if m:
+                why = re.search(r"^Paused because:\s*(.+)$", head, re.M)
+                paused = why.group(1).strip() if why else "no reason given"
+        print("=== %s ===%s" % (effort, "   [PAUSED] " + paused if paused else ""))
         blocks = {}
         for t in tickets.values():
             for b in t["blockers"]:
@@ -101,7 +112,9 @@ def main():
             # cannot make a blocked ticket look takeable.
             open_blockers = [b for b in t["blockers"]
                             if b not in tickets or tickets[b]["Status"] != "resolved"]
-            if t["Status"] == "open" and not open_blockers:
+            if paused and t["Status"] in ("open", "claimed"):
+                mark = "paused  "
+            elif t["Status"] == "open" and not open_blockers:
                 mark = "TAKEABLE"
             elif t["Status"] == "resolved":
                 mark = "resolved"
@@ -109,7 +122,7 @@ def main():
                 mark = "claimed "
             else:
                 mark = "blocked "
-            if not args.all and mark.strip() != "TAKEABLE":
+            if not args.all and mark.strip() not in ("TAKEABLE", "paused"):
                 continue
             line = "  %s  %-8s  %s" % (mark, t["Type"], t["title"])
             if open_blockers:

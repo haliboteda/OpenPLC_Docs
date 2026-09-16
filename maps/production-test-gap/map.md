@@ -1,5 +1,8 @@
 # 产线测试补齐
 
+Status: paused
+Paused because: 等硬件工程师用过工装之后的反馈（用户 2026-09-16 定）
+
 ## Destination
 
 软件侧满足《OPENPLC 生产测试指导文件》逐项的要求，产线工程师坐在上位机前能把一块板判完。
