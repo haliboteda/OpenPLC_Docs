@@ -1,6 +1,6 @@
 # 验收单
 
-**每一条都要有判据**，"看起来正常"不算通过。判据的写法沿用 [../TEST-CASES.md](TEST-CASES.md) 的四栏格式。
+**每一条都要有判据**，"看起来正常"不算通过。判据的写法沿用 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 的四栏格式。
 
 三份清单用途不同，不要混：
 
@@ -18,20 +18,20 @@
 
 | # | 做什么 | 判据 | 命令 |
 |---|---|---|---|
-| CHK-A1 | 主机侧 Go 测试（用例 **H1**） | 全过 | 见 [../TEST-CASES.md](TEST-CASES.md) 的 host 层表 |
-| CHK-A2 | 主机侧 C 测试（用例 **H2**） | 全过 | `host/bootloader_unit/build.py` —— 编译器路径填 `config/machine.py` 的 `HOST_CC` |
+| CHK-A1 | 主机侧 Go 测试（用例 **T1-15**） | 全过 | 见 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 的 host 层表 |
+| CHK-A2 | 主机侧 C 测试（用例 **T1-16**） | 全过 | `host/bootloader_unit/build.py` —— 编译器路径填 `config/machine.py` 的 `HOST_CC` |
 | CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `go vet ./...` |
 | CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **122,880 B** | `tools/build_image.py`（自己按链接脚本判尺寸），或 `tools/flash_bootloader.py` 的构建阶段 |
 | CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，且 `.bin` ≤ **122,880 B** | `tools/build_image.py --porttool`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
-| CHK-A5 | 烧写 + 启动日志 | 见 [BG1](#bg1--启动门禁) | `tools/flash_bootloader.py` |
+| CHK-A5 | 烧写 + 启动日志 | 见 [T3-01](#t3-01--启动门禁) | `tools/flash_bootloader.py` |
 | CHK-A6 | 设备行为用例 | 全过 | `TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
-| CHK-A7 | 变体断言 + 公开根指纹（用例 **P4** / **P6**） | 全过 | 都在 `tools/selfcheck.py` 里 |
+| CHK-A7 | 变体断言 + 公开根指纹（用例 **P4** / **T2-06**） | 全过 | 都在 `tools/selfcheck.py` 里 |
 
 **CHK-A1–A3、CHK-A7 一条命令跑完：`tools/selfcheck.py`**（`--list` 先看它会跑哪些）。
 
-⚠️ **CHK-A4 的上限是 122,880 不是 131,072。** 扇区确实是 128K，但**尾部 8K 已经划给 owner 记录区**（需求 C10，2026-08-18），链接脚本只把 120K 给链接器。按 131,072 判会多算 8K 余量，并且掩盖真正开始失败的那个点。超了链接器会报 `region FLASH overflowed`。
+⚠️ **CHK-A4 的上限是 122,880 不是 131,072。** 扇区确实是 128K，但**尾部 8K 已经划给 owner 记录区**（需求 R2-02，2026-08-18），链接脚本只把 120K 给链接器。按 131,072 判会多算 8K 余量，并且掩盖真正开始失败的那个点。超了链接器会报 `region FLASH overflowed`。
 
-⚠️ **CHK-A6 里 `all` 不含要人动手的用例**（AU1、OW1、OW3），它们会被点名跳过而不是静默略过。要跑得单独按 id 跑，见 [../TEST-CASES.md](TEST-CASES.md)。
+⚠️ **CHK-A6 里 `all` 不含要人动手的用例**（T1-17、T2-01、T2-05），它们会被点名跳过而不是静默略过。要跑得单独按 id 跑，见 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md)。
 
 ---
 
@@ -44,7 +44,7 @@
 | CHK-B1 | 版本号三处一致（用例 **P1**） | `IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明 |
 | CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
 | CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） |
-| CHK-B4 | **公开根告警仍然会响**（用例 **P6**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/security/OWNERSHIP.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
+| CHK-B4 | **公开根告警仍然会响**（用例 **T2-06**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/modules/M2-ownership.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
 | CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与当前 journal 格式相符 |
 | CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传 → 正常启动 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
@@ -71,15 +71,15 @@
 
 MAC 由芯片 UID 派生，**「两块板互不相同」从未被观察过** —— 手上只有一块板。派生算法要是有缺陷，量产时表现为同网段大面积 IP 冲突，而那时已经晚了。
 
-**拿到第二块板的第一件事就是验这条**（对应 [../TEST-CASES.md](TEST-CASES.md) 未覆盖表里的 M3）。产线要留 MAC 记录，否则"不重复"无从判起。
+**拿到第二块板的第一件事就是验这条**（对应 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 未覆盖表里的 M3）。产线要留 MAC 记录，否则"不重复"无从判起。
 
 ---
 
-## BG1 · 启动门禁
+## T3-01 · 启动门禁
 
 任何上板测试之前都先过这一关。`tools/flash_bootloader.py` 会自动判。
 
-⚠️ **这条 2026-08-22 之前叫 `T0`。** 它不属于 `T1`–`T4` 那一系列（那些是设备行为用例，定义在 [../TEST-CASES.md](TEST-CASES.md)，`T0` 从来不在那里），所以给了它自己的前缀。
+⚠️ **这条 2026-08-22 之前叫 `T0`。** 它不属于 `T1-07`–`T1-10` 那一系列（那些是设备行为用例，定义在 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md)，`T0` 从来不在那里），所以给了它自己的前缀。
 
 | 日志 | 含义 | 接下来 |
 |---|---|---|

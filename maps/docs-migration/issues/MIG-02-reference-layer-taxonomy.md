@@ -20,7 +20,7 @@ Blocked by: -
 
 ## Answer
 
-2026-09-16 定。分类表写成 [../../../docs/REFERENCE-LAYER-TAXONOMY.md](../../../docs/REFERENCE-LAYER-TAXONOMY.md)。
+2026-09-16 定。分类表写成 [../../../docs/modules/](../../../docs/modules/)。
 
 | 问 | 定成 |
 |---|---|

@@ -20,7 +20,7 @@
 ### 重新生成后仍须复查（不在 USER CODE 块内）
 
 - `.ioc` 里 PG9 的信号类型（见 [../design/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md)）
-- `STM32H743IIKX_FLASH.ld` 的 `FLASH LENGTH` 必须是 **120K，不是 128K** —— 尾部 8K 是 owner 记录区（需求 C10）。⚠️ **看到 128K 不要“改回去”** ：那会让链接器把代码放进那 8K，把已经写在里面的所有权记录盖掉 —— 而那是静默的，板子会惄无声息地退回出厂根。理由见 [../design/OWNERSHIP.md](../security/OWNERSHIP.md)
+- `STM32H743IIKX_FLASH.ld` 的 `FLASH LENGTH` 必须是 **120K，不是 128K** —— 尾部 8K 是 owner 记录区（需求 R2-02）。⚠️ **看到 128K 不要“改回去”** ：那会让链接器把代码放进那 8K，把已经写在里面的所有权记录盖掉 —— 而那是静默的，板子会惄无声息地退回出厂根。理由见 [../design/OWNERSHIP.md](../modules/M2-ownership.md)
 - **`.cproject` 里链接脚本那个选项的值必须是 `${workspace_loc:/${ProjName}/${PLC_LD_SCRIPT}}`，不是某个写死的 `.ld` 文件名** —— 见下一节
 
 ## 两份链接脚本，选哪份由环境变量决定

@@ -59,7 +59,7 @@
 
 ⚠️ **连接器代号一律带板名。** 板上有两个 `J4`（UpperDeck 的模拟量端子连接器、JunctionLink 的 20 pin 扩展口），不带板名的 `J4-3` 会让人把模拟输出接到 SPI 上。
 
-引脚号和信号名的权威出处是 `Hardware/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx`；端子与连接器管脚的权威出处是各板的 `netlist.ipc`。落地的样子见 `$PROD/docs/production/BOARD-BRINGUP-CASES.md`。
+引脚号和信号名的权威出处是 `Hardware/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx`；端子与连接器管脚的权威出处是各板的 `netlist.ipc`。落地的样子见 `$PROD/docs/modules/M4/BOARD-BRINGUP-CASES.md`。
 
 ## 语言
 

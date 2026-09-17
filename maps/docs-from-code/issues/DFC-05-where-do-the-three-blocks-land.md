@@ -26,9 +26,9 @@ Blocked by: DFC-01
 
 | 用户说的「块」 | 实际落点 |
 |---|---|
-| **设计** | 按**问题域**进八类：启动那套 → `docs/boot/BOOT-SEQUENCE.md`，安全那套 → `docs/security/CHALLENGE-AUTH.md`，各自补进该域已有的文档 |
+| **设计** | 按**问题域**进八类：启动那套 → `docs/modules/M1/BOOT-SEQUENCE.md`，安全那套 → `docs/modules/M1/CHALLENGE-AUTH.md`，各自补进该域已有的文档 |
 | **需求** | `docs/tables/STATUS.md`，**已经在那儿**，不动 |
-| **测试** | 判据继续在 `docs/tables/TEST-CASES.md`；**测试系统本身怎么搭的** → 新建 `docs/production/TEST-DESIGN.md`（用户当天定批 3–5 汇总进一份测试设计文档） |
+| **测试** | 判据继续在 `docs/engineering/HOW-TO-RUN-TESTS.md`；**测试系统本身怎么搭的** → 新建 `docs/engineering/TEST-DESIGN.md`（用户当天定批 3–5 汇总进一份测试设计文档） |
 
 **为什么不新开**：八类是按「我在改 RS485，该读哪几份」分的；
 「设计 / 需求 / 测试」是按**产物类型**分的 —— 那正是 `参考层按什么分类` 那张票否掉的分法。
@@ -43,7 +43,7 @@ Blocked by: DFC-01
 |---|---|---|---|
 | boot | 12 / 12 | `docs/boot/`（+ 一条进 `JOURNAL.md`） | 0 |
 | security | 35 / 35 | `docs/security/`（+ 7 条进 `OWNERSHIP.md`） | 0 |
-| 3–5 汇总 | 125 个文件的 482 段 | `docs/production/TEST-DESIGN.md` | 0 |
+| 3–5 汇总 | 125 个文件的 482 段 | `docs/engineering/TEST-DESIGN.md` | 0 |
 
 **没有一条同时像两个落点。** 逐文件记录在 `../BATCH-LEDGER.md`。
 

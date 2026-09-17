@@ -4,8 +4,8 @@
 
 代码在 `TestCase/porttool/`（固件侧）和 `$TOOL` 的 `internal/pt*` + `cmd/porttool`（上位机侧）。形态与分发方式见 [C.4](#c4-上位机怎么分发怎么起来)。**待办不在本文** —— 见 `$PROD/work/TODO.md` 和 `$PROD/maps/INDEX.md`。
 
-> 本文描述固件 **`0.5.0`** 的现状。取舍理由在 [DECISIONS.md 第 9–15 条](../tables/DECISIONS.md)。⚠️ **原来这里指着 C.5「还没做的 — 三期计划」，那一节 2026-09-15 已删** —— 还没做的现在在 `$PROD/work/TODO.md` 和各张图里。
-引脚事实以 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 为准，本文不重复推导，只引用结论。
+> 本文描述固件 **`0.5.0`** 的现状。取舍理由在 [DECISIONS.md 第 9–15 条](../../tables/DECISIONS.md)。⚠️ **原来这里指着 C.5「还没做的 — 三期计划」，那一节 2026-09-15 已删** —— 还没做的现在在 `$PROD/work/TODO.md` 和各张图里。
+引脚事实以 [HARDWARE-FACTS.md](../../hardware/HARDWARE-FACTS.md) 为准，本文不重复推导，只引用结论。
 专用镜像（一次烧一个用例）的接线细节在 [BOARD-BRINGUP-CASES.md](BOARD-BRINGUP-CASES.md)，B 部分链过去，不抄。
 
 > 图是 Mermaid，渲染成 SVG，可任意缩放。VSCode 装 Markdown Preview Mermaid Support，或直接在 GitHub 上看。
@@ -67,7 +67,7 @@ flowchart TB
 | 主机能判吗 | **能** | **能** —— 产线序列就是拿这一类搭的 |
 | 副作用 | `stop` 负责恢复（继电器全释放） | 自己按需初始化用到的外设 |
 
-⚠️ **`pt.caps` 里两类各占自己的行**（`kind=session` / `kind=run`），但**一块硬件只占一行** —— 见 [DECISIONS.md 第 17 条](../tables/DECISIONS.md)。
+⚠️ **`pt.caps` 里两类各占自己的行**（`kind=session` / `kind=run`），但**一块硬件只占一行** —— 见 [DECISIONS.md 第 17 条](../../tables/DECISIONS.md)。
 
 **惰性初始化**：外设只有在 `pt.start` 到达时才配置（各个会话自己的 `*_inited` 标志），没启动过的端口保持复位状态。
 
@@ -100,13 +100,13 @@ flowchart TB
 | `led.blink` | `pin` `pulses` `half_ms` `observed=unknown` | PE2 闪六次。**没有回读，`observed` 永远是 unknown**，看没看见是人的判断 |
 
 
-> ⚠️ **`pt.run` 的结果主机能判**（[DECISIONS.md 第 22 条](../tables/DECISIONS.md)：判定一律在上位机）。
+> ⚠️ **`pt.run` 的结果主机能判**（[DECISIONS.md 第 22 条](../../tables/DECISIONS.md)：判定一律在上位机）。
 >
 > ⚠️ **`pt.run` 的应答里是量到的数，不是结论。** 没有任何目标打 PASS 或 FAIL。限值住在上位机的方案文件里，这才是「改一个限值不用重烧板子」成立的原因。
 >
 > ⚠️ **它执行的检查会先打自己的散文**（例如 `SDRAM_TEST: data bus OK …`），**然后**才是那一行 `OK`。上位机必须按「裸日志行不结束应答」来读 —— 这正是 `ptproto` 的四类行分流本来就做的事。⚠️ `pt.run` **不停掉正在跑的会话**，中间可能夹着 `!` 采样帧。
 >
-> ⚠️ **`pt.echo` 对 `loop=link` 的端口是被拒绝的**，这是刻意的。那些端口从**被测链路**上取回复；在控制口上答它，会让计数器在那条链路已经死掉的情况下照样往上涨 —— 那正是这套工装不许产生的假通过。取舍见 [DECISIONS.md 第 9 条](../tables/DECISIONS.md)。
+> ⚠️ **`pt.echo` 对 `loop=link` 的端口是被拒绝的**，这是刻意的。那些端口从**被测链路**上取回复；在控制口上答它，会让计数器在那条链路已经死掉的情况下照样往上涨 —— 那正是这套工装不许产生的假通过。取舍见 [DECISIONS.md 第 9 条](../../tables/DECISIONS.md)。
 
 
 ### 参数语法
@@ -162,7 +162,7 @@ pt.caps
   为什么形状和取值分两行：**一个逐路参数就塞不进 192 字节**。dout 光
   `duty=1:0,2:0,…,8:0` 就占 31 个字符，合成一行是 195 字节 —— 超了。
   超了会被截断，而**被截断的 caps 行就是面板永远不会渲染的那个参数**。
-  这条是 2026-09-07 由用例 H4 的行长检查当场抓出来的。
+  这条是 2026-09-07 由用例 T4-01 的行长检查当场抓出来的。
 
 pt.id
   OK uid=00340041XXXXXXXXXXXXXXXX porttool=0.5.0
@@ -227,7 +227,7 @@ pt.stop din  /  pt.stop all
 | `level` | 这一拍**命令的**电平。`square` 模式下每帧翻转一次 |
 | `ch<n>` | 选中的那几路，**每路自己的电平**（`on=1:1,2:0,3:1` 设，和 dout 的 `duty=` 共用 `ch:值` 解析器）。`mode=square` 下每半周期每路各自翻转，所以起始时电平不同的一组会保持那个花样来回翻 |
 
-> ⚠️ **没有单独的 `level=` 字段。**六路各自独立，一个数只在它们恰好一致时才是对的，其余时候是静默的错。这是 0.2.0 相对 0.1.0 的破坏性改动（[DECISIONS.md 第 12 条](../tables/DECISIONS.md)）。
+> ⚠️ **没有单独的 `level=` 字段。**六路各自独立，一个数只在它们恰好一致时才是对的，其余时候是静默的错。这是 0.2.0 相对 0.1.0 的破坏性改动（[DECISIONS.md 第 12 条](../../tables/DECISIONS.md)）。
 
 > ⚠️ **`!relay` 报的是「驱动成什么」，不是「触点真的动了没有」** —— 继电器是 HF41F 干接点，板上没有回读。要证明触点动作必须靠外部回路或人耳，见 [B.2](#b2-relay--继电器输出会话-)。
 
@@ -251,7 +251,7 @@ pt.stop din  /  pt.stop all
 2. **过期回复算 miss，不算闭合。**收回来的数和当前 `seq` 不相等，说明它回答的是更早那一帧。
 3. **第一帧的 `miss` 是 0。**那一拍上位机还没机会回复，判它 miss 会让每个健康的回环都从 1 起步。
 
-⚠️ **`loop=ctrl` 的端口，这三个数不是该端口的判据。**它们只说明控制口和循环还活着。DI 的判据永远是 `v=` 位域，AOUT 的判据永远是端子上的电流。面板必须把它们和读数分区显示（[DECISIONS.md 第 9 条](../tables/DECISIONS.md)）。
+⚠️ **`loop=ctrl` 的端口，这三个数不是该端口的判据。**它们只说明控制口和循环还活着。DI 的判据永远是 `v=` 位域，AOUT 的判据永远是端子上的电流。面板必须把它们和读数分区显示（[DECISIONS.md 第 9 条](../../tables/DECISIONS.md)）。
 
 ### `!dout`
 
@@ -429,7 +429,7 @@ Klemmblock D，Upper Deck。代码 porttool_din.c（`$BOOT/TestCase/porttool/por
 | **怎么接** | 要么不接（验高阻输入本身），要么把 24 V 现场信号接上。也可以**从 DO 引一根 8 芯线过来**（DO 输出 24 V，DI 耐 24 V，一根线覆盖 16 个通道）。完整接线见 [BOARD-BRINGUP-CASES.md](BOARD-BRINGUP-CASES.md) 的 Digital In 行 |
 | **敲什么** | `pt.start din ch=1,3,5 period=200`<br/>参数：`ch=` 1..8 逗号分隔（默认全 8 路）、`period=` 毫秒（默认 200，下限 50）<br/>热改：`pt.set din ch=2,4`　停：`pt.stop din` |
 | **看到什么算过** | `!din` 帧的 `v=` 位域跟着外部驱动变；DI\<n\> 拉高时对应 bit 为 1，拉低为 0，**和实际驱动逐位一致** |
-| **坑** | ⚠️ MCU 侧有外部 10k 上拉，固件配 `GPIO_NOPULL`，**不开内部上拉**。<br/>⚠️ **「恒读 0」和「恒读 1」是两个不同故障**（[HARDWARE-FACTS.md:152](../hardware/HARDWARE-FACTS.md)）：恒 0 = 有 24 V 但那一路没接线；恒 1 = **整个 24 V / 模拟供电没上来**。上位机必须分开报，不能都说成「低电平」 |
+| **坑** | ⚠️ MCU 侧有外部 10k 上拉，固件配 `GPIO_NOPULL`，**不开内部上拉**。<br/>⚠️ **「恒读 0」和「恒读 1」是两个不同故障**（[HARDWARE-FACTS.md:152](../../hardware/HARDWARE-FACTS.md)）：恒 0 = 有 24 V 但那一路没接线；恒 1 = **整个 24 V / 模拟供电没上来**。上位机必须分开报，不能都说成「低电平」 |
 
 **同一组引脚上还没做的**：编码器 1–4（`TIM3 / TIM4 / TIM5 / TIM8` 的 CH1+CH2，正交计数与方向）⬜
 
@@ -513,7 +513,7 @@ flowchart TD
     style OK fill:#e6f4ea,stroke:#34a853
 ```
 
-> ⚠️ **四个会静默毁掉判据的坑**（[HARDWARE-FACTS.md:154-222](../hardware/HARDWARE-FACTS.md)）：
+> ⚠️ **四个会静默毁掉判据的坑**（[HARDWARE-FACTS.md:154-222](../../hardware/HARDWARE-FACTS.md)）：
 > 1. **VREFBUF 不使能** → ADC 读出 `0x8000` / `0x4000` 这类**看起来像真数据**的值。板上没有基准芯片
 > 2. **模拟跳线 JP1–JP9 出厂全开路** → `PC3_C` 和 `PA6` 彻底悬空，读到的只是悬空脚。**焊上去不可逆**
 > 3. **`SYSCFG_PMCR.PC3SO` 复位默认闭合** → 数字单元加载该节点，读数差约 16%。模拟采样一律置开
@@ -527,10 +527,10 @@ Klemmblock A，Lower Deck。代码 porttool_dout.c（`$BOOT/TestCase/porttool/po
 |---|---|
 | **测什么** | 八路 24 V 输出的**开关**与**各自独立的 PWM 占空比** |
 | **端子 / 引脚** | A03–A10 → `PB13 PB0 PH15 PE4 PA8 PA9 PI7 PE5`，前级 U3/U4 两颗 VNQ5160K-E 智能高侧开关，各管四路 |
-| **怎么接** | 万用表或示波器量端子。一种省事的接法是一根八芯线把 A03–A10 接到 D02–D09（DO 出 24 V、DI 耐 24 V）。⚠️ **它是工位的夹具选择，不是面板里的用例**（[DECISIONS.md 43](../tables/DECISIONS.md)） |
+| **怎么接** | 万用表或示波器量端子。一种省事的接法是一根八芯线把 A03–A10 接到 D02–D09（DO 出 24 V、DI 耐 24 V）。⚠️ **它是工位的夹具选择，不是面板里的用例**（[DECISIONS.md 43](../../tables/DECISIONS.md)） |
 | **敲什么** | 逐路占空比：`pt.start dout ch=1,5 duty=1:20,5:75 freq=1000`<br/>全部开：`pt.start dout duty=100`<br/>翻转给 DI 看：`pt.start dout ch=1,2,3,4,5,6,7,8 mode=blink duty=100 period=500`<br/>参数：`ch=` 1..8、`mode=hold|blink`、`duty=` 单值或逐路（0..100 %）、`freq=` 1..2000 Hz（默认 1000）、`period=` blink 半周期毫秒 |
 | **看到什么算过** | 端子电压随占空比变；`blink` 下 DI 会话的 `v=` 位域跟着 DO 翻转逐位对应 |
-| **坑** | ⚠️ **软件 PWM，不是硬件定时器通道。**八路引脚确实都在定时器通道上，但**两两共用一个比较单元**（DO1/DO5 = TIM1_CH1 及其互补输出、DO2/DO6 = TIM1_CH2、DO3/DO7 = TIM8_CH3、DO4/DO8 = TIM15_CH1），硬件方案只能给 4 个独立占空比。理由见 [DECISIONS.md 第 10 条](../tables/DECISIONS.md)。<br/>⚠️ **中断跑在 TIM7 上**，频率 = `freq × 100`，所以 `freq` 封顶 2000 Hz（中断 200 kHz）。<br/>⚠️ **VNQ5160K-E 的 PWM 上限没有数据手册可查** —— 它是智能高侧开关，内部有电荷泵和保护逻辑。`freq` 刻意放开就是为了让工程师扫频量出来，**实测结果要补进 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md)**。<br/>⚠️ **`pt.
+| **坑** | ⚠️ **软件 PWM，不是硬件定时器通道。**八路引脚确实都在定时器通道上，但**两两共用一个比较单元**（DO1/DO5 = TIM1_CH1 及其互补输出、DO2/DO6 = TIM1_CH2、DO3/DO7 = TIM8_CH3、DO4/DO8 = TIM15_CH1），硬件方案只能给 4 个独立占空比。理由见 [DECISIONS.md 第 10 条](../../tables/DECISIONS.md)。<br/>⚠️ **中断跑在 TIM7 上**，频率 = `freq × 100`，所以 `freq` 封顶 2000 Hz（中断 200 kHz）。<br/>⚠️ **VNQ5160K-E 的 PWM 上限没有数据手册可查** —— 它是智能高侧开关，内部有电荷泵和保护逻辑。`freq` 刻意放开就是为了让工程师扫频量出来，**实测结果要补进 [HARDWARE-FACTS.md](../../hardware/HARDWARE-FACTS.md)**。<br/>⚠️ **`pt.
 
 ## B.5 其余未实现的端口 ⬜
 
@@ -542,7 +542,7 @@ Klemmblock A，Lower Deck。代码 porttool_dout.c（`$BOOT/TestCase/porttool/po
 |---|---|---|---|
 | ~~Digital Out 1–8~~ | ~~A03–A10~~ | — | **已实现，移到 [B.6](#b6-dout--数字输出会话-)** |
 
-前级是 **VNQ5160K 智能高侧开关**，输出 24 V。DI 耐 24 V，所以 **DO→DI 线束互接是可行的一种接法**，一根 8 芯线覆盖 16 个通道 —— 但那是工位自己决定的夹具（[DECISIONS.md 43](../tables/DECISIONS.md)）。
+前级是 **VNQ5160K 智能高侧开关**，输出 24 V。DI 耐 24 V，所以 **DO→DI 线束互接是可行的一种接法**，一根 8 芯线覆盖 16 个通道 —— 但那是工位自己决定的夹具（[DECISIONS.md 43](../../tables/DECISIONS.md)）。
 
 ### Bridge 板自带接口
 
@@ -575,7 +575,7 @@ Klemmblock A，Lower Deck。代码 porttool_dout.c（`$BOOT/TestCase/porttool/po
 **用户 2026-09-08 强调过两次。** 工装是一个独立的镜像，ST-Link 整片烧、自己有链接脚本（`FLASH` 拿满 2048K）。所以：
 
 - **不许用「反正产线那一站会烧 bootloader」来论证任何测试怎么做。** 2026-09-08 我用这条理由把 USB 测试推到主机侧看 CDC 枚举，被驳回 —— 那是把 bootloader 拉进了工装的世界。
-- 工装要测某个外设，就**在工装镜像里把那个外设跑起来**。尺寸不再是理由（见 [DECISIONS.md 第 14 条](../tables/DECISIONS.md) 的 2026-09-08 补充）。
+- 工装要测某个外设，就**在工装镜像里把那个外设跑起来**。尺寸不再是理由（见 [DECISIONS.md 第 14 条](../../tables/DECISIONS.md) 的 2026-09-08 补充）。
 - 反过来也成立：工装镜像里的东西不进 bootloader，`PORTTOOL_ENABLE` 就是那道墙。
 
 ## C.1 `PORTTOOL_ENABLE` 怎么把业务线整条绕开
@@ -606,7 +606,7 @@ flowchart TD
 
 调用点在 main.c（`$BOOT/Core/Src/main.c`） 的 `USER CODE BEGIN SysInit` 块里，紧跟 `MX_UART4_Init()` 之后 —— UART4 起来了，工装要的就只有这个，它既是命令通道也是日志。位置和写法跟旁边那排 `#if KNX_TEST_ENABLE` 完全一样，并且**并进了同一条互斥 `#error`**：这些入口没有一个会返回，所以同时只能开一个。
 
-> ⚠️ **`PORTTOOL_ENABLE` 不在任何构建配置里，要在 CubeIDE 的工程属性里手工加**（2026-09-07 定，[DECISIONS.md 第 14 条](../tables/DECISIONS.md)）。**忘了改回 0 就发出一个开不了机的 bootloader** —— 那块板永远到不了 IAP 服务器，USB 和以太网都升不了级。所以 `PORTTOOL_ENABLE=1` 时编译会打一条 `#warning` 把这件事写进构建日志。
+> ⚠️ **`PORTTOOL_ENABLE` 不在任何构建配置里，要在 CubeIDE 的工程属性里手工加**（2026-09-07 定，[DECISIONS.md 第 14 条](../../tables/DECISIONS.md)）。**忘了改回 0 就发出一个开不了机的 bootloader** —— 那块板永远到不了 IAP 服务器，USB 和以太网都升不了级。所以 `PORTTOOL_ENABLE=1` 时编译会打一条 `#warning` 把这件事写进构建日志。
 不涉及烧写工具、不涉及授权 —— ST-Link 直接烧固件，开串口看结果。
 
 `PORTTOOL_ENABLE=0` 时 `TestCase/porttool/` 的每个 `.c` 整个函数体都被宏关掉，**一个字节都不进镜像**（工程没开 `--gc-sections`，只靠「不调用」省不下 Flash）。
@@ -628,10 +628,10 @@ flowchart LR
 
     FW -.->|"!din t=… v=0x16"| UART
     FW -.->|"OK started din"| UART
-    FW -.->|"[T1 ] inputs: …"| UART
+    FW -.->|"[T1-07 ] inputs: …"| UART
 ```
 
-⚠️ **端子是真 ±12V，必须用 USB-RS232 适配器，接 TTL 适配器可能烧掉**（[HARDWARE-FACTS.md:17](../hardware/HARDWARE-FACTS.md)）。
+⚠️ **端子是真 ±12V，必须用 USB-RS232 适配器，接 TTL 适配器可能烧掉**（[HARDWARE-FACTS.md:17](../../hardware/HARDWARE-FACTS.md)）。
 ⚠️ **这条通道被工装占用，所以工装测不了 RS232 端子本身** —— 见 [B.3.3](#b33-rs232--rs232klemmblock-c)。
 ⚠️ `PB10` 拉低 = MAX3221 整片关断，printf 一个字节都出不来。`main.c` 在 `MX_UART4_Init()` 前已 `Enable_RX_RS232()`。
 
@@ -652,13 +652,13 @@ flowchart LR
 
 ## C.4 上位机怎么分发、怎么起来
 
-**一个 exe，两种模式。**2026-09-04 拍板，见 [DECISIONS.md 第 7、8 条](../tables/DECISIONS.md)。
+**一个 exe，两种模式。**2026-09-04 拍板，见 [DECISIONS.md 第 7、8 条](../../tables/DECISIONS.md)。
 
 > **和 IAPTool 的关系**（2026-09-07 定）：两者住在 `$TOOL` 同一个 Go module 里，共享 `internal/`（serialx 的开口与重试 · logx · config · buildinfo），`compile_tool.sh` 一次产出 **`IAPTool.exe` 和 `PortTool.exe` 两个文件**。
 >
 > 这不和上面那句冲突 —— 「一个 exe 两种模式」说的是 **PortTool 自己**既是面板又是 CLI，不是说这两个工具要合成一个。受众不同：硬件工程师的工具里不该出现固件签名和 `takeown`。
 >
-> **面板上的文字是中文、大白话；固件 printf、`OK`/`ERR` 应答、两个 exe 的 stdout 仍然是英文**（[DECISIONS.md 第 11 条](../tables/DECISIONS.md)）。
+> **面板上的文字是中文、大白话；固件 printf、`OK`/`ERR` 应答、两个 exe 的 stdout 仍然是英文**（[DECISIONS.md 第 11 条](../../tables/DECISIONS.md)）。
 
 ```mermaid
 flowchart TD

@@ -6,7 +6,7 @@
 
 | 想知道 | 去哪 |
 |---|---|
-| 启动怎么决策、签名怎么验、journal 怎么记 | [JOURNAL.md](../boot/JOURNAL.md)、[OWNERSHIP.md](../security/OWNERSHIP.md) |
+| 启动怎么决策、签名怎么验、journal 怎么记 | [JOURNAL.md](../modules/M1/JOURNAL.md)、[OWNERSHIP.md](../modules/M2-ownership.md) |
 | 三个仓库在哪、哪些代码是跨仓镜像 | `$PROD/docs/repo/ARCHITECTURE.md` |
 | 引脚、串口、启动模式的实测事实 | [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) |
 | 需求清单和测试矩阵 | `$PROD/docs/tables/STATUS.md` |
@@ -39,11 +39,9 @@
 
 ## 3. 编译产物
 
-**必须装进单个 128K 扇区的前 120K**（122,880 B —— 尾部 8K 给 owner 记录）。这是需求 **E3**，构建时的尺寸门禁。
+**必须装进单个 128K 扇区的前 120K**（122,880 B —— 尾部 8K 给 owner 记录）。这是需求 **ENG-01**，构建时的尺寸门禁。
 
-**当前大小和余量在 `$PROD/docs/tables/STATUS.md` 的 E3 行**（唯一出处）。⚠️ **别在这里拄一份数字。**
-
-> 本节数字会随每次构建变，**别把它当承诺**。要当前值就自己看 `Debug/` 下那个 `.bin` 的大小。
+**当前大小和余量哪份文档都不记** —— 这个数每次构建都在变。要数字跑 `$TOOL:TestCase/tools/build_image.py`，它每次构建都打印，超了当场 Fail；或者自己看 `Debug/` 下那个 `.bin` 的大小。
 
 ## 4. 功能模块清单
 

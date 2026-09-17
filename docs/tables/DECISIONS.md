@@ -46,7 +46,7 @@
 
 
 
-**metadata 存在 journal 里**（机制见 [JOURNAL.md](../boot/JOURNAL.md)）。新 bootloader 读不懂旧格式 journal → 读不到 metadata → 判定 app 无效 → **停在 bootloader 且不会自愈**，现象和变砖一样。
+**metadata 存在 journal 里**（机制见 [JOURNAL.md](../modules/M1/JOURNAL.md)）。新 bootloader 读不懂旧格式 journal → 读不到 metadata → 判定 app 无效 → **停在 bootloader 且不会自愈**，现象和变砖一样。
 
 
 
@@ -148,7 +148,7 @@ app 镜像本身一个字节都没变，是 bootloader 找不到那张"出生证
 
 
 
-**2026-09-03 拍板：保持现状，不换令牌桶。** 合法用量差 25 倍，从不误伤；换掉要改两份跨仓镜像并重跑 N5。
+**2026-09-03 拍板：保持现状，不换令牌桶。** 合法用量差 25 倍，从不误伤；换掉要改两份跨仓镜像并重跑 T1-05。
 
 
 
@@ -166,7 +166,7 @@ app 镜像本身一个字节都没变，是 bootloader 找不到那张"出生证
 
 
 
-bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit UART。它是需求 E4，已实测，理由是"交权时让 app 拿到一块冷板子的状态"。
+bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit UART。它是需求 R3-02，已实测，理由是"交权时让 app 拿到一块冷板子的状态"。
 
 
 
@@ -196,7 +196,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 
 
 
-⚠️ **需求 E6 的原文是"用户碰不到"，落地时按实际改写成"看得见"。** 需求原文和实现不符时改需求，不要让实现假装满足了它。
+⚠️ **需求 R3-04 的原文是"用户碰不到"，落地时按实际改写成"看得见"。** 需求原文和实现不符时改需求，不要让实现假装满足了它。
 
 
 
@@ -307,7 +307,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 2. HTML/CSS/JS 用 Go 的 `embed` 打进同一个 exe，**仍然是单文件、纯 Go**，`compile_tool.sh` 的一键三平台交叉编译不受影响
 
 
-3. [PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) C.3 那三种用法（手动 / 产线 / 自动化）共用**一份固件**，上位机也该共用**一个二进制** —— 拆成两个程序会立刻出现"两边判据不一致"
+3. [PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) C.3 那三种用法（手动 / 产线 / 自动化）共用**一份固件**，上位机也该共用**一个二进制** —— 拆成两个程序会立刻出现"两边判据不一致"
 
 
 
@@ -466,7 +466,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 
 
 
-⚠️ **已知的错位**：面板上的中文提示旁边就是板子来的英文 printf 日志，两种语言混排。这是接受的代价 —— 日志是原始证据，改写它就没法拿去对固件源码了。**`ERR` 行必须原文显示，不许翻译或归纳**（这条本来就是 [PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) A.6 的铁律 1）。
+⚠️ **已知的错位**：面板上的中文提示旁边就是板子来的英文 printf 日志，两种语言混排。这是接受的代价 —— 日志是原始证据，改写它就没法拿去对固件源码了。**`ERR` 行必须原文显示，不许翻译或归纳**（这条本来就是 [PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) A.6 的铁律 1）。
 
 
 
@@ -514,7 +514,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 
 
 
-1. **relay 要改成逐路设电平。** 现在 `on=` 对所有选中通道统一驱动（[PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) B.2 写了「同一帧内各路必定同值」），要改成 `on=1:1,2:0,3:1`，和 dout 的 `duty=1:20,2:50` 共用同一个 `ch:值` 解析器。
+1. **relay 要改成逐路设电平。** 现在 `on=` 对所有选中通道统一驱动（[PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) B.2 写了「同一帧内各路必定同值」），要改成 `on=1:1,2:0,3:1`，和 dout 的 `duty=1:20,2:50` 共用同一个 `ch:值` 解析器。
 
 
 2. **RS232 端子做成会话，不是只当日志通道。** 见第 13 条。
@@ -523,7 +523,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 
 
 
-**什么情况下重开**：不重开。这是「工装不替工程师做减法」的立场 —— 判定和序列全在上位机（[PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) C.3），面板藏起来的选项等于固件白做了。
+**什么情况下重开**：不重开。这是「工装不替工程师做减法」的立场 —— 判定和序列全在上位机（[PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) C.3），面板藏起来的选项等于固件白做了。
 
 
 
@@ -539,7 +539,7 @@ bootloader 在 `server_jump_to_app()` 里主动关掉 RS232 收发器、DeInit U
 
 
 
-**这一条更正了本文件之前没写、但 [PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) B.3.3 写着的一个结论**：「工装占用的就是这条通道，所以会话模式测不了 RS232 端子本身」—— **这句话是错的**。
+**这一条更正了本文件之前没写、但 [PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) B.3.3 写着的一个结论**：「工装占用的就是这条通道，所以会话模式测不了 RS232 端子本身」—— **这句话是错的**。
 
 
 
@@ -799,7 +799,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**什么情况下重开**：不重开。用例 H4 检查「没有两行共用同一个 `port=`」。
+**什么情况下重开**：不重开。用例 T4-01 检查「没有两行共用同一个 `port=`」。
 
 
 
@@ -962,7 +962,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**为什么**：产线限值现在大部分是 TBD，试产阶段会反复改。**改一个限值不该重烧固件** —— 这正是 [PORTTOOL-FLOW.md](../production/PORTTOOL-FLOW.md) C.3 已经写下的那条（「判定和序列全在上位机，固件只报原始采样」）。
+**为什么**：产线限值现在大部分是 TBD，试产阶段会反复改。**改一个限值不该重烧固件** —— 这正是 [PORTTOOL-FLOW.md](../modules/M4/PORTTOOL-FLOW.md) C.3 已经写下的那条（「判定和序列全在上位机，固件只报原始采样」）。
 
 
 
@@ -977,7 +977,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-⚠️ **也不管 `$TOOL/TestCase/onboard/` 的 Arduino sketch。** 那个 sketch 吐 `RESULT <name> PASS|FAIL` 给 `run_sdram.py` 汇总，但它测的是**给用户 sketch 用的 SDRAM 库**（需求 E5 / 用例 SD1），和产线端口测试无关。**2026-09-07 本条初稿曾把它误当成「唯一违反本条的地方」，核实后撤回。**
+⚠️ **也不管 `$TOOL/TestCase/onboard/` 的 Arduino sketch。** 那个 sketch 吐 `RESULT <name> PASS|FAIL` 给 `run_sdram.py` 汇总，但它测的是**给用户 sketch 用的 SDRAM 库**（需求 R3-03 / 用例 T3-02），和产线端口测试无关。**2026-09-07 本条初稿曾把它误当成「唯一违反本条的地方」，核实后撤回。**
 
 
 
@@ -1055,7 +1055,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-2026-09-07 用户拍板，依据是他给的另一个项目的上位机测试软件截图（`AiLinkFactoryAutoV0.01`，三栏：方案文件树 / 步骤表带复选框 / 属性网格）。读解与格式在 [PRODUCTION-FRAMEWORK.md](../production/PRODUCTION-FRAMEWORK.md)。
+2026-09-07 用户拍板，依据是他给的另一个项目的上位机测试软件截图（`AiLinkFactoryAutoV0.01`，三栏：方案文件树 / 步骤表带复选框 / 属性网格）。读解与格式在 [PRODUCTION-FRAMEWORK.md](../modules/M4/PRODUCTION-FRAMEWORK.md)。
 
 
 
@@ -1283,7 +1283,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-- **证明**：命令解析、`pt.caps` 的形状、会话启停、echo 计数、帧格式、版本号、以及上位机整条链路（`ptboard` → `ptseq` → `ptcheck` → 报告 → 面板）。**H5 浏览器测试因此不再需要真板子**（`run.py --port sim`）。
+- **证明**：命令解析、`pt.caps` 的形状、会话启停、echo 计数、帧格式、版本号、以及上位机整条链路（`ptboard` → `ptseq` → `ptcheck` → 报告 → 面板）。**T4-02 浏览器测试因此不再需要真板子**（`run.py --port sim`）。
 
 
 - **不证明**：任何硬件行为。读数全是 stub 造的一块理想板子，每根对端线都当接好的。UART 中断收发、`rx_errors`、真 ADC、真 PHY 都不在里面。
@@ -1835,7 +1835,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-1. **`hold_check()` 必须能被测试手工推进时间** —— 照 `tick_sessions(now_ms)` 的样子把 `now_ms` 当参数传，别在函数里自己取 `HAL_GetTick()`。H4 的 harness 里那个时钟不走，这个坑踩过两次。
+1. **`hold_check()` 必须能被测试手工推进时间** —— 照 `tick_sessions(now_ms)` 的样子把 `now_ms` 当参数传，别在函数里自己取 `HAL_GetTick()`。T4-01 的 harness 里那个时钟不走，这个坑踩过两次。
 
 
 2. **`pt.hold` 走的是同一条 UART4 命令通道**，串口被帧挤爆时续期命令会排队。所以 hold 时长必须大于最坏排队延迟 —— **这和带宽限制是同一件事，带宽守住了这里就安全，守不住两头一起坏。**
@@ -2002,7 +2002,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**总表在** [../test/PROD-CONFIG-ITEMS.md](../production/PROD-CONFIG-ITEMS.md)：九个分类、每项的说明与用法、十四条互斥关系及其出处。
+**总表在** [../test/PROD-CONFIG-ITEMS.md](../modules/M4/PROD-CONFIG-ITEMS.md)：九个分类、每项的说明与用法、十四条互斥关系及其出处。
 
 
 
@@ -2167,7 +2167,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 **判据跟着参数走**：`criteriaFor()` 收下这次用的参数，在方案里挑**参数对得上**的那一步。所以 `sd.integrity passes=1` 和 `passes=64` 在方案里是两步、两组判据，面板上是一个按钮加一个可改的轮数。参数在方案里找不到对应的那一步，就只给读数不给结论 —— 和会话那边「改了参数就不给结论」是同一条规矩。
 
-⚠️ **合并不能丢诊断。** 一轮和多轮报的字段刻意不同：一轮报**两个 CRC**（哪些字节读回来不对，只有单轮说得出），多轮报**第一次出错在第几轮**（只有多轮有这回事）。两者都报 `mounted / identical / passes / passed / bytes`，所以判据写法不变。这一条是 H4 抓出来的 —— 第一版合并把 CRC 丢了。
+⚠️ **合并不能丢诊断。** 一轮和多轮报的字段刻意不同：一轮报**两个 CRC**（哪些字节读回来不对，只有单轮说得出），多轮报**第一次出错在第几轮**（只有多轮有这回事）。两者都报 `mounted / identical / passes / passed / bytes`，所以判据写法不变。这一条是 T4-01 抓出来的 —— 第一版合并把 CRC 丢了。
 
 **什么情况下重开**：某个目标的两种参数需要**不同的字段**才能判，而不只是不同的限值。那时它是两个目标。
 
@@ -2210,7 +2210,7 @@ bootloader 自己的 502 字节一个坏字节都没有。
 ### 结论
 
 **不改。** 提议的改法**买不到任何可测量的东西**，却要付「抢走 app 对收发器的控制权」这个代价 ——
-而那正是 `$PROD/docs/repo/CONSTRAINTS.md` 那条约束要防的。
+而那正是 `$PROD/docs/modules/M3/CONSTRAINTS.md` 那条约束要防的。
 
 ⚠️ **仍然成立的一条**：**不要再往 core 的这个位置加启动打印**。
 交接瞬间那两个坏字节是常态，加得越多越容易把有用的信息挤进那个窗口。

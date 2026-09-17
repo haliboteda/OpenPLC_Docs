@@ -20,7 +20,7 @@ Paused because: 等硬件工程师用过工装之后的反馈（用户 2026-09-1
 
 反馈回来之前，它们在 `$PROD/waiting/WAITING-ON.md` 的「等硬件工程师用过工装之后的反馈」那一行底下。
 
-**域**：工装测试（PortTool）。固件在 `$BOOT/TestCase/porttool/`，上位机在 `$TOOL/internal/` 下 pt 开头的那几个包，判据在 `$PROD/docs/tables/TEST-CASES.md`。
+**域**：工装测试（PortTool）。固件在 `$BOOT/TestCase/porttool/`，上位机在 `$TOOL/internal/` 下 pt 开头的那几个包，判据在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`。
 
 **⛔ 不在域内**：bootloader / IAP 产品路径（`$BOOT/IAPServer/`、`IAPTool`）、Arduino 板卡包。
 
@@ -36,7 +36,7 @@ Hardware/ 的原理图 · netlist · Klemmblockzuordnung     ← 唯一出处
 
 面板照实显示固件给的东西，**所以面板上的错不一定是面板的错**。
 
-**每个会话先读**：`$PROD/docs/production/PORTTOOL-FLOW.md`（现状与取舍）、`$PROD/docs/tables/DECISIONS.md` 第 9–36 条、`$PROD/docs/hardware/HARDWARE-FACTS.md`、`$PROD/docs/tables/TEST-CASES.md`。
+**每个会话先读**：`$PROD/docs/modules/M4/PORTTOOL-FLOW.md`（现状与取舍）、`$PROD/docs/tables/DECISIONS.md` 第 9–36 条、`$PROD/docs/hardware/HARDWARE-FACTS.md`、`$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`。
 
 **这张图允许执行**：不只出决策，端子表和对照清单本身就是产出物。
 

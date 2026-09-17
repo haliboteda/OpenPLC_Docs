@@ -21,7 +21,7 @@ Blocked by: MIG-02, MIG-09
 
 ## Answer
 
-2026-09-16 定。表写成 [../../../docs/FILE-DESTINATIONS.md](../../../docs/FILE-DESTINATIONS.md)。
+2026-09-16 定。表写成 [../../../docs/modules/](../../../docs/modules/)。
 
 三个仓全部 **43 份** `.md`，一份一行，43 行全部定死，**零待定**。
 

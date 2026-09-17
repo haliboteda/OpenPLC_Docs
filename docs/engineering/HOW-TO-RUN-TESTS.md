@@ -20,37 +20,37 @@ TestCase/
 │   ├── check_version_sync.py  ← P1  版本号三处一致
 │   ├── check_mirror_sync.py   ← P2  跨仓镜像 12 锚点 + 备份寄存器占用
 │   ├── check_core_sync.py     ← P3  core live vs git 仓库
-│   ├── check_public_root.py   ← P6  公开根指纹没漂移
+│   ├── check_public_root.py   ← T2-06  公开根指纹没漂移
 │   ├── check_status_sync.py    ← P7  总表和用例名单不得漂
 │   ├── check_doc_dupes.py      ← P8  同一句话不得出现在两个文件
 │   ├── check_doc_paths.py      ← P9  文档里提到的路径必须存在
 │   ├── check_allow_hygiene.py  ← P10 本机 allow 列表不许攒字面命令（建议性，不进 selfcheck）
-│   ├── flash_bootloader.py     ← 无头编译 + ST-Link 烧写 + BG1 判定
+│   ├── flash_bootloader.py     ← 无头编译 + ST-Link 烧写 + T3-01 判定
 │   ├── enter_bootloader.py     ← 把板子请进 bootloader，不用碰板子
 │   ├── serial_watch.py
-│   ├── run_case.py             ← 跑一条 TestCase 用例，`--then-reset` 变成 G1
-│   ├── run_s3.py  run_s4.py    ← S3 启动期验签 / S4 掉电中断
-│   ├── run_au1.py              ← AU1 nonce 唯一性，绕一次真实掉电
-│   ├── run_m5.py  run_sdram.py ← M5 串口冲突 / SD1 SDRAM 封装
-│   ├── run_takeown.py  run_setowner.py  inject_owner_record.py  ← 所有权 OW1/OW2
+│   ├── run_case.py             ← 跑一条 TestCase 用例，`--then-reset` 变成 T1-14
+│   ├── run_s3.py  run_s4.py    ← T1-13 启动期验签 / T1-21 T1-22 掉电中断
+│   ├── run_au1.py              ← T1-17 nonce 唯一性，绕一次真实掉电
+│   ├── run_m5.py  run_sdram.py ← T3-03 串口冲突 / T3-02 SDRAM 封装
+│   ├── run_takeown.py  run_setowner.py  inject_owner_record.py  ← 所有权 T2-01/T2-03
 │   ├── upload_and_watch.py     ← 走真实 IAPTool 上传并判 SDRAM 暂存行为
 │   └── can_send.py  can_watch.py  rs485_echo.py  ← 板级端口
 ├── host/                 ← 不需要板子，纯主机跑
-│   ├── iapcert/          ← H1  证书签发、serial 计数器、挑战签名的 Go 单元测试
-│   ├── bootloader_unit/  ← H2  用 stub 编译真实 bootloader 源码的 C 单元测试
-│   ├── porttool_caps/    ← H4  端口工装协议契约：C harness 跑真实固件源码产出
+│   ├── iapcert/          ← T1-15  证书签发、serial 计数器、挑战签名的 Go 单元测试
+│   ├── bootloader_unit/  ← T1-16  用 stub 编译真实 bootloader 源码的 C 单元测试
+│   ├── porttool_caps/    ← T4-01  端口工装协议契约：C harness 跑真实固件源码产出
 │   │                          caps_golden.txt，Go 测试再拿它验 internal/ptproto
-│   ├── porttool_plan/    ← H1  方案文件、判据算子、执行器、报告，以及方案页的
+│   ├── porttool_plan/    ← T1-15  方案文件、判据算子、执行器、报告，以及方案页的
 │   │                          HTTP 面（板子由脚本假扮，逐条命令自己决定怎么答）
-│   ├── fakeboard/        ← K1–K7  IAPTool 传输前的密钥/证书匹配决策，七种情况
-│   └── crypto_ref/       ← X1/X2  SHA-256 与 ECDSA 的独立实现交叉验证
+│   ├── fakeboard/        ← T1-18a–T1-18g  IAPTool 传输前的密钥/证书匹配决策，七种情况
+│   └── crypto_ref/       ← T1-19/T1-20  SHA-256 与 ECDSA 的独立实现交叉验证
 ├── onboard/              ← 需要烧到板子上跑
-│   └── rs232/SerialPort/ ← O1  UART + CDC 回显 sketch
+│   └── rs232/SerialPort/ ← T3-04  UART + CDC 回显 sketch
 └── acceptance/
     （验收单已搬走：`$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md`）
 ```
 
-> **需求、覆盖矩阵和最近结果在一张表里：[STATUS.md](STATUS.md)** —— 要做到什么、每条用例覆盖哪条需求、跑出什么结果、还欠哪些用例。
+> **需求、覆盖矩阵和最近结果在一张表里：[STATUS.md](../tables/STATUS.md)** —— 要做到什么、每条用例覆盖哪条需求、跑出什么结果、还欠哪些用例。
 > **本文件只管判据和运行方法。**
 >
 > ⚠️ **2026-09-16 改**：原来这里写着「贴着代码走，跨仓不搬」—— **本文件当天就搬进了 `OpenPLC_Docs`**，那句话自己作废了。
@@ -113,7 +113,7 @@ TestCase <case-id|all> --ip=<addr> [--port=56865] [--bin=<file.bin>] [--iaptool=
 ```
 
 - `--ip` 必填。设备 IP 从串口日志的 `[NET]` 行读，或用 `IAPTool ether` 的广播发现看。
-- `--bin` T3 / S1 / S2 需要；`--key` S1 / S2 需要，是板子当前信任的那把私钥。
+- `--bin` T1-09 / T1-11 / T1-12 需要；`--key` T1-11 / T1-12 需要，是板子当前信任的那把私钥。
 - `--iaptool` 默认找 `Output/windows/IAPTool.exe`。
 - 退出码：全过 0，有失败 1，参数错 2。
 
@@ -125,11 +125,11 @@ TestCase <case-id|all> --ip=<addr> [--port=56865] [--bin=<file.bin>] [--iaptool=
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **T1** | 空闲连接 60s 后被踢 | 设备停在 bootloader | 连上后保持沉默，在 ~60s（容差 +15s）内被对端关闭 |
-| **T1b** | 空闲连接 50s 内**不**被踢 | 设备停在 bootloader | 沉默 50s 后连接仍在，且 `ping` 仍答 `OK` |
-| **T2** | 已有连接时第二个连接被拒 | 设备停在 bootloader | 第二个连接被拒（或虽接上但不被服务），**且第一个连接不受影响** |
-| **T3** | 传输进行中的第二个连接不打断传输 | 设备停在 bootloader，需 `--bin` | IAPTool 报告传输完成且退出码 0，闯入的连接未被服务 |
-| **T4** | 第一个连接正常关闭后能再连 | 设备停在 bootloader | 关闭后重连成功并被服务 |
+| **T1-07** | 空闲连接 60s 后被踢 | 设备停在 bootloader | 连上后保持沉默，在 ~60s（容差 +15s）内被对端关闭 |
+| **T1-08** | 空闲连接 50s 内**不**被踢 | 设备停在 bootloader | 沉默 50s 后连接仍在，且 `ping` 仍答 `OK` |
+| **T1-06** | 已有连接时第二个连接被拒 | 设备停在 bootloader | 第二个连接被拒（或虽接上但不被服务），**且第一个连接不受影响** |
+| **T1-09** | 传输进行中的第二个连接不打断传输 | 设备停在 bootloader，需 `--bin` | IAPTool 报告传输完成且退出码 0，闯入的连接未被服务 |
+| **T1-10** | 第一个连接正常关闭后能再连 | 设备停在 bootloader | 关闭后重连成功并被服务 |
 
 ### UDP 发现（`udp_discovery.go`）
 
@@ -137,37 +137,37 @@ TestCase <case-id|all> --ip=<addr> [--port=56865] [--bin=<file.bin>] [--iaptool=
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **N1** | 四个关键词都应答 | 设备在线 | `openplc_server_where_r_y` / `DISCOVER` / `openplc_discover` / `ping` 全部有回复 |
-| **N2** | 多轮间隔查询都应答 | 设备在线 | 6 轮全部有回复 |
-| **N3** | 回复落在工具的超时之内 | 设备在线 | 20 轮全部在 2s（IAPTool 的 `CommandTimeout`）内返回 |
-| **N4** | 长时间浸泡下发现依然可靠 | 设备在线，`--minutes=N`（默认 10） | 整段时间内零次无应答 |
-| **N5** | 泛洪被封顶，且封顶不会把发现打死 | 设备在线 | 以约 500 次/秒猛打 3 秒，回复速率不超过 50/s 的上限；**且随后正常查询仍能应答** |
+| **T1-01** | 四个关键词都应答 | 设备在线 | `openplc_server_where_r_y` / `DISCOVER` / `openplc_discover` / `ping` 全部有回复 |
+| **T1-02** | 多轮间隔查询都应答 | 设备在线 | 6 轮全部有回复 |
+| **T1-03** | 回复落在工具的超时之内 | 设备在线 | 20 轮全部在 2s（IAPTool 的 `CommandTimeout`）内返回 |
+| **T1-04** | 长时间浸泡下发现依然可靠 | 设备在线，`--minutes=N`（默认 10） | 整段时间内零次无应答 |
+| **T1-05** | 泛洪被封顶，且封顶不会把发现打死 | 设备在线 | 以约 500 次/秒猛打 3 秒，回复速率不超过 50/s 的上限；**且随后正常查询仍能应答** |
 
 ### 签名校验（`signature.go`）
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **S1** | 签名无效的镜像被拒绝 | 设备停在 bootloader，需 `--bin` 和 `--key`（板子信任的那把，用来签挑战） | 传完后设备回 `Signature Failed`（或 `No Signature`） |
-| **S2** | 被**别的密钥**签过的镜像被拒绝 | 同 S1，另需 `--iaptool`（用它生成临时密钥并签名） | 同上。**外加**上传前 `getpubkey` 必须和临时密钥不同 |
-| **S3** | **已装好的** app 被改坏 → 启动期拒绝 | 板上有能启动的 app、ST-Link、**一个已签名的恢复镜像** | `metadata present` + `App signature invalid or absent`，且**没有** `** APP Mod` |
-| **G1** | 被拒绝的上传**不破坏已装好的 app** | 紧接 S1 之后复位 | 下次启动出现 `** APP Mod ...`，**不是** `no valid application`。用 `python tools/run_case.py --case S1 --then-reset` 跑 |
+| **T1-11** | 签名无效的镜像被拒绝 | 设备停在 bootloader，需 `--bin` 和 `--key`（板子信任的那把，用来签挑战） | 传完后设备回 `Signature Failed`（或 `No Signature`） |
+| **T1-12** | 被**别的密钥**签过的镜像被拒绝 | 同 T1-11，另需 `--iaptool`（用它生成临时密钥并签名） | 同上。**外加**上传前 `getpubkey` 必须和临时密钥不同 |
+| **T1-13** | **已装好的** app 被改坏 → 启动期拒绝 | 板上有能启动的 app、ST-Link、**一个已签名的恢复镜像** | `metadata present` + `App signature invalid or absent`，且**没有** `** APP Mod` |
+| **T1-14** | 被拒绝的上传**不破坏已装好的 app** | 紧接 T1-11 之后复位 | 下次启动出现 `** APP Mod ...`，**不是** `no valid application`。用 `python tools/run_case.py --case T1-11 --then-reset` 跑 |
 
 ```
 python tools/run_s3.py --bin <app.bin>       # 破坏 + 判定 + 自动恢复
 ```
 
-### 所有权（`python tools/run_takeown.py`，需求 C10）
+### 所有权（`python tools/run_takeown.py`，需求 R2-02）
 
-OW1 / OW2 的动作走出货工具（`IAPTool takeown` / `setowner`），判据向板子要（原始 TCP `getowner` / `getpubkey`）。`--bad-signature` 是例外：出货工具做不出坏签名，那条验的是板子的行为，所以在用例里手工拼记录。
+T2-01 / T2-03 的动作走出货工具（`IAPTool takeown` / `setowner`），判据向板子要（原始 TCP `getowner` / `getpubkey`）。`--bad-signature` 是例外：出货工具做不出坏签名，那条验的是板子的行为，所以在用例里手工拼记录。
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **OW1** | 认领把板子绑到一把新密钥上 | 板子停在 bootloader，**且这次启动按住过 BOOT0** | `takeown` 回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得，公开根告警消失 |
-| **OW1-neg** | BOOT0 没按时认领被拒 | 停在 bootloader，**没按 BOOT0**（用 `enter_bootloader.py` 进） | 回 `Refused`，`getpubkey` **一字节不变** |
+| **T2-01** | 认领把板子绑到一把新密钥上 | 板子停在 bootloader，**且这次启动按住过 BOOT0** | 判据见模块文档的测试表 |
+| **T2-02** | BOOT0 没按时认领被拒 | 停在 bootloader，**没按 BOOT0**（用 `enter_bootloader.py` 进） | 回 `Refused`，`getpubkey` **一字节不变** |
 
-| **OW2** | 换 owner：现任签名才算数 | 板子已被一把**你持有私钥**的密钥认领 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变 |
-| **OW2-attack** | 无签名的高 generation 记录**夺不走**板子 | 同上 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 |
-| **OW3** | 恢复出厂，然后能重新认领 | 板子已被认领，**有人在板子旁** | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、公开根告警回来 → 再 `takeown` 能成功 |
+| **T2-03** | 换 owner：现任签名才算数 | 板子已被一把**你持有私钥**的密钥认领 | 判据见模块文档的测试表 |
+| **T2-04** | 无签名的高 generation 记录**夺不走**板子 | 同上 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 |
+| **T2-05** | 恢复出厂，然后能重新认领 | 板子已被认领，**有人在板子旁** | 判据见模块文档的测试表 |
 
 ```
 python tools/run_takeown.py --expect-refused          # 认领负向，不需要人
@@ -181,7 +181,7 @@ python tools/inject_owner_record.py --key <hex> --also-unsigned 9   # 夺取攻�
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **AU1** | nonce 不重复，且**掉电后不从头开始** | 设备停在 bootloader；**要人工断电一次**；VBAT 电池在位 | 两阶段所有 nonce 互不相同；阶段内计数器恰好 +1；断电后的第一个计数器**严格大于**断电前最后一个 |
+| **T1-17** | nonce 不重复，且**掉电后不从头开始** | 设备停在 bootloader；**要人工断电一次**；VBAT 电池在位 | 两阶段所有 nonce 互不相同；阶段内计数器恰好 +1；断电后的第一个计数器**严格大于**断电前最后一个 |
 
 ```
 python tools/run_au1.py                 # 编排两个阶段，中间提示你拔电
@@ -190,7 +190,7 @@ python tools/run_au1.py --resume         # 阶段 1 已经跑过了，直接等�
 
 ### 委托证书怎么在真板子上复现
 
-K1–K7 用假板子覆盖了工具的判断，H2 用真实 bootloader 源码覆盖了板子的判断。**两者中间那段——真板子收下一张委托证书并据此执行固件——只能手工走一遍**，发版前值得跑：
+判据见对应模块文档的测试表。
 
 ```
 # 管理员：用板子当前信任的那把根，给"同事"的公钥发一张证书
@@ -211,7 +211,7 @@ IAPTool ether app.bin <ip>
 
 ## 怎么让设备停在 bootloader
 
-T1–T4 和 S1 都要求设备处于 bootloader 且以太网已起。三种办法：
+T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。三种办法：
 
 1. **`python tools/enter_bootloader.py`** —— 全自动，不需要碰板子。**推荐**
 2. **按住 BOOT0 复位** —— 日志出现 `** UPLOAD Mod ... (BOOT0 held)`
@@ -227,10 +227,10 @@ T1–T4 和 S1 都要求设备处于 bootloader 且以太网已起。三种办�
 cd TestCase/host/porttool_caps && python build.py --sim   # 编，产出 harness/porttool_simboard.exe
 porttool                                                  # 面板的端口列表里选 "sim"
 porttool run --port sim --yes TestCase/plans/station6-poweron.json
-cd TestCase/host/porttool_panel && python run.py --port sim   # H5，不用板子
+cd TestCase/host/porttool_panel && python run.py --port sim   # T4-02，不用板子
 ```
 
-**H5 旁边还有一个 `naive.py`，问的不是同一个问题。** `run.py` 知道每个控件在哪、
+**T4-02 旁边还有一个 `naive.py`，问的不是同一个问题。** `run.py` 知道每个控件在哪、
 该点哪一个；`naive.py` 只认页面：进一个端口，把印在上面的按钮按印出来的顺序挨个
 按一遍，读它自己那一段给出的结论，同时查这一段的排版（说明在不在、按钮是不是排在
 配置后面结果前面、要人插的对端是不是排在所有用例之前）。三个 2026-09-14 的 bug
@@ -273,10 +273,10 @@ python naive.py --port COM5 --long                 # 连全量的 SD 压力和 S
 |---|---|---|
 | `host/iapcert/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 证书布局与根签名覆盖的字节范围（换个范围就验错东西）；serial 计数器从 1 开始、递增、落文件；serial 小端落在偏移 64；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
 | `host/bootloader_unit/` | `python build.py`，需要 gcc/clang | 用 stub 在主机上编译**真实的** `sha256.c` / `iap_cert.c` / `fw_verify.c` / `iap_auth.c` 并跑断言。金标证书由出货工具生成，所以过了就等于 C 和 Go 对同一套线格式达成一致。细节见 `$TOOL:TestCase/host/bootloader_unit/HOST-C-TESTS.md`（贴着代码放） |
-| `host/porttool_caps/` | `python build.py`，需要 gcc/clang | **H4** 端口工装的协议契约，判据见 `$TOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`（贴着代码放，没有搬过来） |
-| `host/porttool_panel/` | `python run.py --port COMx`（**真板子**）或 `--port sim`（**模拟板，不用板子**，见下），都要 playwright + Chrome | **H5** 面板在真浏览器里点一遍。判据：①页面先过一遍语法（用 playwright 自带的 node `--check`，板子都不用）②页面抛的任何异常、控制台任何 error 直接判失败 ③串口列表、未连接时的门闸、按板子分组 ④**逐个端口按一次「开始测试」，每个端口的结论必须是这台工位应该出的那一个** —— 缺激励的端口要失败，并且失败原因里要点出是哪个读数 ⑤**方案文件里的参数真的发出去了** —— `on=1:1` / `mv=1:1000` / `duty=1:100` / `mode=extloop` 在日志里能查到 ⑥**持续测试**：「单次 / 持续」两个单选，持续下面才出现时长（1/2/3/4 小时 / 一直跑）；左边可以勾多个端口、一次启动；**看门狗在续期**（日志里 `OK hold=` 一直在涨，不是只武装了一次）；点停止要同时出 `OK stopped all` 和 `OK hold=off`。⚠️ **断言看的是板子的回复不是发出去的命令** —— 续期由服务端直接走串口发，不过 `/api/command`，页面日志里没有那一行 ⑦两个 tab、日志的暂停/清空/过滤、断开、记下的控制口 ⑧**改了参数就不给结论** —— 改一个参数再按「开始测试」，结论不能是「失败」，卡片要说清哪一项和方案不一样，点「恢复方案参数」之后又能判（2026-09-11 用户实测撞出来的：勾 DO3、占空比 50，1.4 秒出一个假失败）⑨**卡片上不许剩协议词** —— 逐个端口扫一遍，命中 `BANNED_ON_CARDS` 里任何一个（`duty`、`freq`、`miss`、`Klemmblock`…）就判失败 ⑩**四个一直没被点过的控件**（2026-09-11 补）：「单独跑」单个 `pt.run` 目标、「自动回环应答」勾选框、「绑上/解开」对端串口、**方案页的「运行」按钮**（用 `bench-smoke.json` 跑完整一轮，每一步都要回判据）。⚠️ **「绑上」在模拟板上只能证明控件通到服务端并且能解开** —— 「绑对了适配器才闭合链路」只有真工位能证明，因为模拟板自己演所有对端。⚠️ 覆盖不到的是**真外观** —— 颜色间距好不好看只能人看 |
+| `host/porttool_caps/` | `python build.py`，需要 gcc/clang | **T4-01** 端口工装的协议契约，判据见 `$TOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`（贴着代码放，没有搬过来） |
+| `host/porttool_panel/` | `python run.py --port COMx`（**真板子**）或 `--port sim`（**模拟板，不用板子**，见下），都要 playwright + Chrome | **T4-02** 面板在真浏览器里点一遍。判据：①页面先过一遍语法（用 playwright 自带的 node `--check`，板子都不用）②页面抛的任何异常、控制台任何 error 直接判失败 ③串口列表、未连接时的门闸、按板子分组 ④**逐个端口按一次「开始测试」，每个端口的结论必须是这台工位应该出的那一个** —— 缺激励的端口要失败，并且失败原因里要点出是哪个读数 ⑤**方案文件里的参数真的发出去了** —— `on=1:1` / `mv=1:1000` / `duty=1:100` / `mode=extloop` 在日志里能查到 ⑥**持续测试**：「单次 / 持续」两个单选，持续下面才出现时长（1/2/3/4 小时 / 一直跑）；左边可以勾多个端口、一次启动；**看门狗在续期**（日志里 `OK hold=` 一直在涨，不是只武装了一次）；点停止要同时出 `OK stopped all` 和 `OK hold=off`。⚠️ **断言看的是板子的回复不是发出去的命令** —— 续期由服务端直接走串口发，不过 `/api/command`，页面日志里没有那一行 ⑦两个 tab、日志的暂停/清空/过滤、断开、记下的控制口 ⑧**改了参数就不给结论** —— 改一个参数再按「开始测试」，结论不能是「失败」，卡片要说清哪一项和方案不一样，点「恢复方案参数」之后又能判（2026-09-11 用户实测撞出来的：勾 DO3、占空比 50，1.4 秒出一个假失败）⑨**卡片上不许剩协议词** —— 逐个端口扫一遍，命中 `BANNED_ON_CARDS` 里任何一个（`duty`、`freq`、`miss`、`Klemmblock`…）就判失败 ⑩**四个一直没被点过的控件**（2026-09-11 补）：「单独跑」单个 `pt.run` 目标、「自动回环应答」勾选框、「绑上/解开」对端串口、**方案页的「运行」按钮**（用 `bench-smoke.json` 跑完整一轮，每一步都要回判据）。⚠️ **「绑上」在模拟板上只能证明控件通到服务端并且能解开** —— 「绑对了适配器才闭合链路」只有真工位能证明，因为模拟板自己演所有对端。⚠️ 覆盖不到的是**真外观** —— 颜色间距好不好看只能人看 |
 | `host/porttool_plan/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 判据算子（缺字段一律判失败）；执行器（超时与判据失败分得开、重试保留被它替掉的那次失败、失败后的门闸看最后一个真跑过的步骤）；随包发布的 `plans/bench-smoke.json` 和 `plans/station6-poweron.json` 都能拿假板子跑通；方案里的 `pt.run` 目标对着 caps 的 `runs=` 离线校验（打错名字、写一个固件没报过的目标，两种都要报）；方案页四个接口 —— **写盘前先验、方案名出不了 plans 目录、跑方案期间面板自己的回环应答器停摆** |
-| `host/fakeboard/` | `python run_cases.py` | **K1–K7** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
+| `host/fakeboard/` | `python run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
 | `host/crypto_ref/` | `python run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL:TestCase/host/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
 | `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前一个：FMC 保留脚表（39 个）自洽。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译 core 自有库的**每一个 example**。⚠️ **约十分钟，故意不进 selfcheck** —— 见下 |
@@ -290,9 +290,9 @@ python host/examples_build/build.py              # 全部
 python host/examples_build/build.py --only SDRAM  # 只挑一个库
 ```
 
-`tools/` 下还有四个纯静态检查，不碰任何代码执行：`check_version_sync.py`（版本号三处一致）、`check_mirror_sync.py`（跨仓镜像 9 个锚点 + RTC 备份寄存器占用）、`check_core_sync.py`（core live 与 git 仓库）、`check_public_root.py`（**P6**）。前三个对应发版检查单的 B1 / B2 / B3，以前是人工核对。
+`tools/` 下还有四个纯静态检查，不碰任何代码执行：`check_version_sync.py`（版本号三处一致）、`check_mirror_sync.py`（跨仓镜像 9 个锚点 + RTC 备份寄存器占用）、`check_core_sync.py`（core live 与 git 仓库）、`check_public_root.py`（**T2-06**）。前三个对应发版检查单的 `CHK-B1` / `CHK-B2` / `CHK-B3`，以前是人工核对。
 
-### P6 · "信任公开根"的告警不能失灵
+### T2-06 · "信任公开根"的告警不能失灵
 
 bootloader 每次启动会在**当前生效的根就是随项目发布的那把公开根**时告警。它靠编进 `IAPServer/owner_slot.c` 的一个 SHA-256 指纹常量认出那把密钥。
 
@@ -336,6 +336,23 @@ python tools/check_doc_dupes.py          # 加 --min 40 只看更长的断言；
 
 把每份文档切成句子，去掉 markdown 加粗之类的强调符号（这样加粗过的一份能跟没加粗的一份对上），任何长到能算"断言"的句子出现在两个以上文件里就判失败。**指针（"见 X"）不算**——指针短且泛化，这正是修复重复的手段本身。**代码块单独报告、不计入失败**：抓下来的日志、命令这类东西合理地要在多处原样出现（发布说明要给客户看到他会看到的确切字符串，验收记录要写板子实际打了什么）——它们引的是那份 `.c` 文件，不是互相抄。退出码：0 没有断言重复，1 至少一处，2 环境问题。
 
+#### P8 扫哪些文件
+
+| 扫 | |
+|---|---|
+| 六个仓的 `CLAUDE.md` | bootloader / core / 工具 / 硬件 / 参考工程 / AI-Skills |
+| `$BOOT/RELEASE-NOTES.md` | |
+| `$PROD` 根的四份 | `CLAUDE.md` `README.md` `GLOSSARY.md` `WHERE-THINGS-LIVE.md` |
+| `$PROD/docs/` 全部 | 递归 |
+| `AI-Skills/OpenPLC` 和 `AI-Skills/_shared` | 站着的规矩 |
+
+**`$PROD/maps/` 不扫。** 一张票的 `## Answer` 按设计就会摘述别处的结论，
+两张图的 `Paused because:` 按约定就是同一句话 —— 纳进来这些全变成永久红灯。
+实测数据：纳入会多 47 份文件、报 11 处重复，其中只有 2 处是真的。
+
+⚠️ **一个 named 路径找不到文件时，这条检查现在直接失败**（退出码 2），不再静默跳过。
+静默跳过让它从 2026-09-16 到 09-17 只扫 21 个文件、一份 `$PROD` 的文档都没扫，**却一直报 PASS**。
+
 ### P9 · 文档里提到的路径必须存在
 
 ```
@@ -371,16 +388,16 @@ python tools/check_allow_hygiene.py --fail-over 400   # 超过这个数才算失
 | 目录 | 是什么 | 怎么用 |
 |---|---|---|
 | `rs232/SerialPort/` | UART + USB-CDC 回显 sketch | 用 Arduino IDE/CLI 编译上传，往端子 C05/C06 发字符看回显 |
-| `rs232/M5_SerialConflict/` | **M5**：`Serial4.begin()` 之后 `Serial_Test` 还能不能收 | `python tools/run_m5.py`（自己编译、烧写、发字节、验回显） |
-| `sdram/SDRAM_Acceptance/` | **SD1**：`OpenPLC_SDRAM` 封装的 19 条断言 + 清零速率测量 | `python tools/run_sdram.py` |
+| `rs232/M5_SerialConflict/` | **T3-03**：`Serial4.begin()` 之后 `Serial_Test` 还能不能收 | 判据见模块文档的测试表 |
+| `sdram/SDRAM_Acceptance/` | **T3-02**：`OpenPLC_SDRAM` 封装的 19 条断言 + 清零速率测量 | `python tools/run_sdram.py` |
 
-### SD1 · SDRAM 封装（需求 E5）
+### T3-02 · SDRAM 封装（需求 R3-03）
 
 sketch 打 `RESULT <名字> PASS|FAIL` 和 `MEASURE <名字> <数>`，脚本按行判。**任何 FAIL、缺 `DONE`（说明跑一半挂了）、或一条 RESULT 都没有，都算失败。**
 
 2026-08-17 实测：`begin()` 1.4 ms，清零 **91 MB/s**（清满 64MB ≈ 701 ms），`allocUninitialized()` 0 µs。
 
-### M5 · 诊断串口不被用户 sketch 掐掉（需求 E7）
+### T3-03 · 诊断串口不被用户 sketch 掐掉（需求 R3-05）
 
 | 判据 | 前置条件 |
 |---|---|
@@ -400,7 +417,7 @@ sketch 打 `RESULT <名字> PASS|FAIL` 和 `MEASURE <名字> <数>`，脚本按�
 | R2 | 适配器上每 **3 s** 收到一帧 `RS485 HELLO <n>` | ❌ 要适配器 |
 | R4 | 主机发一串探针，板子原样发回；同时在日志口打出 **ASCII + hex** 两列 | ❌ 要适配器 |
 
-## S4a / S4b · 掉电中断，怎么跑
+## T1-21 / T1-22 · 掉电中断，怎么跑
 
 ```bash
 python3 tools/run_s4.py --case a --bin <app.bin> --pad-to 1200000
@@ -409,13 +426,13 @@ python3 tools/run_s4.py --case b --bin <app.bin> --retry 3
 
 | | |
 |---|---|
-| **判据 S4a** | 传输窗口内断电 → 重新上电后**旧 app 照常启动**（日志出现 `APP Mod`，且**没有** `App signature invalid or absent`）|
-| **判据 S4b** | 擦写窗口内断电 → 上电报 `App signature invalid or absent`，**且重传一次能恢复** |
-| **窗口锚点** | `Staging in SDRAM` 之后 / `Erasing application region` 之前 = S4a；`Erasing application region` 之后 = S4b。字符串对齐 `open_plc_cube_ide/IAPServer/IAP_server.c` |
+| **判据 T1-21** | 传输窗口内断电 → 重新上电后**旧 app 照常启动**（日志出现 `APP Mod`，且**没有** `App signature invalid or absent`）|
+| **判据 T1-22** | 擦写窗口内断电 → 上电报 `App signature invalid or absent`，**且重传一次能恢复** |
+| **窗口锚点** | `Staging in SDRAM` 之后 / `Erasing application region` 之前 = T1-21；`Erasing application region` 之后 = T1-22。字符串对齐 `open_plc_cube_ide/IAPServer/IAP_server.c` |
 
 ## 未覆盖
 
-**完整的覆盖矩阵和每条待补用例的设计骨架在 [docs/STATUS.md](STATUS.md)**，这里只留摘要：
+**完整的覆盖矩阵和每条待补用例的设计骨架在 [docs/STATUS.md](../tables/STATUS.md)**，这里只留摘要：
 
 | ID | 内容 | 为什么还没做 |
 |---|---|---|

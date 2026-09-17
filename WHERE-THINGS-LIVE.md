@@ -55,7 +55,7 @@
 
 这是旧框架最安静的漏法：在表里写个 ⬜ 然后接着往下走，没有人被挂上钩，
 几个月后在工位上才发现。现成的样本是 `$PROD/docs/tables/ID-MAP.md` 里那三张验收单 ——
-「结果记在哪」一栏写着 ⬜，需求 F2 因此一直 🟡。
+「结果记在哪」一栏写着 ⬜，需求 ENG-09 因此一直 🟡。
 
 `tools/check_no_orphan_placeholders.py` 查这一条，挂在 pre-commit 上，**提交过不去**。
 它也能扫本仓之外的文档：`python tools/check_no_orphan_placeholders.py <路径>`。

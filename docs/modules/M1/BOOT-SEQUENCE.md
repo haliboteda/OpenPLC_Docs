@@ -2,7 +2,7 @@
 
 **这份回答一件事：一次复位之后，板子怎么决定跑 app 还是留在 bootloader，以及怎么把硬件交出去。**
 
-2026-09-16 从固件注释里整理出来。判据和用例在 `$PROD/docs/tables/TEST-CASES.md`，
+2026-09-16 从固件注释里整理出来。判据和用例在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`，
 已拍板的取舍在 `$PROD/docs/tables/DECISIONS.md`，flash 上那本账在 [JOURNAL.md](JOURNAL.md)。
 
 ## 两个阶段，分开的理由
@@ -77,7 +77,7 @@ Phase 1 里先在开机继电器窗口内反复轮询 BOOT0，再把结果交给
 
 两个维护调用在数据 cache 关闭时都是无害的空操作 —— **这正是重点**：
 **不管正在跑的镜像怎么配置了它的 cache，这个文件都是对的，而且不需要任何 MPU 区。**
-（这条正是 `$PROD/docs/repo/CONSTRAINTS.md` 那条约束的落地：不能依赖 app 恰好关掉了什么。）
+（这条正是 `$PROD/docs/modules/M3/CONSTRAINTS.md` 那条约束的落地：不能依赖 app 恰好关掉了什么。）
 
 ### 读回校验：旧方案缺的就是这一条
 

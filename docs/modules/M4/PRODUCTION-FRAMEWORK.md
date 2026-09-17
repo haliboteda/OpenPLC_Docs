@@ -4,9 +4,9 @@
 
 - 要什么 vs 有什么 → `$PROD/maps/production-test-gap/`（那条线 2026-09-16 起 ⏸ 等使用反馈）
 - `pt.*` 协议本身 → [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) 的 A 部分
-- 取舍理由 → [DECISIONS.md](../tables/DECISIONS.md) 第 22–25 条
+- 取舍理由 → [DECISIONS.md](../../tables/DECISIONS.md) 第 22–25 条
 
-> **固件不参与这份文件描述的任何事。** 按[第 22 条](../tables/DECISIONS.md)，板子只吐原始值，判定全在这里。
+> **固件不参与这份文件描述的任何事。** 按[第 22 条](../../tables/DECISIONS.md)，板子只吐原始值，判定全在这里。
 
 ---
 
@@ -46,7 +46,7 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 ### 一条不抄的
 
-**他们每个功能一个手写步骤类型**（`UartCheck` / `SoundRecording` / `soundPlay`）。我们不这么做 —— 见[第 25 条](../tables/DECISIONS.md)，我们有 `pt.caps` 自描述，三个通用类型就够，加端口不动程序。
+**他们每个功能一个手写步骤类型**（`UartCheck` / `SoundRecording` / `soundPlay`）。我们不这么做 —— 见[第 25 条](../../tables/DECISIONS.md)，我们有 `pt.caps` 自描述，三个通用类型就够，加端口不动程序。
 
 ### 从他们的类型名读出的分类
 
@@ -58,13 +58,13 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 | 产品专有 | `SoundRecording` `soundPlay` |
 | 人工 | `User Confirm` |
 
-⚠️ **注意 MES 那一类占了六步之多**，但它们只是**几个步骤类型**，不是框架内建能力。这正好印证[第 20 条](../tables/DECISIONS.md)「MES 不做只留接口」—— 留接口 = 留两个步骤类型（读 SN、推结果），不是做一套系统。
+⚠️ **注意 MES 那一类占了六步之多**，但它们只是**几个步骤类型**，不是框架内建能力。这正好印证[第 20 条](../../tables/DECISIONS.md)「MES 不做只留接口」—— 留接口 = 留两个步骤类型（读 SN、推结果），不是做一套系统。
 
 ---
 
 ## 二、方案文件
 
-**格式 JSON。** 理由：Go 标准库自带，不破坏[第 7、8 条](../tables/DECISIONS.md)的零安装与纯 Go 一键三平台交叉编译。代价是不能写注释 —— 用 `_note` 字段兜。
+**格式 JSON。** 理由：Go 标准库自带，不破坏[第 7、8 条](../../tables/DECISIONS.md)的零安装与纯 Go 一键三平台交叉编译。代价是不能写注释 —— 用 `_note` 字段兜。
 
 ### 骨架
 
@@ -137,7 +137,7 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 ## 三、步骤类型
 
-和板子说话的只有三个 `Pt*` 通用类型（[第 25 条](../tables/DECISIONS.md)）：
+和板子说话的只有三个 `Pt*` 通用类型（[第 25 条](../../tables/DECISIONS.md)）：
 
 | 类型 | 干什么 | 专有参数 |
 |---|---|---|
@@ -209,5 +209,5 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 ## 七、还没定的
 
 - **报告推给谁、什么格式**（`PushResult` 的 `sink`）—— 等产线那边的系统确定
-- **仪器与工装板的调用形态** —— `Tool` 类型起进程是兜底方案；工装板若走串口协议，可能值得一个 `Fixture` 类型。等 [FIXTURE-INTERFACE.md](../outbound/FIXTURE-INTERFACE.md) 第三节那几个问题有回音
+- **仪器与工装板的调用形态** —— `Tool` 类型起进程是兜底方案；工装板若走串口协议，可能值得一个 `Fixture` 类型。等 [FIXTURE-INTERFACE.md](../../outbound/FIXTURE-INTERFACE.md) 第三节那几个问题有回音
 - **AI / AO 逐板校准** —— 整块挂起，见 `$PROD/maps/production-test-gap/GAP-AS-OF-2026-09-16.md` 的 Q2

@@ -37,4 +37,4 @@ grep -rn '\*\*\*' TestCase --include='*_test.h'
 
 ## 代码放哪
 
-一个端口一个子目录，都在 `TestCase/` 下。`TestCase/common/` 装公用件：`testcase_hal_guard.h`、`bringup_test.c`、vendored FatFs，以及工程里唯一自带 HAL 副本的地方（ADC / DAC / SD / SDMMC / FDCAN）。`TestCase/common` 必须在 include path 上（`.cproject` 两个 build config 各一条 `../TestCase/common`）。
+一个端口一个子目录，都在 `TestCase/` 下。`TestCase/common/` 装公用件：`testcase_hal_guard.h`、`bringup_test.c`、vendored FatFs，以及工程里唯一自带 HAL 副本的地方（ADC / DAC / SD / SDMMC / FDCAN）。`TestCase/common` 必须在 include path 上（`.cproject` 两个 build config 各一条 `../../TestCase/common`）。

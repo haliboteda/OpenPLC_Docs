@@ -26,7 +26,7 @@
 
 | 今天产生了 | 归到哪 |
 |---|---|
-| 测试脚本、自动化工具 | `$TOOL/TestCase/tools/` 或 `host/<主题>/`，判据写进 `$PROD/docs/tables/TEST-CASES.md` |
+| 测试脚本、自动化工具 | `$TOOL/TestCase/tools/` 或 `host/<主题>/`，判据写进 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md` |
 | 一次性探查脚本，但值得留 | 同上，并补一份 README 说清"验证什么 / 前置 / 判据" |
 | 新的设计决策与否决理由 | `$PROD/docs/tables/DEFERRED-DESIGNS.md` 或对应模块的 Todo 文件 |
 | 新发现的问题 | **按 `$PROD/WHERE-THINGS-LIVE.md` 的六问走** —— 要定的事开票，知道怎么做的进 `$PROD/work/TODO.md`，等外部条件的进 `$PROD/waiting/WAITING-ON.md` |

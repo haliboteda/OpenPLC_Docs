@@ -40,9 +40,9 @@ find . -maxdepth 3 -name .git -not -path '*/node_modules/*'
 <!-- 一张已关的票一行：一句话摘要 + 链接。详情在票里，这里不重复 -->
 
 - [tracker 约定怎么写](issues/MIG-01-tracker-convention.md)：票的头部恰好四个字段，blocking 只写单向，前沿由脚本算且不进 `selfcheck`，关掉的票原地改状态不移走。约定落在 [MAP-AND-TICKET-CONVENTION.md](../MAP-AND-TICKET-CONVENTION.md)
-- [参考层按什么分类](issues/MIG-02-reference-layer-taxonomy.md)：准入判据是「不会因为工作推进而变」，按**问题域**分成八类，总表不拆、状态表拆两半。分类表落在 [REFERENCE-LAYER-TAXONOMY.md](../../docs/REFERENCE-LAYER-TAXONOMY.md)
+- [参考层按什么分类](issues/MIG-02-reference-layer-taxonomy.md)：准入判据是「不会因为工作推进而变」，按**问题域**分成八类，总表不拆、状态表拆两半。分类表落在 [REFERENCE-LAYER-TAXONOMY.md](../../docs/modules/)
 - [已知问题和待立项模块在新框架里住哪](issues/MIG-09-where-do-defects-and-modules-live.md)：「已知问题」不是一类东西，拆成五个去处（票 / 参考层 / `work/` / `waiting/` / 迷雾）。路由表落在 [WHERE-THINGS-LIVE.md](../../WHERE-THINGS-LIVE.md)
-- [三十多份文件逐份定去向](issues/MIG-03-file-by-file-destination.md)：43 份逐一定死，零待定。表落在 [FILE-DESTINATIONS.md](../../docs/FILE-DESTINATIONS.md)
+- [三十多份文件逐份定去向](issues/MIG-03-file-by-file-destination.md)：43 份逐一定死，零待定。表落在 [FILE-DESTINATIONS.md](../../docs/modules/)
 - [关票时怎么强制回答「引出什么新未知」](issues/MIG-08-fog-graduation-on-close.md)：做成 pre-commit 钩子，缺了那一节**提交就过不去**，不是约定里写着。脚本是 [check_wayfinder_ticket_hygiene.py](../../tools/check_wayfinder_ticket_hygiene.py)
 - [「没有去处」怎么报错](issues/MIG-07-no-destination-must-fail.md)：路由表补第六问「跑出来的数据」，并规定**占位符同一行必须指出一张票**，由 [check_no_orphan_placeholders.py](../../tools/check_no_orphan_placeholders.py) 在 pre-commit 上拦住
 - [P7/P8/P9 和 selfcheck 怎么跟着搬](issues/MIG-05-doc-checks-follow.md)：`$PROD` 改指向本仓（不新造变量），脚本各留各家，新增 **P12** 把本仓的检查搬进 `selfcheck`，搬迁顺序定为**加 → 搬 → 减**

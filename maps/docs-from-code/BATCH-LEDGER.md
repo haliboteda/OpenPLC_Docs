@@ -6,7 +6,7 @@
 ## 批 1 · boot（2026-09-16）
 
 ⚠️ **`docs/boot/` 原来只有 `JOURNAL.md` 一份**，所以这一批不是「比对补充」，
-是**从注释里把 boot 的设计文档写出来**。产物：[../../docs/boot/BOOT-SEQUENCE.md](../../docs/boot/BOOT-SEQUENCE.md)。
+是**从注释里把 boot 的设计文档写出来**。产物：[../../docs/modules/M1/BOOT-SEQUENCE.md](../../docs/modules/M1/BOOT-SEQUENCE.md)。
 
 ⚠️ **域分错了要纠正**：语料按目录归的 `boot`，其中 **411 行其实属于 `security`**
 （`owner_slot`、`iap_auth`、`iap_cert`、`fw_verify`、`fw_pubkey`、`iap_keyderive`）——
@@ -52,7 +52,7 @@
 
 | 文件 | 注释行 | 处理 |
 |---|---|---|
-| `IAPServer/iap_auth.{c,h}` | 75 | ✅ **整套挑战应答机制文档里几乎不存在** —— `nonce` 全文只出现过 1 次、`RNG` **0 次**。新建 [../../docs/security/CHALLENGE-AUTH.md](../../docs/security/CHALLENGE-AUTH.md) |
+| `IAPServer/iap_auth.{c,h}` | 75 | ✅ **整套挑战应答机制文档里几乎不存在** —— `nonce` 全文只出现过 1 次、`RNG` **0 次**。新建 [../../docs/modules/M1/CHALLENGE-AUTH.md](../../docs/modules/M1/CHALLENGE-AUTH.md) |
 | `IAPServer/iap_cert.h` | 36 | ✅ 取出：一个镜像要过的两道检查、为什么两条缺一不可、为什么拆成两个函数 → `CHALLENGE-AUTH.md` |
 | `IAPServer/owner_slot.h` | 104 | 🟡 绝大部分 `OWNERSHIP.md` 已有（签名前缀 88、uid 绑板、format_ver、告警判据）。**补了三条**：记录必须是整数个 flash 字（H7 一次编程 256 位）、签 `generation` 是为了挡重放进后面的槽、`format_ver` 从第一版就在是刻意的 |
 | `iapcert/iapcert.go`、`owner.go`、`auth.go` | 124 | 🟡 大部分已有。**补了两条**：签名必须覆盖板子最终写入的确切字节（`uid` 是板子自己填的）、流水号写失败只报警告不当错误 |
@@ -74,7 +74,7 @@
 
 **做法**：在 6,985 行注释里筛出带设计理由信号的段落（`rather than` / `on purpose` /
 `deliberately` / `the point` / `used to` 等），**得到 482 段、分布在 125 个文件**，
-再按主题归并。产物：[../../docs/production/TEST-DESIGN.md](../../docs/production/TEST-DESIGN.md)。
+再按主题归并。产物：[../../docs/engineering/TEST-DESIGN.md](../../docs/engineering/TEST-DESIGN.md)。
 
 收进去的主题：一条判据只存在一份 · 模拟板是真固件编到 PC 上 · 桩要响亮失败 ·
 C harness 为什么不挨着 Go 测试 · 会话参数只在启动时收 · 跑起来要看得见 · 搭台与用例分开 · 面板取舍。

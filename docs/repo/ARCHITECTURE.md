@@ -45,7 +45,7 @@
 - ⚠️ **`$CORE_LIVE` 不在版本控制下。** 验证通过后忘了同步，那段代码就只存在于这一台机器上，重装一次 IDE 就没了。
 - 同步**继续手动做，不自动化**（2026-09-11 定）。兜底是 P3 `$TOOL/TestCase/tools/check_core_sync.py`，提交前跑它。
 
-核对两边是否已同步：`$TOOL/TestCase/tools/check_core_sync.py`（用例 **P3**，发版检查单 B3）。
+核对两边是否已同步：`$TOOL/TestCase/tools/check_core_sync.py`（用例 **P3**，发版检查单 `CHK-B3`）。
 
 它**刻意排除六类**，每一类为什么排除写在脚本自己的 `SKIP` 注释里 —— 那是唯一出处，这里不抄。
 
@@ -86,7 +86,7 @@
 | 3 | 身份字符串格式 `name_uid_role_version` | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`<br>core `libraries/OpenPLC_IAP/src/udp_server.c`<br>tool `IAP_Ether.go` 的 `strings.Split(raw, "_")`、`IAP_CDC.go` | P2 |
 | 4 | SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
 | 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
-| 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | ❌ **没有任何东西在比两份 C。** H2 只编 bootloader 那份。⚠️ 正文目前一字不差，差别只有 `#include` |
+| 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | ❌ **没有任何东西在比两份 C。** T1-16 只编 bootloader 那份。⚠️ 正文目前一字不差，差别只有 `#include` |
 | 7 | 证书线格式（132 字节，签名覆盖前 68） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
 | 8 | owner 记录格式（v2，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
@@ -118,4 +118,4 @@
 
 ## 密钥
 
-签名密钥和固定口令在 bootloader 仓库里，连同它们的注意事项：`$PROD/docs/security/KEYS.md`。
+签名密钥和固定口令在 bootloader 仓库里，连同它们的注意事项：`$PROD/docs/modules/M2-ownership.md`。
