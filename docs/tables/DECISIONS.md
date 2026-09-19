@@ -2216,3 +2216,170 @@ bootloader 自己的 502 字节一个坏字节都没有。
 交接瞬间那两个坏字节是常态，加得越多越容易把有用的信息挤进那个窗口。
 
 **什么情况下重开**：交接时序变了（bootloader 不再在跳转前关收发器），或者有人真的需要那两个字节干净。
+
+---
+
+## 50 · 优先级：M1 / M2 / M3 高，M4 工装中
+
+用户 2026-09-18 定：**「工装的需求优先级全部降为中，boot 和 iaptool、arduino core 相关的需求优先级为高。我们先处理高优先级。」**
+
+用户说的是三样东西（boot、iaptool、arduino core）和一样东西（工装），落到模块上是：
+
+| 模块 | 对应用户说的哪样 | 优先级 |
+|---|---|---|
+| `M1` | boot + iaptool | **高** |
+| `M2` | boot + iaptool | **高** |
+| `M3` | arduino core | **高** |
+| `M4` | 工装 | **中** |
+| 工程约束 | 跟着它服务的那个模块走 | — |
+
+（每个编号是哪个模块、文档在哪，见 [STATUS.md](STATUS.md) 第二节。）
+
+⚠️ **M1/M2 都归「boot + iaptool」是 AI 的读法，用户没有逐模块点名。** 两者的实现都横跨 bootloader 与 `IAPTool`，M2 的信任根验证就跑在 bootloader 里。读法错了在这里改。
+
+⚠️ **「中」不是「不做」。** M4 剩下的活本来就全部卡在硬件工程师的工装使用反馈上，降级不改变那一条 —— 见 [../../waiting/WAITING-ON.md](../../waiting/WAITING-ON.md)。
+
+**什么情况下重开**：硬件工程师的工装反馈到了，或者 M1/M2/M3 这边的高优先级项清空。
+
+---
+
+## 51 · 找板子只用物理网卡，虚拟网卡一律忽略，三平台都要支持
+
+用户 2026-09-18 重申：**「iap 脚本只查物理网卡，忽略其他的」「要兼容 linux 和 mac」**。
+
+**权威实现已经存在**：`$CORE_REPO/tools/discovery/` 的 `isPhysicalInterface()`，它排掉四类
+——没 up 的、回环、**点对点（VPN 的 tun 就是这类）**、没有 MAC 地址的——再交给按操作系统
+分别实现的 `isRealHardwareInterface`（三个 `iface_*.go`）。Windows 那份读的是操作系统自己的
+`MSFT_NetAdapter.Virtual` 标志，**不靠网卡名**，因为 Windows 会把虚拟网卡也重命名成
+`Ethernet 5` 这种，按名字分不出来。分类器取不到结果时**当成真网卡**（fail open），
+宁可多试一个也不要漏掉真网卡。
+
+**2026-09-18 核实：另外两处没有用它。**
+
+| 哪个 | 现状 |
+|---|---|
+| `$TOOL/IAP_Ether.go` 的 `getDirectedBroadcastAddrs()` | 只排 down 和回环，**虚拟网卡照用** |
+| `$TOOL/TestCase/udp_discovery.go` | **一点筛选都没有** |
+
+代价当场付过：这台机器上 `tun0`（VPN）带一条 metric 0 的默认路由，`T1-01` 因此全部超时，
+**看起来像板子不应答**。
+
+**什么情况下重开**：出现一种板子只能经由虚拟网卡到达的部署（例如板子在容器网络或隧道后面）。
+那时它是「默认只用物理网卡，另给一个显式指定网卡的开关」，不是把筛选去掉。
+
+**2026-09-18 补充，用户指出**：这条最初只接进了 `IAPTool` 的**广播发现**函数
+（`getDirectedBroadcastAddrs`）。而 `IAP_Ether.go` 里四个**单播**函数——识别板子状态
+（`sendUDPWithResponseOnPort`）、认证重启（`sendUDPNoResponseOnPort`）、传文件的两条 TCP
+连接（`RunEther_TCP`/`etherPreflight`）——**都没有绑物理网卡，而这四步是每次真实上传都会
+走到的路**，比那次广播函数更常被触发。
+
+**已补齐**：新增 `dialUDPBoard()` / `dialTCPBoard()` 两个共用辅助，四处全部改用它们，
+都调用同一个 `netiface.LocalIPFor()`。**不需要新写平台相关代码** ——
+`netiface` 的三个分类器（`iface_{windows,linux,darwin}.go`）已经覆盖三平台。
+
+**顺带修正了一个协议细节**：`sendUDPWithResponseOnPort` 原来是不连接的 socket
+（绑 `0.0.0.0:0`，`WriteToUDP`/`ReadFromUDP` 各自指定地址），改成连接到具体目标的 socket
+之后，**内核会替它过滤掉不是目标地址发来的回复** —— 这是连带的正确性收益，不是本次的目的。
+
+用真实上传验证过：识别、认证重启、重传确认、传文件，四步全部走过，板子正常启动。
+
+**2026-09-18 再补充**：Python 那三个直接开 socket 的测试脚本
+（`run_au1.py` `run_s4.py` `run_cdc_does_not_start_ethernet.py`）也补了同样的绑定。
+**选的是复用，不是第三份实现**：新增 `$TOOL/TestCase/tools/netifquery/`
+（一个几行的 Go 小程序，`go run` 调用，直接复用 `netiface.LocalIPFor()`），
+`common.py` 新增 `local_ip_for()` 去 `subprocess` 调它。三个脚本改动到位后用真板子逐条验证过。
+
+⚠️ **验证时遇到一次假阴性，记下来避免下次白查**：连续快速重跑探针时板子会返回"不在线"，
+原因是板子自己的**每源限流窗口**（约 2 秒一个源地址一次），不是绑定代码的问题——
+隔开几秒再测，真实应答立刻恢复。
+
+
+## 53 · SDRAM 自检失败的正向验证不追——负向对照 + 报了原因就够
+
+用户 2026-09-18 拍板：**「没有 sdram 真坏了的板子，也不需要，查 sdram 时坏掉就提示，
+没必要过度涉及。」**
+
+`2026-09-18` 已经把 SDRAM 自检的结论接进了上传拒绝消息（`Checksum Failed - SDRAM staging
+buffer failed its self-test`），并验证过负向对照（自检通过时不误报）。**正向对照（真的烧坏一块
+SDRAM 再确认提示出现）不追**——没有坏板子测，也不必为了测它去制造一块坏板子。
+
+## 54 · `RunEther_TCP` 合并成一条 TCP 连接——两条连接的理由已经不在了
+
+用户 2026-09-19 拍板：`R1-07`（同一台主机多个工具不互相打断上传）那段空档，
+按方案 A 处理——合并连接，不为它另立需求。
+
+**这个空档从哪来**：commit `0a970016`（2026-08-15）给以太网通道加了降级确认——
+本地版本低于板子已装版本时要停下来问操作员。**板子会踢空闲连接**，而这个询问可能要
+等人很久才回答，所以不能发生在马上要传文件的那条连接上。于是拆成两条：`etherPreflight`
+先连一次验证signing key、问完就关；`RunEther_TCP` 自己再连一次传文件。中间那段没有
+连接存在的空档就是这么来的——**当时是真实约束，不是随手写的**。
+
+**现在这个约束已经不在了**：`382086d`（"Remove anti-rollback"）把降级版本比对整段删了，
+现在 `etherPreflight` 剩下的 `verifyIdentityMatchesDevice` 只是一次纯网络问答（问板子要
+公钥、比对签名），**代码里不再有任何等人输入的地方**。CDC 通道（`IAP_CDC.go` 的
+`runCDCAttempt`）从来没有这个问题——它一直是一条串口连接从identify 到传完全程不断开。
+
+**已合并**：`RunEther_TCP` 不再调用 `etherPreflight`，改成自己 dial 一次、ping、
+`verifyIdentityMatchesDevice`、再 `sendFile`，和 CDC 通道现在是同一个模式。空档消失。
+
+**2026-09-18 在真板子上重跑 `T1-23` 确认过**：合并后一次真实以太网上传走完，
+`erase happened AFTER verification`，板子重启后正常起了 app。见
+[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) `R1-07` 段落。
+
+**什么情况下重开**：以太网通道再需要一步会等操作员回答的检查时（当年降级确认那类），
+要重新权衡是否要拆连接——那时的约束（板子踢空闲连接）没有变。
+
+## 55 · Arduino core 的 app 尺寸上限对齐到 bootloader 实际能收的大小
+
+用户 2026-09-19 拍板：**「要对齐，因为app有限制。」**
+
+`open_plc_arduino/boards.txt` 原来写 `upload.maximum_size=1966080`（2MB 减一个 flash 扇区），
+注释说这一个扇区是 bootloader 为 metadata/事件日志保留的最后一个扇区。**这个数漏算了一处**：
+bootloader 自己的第一个扇区（`0x08020000` 之前）本来就不给 app 用，app 真正能装的上限是
+`IAP_APP_MAX_SIZE`（`Core/Inc/usbd_cdc_flash.h`：`IAP_STATE_SECTOR_ADDR - IAP_APP_ADDRESS`），
+算出来是 `1835008`，比 `1966080` 少 128 KiB——正好一个扇区。
+
+**后果**：一个介于 1835008–1966080 字节之间的 sketch，Arduino IDE 会说编译通过、能上传，
+但板子拒收，用户看到的是升级失败而不是一个清楚的"太大了"。
+
+**已对齐**：`boards.txt` 的 `upload.maximum_size` 改成 `1835008`，注释改成直接引用
+`IAP_APP_MAX_SIZE` 的定义，不再自己重新推一遍算式。`$CORE_LIVE` 和 `open_plc_arduino`
+两份已同步改（改动方向：live 先改、编过例程、再拷进仓库，见 `ARCHITECTURE.md`）。
+
+**什么情况下重开**：bootloader 侧的 flash 分区（`IAP_APP_ADDRESS` 或 `IAP_STATE_SECTOR_ADDR`）
+挪动时，这个数要跟着重算，不能沿用 `1835008` 这个具体数字。
+
+## 56 · IAP 升级的防重放继续用挑战-应答 + RTC 备份寄存器，不借鉴 KNX 的序列号机制
+
+用户 2026-09-19 拍板：**「那先不管 KNX 的思路了，按现在的方案继续。」**
+
+KNX Data Security 的序列号防重放绑在共享对称密钥上——`securityKey()` 要查到 group/p2p key
+才能验证序列号没被伪造（`open_plc_arduino/libraries/OpenPLC_KNX/src/knx/secure_application_layer.cpp:556`），
+这和「板子上从此不存任何共享密钥」（`docs/modules/M2-ownership.md:391`）直接冲突，照搬等于
+推翻那条已经定下的决定。现有方案（`DR1` 持久计数器 + 一次性消费 + 30 秒 TTL，
+见 `docs/modules/M1/CHALLENGE-AUTH.md`）不动。
+
+**什么情况下重开**：以后要支持多个同时在场的授权客户端各自独立操作时（现在只有
+"单一信任根"这一种模型），KNX 那边"每个发送方单独记一条序列号"的思路才会变得有意义，
+届时值得重新评估。
+
+## 57 · bootloader 和 Arduino core 的 RTC 时钟源必须一致，统一走 LSE
+
+用户 2026-09-19 拍板：两边都用 LSE，**不是**把 bootloader 退回 LSI。
+
+**为什么这条是硬约束，不是偏好**：改 `RCC_BDCR.RTCSEL` 在硬件上要求先复位整个备份域，
+HAL 就是这么做的（`__HAL_RCC_BACKUPRESET_FORCE()`，
+`$BOOT/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c:913-921`）。
+两边选不同的源 ⇒ **每次 bootloader ↔ app 切换都清空 `DR0`–`DR31`**，
+`DR1` 的 nonce 计数器和 `DR3` 的 VBAT witness 一起没。
+2026-09-19 用不断电的对照实验坐实，实验数据在
+`$TOOL/TestCase/acceptance/2026-09-18-boot-iap-full-run.md`。
+
+**选 LSE 不选 LSI**：LSE 那条 2026-09-10 刚定（本表第 36 条），理由是走时精度；
+这个 bug 不构成撤销它的理由，而且 app 侧本来也该和 bootloader 用同一个源。
+
+**LSE 振荡器由谁打开**：bootloader（`$BOOT/Core/Src/main.c:463-466`，`RCC_LSE_ON`）。
+app 侧不自己开 —— `LSEON` 住在备份域里，bootloader 永远先跑，app 拿到手时 `LSERDY` 已经是 1。
+
+**什么情况下重开**：出现一条不经过 bootloader 就能启动的 app 路径时，
+app 侧必须自己开 LSE，否则 `HAL_RCCEx_PeriphCLKConfig` 会等满 `LSE_TIMEOUT_VALUE`（5 s）再报错。

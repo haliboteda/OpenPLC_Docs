@@ -144,7 +144,7 @@ Arduino core 不配这个脚，它停在复位默认值，而**模拟模式断�
 | 时钟源 | `pt.run rtc.read` 回 **`clk=lse`**。⚠️ 这个字段读的是 `RCC_BDCR.RTCSEL`，不是写死的文字 —— 它**曾经**是写死的 `lsi`，换 LSE 那天就变成了谎话 |
 | 走时 | **RTC 走 180 s，PC 时钟走 180.0 s**。⚠️ RTC 只报到秒，所以这只能说明「误差 < 1 s / 180 s」。**够用了** —— LSI 的 ±5% 在 180 s 上是 ±9 s，一眼就能看出来，而这里看不出来 |
 | 起振 | **没有 5 秒停顿。** 复位后板子立刻出 banner。晶振要是没起振，`HAL_RCC_OscConfig()` 会阻塞到 `LSE_TIMEOUT_VALUE`（5000 ms） |
-| 掉电保持 | 重新烧录之后 RTC 接着走（`time=00:01:57`），**BAT1 备份电池在工作** |
+| 掉电保持 | ⚠️ **这条原先写的"BAT1 备份电池在工作"不准。** 当时测的是"重新烧录之后 RTC 接着走"（`time=00:01:57`），但 ST-Link 烧录全程没断电，测不出电池有没有在撑。**真正的断电测试是 `T1-17`（2026-09-18，ST-Link 量到 0.00V 的真断电）**：备份域丢了——拔电前计数器 18，拔电后掉到 2，8 个 nonce 全部撞上之前用过的值，连测三次结论一致。**2026-09-19 定案：跟电池无关，是固件自己清的。** 用户万用表实测 `BAT1` 两端 **2.97V**（`VL1220/1HF` 标称 3.0V，电池在位且有电）；同日做了不断电的对照实验 —— bootloader 选 LSE（`$BOOT/Core/Src/rtc.c:74`）、Arduino core 选 LSI（`$CORE_REPO/libraries/SrcWrapper/src/stm32/rtc.c:73`），**每次 bootloader ↔ app 切换 `RTCSEL` 都翻转，HAL 就强制复位整个备份域**，`DR1`–`DR31` 全清。**2026-09-19 已修**：core 侧改成 LSE，一次完整往返里 `DR1` `DR2` `DR3` 全保住，bootloader 打 `Backup domain retained`；决定见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md)。**`T1-17`（nonce 跨掉电不重复）2026-09-19 真断电验收通过** —— ST-Link 量到 0.00V 的真断电，断电前计数器 11、断电后从 13 续，16 个 nonce 全不同。**备份电池一直是好的。**固件那句 `RTC battery absent or empty` 也已改掉（`$BOOT/IAPServer/iap_auth.c:162`），它曾把软件问题报成硬件问题。实验数据见 `IAPTranfer_Tool/TestCase/acceptance/2026-09-18-boot-iap-full-run.md` |
 
 ## SRAM4 的 no-init 机制
 
