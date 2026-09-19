@@ -182,7 +182,7 @@
 
 | 事实 | 图里在哪 | 该进哪 |
 |---|---|---|
-| nonce 的 **TTL 30 秒** | 流程 A ② · 参2 · 参9 | CHALLENGE-AUTH.md 通篇没有 TTL 这个概念，只说「一次性消费」→ M1 |
+| nonce 的 **TTL 30 秒** | 流程 A ② · 参2 · 参9 | CHALLENGE-AUTH.md 通篇没有 TTL 这个概念，只说「一次性消费」→ M1。✅ **2026-09-19 已补**，见 `docs/modules/M1/CHALLENGE-AUTH.md` |
 | **全局单 nonce**：CDC 和以太网并发请求挑战会互相冲掉，**是可用性怪癖不是安全洞** | 参4 · 参9（均注 `SECURITY.md:127-136`） | CHALLENGE-AUTH.md 没有 → M1 |
 | 签名消息的确切字节：`sha256(nonce ‖ "flash <size> <crc32hex> <signature_hex>")`，命令文本逐字节重建 | 参9 | CHALLENGE-AUTH.md 只说「命令原文」→ M1 |
 | BOOT0 **30 秒卡键上限**（超时判卡键，退回 UPLOAD 模式） | 流程 E · 参10 | OWNERSHIP.md:275「定下来的取舍」只写了 10 秒 → M2 |

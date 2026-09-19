@@ -73,7 +73,7 @@
 2. **改动了下表任何一处，当场问用户要不要同步其余位置** —— 不要自行决定。
 3. **不做共享文件**（submodule / 生成拷贝那类），2026-09-16 明确放弃。
 
-**下表 22 个位置 2026-09-16 逐个核实过，全部存在。** "core" 指 `$CORE_LIVE` 和
+**下表第 1–9 条的 22 个位置 2026-09-16 逐个核实过，第 10 条 2026-09-18 新增并核实。** "core" 指 `$CORE_LIVE` 和
 `$CORE_REPO` 两份（先改前者，验证过再同步到后者）。
 
 「谁在查」一栏是实测的，不是推测 —— 跑 `$TOOL/TestCase/tools/check_mirror_sync.py`（用例 **P2**），
@@ -90,8 +90,9 @@
 | 7 | 证书线格式（132 字节，签名覆盖前 68） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
 | 8 | owner 记录格式（v2，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
+| 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
-> ✅ **9 条里 7 条 P2 真的在查，第 6 条完全没查，第 9 条只查一半。**
+> ✅ **10 条里 8 条 P2 真的在查，第 6 条完全没查，第 9 条只查一半。**
 > 所以「只能靠注释约束」这个旧说法对多数条目已经不成立 —— **但第 6、9 两条仍然只靠人。**
 
 ### RTC 备份寄存器分配表
