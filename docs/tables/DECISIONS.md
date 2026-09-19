@@ -1652,7 +1652,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**硬件本来就齐**：晶振 **XTAL2**（ABS07 系列，Bridge 板顶层，在贴片坐标里）、备份电池 **BAT1 = VL1220/1HF**。固件从来没用上 —— Core/Src/rtc.c:74（`$BOOT/Core/Src/rtc.c`） 写死 `RCC_RTCCLKSOURCE_LSI`，`.ioc` 里 LSE 压根没打开（`RCC.RTCFreq_Value=32000` 是 LSI 的值）。
+**硬件本来就齐**：晶振 **XTAL2**（ABS07 系列，Bridge 板顶层，在贴片坐标里）、备份电池 **BAT1 = VL1220/1HF**。固件当时没用上 —— 改之前 Core/Src/rtc.c:74（`$BOOT/Core/Src/rtc.c`） 写死 `RCC_RTCCLKSOURCE_LSI`，`.ioc` 里 LSE 压根没打开（`RCC.RTCFreq_Value=32000` 是 LSI 的值）。
 
 
 
