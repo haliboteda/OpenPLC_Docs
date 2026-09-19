@@ -2365,21 +2365,13 @@ KNX Data Security 的序列号防重放绑在共享对称密钥上——`securit
 
 ## 57 · bootloader 和 Arduino core 的 RTC 时钟源必须一致，统一走 LSE
 
-用户 2026-09-19 拍板：两边都用 LSE，**不是**把 bootloader 退回 LSI。
+用户 2026-09-19 拍板：两边都用 LSE，不是把 bootloader 退回 LSI。
 
-**为什么这条是硬约束，不是偏好**：改 `RCC_BDCR.RTCSEL` 在硬件上要求先复位整个备份域，
-HAL 就是这么做的（`__HAL_RCC_BACKUPRESET_FORCE()`，
-`$BOOT/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c:913-921`）。
-两边选不同的源 ⇒ **每次 bootloader ↔ app 切换都清空 `DR0`–`DR31`**，
-`DR1` 的 nonce 计数器和 `DR3` 的 VBAT witness 一起没。
-2026-09-19 用不断电的对照实验坐实，实验数据在
+**理由**：改 `RCC_BDCR.RTCSEL` 会强制复位整个备份域（HAL 的 `__HAL_RCC_BACKUPRESET_FORCE()`），
+两边选不同的源就会在每次 bootloader ↔ app 切换时清空 `DR0`–`DR31`，
+`DR1` 的 nonce 计数器一起没。实测证据在
 `$TOOL/TestCase/acceptance/2026-09-18-boot-iap-full-run.md`。
 
-**选 LSE 不选 LSI**：LSE 那条 2026-09-10 刚定（本表第 36 条），理由是走时精度；
-这个 bug 不构成撤销它的理由，而且 app 侧本来也该和 bootloader 用同一个源。
-
-**LSE 振荡器由谁打开**：bootloader（`$BOOT/Core/Src/main.c:463-466`，`RCC_LSE_ON`）。
-app 侧不自己开 —— `LSEON` 住在备份域里，bootloader 永远先跑，app 拿到手时 `LSERDY` 已经是 1。
-
-**什么情况下重开**：出现一条不经过 bootloader 就能启动的 app 路径时，
-app 侧必须自己开 LSE，否则 `HAL_RCCEx_PeriphCLKConfig` 会等满 `LSE_TIMEOUT_VALUE`（5 s）再报错。
+**什么情况下重开**：出现一条不经过 bootloader 就能启动的 app 路径时 ——
+LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:463-466`），app 侧不自己开，
+否则 `HAL_RCCEx_PeriphCLKConfig` 会等满 5 秒再报错。
