@@ -420,9 +420,14 @@ sketch 打 `RESULT <名字> PASS|FAIL` 和 `MEASURE <名字> <数>`，脚本按�
 ## T1-21 / T1-22 · 掉电中断，怎么跑
 
 ```bash
-python3 tools/run_s4.py --case a --bin <app.bin> --pad-to 1200000
-python3 tools/run_s4.py --case b --bin <app.bin> --retry 3
+python3 tools/run_s4.py --case a --bin <app.bin> --pad-to 1835008 --retry 3
+python3 tools/run_s4.py --case b --bin <app.bin> --pad-to 1835008 --retry 3
 ```
+
+⚠️ **`--pad-to` 两条都要，而且要补到 app 区上限 1835008。** 不补零时窗口只有几秒，
+人抓不住；补满之后传输窗口约 34 秒、擦写窗口约 20 秒。**旧写法给 `T1-21` 写 1200000、
+给 `T1-22` 完全不写，两个都不够** —— 脚本自己的文件头就写着 1200000 对擦写窗口太短。
+2026-09-18 实测：补到 1835008，`T1-21` 一次命中，`T1-22` 第三次命中。
 
 | | |
 |---|---|
@@ -430,7 +435,53 @@ python3 tools/run_s4.py --case b --bin <app.bin> --retry 3
 | **判据 T1-22** | 擦写窗口内断电 → 上电报 `App signature invalid or absent`，**且重传一次能恢复** |
 | **窗口锚点** | `Staging in SDRAM` 之后 / `Erasing application region` 之前 = T1-21；`Erasing application region` 之后 = T1-22。字符串对齐 `open_plc_cube_ide/IAPServer/IAP_server.c` |
 
+## T1-27 · 按住 BOOT0 强制进上传模式，怎么跑
+
+```bash
+python3 tools/run_boot0_upload_mode.py --ports COM5
+```
+
+脚本只捕获日志并判定，**一次复位都不发**。整个手势由人做：
+
+1. 按一下复位键并松开
+2. **一听到继电器咔哒声就按住 BOOT0**
+3. 咔哒声停了再按约两秒，然后松开
+
+| | |
+|---|---|
+| **判据** | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` |
+| **为什么复位不能由 ST-Link 驱动** | BOOT0 是**启动模式引脚**。按住它的时候复位，芯片去启动 ST 自带的 DFU，我们的 bootloader 根本不执行 —— 串口全程静默，USB 上出现 `DFU in FS Mode`，要等下一次「BOOT0 为低」的复位才退出。2026-09-18 这么试了 11 次，每次都报「没按」，而板子其实在 DFU 里 |
+| **为什么用咔哒声当信号** | `Core/Src/main.c` 的 `boot_window_relay()` 把三个继电器各拨 500 ms 并全程轮询 BOOT0，**那 1.5 秒的响声就是窗口本身**。PC 这边看不见它 |
+| ⛔ **破坏性** | 长按超过 10 秒会**武装恢复出厂，松手就执行**。而这条用例需要长按，两者分不开。**在已认领的板子上跑会抹掉 owner 密钥** |
+
+## T1-28 · journal 扇区满了能回收，怎么跑
+
+```bash
+python3 tools/run_journal_reclaim.py --bin <app.bin>
+python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
+```
+
+| | |
+|---|---|
+| **判据** | 灌满后板子报 `N/4096 journal slots used`；一次上传后日志出现 `Reclaiming state sector (<n> slots discarded)`；**且板子照常启动 app** |
+| **为什么不能靠反复上传灌满** | 一次上传只占 9 槽，4096 槽要约 390 次上传、大半天 |
+| **为什么必须整片读回来再整片写回去** | 扇区里存着当前 app 的 metadata（签名和证书**伪造不了**），而 `STM32_Programmer_CLI` 写之前会擦整个扇区 |
+| **留的空槽必须少于 9** | 回收只发生在写 metadata 的那一刻，而一条 metadata 占 9 槽 |
+
 ## 未覆盖
+
+## R1-31 · 备份域失效能被发现：已实地验证，没有脚本
+
+**没有专门的脚本，也不打算写** —— 2026-09-19 排查 `T1-17` 时正负两个方向都真实触发过，
+证据比脚本更硬。判据在 `$BOOT/IAPServer/iap_auth.c` 的 `iap_auth_report_backup_domain()`。
+
+| 方向 | 怎么出现的 | bootloader 打的 |
+|---|---|---|
+| 域丢了 | witness 写进去之后被 app 清掉（当时两边 RTC 时钟源不一致） | `** Backup domain was lost ... **` + `Nonce counter is zero` |
+| 域还在 | 时钟源统一之后 | `Backup domain retained, nonce counter = 1` |
+
+⚠️ **要再现得自己制造一次备份域丢失。** core 自带 `resetBackupDomain()`
+（`$CORE_REPO/cores/arduino/stm32/backup.h`）能清整个域，不必拆电池。
 
 **完整的覆盖矩阵和每条待补用例的设计骨架在 [docs/STATUS.md](../tables/STATUS.md)**，这里只留摘要：
 

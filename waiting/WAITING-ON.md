@@ -30,7 +30,11 @@
 | 电荷泵没塌完，DeInit 把 PC10 放浮空 | bootloader 里 `Disable_RX_RS232()` 后插 20 ms → 坏字节不变 |
 | 冷启动会丢 | 真断电上电（POR）→ 照样出，逐字节相同 |
 
-**建议下一步**：**拿万用表量 app 跑起来时 PB10 的实际电平。**
-现在有一条矛盾没解开 —— bootloader 交出去前把 PB10 拉低，core 也只 `pinMode(OUTPUT)` 没写高，
-按 `$PROD/docs/hardware/HARDWARE-FACTS.md` 的「PB10 拉低 = 整片关断」，app 的输出不该出得来，可它出来了。
-**这条矛盾指向硬件事实文档里可能有一条不准，比那两个字节重要。** 读代码定不了，要量。
+**2026-09-19 量过了，硬件事实文档没错。** app 跑起来时 `PB10` 实测为**低**
+（`GPIOB_IDR` bit10 = 0，ST-Link 读的是引脚实际电平，不用万用表；同一读法在 bootloader 下读到高，
+可作对照）。收发器确实是关断的 —— `[BOOT]` / `[NET]` 两行出得来是电荷泵余电，
+而 sketch 自己每秒一次的 `IAP_PROBE_APP alive` **一行都没出来**。
+
+⚠️ **还差一步才算坐实**：现在无法区分「sketch 在跑但输出被挡」和「sketch 根本没跑」。
+要一个主动 `digitalWrite(RS232_EN_Pin, HIGH)` 的 sketch，看 `alive` 是否随之出现。
+（ST-Link 直接写 `GPIOB_ODR` 更快，但写内存被权限策略拦下。）
