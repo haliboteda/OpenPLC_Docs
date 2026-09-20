@@ -313,6 +313,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ |
 | `P13` | `tools/check_no_stale_ids.py` | 改过名的编号没有残留引用 | ✅ |
 | `P14` | `tools/check_changelist_has_no_orphans.py` | **没做完的活不许只活在某张图的 `CHANGE-LIST` 里** —— 每份 `CHANGE-LIST` 要有横幅说明未完成的块搬去了哪，且 `work/TODO.md` 里找得到 | ✅ |
+| `P15` | `host/vector_alignment/build.py` | **app 的起始地址必须是 1024 的倍数**。正：当前 `build.flash_offset` 编得过；**反：传 `0x20200` 必须链接失败**，且错误里点名对齐。需要 arduino-cli | ✅ |
 | `P16` | `tools/check_icache_is_restored.py` | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ |
 
 ⚠️ **这张表和 `selfcheck.py` 的 `CATALOG` 现在由 `P7` 对账**（2026-09-21 补的第三头）。
