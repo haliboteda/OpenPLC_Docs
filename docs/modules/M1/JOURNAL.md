@@ -1,5 +1,10 @@
 # Journal 设计说明
 
+> ⚠️ **这份文件已定废弃，但还没删 —— 下面写的是 2026-09-20 当天的真实行为。**
+> metadata 要搬进 app 镜像开头的 header，八种事件日志要**全部删除**，这个扇区不再参与启动判定。
+> 决定和进度在 [metadata 从 journal 扇区搬进 app 头部](../../../maps/app-header-replaces-journal/map.md)。
+> **代码尚未改动**，所以这份文件仍然是当前实现的准确描述，照着它查问题不会错。
+
 Bootloader 用来回答一个问题的机制：**flash 里那个 app，能不能跑？**
 
 代码在 `IAPServer/bootloader_state.{c,h}`，判定链在 `IAPServer/IAP_server.c` 的 `server_decide()`。

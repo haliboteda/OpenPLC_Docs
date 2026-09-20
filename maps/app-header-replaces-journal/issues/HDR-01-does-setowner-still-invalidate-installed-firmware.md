@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-20
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -37,3 +37,31 @@ Blocked by: -
 3. 如果「能」（改成只管未来）：**点名哪几条用例要重写判据** —— 至少要核对 `T2-03`（换 owner：现任签名才算数）和
    [`$TOOL/TestCase/tools/run_claim_invalidates_existing_app.py`](../../../../IAPTranfer_Tool/TestCase/tools/run_claim_invalidates_existing_app.py)
    这个脚本（它的名字就写着「认领会作废已装 app」）
+
+## Answer
+
+2026-09-20 定
+
+**换主之后旧根签的固件不能启动，停在 bootloader。维持今天的行为，不跟撤销走同一个语义。**
+
+> **完整论述、两条语义为什么故意不一致、要改哪一行代码、哪条用例判据反转，全部在
+> [`DECISIONS.md` 第 60 条](../../../docs/tables/DECISIONS.md)。**
+> 那是项目级决策的唯一出处，这里不抄。
+
+下面只写**这张票特有的那部分** —— 这个答案对 header 布局意味着什么。
+
+**header 布局的直接后果**：仍然存**整张 `cert`（128 字节）**，不需要额外存「安装时那把根」—— 因为要验的就是当前根。
+`app_size`(4) + `signature`(64) + `cert`(128) = 196 字节不变。
+
+**判据不受影响的**：`T2-03`（换 owner：现任签名才算数）、
+[`run_claim_invalidates_existing_app.py`](../../../../IAPTranfer_Tool/TestCase/tools/run_claim_invalidates_existing_app.py)
+（认领会作废已装 app）—— 今天的行为保留，两条照旧。
+
+## 引出了什么新的未知
+
+一条：**文档里要把「撤销不作废、换主作废」这个差异讲清楚**，否则下一个人会当成 bug 来「修」。
+
+✅ **2026-09-20 当天就落了，不用等 header 定稿**：[`DECISIONS.md` 第 60 条](../../../docs/tables/DECISIONS.md)
+写完整论述，`M2-ownership.md` 的 `R2-04` 说明段和 `T2-15` 行各留一句加链接。
+**提前落是因为 `T2-15` 刚在真板子上验收通过，另一个会话正在照旧语义继续干活** ——
+文档是权威，不落盘它就会照旧状态往下做。

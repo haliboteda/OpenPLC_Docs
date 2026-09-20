@@ -12,13 +12,30 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 哪张票 |
 |---|---|---|
-| 1 | **换主之后旧根签的固件还能不能启动** | [换主之后，旧根签的固件还能不能启动](issues/HDR-01-does-setowner-still-invalidate-installed-firmware.md) |
-| 2 | **八种事件日志留不留、留的话住哪** | [八种事件日志留不留，留的话住哪](issues/HDR-02-do-the-event-logs-survive.md) |
-| 3 | 让出来的 128 KiB 给谁 | [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md) |
-| 4 | header 里放什么、什么布局 | [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md) |
-| 5 | 发布和现场迁移怎么走 | [这次变更怎么发布，现场的板子怎么迁移](issues/HDR-06-how-does-this-ship-and-migrate.md) |
+| 1 | **header 分几段** —— 两段式（都在开头）还是 MCUboot 式三段（header 前 / 签名后）。⚠️ **这条决定将来能不能加防回滚和 SBOM** | [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md) |
+| 2 | 发布和现场迁移怎么走 | [这次变更怎么发布，现场的板子怎么迁移](issues/HDR-06-how-does-this-ship-and-migrate.md) |
 
 **还要你动一次手**：[VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md) 要在真板子上验一次跳转。
+
+> 2026-09-20 已关掉三张：换主语义、日志去留、扇区归属。
+
+## header 现在长什么样（低分辨率，详情在票里）
+
+**已经定死的**：
+
+| 字段 | 字节 | 为什么必须 |
+|---|---|---|
+| `app_size` | 4 | 定哈希范围。不记它就必须每次全擦 app 区 |
+| `signature` | 64 | 对 app 内容的背书 —— **公钥本身验证不了任何东西** |
+| `cert` | 128 | 证明该用哪把公钥验，且那把公钥被根认可 —— **只缓存叶公钥不安全** |
+| **合计** | **196** | |
+
+**header 的总大小由 VTOR 对齐决定，不由内容决定** —— 推导值 **1024 字节**（H743 最大中断号 149 ⇒ 向量表 664 B ⇒ 向上取整到 2 的幂）。也就是说**约 828 字节是 padding**，实测确认在 [VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md)。
+
+**还没定的**（都在 [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md)）：分几段、要不要 magic、要不要 `format_ver`、padding 填什么、哈希范围的两端、要加哪几条 `_Static_assert`。
+
+⚠️ **那 828 字节 padding 能放什么，判据是一句话**：**这个数据和这份固件是不是同生共死？**
+是 → 可以进 header（版本号、构建时间、SBOM 哈希）；不是 → 必须住扇区 15（校准值、防回滚计数器）。
 
 ## Destination
 
@@ -70,7 +87,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 | 同上，写入流程图 | `追加 M 记录（8格）` | `journal_write(&rec, 7)` | 同上 |
 | 同上，写入流程图 | `剩余格子 < 8` | `journal_room() < 7` | 同上。⚠️ **这处有实际后果**：剩正好 7 格时代码直接追加，追加完剩 0 格，那条 `UPDATE_OK` 日志写不进去 |
 | `$BOOT/IAPServer/bootloader_state.h` 头部注释 | journal 满状态 "reported at boot and **in the identity string**" | `iap_identity_string()` 只看 `app_is_valid`，**identity 里没有** | 本图（[八种事件日志留不留](issues/HDR-02-do-the-event-logs-survive.md) 会重写这段） |
-| ⚠️ [`M2-ownership.md`](../../docs/modules/M2-ownership.md) `R2-04` 旁注 | 「**状态仍是 ⬜ —— 设计定了，代码一行还没写**」 | 撤销已实现（commit `294fb20`），`T2-15`–`T2-18` **2026-09-20 真板子通过**，同一份文档第 485 行自己记着 | ❌ **不属于本图** —— 是 [撤销叶证书 + bootloader 原地升级](../owner-revoke-and-boot-upgrade/map.md) 的遗留。**这处会让人以为撤销还没实现** |
+| ~~[`M2-ownership.md`](../../docs/modules/M2-ownership.md) `R2-04` 旁注~~ | ~~「状态仍是 ⬜ —— 代码一行还没写」~~ | 撤销已实现（commit `294fb20`） | ✅ **另一个会话 2026-09-20 17:5x 正在改，已在工作区**（未提交）。不属于本图，**本图不要碰它** |
 
 ## Decisions so far
 
@@ -88,10 +105,18 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 **以下两条 2026-09-20 由用户拍板，同样没有票：**
 
 - **选 S-e：header 放 app 镜像开头** —— 相比放尾部（S-a），它**不需要额外擦一个 128 KiB 扇区**，也没有「忘记擦」这个坑，代价是要改 `build.flash_offset`（一个数字）并因 VTOR 对齐浪费约 800 字节
+- **S-e 的安全模型不比今天差** —— 锚没动（`cert.root_sig` 仍验 `owner_slot_root()`，那把根在 owner 区，既不在 app 区也不在 journal 扇区）。逐项比过：物理接触者两者都挡不住（一样的路）；走 IAP 上传两者同一段代码；**唯一有差别的「app 提权改 flash」路径上，门槛同样是「造不出 `root_sig`」**；降级攻击两者都不挡（`a92a8c7` 早已移除 anti-rollback）。**S-e 还消除了「认哪一条 metadata」的歧义**（位置唯一，不像 append-only 要认物理最后一条）。失去的是取证历史，而那个能力已核实零读出路径。⚠️ **唯一新增的是一类实现风险** —— 哈希起点算错会让向量表开头漏出签名覆盖，详见 [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md)，那张票要产出编译期约束来兜住
 - **撤销只管未来** —— 叶 a 被撤销后，**已经装在板子上的、a 签的固件照常启动**；a 再上传仍然被拒。理由：`R2-04` 记录在案的需求是「员工离职换人」（持证几人到十几个，换人频率不定），离职一个同事不该让他经手过的板子集体停机。⚠️ **`T2-15`（撤销回溯作废已经装上的固件）判据要重写**，它 2026-09-20 刚在真板子上通过
+
+**以下两条有自己的票：**
+
+- [换主之后，旧根签的固件还能不能启动](issues/HDR-01-does-setowner-still-invalidate-installed-firmware.md)：**不能，停在 bootloader —— 维持今天的行为，不跟撤销走同一个语义**。两者问的不是同一个问题：撤销问「这个人还值不值得信」，换主问「这块板还是不是你的」。header 因此仍存整张 `cert`，196 字节不变
+- [八种事件日志留不留，留的话住哪](issues/HDR-02-do-the-event-logs-survive.md)：**全删，连 `JOURNAL.md` 一起删**。「日志满了靠什么回收」这个问题随之消失；state 扇区**完全**空出来，不是部分
+- [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md)：**留给 bootloader 侧，归校准值**。不是「放这儿方便」，是排除法之后的唯一去处 —— 板上**没有 EEPROM**、microSD 可拔插、RTC 备份寄存器会随电池丢失且撞过车、app 区和 header 每次升级被擦重写。附带解掉第 45 条那个「reclaim 搬运校准值、掉电就丢」的既存冲突。⚠️ **本票不改 `IAP_APP_MAX_SIZE`** —— 它会因 header 而变，那是另一张票的事，别重复改
 
 ## Not yet specified
 
+- **`AUTH_FAIL` 的 RAM 环形缓冲要不要一起删** —— `s_auth_fail[32]` 和 `bootloader_state_note_auth_fail()` 不占 flash（刻意 RAM-only，防止未认证调用者磨损扇区），但它的两个读取函数同样**零调用者**。按「日志全删」的口径该删，但它和 flash 日志不是同一个东西，**属于清理死代码，要单独确认**
 - **`R1-32`（任何丢包 / 拒绝路径都能说出自己为什么）在新结构下还成不成立** —— 现在「板子起不来怎么查」那张八行索引表里，`metadata absent`（出厂空板）和 `App signature invalid`（装过但上次失败）是两行；header 跟 app 一起被擦之后这两行会塌缩成一个现象。**其余六行不受影响**。要等 `HDR-05` 定了 header 布局（有没有 magic、magic 能不能区分「从没写过」和「写了一半」）才说得清
 - **`P2`（跨仓镜像没分叉）要不要把 `build.flash_offset` 纳进去** —— 它现在守的是 owner 记录和证书那几份镜像。app 起始地址变成三处共识之后，谁来保证它们不分叉还没定
 - **bootloader 自己要不要也带 header** —— 本图只管 app。`flashboot` 原地升级（另一张图）落地后，bootloader 镜像自己的完整性怎么证，可能会回头影响这里的格式选择
