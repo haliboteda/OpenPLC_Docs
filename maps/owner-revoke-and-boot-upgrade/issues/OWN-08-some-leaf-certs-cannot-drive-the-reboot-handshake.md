@@ -172,3 +172,32 @@ UDP 包跨 pbuf 段、app 处理长包时崩溃、app 重启但没进 bootloader
 
 **主路径已经反复实测正常**，最早那两次再没复现过。
 继续猜是浪费——这张票等它**自己再出现**，到时候探针会当场告诉我们是哪一种。
+
+
+## 2026-09-21 第四轮：今天这次完全解释清楚了，但票先不关
+
+**今天的失败是拿错钥匙，不是缺陷。** 板子昨天被 `Output/revoke-run/owner_r3.pem` 认领
+（`getowner` 回「Claimed at generation 4」，公钥逐字节相同），而 `tools/enter_bootloader.py`
+调的是 `IAPTool ether <big> <ip>`，**不传 `--key`** —— 用默认那把公开根签的证书，板子正确拒绝。
+换成 `--key=owner_r3.pem` 之后一次就进了 bootloader。
+
+**证据链**（探针带 `udp_server.c` 自带计数，`printf` 已通）：
+
+| 观察 | 值 |
+|---|---|
+| 收包计数 | `len=31`（challenge）→ **`len=407`（重启命令，完整）** |
+| 407 的构成 | `21 + 1 + 256 + 1 + 128`，和 `IAP_Ether.go:301` 拼的串一致 |
+| app 打的那行 | **`Rejected unauthenticated openplc_server_reboot request`** |
+
+⚠️ **上一轮记的「一个字都没打印」是错的** —— 那是抓日志时只 grep 了 `udp rx=`，
+把这行滤掉了。板子一直在说原因。据此，`sscanf` 返回的是 2，**分支进去了，是验签没过**，
+主机上拿同样的 407 字节跑同一个 `sscanf` 也返回 2。
+
+**为什么不关**：本票最早的观察是「**同一把根签发的两张叶**，一张行一张不行」。
+今天解释的是「根本就不是那把根」。两者不是同一个现象，**旧观察仍未复现、也仍未解释**。
+
+### 该改的东西
+
+`enter_bootloader.py` 对**已认领的板子**无效，而它自己的文档没说这件事。
+要么加 `--key` 透传，要么在板子已认领时给出可操作的报错，而不是「board does not appear
+to be in the bootloader」。已记进 `work/TODO.md`。

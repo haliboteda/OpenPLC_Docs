@@ -2,7 +2,7 @@
 
 Type: task
 Opened: 2026-09-20
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -68,3 +68,35 @@ H743 最大中断号 WAKEUP_PIN_IRQn = 149          （Drivers/CMSIS/.../stm32h7
 
 > 对照参考：`ref/Hello_World_OpenPLC/Core/Src/system_stm32h7xx.c` 是「app 侧 VTOR 怎么设」的现成样例，
 > **它是对照不是权威，不要改它**。
+
+
+## Answer
+
+2026-09-21 定。**header 取 1024 字节。** 硬件强制的是 **128 字节**（实测），
+1024 来自架构规则「对齐 ≥ 向量表长度取整到 2 的幂」，664 → 1024。
+
+真板子实测（`python tools/run_vtor_alignment.py --key <owner.pem>`）：
+
+| 写进 `SCB->VTOR` 的位 | 读回 | 结论 |
+|---|---|---|
+| bit0 / bit4 / bit6 | 被硬件丢掉 | 不实现 |
+| **bit7 / bit8 / bit9** | 原样保留 | 实现 |
+
+⇒ **最低实现位是 bit7，`TBLOFF = bit[31:7]` 成立** —— 和 `core_cm7.h` 一致，
+这条从此不再靠抄件。同一次跑还确认 **bootloader 交给 app 的 `SCB->VTOR` 就是 `0x08020000`**。
+
+⚠️ **1024 这一半仍未实测**，而且做不到：违反架构约束的后果是 UNPREDICTABLE，
+板子跑得起来也不算证据。要么查 ARMv7-M 架构手册原文，要么按规则取 1024 —— **本票按后者定案**。
+
+⚠️ **没有任何构建期防线守着这个对齐**：`$CORE_REPO/variants/STM32H7xx/H743/ldscript.ld:61-66`
+对 `.isr_vector` 只有 `ALIGN(4)`，全靠 `build.flash_offset` 这一个数字碰巧是对的。
+
+## 引出了什么新的未知
+
+**两条。**
+
+1. **给 `build.flash_offset` 加链接期对齐断言** —— 见上，header 改成非 1024 的值时链接器
+   一声不吭，而后果是跳转后跑飞。已在 `work/TODO.md`（计划编号 `P15`）。
+2. **票里担心的 `VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET` 是假警报** —— 那段被
+   `#if defined(USER_VECT_TAB_ADDRESS)` 包着，而那个宏在两份 core 里只出现在注释里，
+   app 的 VTOR 实际由 bootloader 一处纯赋值设定（`$BOOT/IAPServer/IAP_server.c:749`）。**不用再查。**

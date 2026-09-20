@@ -113,6 +113,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 - [换主之后，旧根签的固件还能不能启动](issues/HDR-01-does-setowner-still-invalidate-installed-firmware.md)：**不能，停在 bootloader —— 维持今天的行为，不跟撤销走同一个语义**。两者问的不是同一个问题：撤销问「这个人还值不值得信」，换主问「这块板还是不是你的」。header 因此仍存整张 `cert`，196 字节不变
 - [八种事件日志留不留，留的话住哪](issues/HDR-02-do-the-event-logs-survive.md)：**全删，连 `JOURNAL.md` 一起删**。「日志满了靠什么回收」这个问题随之消失；state 扇区**完全**空出来，不是部分
 - [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md)：**留给 bootloader 侧，归校准值**。不是「放这儿方便」，是排除法之后的唯一去处 —— 板上**没有 EEPROM**、microSD 可拔插、RTC 备份寄存器会随电池丢失且撞过车、app 区和 header 每次升级被擦重写。附带解掉第 45 条那个「reclaim 搬运校准值、掉电就丢」的既存冲突。⚠️ **本票不改 `IAP_APP_MAX_SIZE`** —— 它会因 header 而变，那是另一张票的事，别重复改
+- [VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md)：**header 取 1024**。真板子实测硬件只强制 128（`TBLOFF = bit[31:7]` 坐实），1024 来自架构规则「对齐 ≥ 向量表长度取整到 2 的幂」，664 → 1024，**那一半测不了也不必测**
 
 ## Not yet specified
 
