@@ -87,8 +87,8 @@
 | 4 | SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
 | 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
 | 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | ❌ **没有任何东西在比两份 C。** T1-16 只编 bootloader 那份。⚠️ 正文目前一字不差，差别只有 `#include` |
-| 7 | 证书线格式（132 字节，签名覆盖前 68） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
-| 8 | owner 记录格式（v2，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
+| 7 | 证书线格式（128 字节，签名覆盖前 64） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
+| 8 | owner 记录格式（v3，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 

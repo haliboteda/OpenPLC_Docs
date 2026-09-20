@@ -183,29 +183,25 @@ flowchart TD
 
 **都是固定偏移，没有 parser。**
 
-`iap_cert_t` · **132 字节**：
+`iap_cert_t` · **128 字节**：
 
 | 偏移 | 长度 | 字段 |
 |---|---|---|
 | 0 | 64 B | `leaf_pubkey` |
-| 64 | 4 B | `serial`（u32 LE） |
-| 68 | 64 B | `root_sig` —— 根对 `sha256(前 68 字节)` 的签名 |
+| 64 | 64 B | `root_sig` —— 根对 `sha256(前 64 字节)` 的签名 |
 
-`IAP_CERT_SIGNED_LEN = 68`。**自签证书固定用 `0xFFFFFFFF`，不吃号** —— 编号存在的意义是「将来能被撤销点名」，而根没法把自己撤销掉。
+`IAP_CERT_SIGNED_LEN = 64`。**撤销按叶公钥点名，不按流水号** —— 见 [撤销记录点名的是序号还是公钥](../../maps/owner-revoke-and-boot-upgrade/issues/OWN-01-revoke-by-serial-or-by-pubkey.md)。
 
-`iap_fw_metadata_t` · **248 字节，占 8 个 journal 格**（`IAP_METADATA_SLOTS = 8`）：
+`iap_fw_metadata_t` · **216 字节，占 7 个 journal 格**（`IAP_METADATA_SLOTS = 7`）：
 
 | 偏移 | 长度 | 字段 |
 |---|---|---|
 | 0 | 4 B | `app_size` |
-| 4 | 32 B | `sha256` |
-| 36 | 64 B | `signature` |
-| 100 | 132 B | `cert` —— **整张存进来** |
-| 232 | 16 B | 保留 |
+| 4 | 64 B | `signature` |
+| 68 | 128 B | `cert` —— **整张存进来** |
+| 196 | 20 B | 保留 |
 
-**为什么存整张证书而不是缓存叶公钥**：每次启动要**重验 `root_sig`**。缓存叶公钥会让「换 owner 追溯作废固件」这条性质**静默失效**。M 记录从 4 格涨到 8 格就是为了这个，**一次更新因此占 9 格：8 格 metadata + 1 格日志**（`R1-28`），约 455 次更新触发一次回收。
-
-⚠️ **`meta.sha256` 写进去了，但全代码没有任何地方读它。** **不是 bug** —— 签名已经绑定了哈希，再比一次存的副本不增加任何安全性。将来要给工具加个核对用的命令，字段现成就在。（2026-08-16 核实）
+**为什么存整张证书而不是缓存叶公钥**：每次启动要**重验 `root_sig`**。缓存叶公钥会让「换 owner 追溯作废固件」这条性质**静默失效**。M 记录从 4 格涨到 7 格就是为了这个，**一次更新因此占 8 格：7 格 metadata + 1 格日志**（`R1-28`），512 次更新触发一次回收。
 
 **日志记录 · 1 格 = 32 字节**：`event` · `method`（哪条通道）· `peer_ip`（**只有 TCP 有，CDC 恒为 0** —— USB 不携带任何地址等价的身份可记）· `tick_ms` · `auth_counter` · `detail` · `prev_hash`。
 
@@ -261,7 +257,7 @@ flowchart TD
 | **R1-25** | 传输与校验 | **校验失败的上传不破坏已装好的 app** | `T1-14` | ✅ |
 | **R1-26** | 启动切换 | app 的签名在**每次启动时**被重新校验 | `T1-13` | ✅ |
 | **R1-27** | 启动切换 | 掉电中断升级后板子仍可恢复 | `T1-21` `T1-22` | ✅ |
-| **R1-28** | 记录与诊断 | metadata 和事件记在 journal 里，一次成功升级 = 9 槽 | `T1-26` | ✅ |
+| **R1-28** | 记录与诊断 | metadata 和事件记在 journal 里，一次成功升级 = 8 槽 | `T1-26` | ✅ |
 | **R1-29** | 记录与诊断 | journal 扇区满了能 reclaim 并恢复 | `T1-28` | ✅ |
 | **R1-30** | 记录与诊断 | 复位原因能正确报出（PIN / SOFT / POR） | 手工 | ✅ |
 | **R1-31** | 记录与诊断 | RTC 备份域失效（VBAT 没电）时能被发现 | 手工 | ✅ |
@@ -359,11 +355,14 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-23` | `R1-01` `R1-03` | 一次真实上传走完，且擦除在验证之后 | 日志出现 `Staging in SDRAM`，且 `Erasing application region` 在 `Transfer complete, verifying` **之后** | `python tools/upload_and_watch.py --bin <app.bin> --ip <IP>`（或 `--cdc <COM>`） | 真板子 | ✅ |
 | `T1-24` | `R1-22` | 坏 CRC 必须在验签之前被拒 | 板子回 `Checksum Failed` 而**不是** `Signature Failed` —— 「先」过 CRC32 这半句正是它证明的 | `python tools/run_case.py --case T1-24 --bin <app.bin>` | 真板子 | ✅ |
 | `T1-25` | `R1-05` | CDC 上传模式下以太网栈不起来 | 板子进 CDC 模式后不应答 UDP 发现，**且同一轮的正向对照答得出** ¹ | `python tools/run_cdc_does_not_start_ethernet.py --cdc <COM> --ip <IP> --ports <日志口>` | 真板子 | ✅ |
-| `T1-26` | `R1-28` | 一次成功升级消耗 9 个 journal 槽 | 上传前后各复位一次读 `Bootloader state: N/M journal slots used`，差值 **= 9** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-26` | `R1-28` | 一次成功升级消耗 8 个 journal 槽 | 上传前后各复位一次读 `Bootloader state: N/M journal slots used`，差值 **= 8** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
 | `T1-28` | `R1-29` | journal 扇区满了能 reclaim 并恢复 | 灌满后板子报 `N/4096 journal slots used`，一次上传后日志出现 `Reclaiming state sector (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 
-**共 30 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 34 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+
+⚠️ **这个数 2026-09-20 之前写着「共 30 条」，和上表对不上。** 数字是按上表重数的 ——
+补用例的时候没有回头改小结，这类漂移没有任何检查看得见。
 
 ³ **复位必须由人按，不能由 ST-Link 驱动。** BOOT0 是启动模式引脚：按住它的时候复位，芯片去启动 ST 自带的 DFU，我们的 bootloader 根本不执行，串口全程静默。正确顺序是**先复位、再按住**，继电器咔哒声就是那 1.5 秒窗口。⚠️ **长按超过 10 秒会武装恢复出厂**，在已认领的板子上会抹掉 owner 密钥。
 

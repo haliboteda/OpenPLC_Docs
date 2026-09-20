@@ -1,0 +1,171 @@
+# 要改的东西，一条不落
+
+**这份是 [撤销叶证书 + bootloader 原地升级](map.md) 这张图的配套清单。**
+它不是待办表（`work/TODO.md` 的准入要求每条挂一张**已关**的票，这些还没有）。
+它回答的是：**这张图走完之后，实施要碰哪些地方，以及每一条该谁拍板。**
+
+## 两列的含义
+
+| 标记 | 意思 |
+|---|---|
+| 🍍 **要问** | 设计取舍 / 影响客户 / 改了不好回头。**必须用户拍板** |
+| 🤖 **可直接做** | 有唯一正确答案，或纯机械，或只是调查。**不用问** |
+| ⏳ **等票** | 形状还没定，等某张票关掉才动得了 |
+
+---
+
+## A · bootloader（`$BOOT` = `open_plc_cube_ide`）
+
+| # | 改哪 | 改什么 | 谁拍板 |
+|---|---|---|---|
+| A1 | `IAPServer/owner_slot.h` | 新增 `'R'` 记录类型常量；撤销载荷布局（几个 × 几字节）；`_Static_assert` 锁尺寸 | 🤖 **已定 2026-09-20**（票 1：C / 16 字节） |
+| A2 | `IAPServer/owner_slot.c` · `record_is_structurally_valid()` | 认 `'R'` 类型 | 🤖 **已定 2026-09-20** |
+| A3 | `IAPServer/owner_slot.c` · `resolve_chain()` | 走链时比对撤销项（**不在 RAM 里建集合**，验证时直接扫）；`'R'` 强制要签名（无 TOFU 例外） | 🤖 **已定 2026-09-20** |
+| A4 | `IAPServer/owner_slot.c` | 新增 `owner_slot_is_revoked(leaf_pubkey)` —— 比对前 16 字节 | 🤖 **已定 2026-09-20** |
+| A5 | `IAPServer/owner_slot.c` | 新增 `owner_slot_revoke()` —— 追加 `'R'` 记录，验当前根签名 | 🤖 **已定 2026-09-20** |
+| A6 | `IAPServer/owner_slot.c` | **`R4` 落地**：撤销项 == 当前生效的根公钥前 16 字节 → **忽略该项**（不拒整条，一条装 4 个人），并在启动日志喊一声 | 🤖 **已定 2026-09-20** |
+| A7 | `IAPServer/owner_slot.c` · `report_root_trust()` | 启动日志加「owner 槽还剩 N 条」+ 撤销集合大小 | 🤖 |
+| A8 | `IAPServer/iap_cert.c/.h` | **给 `iap_cert_verify()` 加一个参数**，让编译器保证每个调用点都处理撤销 —— 今天两个调用点：`iap_auth.c:122`、`IAP_server.c:428` | 🤖 **已定 2026-09-20** |
+| A9 | `IAPServer/IAP_server.c` | 新增命令 `revoke` | ⏳ 迷雾「`flashboot` 的线上协议」一并定 |
+| A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | ⏳ 同上 |
+| A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | 🤖 **已定**（「没有有效 owner 能授权的操作一律物理在场」） |
+| A12 | **新文件** · 原地升级 | 收镜像→SDRAM ／ owner 根验签 ／ **查尺寸 ≤ 120 KiB** ／ 搬 owner 记录进 SDRAM ／ 擦扇区 0 ／ **先写 owner 再写 bootloader** ／ 写回时压缩 | 🤖 **已定 2026-09-20** —— 擦写例程放 `RAM_D1`，全程关中断，不调 HAL |
+| A13 | 链接脚本 / 启动代码 | ✅ **不用改** —— `.RamFunc` 段已经收在 `.data` 里（`STM32H743IIKX_FLASH.ld:166-167`）、启动代码已经会拷贝。**只要用** | 🤖 **已定 2026-09-20**，核实过 |
+| A14 | journal 事件表 | 新增「升级开始 / 升级完成」两条 | ⏳ 票「升级被打断之后，板子怎么让人知道」 |
+| A16 | `owner_record_t.slots` | **删掉这个字段** | 🤖 **已定 2026-09-19** —— 变长记录不做了，它是个永远不触发的校验 |
+| A17 | 构建尺寸 | 新增代码会涨。当前 **103,144 B**，上限 **122,880 B**，余 **19,736 B**。`CHK-A4` 自动卡 | 🤖 自动 |
+| A18 | `IAPServer/iap_cert.h` | **删 `iap_cert_t.serial`**：`IAP_CERT_SIZE` 132 → **128**，`IAP_CERT_SIGNED_LEN` 68 → **64**，`_Static_assert` 跟着改 | 🤖 **已定 2026-09-19** |
+| A19 | `iap_fw_metadata_t` | **删 `sha256[32]`**（全代码没人读）。新布局 `app_size 4 + signature 64 + cert 128 = 196` | 🤖 **已定 2026-09-19** |
+| A20 | `IAP_METADATA_SLOTS` | **8 → 7 格**（196 字节要 7 个 32 字节格）。⚠️ **一次成功升级从 9 格降到 8 格** | 🤖 跟 A19 |
+| A21 | `IAPServer/owner_slot.h` · `OWNER_FORMAT_VER` | **2 → 3**，硬切不做兼容 | 🤖 **已定** —— 见票 [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md) |
+
+## B · PC 工具（`$TOOL` = `IAPTranfer_Tool`）
+
+| # | 改哪 | 改什么 | 谁拍板 |
+|---|---|---|---|
+| B1 | `app.go` | 新增 `IAPTool revoke <ip> --key=owner.pem --leaf=<公钥>` | 🤖 **已定 2026-09-20** |
+| B2 | `app.go` | 新增 `IAPTool flashboot <boot.bin> <ip>` | ⏳ 迷雾（协议） |
+| B3 | `app.go` | 帮助文本、`Invalid mode` 那行的命令列表 | 🤖 |
+| B4 | `owner.go` | `RunRevoke()` —— 读板子的 generation + uid，拼签名前缀，签，下发，**再读回来确认** | 🤖 形状已定；⏳ 「已经撤过谁」怎么查还在迷雾 |
+| B5 | `owner.go` | `RunFlashBoot()` | ⏳ 迷雾 |
+| B6 | `iapcert/iapcert.go` | **整套删掉**：`serial` 字段、`SelfSignedSerial`、`NextSerial()`、`CounterPath()`、`.certserial` 文件 | 🤖 **已定 2026-09-19**（层①：删字段） |
+| B7 | `iapcert/iapcert.go` | `Cert` 结构和 `SignedLen` 跟着改成 128 / 64 | 🤖 跟 B6 |
+| B8 | `cert.go` | `issueLeafCert()` 去掉发号和 warning 返回值 | 🤖 跟 B6 |
+| B9 | `$BOOT/IAPServer/keys/` | 删掉 `*.pem.certserial` 文件本身，以及 `keys/README.md` 里讲发号的那段 | 🤖 跟 B6 |
+| B10 | `README.md` | 新命令的说明 | 🤖 |
+
+## C · Arduino 板卡包（`$CORE` = `open_plc_arduino`）
+
+| # | 改哪 | 改什么 | 谁拍板 |
+|---|---|---|---|
+| C1 | `libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}` | **常量必须和 `owner_slot.h` 完全一致** —— 新增的 `'R'` 类型和载荷布局要同步 | 🤖 **可以做了 2026-09-20** |
+| C2 | 板卡包版本号 / `boards.txt` | 发版时才动 | 🤖 |
+| **C3** | `libraries/OpenPLC_IAP/src/iap_cert.{c,h}` | ⚠️ **2026-09-20 全集对账补** —— core 侧镜像的**不只是 `owner_root_ro`**。证书 132 → 128 字节、`IAP_CERT_SIGNED_LEN` 68 → 64 要同步到这里 | 🤖 已定，⏳ 跟 A18 |
+| **C4** | `libraries/OpenPLC_IAP/src/iap_auth.{c,h}` | 同上 —— 会话认证那条路也镜像在 core 侧，证书长度变了要跟 | 🤖 已定，⏳ 跟 A18 |
+
+## C-附 · 2026-09-20 全集对账补进来的（测试资产侧）
+
+| # | 改哪 | 改什么 | 谁拍板 |
+|---|---|---|---|
+| **X1** | `$TOOL/TestCase/tools/inject_owner_record.py` | ⚠️ **它手工拼 owner 记录字节**（`T2-04` 靠它造「无签名的高 generation 记录」）。删了 `slots`、`format_ver` 升 3 之后**必须跟着改，否则那条用例造出来的是无效记录、测不到东西** | 🤖 已定，⏳ 跟 A16/A21 |
+| **X2** | `$TOOL/TestCase/host/bootloader_unit/`（`owner_slot_stub.{c,h}`、`test_main.c`、`build.py`、`HOST-C-TESTS.md`） | ⚠️ **`T1-16` 拿真实 bootloader 源码在 PC 上跑**，包含 `owner_slot.c`。记录格式变了，桩和用例全要跟 | 🤖 已定，⏳ 跟 A1–A6 |
+| **X3** | `$TOOL/TestCase/tools/check_mirror_sync.py` | 跨仓镜像清单要加 `iap_cert` / `iap_auth`（见 C3/C4），否则 `P2` 看不见它们分叉 | ✅ **本来就在查**（`check_mirror_sync.py:280-287,316-317`），这条写清单时没核实 |
+| **X6** | `$TOOL/TestCase/tools/run_delegated_cert_on_real_board.py`、`run_rotate_root_revokes_old_leaf.py` | ⚠️ **2026-09-20 写新脚本时发现**：两个驱动都在标准输出里找 **264 个** hex 字符的证书（132 字节）。证书现在是 128 字节 = **256** 字符，**`T2-11` 和 `T2-12`–`T2-14` 的驱动本来会全部失败** | ✅ **2026-09-20 改完** |
+| **X4** | `$PROD/docs/modules/M1/CHALLENGE-AUTH.md` | 讲会话认证怎么用证书。证书结构变了要跟 | 🤖 |
+| **X5** | `$BOOT/IAPServer/SECURITY.md` | 同上 | 🤖 |
+
+## D · 要你拍板的（汇总）
+
+| # | 问题 | 状态 |
+|---|---|---|
+| **D1** | `serial` 精简到哪一层 | ✅ **2026-09-19 定：① 删字段**。理由：现在是测试阶段，数据随便改 |
+| **D2** | `'R'` 记录最终定 C 吗？公钥取前 8 / 12 / 16 字节？ | ✅ **2026-09-20 定：C，取前 16 字节，一条装 4 个**。见票 [撤销记录点名的是序号还是公钥](issues/OWN-01-revoke-by-serial-or-by-pubkey.md) |
+| **D3** | `owner_record_t.slots` 的变长预留还要不要 | ✅ **2026-09-19 定：删**。变长的收益在 `'R'` 也是 160 字节时为零，代价是记录损坏会让后面全部错位 |
+| **D4** | `format_ver` 升 3 还是保持 2 | ✅ **2026-09-19 定：升 3**，硬切。见票 [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md) |
+| **D5** | 升级被打断，日志怎么报、报完让人做什么 | 🍍 **有草稿待改** —— 见票 [升级被打断之后，板子怎么让人知道](issues/OWN-04-how-does-an-interrupted-upgrade-announce-itself.md) |
+| **D6** | `flashboot` 的线上协议：和现有 `flash` 共用多少 | ⏳ 迷雾，等 `'R'` 形状定 |
+| **D7** | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | ⏳ 迷雾 |
+| **D13** | **工具怎么确认一次撤销真的进去了** —— 2026-09-20 真板子实测发现 `RunRevoke()` 拿 generation 当凭据，而它设计上就不会变 | 🍍 **待拍板**：① 去掉回读，只信板子的 `OK`（弱，变成工具自己确认自己）；② **板子加 `getrevoked` 命令**，顺带填上 `B4`/`D7` 那块迷雾；③ `getowner` 多报一个记录条数（答不出「撤的是谁」） |
+| **D8** | 发布说明怎么改 | 🍍 **有草稿待改** —— `RELEASE-NOTES.md` 是英文的 |
+
+## D-附 · 删字段带来的连锁，一条都不能漏
+
+| # | 影响 | 谁拍板 |
+|---|---|---|
+| D9 | **需求 `R1-28`（一次成功升级 = 9 个 journal 槽）改成 8** | ✅ **2026-09-20 做完** |
+| D10 | **用例 `T1-26` 的判据「差值 = 9」改成 8**，`run_journal_slot_accounting.py` 的期望值跟着改 | ✅ **2026-09-20 做完** |
+| D11 | journal 回收频率从约 455 次一次变成 **512 次一次**，`M1-firmware-upgrade.md` 里那个数要改 | ✅ **2026-09-20 做完** |
+| D12 | ⚠️ **手上那块板如果已认领（v2 记录），升到 v3 固件时会丢所有权，要手工重新 `takeown` 一次** | 🍍 **知会你**，不是决定 |
+
+## E · 我可以直接做的（汇总）
+
+| # | 做什么 | 现在能做吗 |
+|---|---|---|
+| **E1** | 票「擦扇区 0 的时候，那段代码从哪执行」—— 查 RM0433 + 读代码 + 给结论 | ✅ **现在就能做** |
+| **E2** | `GLOSSARY.md` 加词 | ✅ **2026-09-20 做完** |
+| **E3** | `docs/tables/ID-MAP.md` 登记新需求号和新用例号 | ⏳ 等编号定 |
+| **E4** | `docs/repo/ARCHITECTURE.md` 的「跨仓镜像的代码」表加一行 | ⏳ 等 C1 |
+| **E5** | 文档里那处「撤销**点名**」vs「下限**连坐**」的含糊改准 | ✅ **2026-09-20 做完** |
+| **E6** | 跨仓镜像常量同步（抄过去 + `P2` 验） | ✅ **现在能做**（格式已定） |
+| **E7** | 断链检查（`P9`）、占位符检查、重复事实检查（`P8`） | ✅ 自动，每次提交跑 |
+
+## F · 文档（`$PROD` = `OpenPLC_Docs`）
+
+| # | 改哪 | 改什么 |
+|---|---|---|
+| F1 | `docs/modules/M2-ownership.md` | 新增「撤销」一节（格式 + 判断顺序 + `R4` 怎么落地） |
+| F2 | 同上 | ✅ **2026-09-20 已改** —— 那段「下限连坐」的推理删掉了，换成「按叶公钥点名」并指向票 1 |
+| F3 | 同上 | ✅ **2026-09-20 已改** —— 「等真实需求」的理由已删（离职换人是真实场景）。⚠️ **状态仍是 ⬜**：设计定了，代码还没写 |
+| F4 | 同上 · 边界一节 | ⚠️ **「ST-Link 重烧 bootloader = 所有权重置」这句要改** —— 原地升级之后不再成立 |
+| F5 | 同上 · BOOT0 那节 | 写进「没有有效 owner 能授权的操作一律物理在场」 |
+| F6 | 同上 · 「定下来的取舍」表 | ✅ **2026-09-20 已标** `serial` 要删。⏳ `IAPServer/keys/README.md` 里讲发号那段等代码改完再动 |
+| F7 | `docs/modules/M1-firmware-upgrade.md` | 新增 `flashboot` 通道（一条新需求 + 用例）；journal 事件表加两条 |
+| F8 | `docs/tables/STATUS.md` | M2 条数变了；场景表「**同事离职，或他的叶私钥泄露了**」那一行的去向要改 |
+| F9 | `docs/tables/DECISIONS.md` | 追加这一轮拍板的几条 |
+| F10 | `docs/tables/ACCEPTANCE-CHECKLIST.md` | `CHK-B` 加一条「原地升级走一遍」 |
+| F11 | `docs/engineering/HOW-TO-RUN-TESTS.md` | 新用例的跑法 |
+| F12 | `$BOOT/RELEASE-NOTES.md` | 见 D8。⚠️ **这份文件是英文的**，草稿见下 |
+| F13 | `GLOSSARY.md` | ✅ **2026-09-20 已加**：根/叶、认领、`'O'`/`'R'` 记录、原地升级、压缩 —— 未实现的都标了 ⚠️ |
+
+## G · 测试用例（`$TOOL/TestCase`）
+
+| # | 测什么 | 台子 | 测不到什么 |
+|---|---|---|---|
+| G1 | 撤销生效：被撤的叶子上传被拒 | 真板子 | —— |
+| G2 | **撤销不连坐**：没被撤的叶子照常上传 | 真板子 | **正向对照，不可省** —— 没有它分不清「撤销生效」和「板子死了」 |
+| G3 | 无签名的撤销记录被拒 | 真板子 | 出货工具做不出坏签名，要手工拼记录 |
+| G4 | 撤不掉当前生效的根（`R4`） | 主机侧 | 主机侧测不到真板子的 flash 行为 |
+| G5 | 原地升级之后**所有权还在** | 真板子 | —— |
+| G6 | 原地升级**顺手压缩了历史记录** | 真板子 | 判据是槽位数，要 ST-Link 复位读两次 |
+| G7 | 未认领板子 `flashboot` 没按 BOOT0 → 被拒 | **真板子 + 人按 BOOT0** | —— |
+| G8 | 升级镜像超尺寸 → **擦除之前**就被拒 | 真板子 | —— |
+| G9 | 升级中掉电 → DFU 救回 → 日志报「上次被打断」 | **真板子 + 人工断电** | —— |
+| G10 | 撤销记录被拷到另一块板上无效（`uid` 检查） | 真板子 | **要第二块板** —— 见 `waiting/WAITING-ON.md` |
+
+⚠️ **G10 卡在第二块板上**，和 `R1-14`（两块板 MAC 不同）是同一个条件。
+
+## H · `RELEASE-NOTES.md` 的草稿（英文，等用户改）
+
+`open_plc_cube_ide/RELEASE-NOTES.md` 现在的 Upgrade rules 写着「换 bootloader 要重传 app **和**
+重新认领」。原地升级做出来之后那句过期，换成：
+
+```markdown
+### Updating the bootloader
+
+From this release the bootloader can be updated in place with `IAPTool flashboot`.
+**Ownership and the installed application both survive the update** -- no ST-Link needed.
+
+- The update requires a signature from the board's current owner. An **unclaimed**
+  board additionally requires BOOT0 to be held through start-up.
+- **Do not cut power during the update.** If power is lost the board will not start.
+  Hold BOOT0 through a reset to enter the ST ROM DFU and re-flash the bootloader over
+  USB; whether ownership survived depends on where it stopped, and the boot log says so.
+- The update also discards superseded entries in the owner record area, reclaiming slots.
+
+⚠️ Re-flashing the bootloader over **ST-Link still wipes ownership** -- the owner records
+live in the bootloader's own flash sector. Use `flashboot` to keep it.
+```
+
+⚠️ **这段有一条前提还没成立**：升到 `format_ver` 3 的那一次，v2 记录会被判无效，
+**所有权仍然会丢**。所以「所有权会保住」这句话**从 v3 之后的版本之间才为真** ——
+发布说明要把这一次切换单独说明。见票 [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md)。

@@ -464,9 +464,9 @@ python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
 | | |
 |---|---|
 | **判据** | 灌满后板子报 `N/4096 journal slots used`；一次上传后日志出现 `Reclaiming state sector (<n> slots discarded)`；**且板子照常启动 app** |
-| **为什么不能靠反复上传灌满** | 一次上传只占 9 槽，4096 槽要约 390 次上传、大半天 |
+| **为什么不能靠反复上传灌满** | 一次上传只占 8 槽，4096 槽要 512 次上传、大半天 |
 | **为什么必须整片读回来再整片写回去** | 扇区里存着当前 app 的 metadata（签名和证书**伪造不了**），而 `STM32_Programmer_CLI` 写之前会擦整个扇区 |
-| **留的空槽必须少于 9** | 回收只发生在写 metadata 的那一刻，而一条 metadata 占 9 槽 |
+| **留的空槽必须少于 7** | 回收只发生在写 metadata 的那一刻，而一条 metadata 占 7 槽 |
 
 ## 未覆盖
 
