@@ -21,3 +21,15 @@
 | 准备**两个可区分的镜像**当升级的 v1 / v2（五条路径每条都要「针对自己程序进行升级」） | 启动日志里的版本串从 A 变成 B，脚本能判真假。先确认 `Output/` 下现有的 `iap_probe_app.bin` / `iap_probe_altmac.bin` 能不能直接当 v1/v2，不能就各做一个 | [五条路径共用一块板，顺序怎么排](../maps/five-paths-e2e-test/issues/E2E-03-what-order-do-the-five-paths-run-in.md) |
 | 整轮收尾要还原被 `rotate_keys.sh` 改掉的仓库文件（路径 ③ 会重写 `$BOOT/IAPServer/keys/fw_pubkey.inc` 和 `fw_signing_key.TEST_ONLY.pem`） | 跑 `rotate_keys.sh --restore <本轮快照>`，之后 `check_public_root.py` 退出码 0。⚠️ **还原必须在整轮结束之后，不是路径 ③ 之后** —— 路径 ④ 发叶证书要用那把轮换后的根私钥 | [路径三换根之后 `T2-06` 必然失败，算不算](../maps/five-paths-e2e-test/issues/E2E-05-is-t2-06-failing-after-rotate-expected.md) |
 | ⚠️ **`enter_bootloader.py` 对预编译的 `iap_probe_*.bin` 无效**：核实过，这两个镜像编译时内置的是**轮换前的旧根**（`old-key present = True`，`today-key present = False`），板子未认领时用它们做重启握手会用**编译那一刻烧进去的根**去验证请求方证书，和 bootloader 当前信的根（可能已轮换）对不上，静默不响应。**这不是产品缺陷**——脚本自己的文档已经写着"另一条路是按 BOOT0，需要人在场"；只是说明"软件重启进 bootloader"这条路在换过根之后，对着旧镜像会失效，重新编译镜像或者按 BOOT0 是仅有的两条路 | 需要重编 `onboard/iap_probe/iap_probe.ino` 用当前 `fw_pubkey.inc`，或接受按 BOOT0 | [撤销叶证书 + bootloader 原地升级](../maps/owner-revoke-and-boot-upgrade/map.md) |
+
+## 下次上板一起做
+
+**攒着一次做，不要零散上板**（用户 2026-09-20：「一会上板后统一改和测试」）。
+板子只有一块，每次上板都要重烧 / 重新认领，散着做等于把同一份代价付很多遍。
+
+| 待验 | 怎么算做完 | 来自哪 |
+|---|---|---|
+| **`printf` 绑到 RS232 之后真的出得来** | 探针 sketch 里那行 `printf` 出现在 `COM5` 上。今天实测基线是 **printf 0 行 / `Serial_Test` 18 行**，绑对了应该两者都有 | [app 里的 printf 没有输出通道](../maps/owner-revoke-and-boot-upgrade/issues/OWN-09-printf-has-no-output-path-in-an-app.md) |
+| **`OWN-08`：有些叶证书驱动不了重启握手** | 复现一次成功、一次失败，抓到 app 侧那一行拒绝理由，定性是「验证失败」「冷却期内」还是「`sscanf` 解析失败」 | [有些叶证书驱动不了重启握手](../maps/owner-revoke-and-boot-upgrade/issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)。⚠️ **要等 printf 通了才查得下去** |
+| **`Flash_If_Write()` 的 I-cache 修复** | 制造一次失败的写入，读回 `SCB->CCR` 确认 I-cache 仍是开的。⚠️ **难点在怎么可靠地制造一次失败写入**，办法还没想好 | 代码已改并提交（`886b0ad`），判据的上板那一半没验 |
+| **`T2-08`–`T2-14` 七条用例首次上真板子** | 七个驱动脚本都已存在，从没在真板子上跑过 | 五条路径那张图。⚠️ `T2-09` 要按 BOOT0；`T2-12`–`T2-14` 会换根，跑完这块板的 owner 私钥就变了 |

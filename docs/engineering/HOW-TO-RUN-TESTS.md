@@ -280,7 +280,7 @@ python naive.py --port COM5 --long                 # 连全量的 SD 压力和 S
 | `host/porttool_plan/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 判据算子（缺字段一律判失败）；执行器（超时与判据失败分得开、重试保留被它替掉的那次失败、失败后的门闸看最后一个真跑过的步骤）；随包发布的 `plans/bench-smoke.json` 和 `plans/station6-poweron.json` 都能拿假板子跑通；方案里的 `pt.run` 目标对着 caps 的 `runs=` 离线校验（打错名字、写一个固件没报过的目标，两种都要报）；方案页四个接口 —— **写盘前先验、方案名出不了 plans 目录、跑方案期间面板自己的回环应答器停摆** |
 | `host/fakeboard/` | `python run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
 | `host/crypto_ref/` | `python run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL:TestCase/host/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
-| `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前一个：FMC 保留脚表（39 个）自洽。**编不过就是变体头坏了，不是 sketch 坏了** |
+| `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译 core 自有库的**每一个 example**。⚠️ **约十分钟，故意不进 selfcheck** —— 见下 |
 
 ### P5 · example 不能腐烂

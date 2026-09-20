@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-20
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -49,3 +49,40 @@ stdout 也已 `setvbuf(..., _IONBF, 0)`。
 1. 选定一条，让 `udp_server.c` 的两句拒绝日志在真板子上**看得见**
 2. 说清它对 **bootloader 侧**有没有影响（bootloader 有自己的 `_write`，`printf` 一直是通的 —— 不要把两边搞混）
 3. 如果选 ① 或 ②，`变体断言`（用例 `P4`）要跟着加一条，防止它再漂回去
+
+## Answer
+
+2026-09-20 定。**选 ① 的修正版：`DEBUG_UART` 绑 `USART3`，不是 `UART4`。**
+
+两行加在 `core:variants/STM32H7xx/H743/variant_PLC_H743.h`：
+
+```c
+#define DEBUG_UART            USART3
+#define DEBUG_PINNAME_TX      PC_10_ALT1
+```
+
+**为什么不是 `UART4`**：RS232 端子（PC10/PC11）和扩展口（PH13/PH14）在 `PeripheralPins.c` 里
+都是 UART4，而一个外设只有一个句柄槽位 —— 把 `printf` 放 UART4 就等于和扩展口抢。
+`PC10/PC11` 上另有 AF7 = USART3，线一根不用动，那正是 `Serial_Test` 今天用的一组
+（2026-09-20 实测 18 行，所以这条路径已经证明是通的）。
+
+**为什么 `DEBUG_PINNAME_TX` 不能省**：不写它，core 会取 `PinMap_UART_TX` 里第一个 USART3 TX，
+那是 **PB10 —— 本板的 RS232 使能脚**，`printf` 会把使能脚重配成串口输出。
+
+**bootloader 不受影响**：它有自己的 `_write`，`printf` 一直走 UART4/PC10。
+
+固定住的办法：用例 `P4`（变体断言）新增 sketch `$TOOL/TestCase/host/variant_check/uart_routing/`，
+对两条通道各断一次，改错编译就不过。路由表记在
+[HARDWARE-FACTS.md](../../../docs/hardware/HARDWARE-FACTS.md) 的「UART4 与 USART3」一节。
+
+## 引出了什么新的未知
+
+**一条：`printf` 和 `Serial_Test` 现在共用 USART3 的同一个句柄，谁先 `begin()` 决定波特率。**
+
+`uart_debug_write()` 找得到已有句柄就直接用，找不到才自己 `uart_debug_init()` ——
+后者是 **9600、半双工**。所以 app 里 `printf` 出现在 `Serial_Test.begin(115200)` 之前的话，
+USART3 会先被配成 9600 半双工，之后 `Serial_Test.begin()` 再把它重配回来。
+`core:cores/arduino/main.cpp` 今天在启动早期就 `begin(115200)`，所以正常顺序下不成问题，
+**但这条没有在板子上验证过** —— 本票的改动全部只做到编译期。
+
+⚠️ **`PB10` 仍然要 sketch 自己拉高**，这条改动不碰它（见 HARDWARE-FACTS「默认是关的」）。

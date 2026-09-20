@@ -52,7 +52,24 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 - bootloader 的 printf 控制台走 **UART4**，到 MAX3221 再到 RS232 端子 C05/C06
 - core 里的 `Serial_Test` 走 **USART3**（`core:cores/arduino/main.cpp` 的 `HardwareSerial Serial_Test(PC_11_ALT1, PC_10_ALT1)`）。**`ALT1` 就是选 AF7 的写法**，线一根没变
 
-`PH13 / PH14` 那一对也是 UART4（接到扩展口 JunctionLink J4-11 / J4-12）。**同一个 UART 外设只有一个句柄槽位，最后一次 `begin()` 赢** —— 所以不能同时在扩展口上有 TTL 串口又保住 RS232 端子上的控制台。
+`PH13 / PH14` 那一对也是 UART4（接到扩展口 JunctionLink J4-11 / J4-12）。**同一个 UART 外设只有一个句柄槽位，最后一次 `begin()` 赢** —— 所以 app 侧的控制台放在 USART3 上，扩展口才拿得住 UART4（下表）。
+
+### app 侧三条通道各走哪个外设（2026-09-20 定）
+
+| 谁 | 外设 | 引脚 | 出口 |
+|---|---|---|---|
+| `printf` / stdout（`DEBUG_UART`） | **USART3** AF7 | PC10 / PC11 | RS232 端子 C05 / C06 |
+| `Serial_Test` | **USART3** AF7 | PC10 / PC11 | 同上 —— 和 `printf` 共用同一个句柄 |
+| `Serial1`（`PIN_SERIAL_TX` / `PIN_SERIAL_RX`） | **UART4** AF8 | PH13 / PH14 | JunctionLink 扩展口 J4-11 / J4-12 |
+
+`printf` 不走 UART4，是因为 UART4 已经是扩展口那一组的外设，两边会抢同一个句柄槽位。
+`DEBUG_PINNAME_TX` 必须显式写成 `PC_10_ALT1`：不写的话 core 会取 `PeripheralPins.c` 里第一个
+USART3 TX，那是 **PB10 —— 本板的 RS232 使能脚**。
+
+两个宏定义在 `core:variants/STM32H7xx/H743/variant_PLC_H743.h`，由用例 `P4`（变体断言，
+`$TOOL/TestCase/host/variant_check/uart_routing/`）钉住，改错编译就不过。
+
+⚠️ **bootloader 侧不受这条影响** —— 它有自己的 `_write`，`printf` 一直走 UART4 / PC10。
 
 ### USART3 在这颗芯片上有三组引脚，本板只有一组能用
 
@@ -61,7 +78,7 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 | 组 | TX | RX | 本板这两个脚的信号名 |
 |---|---|---|---|
 | 一 | PB10 | PB11 | `RS232_EN` / `RMII_TX_EN` —— 都占了 |
-| 二 | **PC10** | **PC11** | `RS232_TXD` / `RS232_RXD` —— **唯一可用的一组**，现在给了 UART4 |
+| 二 | **PC10** | **PC11** | `RS232_TXD` / `RS232_RXD` —— **唯一可用的一组**；bootloader 用 UART4(AF8)，app 用 USART3(AF7) |
 | 三 | PD8 | PD9 | `FMC_D13` / `FMC_D14` —— SDRAM 数据线 |
 
 **所以「把控制台从 UART4 挪到 USART3、把 UART4 让给扩展口」只有 PC10/PC11 这一种走法，线一根不用动**（[DECISIONS.md 第 35 条](../tables/DECISIONS.md)把它记成了重开条件）。

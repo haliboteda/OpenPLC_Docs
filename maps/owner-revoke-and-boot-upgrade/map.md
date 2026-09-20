@@ -86,6 +86,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 - **2026-09-20 在对话里定，没有对应的票**：`'R'` 记录压到**一个 flash word（32 字节）**，owner 区改成 **`'O'` 32 条 + `'R'` 96 条**两段定长；写入验签、**读取只查结构**。详见 `DECISIONS.md` 第 58 / 59 条，要改的东西在 [要改的东西，一条不落](CHANGE-LIST.md) 的 I 节
 - [换根的时候把 owner 区清空重写](issues/OWN-07-should-setowner-wipe-the-owner-area.md)：**按需清空，必须显式请求**。平时换根仍是低风险追加；剩 8 条时日志提示；`--wipe` 那一次才擦扇区 0。**实施排在 `flashboot` 之后**
 - [第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)：**`'R'` 退出链的行走，改成独立一趟扫描**。真板子验收通过（`T2-19`/`T2-20`），槽位 50 → 42、八次作废零浪费
+- [app 里的 printf 没有输出通道](issues/OWN-09-printf-has-no-output-path-in-an-app.md)：**`DEBUG_UART` 绑 `USART3` + `DEBUG_PINNAME_TX` 绑 `PC_10_ALT1`**，`printf` 从此和 `Serial_Test` 一样出在 RS232 端子 C05/C06；**扩展口的 `PH13`/`PH14`（UART4）一个字没动**。用例 `P4` 新增 `uart_routing` sketch 钉住两条通道。**只验到编译期，板上没验**
 
 ## Not yet specified
 
