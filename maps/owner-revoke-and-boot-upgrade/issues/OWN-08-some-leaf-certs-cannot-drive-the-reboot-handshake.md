@@ -53,3 +53,35 @@ app 收到 `openplc_server_reboot` 之后不重启，继续以 `CUSAPP` 应答 U
 
 ⚠️ **暂时的绕行办法已经在用**：`run_revoke_leaf.py` 里把板子请回 bootloader 改用
 **根密钥自签**（`move_to_bootloader_selfsigned()`），那条路可靠。所以这张票不阻塞作废那套用例。
+
+## 2026-09-20 上板调查：现象复现，范围大幅缩小
+
+`printf` 通了之后（见 [app 里的 printf 没有输出通道](OWN-09-printf-has-no-output-path-in-an-app.md)），
+拿同一张证书反复试：**有时成功、有时失败** —— 所以这**不是「某些证书天生不行」，是间歇性的**。
+票的标题据此已经不准确，但先不改，等根因定了一起改。
+
+**失败那一次的决定性观察**：app 在跑（心跳不断，`printf` 和 `Serial_Test` 两个通道都在输出），
+但收到重启请求时**一个字都没打印**。
+
+### 已经排除的（都是实测或查实，不是推测）
+
+| 假设 | 怎么排除的 |
+|---|---|
+| 冷却期（`REBOOT_COOLDOWN_MS` 10 秒） | 那条路径**会打印** `Reboot request ignored: still within cooldown`，实测时一行没有 |
+| 证书或签名验不过 | 同理，那条路径会打印 `Rejected unauthenticated openplc_server_reboot request` |
+| UDP 包跨 pbuf 段、`p->len` 只拿到前半截 | `PBUF_POOL_BUFSIZE = 1524`（`OpenPLC_Net/src/lwipopts_default.h:73`），远大于命令的 ~407 字节，**不会跨段** |
+
+### 还剩的两条，下一轮从这里开始
+
+按 `udp_server.c` 的代码，静默只剩两种可能：
+
+1. **`sscanf(recv_buf, "openplc_server_reboot %256s %128s", ...)` 返回 ≠ 2** —— 那个分支整个被跳过，不打印任何东西
+2. **包根本没到 app** —— `CM_Reboot` 用 `sendUDPNoResponseOnPort` 发出，不等应答，所以 PC 那边无从分辨
+
+**怎么分开这两条**：`udp_server.c` 里已经有 `udp_server_recv_counter`、
+`udp_server_last_rx_len_value`、`udp_server_last_rx_tick_ms` 三个全局计数。
+**让探针 sketch 把它们打出来**，失败那一次看计数有没有涨、收到的长度是多少 ——
+涨了且长度是 407 就是第 1 条，没涨就是第 2 条。
+
+⚠️ **顺带发现的一个隐患（不是本票的根因，但该记）**：那段接收码用 `p->len` 而不是
+`p->tot_len` 取长度。今天因为 `PBUF_POOL_BUFSIZE` 够大而碰不到，但包一旦跨段就会静默截断。
