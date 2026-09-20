@@ -38,6 +38,7 @@ TestCase/
 ├── host/                 ← 不需要板子，纯主机跑
 │   ├── iapcert/          ← T1-15  证书签发、serial 计数器、挑战签名的 Go 单元测试
 │   ├── bootloader_unit/  ← T1-16  用 stub 编译真实 bootloader 源码的 C 单元测试
+│   ├── owner_revoke/     ← T2-21  喂假 owner 记录区，跑真实 core 侧 owner_root_ro.c
 │   ├── porttool_caps/    ← T4-01  端口工装协议契约：C harness 跑真实固件源码产出
 │   │                          caps_golden.txt，Go 测试再拿它验 internal/ptproto
 │   ├── porttool_plan/    ← T1-15  方案文件、判据算子、执行器、报告，以及方案页的
@@ -273,6 +274,7 @@ python naive.py --port COM5 --long                 # 连全量的 SD 压力和 S
 |---|---|---|
 | `host/iapcert/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 证书布局与根签名覆盖的字节范围（换个范围就验错东西）；serial 计数器从 1 开始、递增、落文件；serial 小端落在偏移 64；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
 | `host/bootloader_unit/` | `python build.py`，需要 gcc/clang | 用 stub 在主机上编译**真实的** `sha256.c` / `iap_cert.c` / `fw_verify.c` / `iap_auth.c` 并跑断言。金标证书由出货工具生成，所以过了就等于 C 和 Go 对同一套线格式达成一致。细节见 `$TOOL:TestCase/host/bootloader_unit/HOST-C-TESTS.md`（贴着代码放） |
+| `host/owner_revoke/` | `python build.py`，需要 gcc/clang | **T2-21** 当前生效的根撤不掉自己（`R4`）。喂一块 RAM 里的假 owner 记录区（按 `owner_slot.h` 的字节布局手搓），在主机上编译并跑**真实的** `owner_root_ro.c`。判据见 [M2 归属与信任](../modules/M2-ownership.md) 的「测试怎么跑」节 |
 | `host/porttool_caps/` | `python build.py`，需要 gcc/clang | **T4-01** 端口工装的协议契约，判据见 `$TOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`（贴着代码放，没有搬过来） |
 | `host/porttool_panel/` | `python run.py --port COMx`（**真板子**）或 `--port sim`（**模拟板，不用板子**，见下），都要 playwright + Chrome | **T4-02** 面板在真浏览器里点一遍。判据：①页面先过一遍语法（用 playwright 自带的 node `--check`，板子都不用）②页面抛的任何异常、控制台任何 error 直接判失败 ③串口列表、未连接时的门闸、按板子分组 ④**逐个端口按一次「开始测试」，每个端口的结论必须是这台工位应该出的那一个** —— 缺激励的端口要失败，并且失败原因里要点出是哪个读数 ⑤**方案文件里的参数真的发出去了** —— `on=1:1` / `mv=1:1000` / `duty=1:100` / `mode=extloop` 在日志里能查到 ⑥**持续测试**：「单次 / 持续」两个单选，持续下面才出现时长（1/2/3/4 小时 / 一直跑）；左边可以勾多个端口、一次启动；**看门狗在续期**（日志里 `OK hold=` 一直在涨，不是只武装了一次）；点停止要同时出 `OK stopped all` 和 `OK hold=off`。⚠️ **断言看的是板子的回复不是发出去的命令** —— 续期由服务端直接走串口发，不过 `/api/command`，页面日志里没有那一行 ⑦两个 tab、日志的暂停/清空/过滤、断开、记下的控制口 ⑧**改了参数就不给结论** —— 改一个参数再按「开始测试」，结论不能是「失败」，卡片要说清哪一项和方案不一样，点「恢复方案参数」之后又能判（2026-09-11 用户实测撞出来的：勾 DO3、占空比 50，1.4 秒出一个假失败）⑨**卡片上不许剩协议词** —— 逐个端口扫一遍，命中 `BANNED_ON_CARDS` 里任何一个（`duty`、`freq`、`miss`、`Klemmblock`…）就判失败 ⑩**四个一直没被点过的控件**（2026-09-11 补）：「单独跑」单个 `pt.run` 目标、「自动回环应答」勾选框、「绑上/解开」对端串口、**方案页的「运行」按钮**（用 `bench-smoke.json` 跑完整一轮，每一步都要回判据）。⚠️ **「绑上」在模拟板上只能证明控件通到服务端并且能解开** —— 「绑对了适配器才闭合链路」只有真工位能证明，因为模拟板自己演所有对端。⚠️ 覆盖不到的是**真外观** —— 颜色间距好不好看只能人看 |
 | `host/porttool_plan/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 判据算子（缺字段一律判失败）；执行器（超时与判据失败分得开、重试保留被它替掉的那次失败、失败后的门闸看最后一个真跑过的步骤）；随包发布的 `plans/bench-smoke.json` 和 `plans/station6-poweron.json` 都能拿假板子跑通；方案里的 `pt.run` 目标对着 caps 的 `runs=` 离线校验（打错名字、写一个固件没报过的目标，两种都要报）；方案页四个接口 —— **写盘前先验、方案名出不了 plans 目录、跑方案期间面板自己的回环应答器停摆** |
