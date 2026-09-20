@@ -409,7 +409,7 @@ flowchart TD
 | # | 阶段 | 要做到什么 | 谁证明 | 状态 |
 |---|---|---|---|---|
 | **R2-01** | 根从哪来 | **客户自己编译时能把自己的根编进去**，出厂即安全 | `T2-07` `T2-10` | ✅ |
-| **R2-02** | 换成自己的 | 板子有办法脱离"出厂公开根"，且不需要 ST-Link | `T2-01`–`T2-06` `T2-08` `T2-09` `T2-12`–`T2-14` | ✅ |
+| **R2-02** | 换成自己的 | 板子有办法脱离"出厂公开根"，且不需要 ST-Link | `T2-01`–`T2-06` `T2-08` `T2-09` `T2-12`–`T2-14` | 🟡 ¹⁰ |
 | **R2-03** | 授权别人 | 板子从第一版就懂证书链，简单模式走同一条验证路径 | `T1-18d`–`T1-18f` `T1-16` ¹ `T2-11` ² | ✅ |
 | **R2-04** | 收回授权 | 撤销叶子证书，且**永不能撤到一个有效根都不剩** | `T2-15`–`T2-21` ⁶ | 🟡 |
 
@@ -459,7 +459,7 @@ flowchart TD
 | `T2-02` | `R2-02` | BOOT0 没按时认领被拒（反向用例） | 回 `Refused`，`getpubkey` **一字节不变** | `python tools/run_takeown.py --expect-refused` | 真板子 | ✅ |
 | `T2-03` | `R2-02` | 换 owner：现任签名才算数 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变；**跑完新主人那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_setowner.py --current-key a.pem`（加 `--bad-signature` 跑负向） | 真板子 | ✅ |
 | `T2-04` | `R2-02` | 无签名的高 generation 记录**夺不走**板子 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 | `python tools/inject_owner_record.py --key <hex> --also-unsigned 9` | 真板子 | ✅ |
-| `T2-05` | `R2-02` | 恢复出厂，然后能重新认领 | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、**公开根告警回来** → 再 `takeown` 能成功 | 同 `T2-01` 的驱动 | **真板子 + 人按住 BOOT0 十秒** | ✅ |
+| `T2-05` | `R2-02` | 恢复出厂，然后能重新认领 | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、**公开根告警回来** → 再 `takeown` 能成功 | 同 `T2-01` 的驱动 | **真板子 + 人按住 BOOT0 十秒** | ❌ ¹⁰ |
 | `T2-06` | `R2-02` | 「信任公开根」的告警不能失灵 | bootloader 认出那把公开根靠的是编进 `owner_slot.c` 的 SHA-256 指纹常量，这条查它还对得上 | `python tools/check_public_root.py` | 主机侧 | ✅ |
 | `T2-07` | `R2-01` | 换成自己的根之后，公开根告警不再出现 | 启动日志里 `Owner slot: empty` **在**，而 `This board trusts the PUBLISHED root key` 两行**不在**；再用新密钥签的 app 装得进且能启动 | `rotate_keys.sh --yes` → `build_image.py` → `flash_bootloader.py --skip-build` → `upload_and_watch.py` | 真板子 + ST-Link | ✅ |
 
@@ -528,6 +528,8 @@ app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
 它原先落在系统临时目录，清理一次板子就只能重烧 bootloader 才能再用，所以改到
 `$TOOL/Output/owner-keys/<时间戳>/`（`Output/` 不进 git）。判据查文件在不在，
 **不查脚本打印了什么** —— 工具不能自己证明自己。
+
+¹⁰ **2026-09-21 实测不通过。** 前半截成立（恢复出厂做成了，回落到公开根），**后半截「再 `takeown` 能成功」过不去** —— `IAPTool` 的前置检查把 generation ≠ 0 一律当成已认领，而恢复出厂写的是一条 generation 照常递增的「已清空」记录。板子那边是对的，拦人的是工具。见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](../../maps/owner-revoke-and-boot-upgrade/issues/OWN-11-getowner-cannot-say-cleared.md)。
 
 ⁸ ⚠️ **`T2-21` 只覆盖 core 侧那一份 `R4`。** 同一条规则在 bootloader 的
 `owner_slot.c` 里还有第二份实现，而 `T1-16` 的 owner 槽是**桩**
