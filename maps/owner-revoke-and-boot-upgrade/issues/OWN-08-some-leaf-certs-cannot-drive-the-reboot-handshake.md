@@ -85,3 +85,44 @@ app 收到 `openplc_server_reboot` 之后不重启，继续以 `CUSAPP` 应答 U
 
 ⚠️ **顺带发现的一个隐患（不是本票的根因，但该记）**：那段接收码用 `p->len` 而不是
 `p->tot_len` 取长度。今天因为 `PBUF_POOL_BUFSIZE` 够大而碰不到，但包一旦跨段就会静默截断。
+
+
+## 2026-09-20 第二轮：问题在 IAPTool 侧，app 已证明是好的
+
+给探针加上 `udp_server.c` 自带的收包计数（`openplc_udp_server_recv_count()` 等，
+getter 本来就声明在 `OpenPLC_IAP_Autostart.h`，**没改产品代码**）之后，得到一组对照：
+
+### 手工直接发 UDP（python socket → 192.168.0.3:56865）
+
+| 发什么 | app 收到 | 回复 |
+|---|---|---|
+| `openplc_server_where_r_y`（24 字节） | ✅ `rx len=24` | 47 字节身份串 |
+| `openplc_server_reboot_challenge`（31 字节） | ✅ `rx len=31` | **32 字节 nonce** |
+| **407 字节的 `openplc_server_reboot ...`** | ✅ **`rx len=407`** | ——（内容是垃圾，预期不重启） |
+
+**app 全程活着，心跳不断，收到了完整的 407 字节。**
+这同时再次证实包不跨 pbuf 段（`p->len` 拿到了全长）。
+
+### 同一时刻，IAPTool 跑同样的握手
+
+| 观察 | 值 |
+|---|---|
+| app 收到的包 | **只有 1 个，`len=24`**（发现命令）—— challenge 和 reboot 都没到 |
+| IAPTool 拿到 nonce 了吗 | **拿到了**（拿不到会报 `reboot challenge request failed`） |
+| app 重启了吗 | **没有** —— 心跳 36 次不间断，没有任何启动横幅 |
+| app 崩了吗 | **没有** —— 同上 |
+
+**这两组观察无法用 app 侧解释。** 同一个地址、同一个端口（`getPort()` 默认 56865，已查）、
+同样的字节，手工发得到、IAPTool 发不到，而 IAPTool 又确实收到了来自某处的 nonce。
+
+### 下一轮从哪开始
+
+问题在 **PC 侧**，不在固件侧。两个具体方向：
+
+1. **IAPTool 到底把包发去了哪里** —— 在 `sendUDPWithResponseOnPort` / `dialUDPBoard` 里把
+   `conn.LocalAddr()` 和 `conn.RemoteAddr()` 打出来。这台机器可能有多个网卡，
+   广播（发现）和单播（challenge）可能走不同接口
+2. **那个 nonce 到底是谁回的** —— 抓包（Wireshark）最直接；或者把收到的字节打印出来，
+   看它是真 nonce 还是发现应答的残留
+
+⚠️ **票的标题已经不准** —— 和叶证书无关，也不是板子的毛病。根因定了一起改。
