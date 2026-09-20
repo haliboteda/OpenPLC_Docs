@@ -14,7 +14,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
-| **0** | **设计全部走完，眼下没有要你拍板的** —— 剩下的都是 🤖 实施 | —— |
+| **1** | **[升级被打断怎么报，原方案的载体已经没了](issues/OWN-10-interrupted-upgrade-has-lost-its-carrier.md)** —— 原方案靠两条 journal 事件活下来，而那八种事件已被另一张图全删。四个候选，等你选 | **现在就能问**，它挡着 `flashboot` 实施 |
 | —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套** | 要先做一个能说话的探针 app |
 | 1 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
 | 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |

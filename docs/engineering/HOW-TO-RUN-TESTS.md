@@ -292,7 +292,33 @@ python host/examples_build/build.py              # 全部
 python host/examples_build/build.py --only SDRAM  # 只挑一个库
 ```
 
-`tools/` 下还有四个纯静态检查，不碰任何代码执行：`check_version_sync.py`（版本号三处一致）、`check_mirror_sync.py`（跨仓镜像 9 个锚点 + RTC 备份寄存器占用）、`check_core_sync.py`（core live 与 git 仓库）、`check_public_root.py`（**T2-06**）。前三个对应发版检查单的 `CHK-B1` / `CHK-B2` / `CHK-B3`，以前是人工核对。
+### 静态检查一览（`P` 系列）
+
+**不碰任何代码执行，看的是源码和文档本身。** `P1`/`P2`/`P3` 对应发版检查单的
+`CHK-B1` / `CHK-B2` / `CHK-B3`，以前是人工核对。
+
+| 编号 | 跑什么 | 查什么 | 在 selfcheck 里 |
+|---|---|---|---|
+| `P1` | `tools/check_version_sync.py` | 固件版本号三处一致 | ✅ |
+| `P2` | `tools/check_mirror_sync.py` | 跨仓镜像 **12 个锚点** + RTC 备份寄存器占用 | ✅ |
+| `P3` | `tools/check_core_sync.py` | `$CORE_LIVE` 与 git 仓库一致 | ✅ |
+| `P4` | `host/variant_check/build.py` | Arduino 变体头的编译期断言 | ✅ |
+| `P5` | `host/examples_build/build.py` | core 自有库的每个 example 都编得过 | ⛔ 约十分钟，故意不进 |
+| `T2-06` | `tools/check_public_root.py` | 公开根指纹。**它是用例不是 `P` 系列** —— 退役的旧号登记在 [ID-MAP.md](../tables/ID-MAP.md) | ✅ |
+| `P7` | `tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ |
+| `P8` | `tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ |
+| `P9` | `tools/check_doc_paths.py` | 文档里点名的每条路径都存在 | ✅ |
+| `P10` | `tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
+| `P11` | `tools/check_tool_sync.py` | 板卡包里的 `IAPTool` 不落后于仓库 | ✅ |
+| `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ |
+| `P13` | `tools/check_no_stale_ids.py` | 改过名的编号没有残留引用 | ✅ |
+| `P14` | `tools/check_changelist_has_no_orphans.py` | **没做完的活不许只活在某张图的 `CHANGE-LIST` 里** —— 每份 `CHANGE-LIST` 要有横幅说明未完成的块搬去了哪，且 `work/TODO.md` 里找得到 | ✅ |
+| `P16` | `tools/check_icache_is_restored.py` | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ |
+
+⚠️ **这张表和 `selfcheck.py` 的 `CATALOG` 现在由 `P7` 对账**（2026-09-21 补的第三头）。
+`P14` 曾经从这个缝里漏过去：它进了 `CATALOG`、每次都在跑，文档里却一个字都没有。
+**新加一个步骤要同时动三处** —— `CATALOG`、这张表、以及模块文档里引用它的那条需求；
+少一处 `P7` 就红。
 
 ### T2-06 · "信任公开根"的告警不能失灵
 

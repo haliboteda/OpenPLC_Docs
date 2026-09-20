@@ -455,9 +455,9 @@ flowchart TD
 
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
-| `T2-01` | `R2-02` | 认领把板子绑到一把新密钥上 | `takeown` 回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得，**公开根告警消失** | `python tools/run_takeown.py` | **真板子 + 人按住 BOOT0** | ✅ |
+| `T2-01` | `R2-02` | 认领把板子绑到一把新密钥上 | `takeown` 回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得，**公开根告警消失**；**跑完那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_takeown.py` | **真板子 + 人按住 BOOT0** | ✅ |
 | `T2-02` | `R2-02` | BOOT0 没按时认领被拒（反向用例） | 回 `Refused`，`getpubkey` **一字节不变** | `python tools/run_takeown.py --expect-refused` | 真板子 | ✅ |
-| `T2-03` | `R2-02` | 换 owner：现任签名才算数 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变 | `python tools/run_setowner.py --current-key a.pem`（加 `--bad-signature` 跑负向） | 真板子 | ✅ |
+| `T2-03` | `R2-02` | 换 owner：现任签名才算数 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变；**跑完新主人那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_setowner.py --current-key a.pem`（加 `--bad-signature` 跑负向） | 真板子 | ✅ |
 | `T2-04` | `R2-02` | 无签名的高 generation 记录**夺不走**板子 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 | `python tools/inject_owner_record.py --key <hex> --also-unsigned 9` | 真板子 | ✅ |
 | `T2-05` | `R2-02` | 恢复出厂，然后能重新认领 | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、**公开根告警回来** → 再 `takeown` 能成功 | 同 `T2-01` 的驱动 | **真板子 + 人按住 BOOT0 十秒** | ✅ |
 | `T2-06` | `R2-02` | 「信任公开根」的告警不能失灵 | bootloader 认出那把公开根靠的是编进 `owner_slot.c` 的 SHA-256 指纹常量，这条查它还对得上 | `python tools/check_public_root.py` | 主机侧 | ✅ |
@@ -523,6 +523,11 @@ app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
 `T2-21` 跑的是 core 侧那份镜像，所以这两条**只能真板子验**。
 
 ⁶ **`R2-04` 的后半句由 `T2-21` 证明**（2026-09-20 补的主机台子）。**仍标 🟡 的原因见 ⁸。**
+
+⁹ **`T2-01` 那把新生成的私钥，以及 `T2-03` 换给新主人的那把，都是当时唯一能签固件的东西。**
+它原先落在系统临时目录，清理一次板子就只能重烧 bootloader 才能再用，所以改到
+`$TOOL/Output/owner-keys/<时间戳>/`（`Output/` 不进 git）。判据查文件在不在，
+**不查脚本打印了什么** —— 工具不能自己证明自己。
 
 ⁸ ⚠️ **`T2-21` 只覆盖 core 侧那一份 `R4`。** 同一条规则在 bootloader 的
 `owner_slot.c` 里还有第二份实现，而 `T1-16` 的 owner 槽是**桩**

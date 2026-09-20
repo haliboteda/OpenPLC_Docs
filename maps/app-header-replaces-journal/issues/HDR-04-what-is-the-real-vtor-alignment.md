@@ -32,14 +32,35 @@ H743 最大中断号 WAKEUP_PIN_IRQn = 149          （Drivers/CMSIS/.../stm32h7
 `0x08000000 | 0x20400 = 0x08020400` 恰好是对的，但**这依赖两个数不重叠位**，
 换个 offset 值可能就不成立了。这条要在同一次实验里一并看。
 
+## 2026-09-21 桌面核实：三条支柱里两条坐实，一条仍是抄件
+
+| 要查的 | 结果 | 出处 |
+|---|---|---|
+| 向量表多长 | **664 字节** —— 真实 map 实测 `.isr_vector = 0x298`，不是只靠算 | `Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h743xx.h:199`（`WAKEUP_PIN_IRQn = 149`） |
+| `TBLOFF` 是哪几位 | `_Pos=7`、`_Msk=0x1FFFFFF<<7` ⇒ bit[31:7]，本机三份 CMSIS 一致 | `open_plc_cube_ide/Drivers/CMSIS/Include/core_cm7.h:557-558`。⚠️ **这是抄件，不是硅片** |
+| app 当前链在哪 | `build.flash_offset=0x20000` ⇒ `0x08020000`，已是 128K 对齐 | `open_plc_arduino/platform.txt:109` |
+| 「架构要求对齐 ≥ 向量表长度」 | ⚠️ **没有查过 ARMv7-M 架构手册原文**，是转述。它是 1024 的支柱，却没有出处 | —— |
+
+**票里第二个担忧（`VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET` 的 OR）是假警报，可以划掉**：
+那段被 `#if defined(USER_VECT_TAB_ADDRESS)` 包着，而那个宏在两份 core 里**只出现在注释里**
+（`open_plc_arduino/system/.../system_stm32h7xx.c:88`）。app 的 VTOR 实际由 bootloader 跳转前
+**一处纯赋值**设定：`SCB->VTOR = app_base;`（`open_plc_cube_ide/IAPServer/IAP_server.c:749`）。
+
+⚠️ **顺带发现**：`open_plc_arduino/variants/STM32H7xx/H743/ldscript.ld:61-66` 对 `.isr_vector`
+只有 `ALIGN(4)`，**1024 对齐没有任何构建期防线**，全靠 `flash_offset` 这一个数字碰巧是对的。
+
 ## 怎么算答完
 
-在**真板子**上做完这两件，并把观察到的原话记进 `## Answer`：
+**实验换成读回寄存器，不再链非对齐地址。** 原方案（链到 `0x08020200` 烧进去看跑不跑）测的是
+一条 UNPREDICTABLE 行为 —— 跑通了也只证明这颗片子这次没炸，不构成「512 够用」的证据。
 
-1. **把 app 链接到一个非 1024 对齐的地址**（例如 `0x08020200`），烧进去，复位 —— 记录板子的实际表现
-   （跳转成功？HardFault？跑飞？串口打了什么？）
-2. **链接到 `0x08020400`**，烧进去，复位 —— 确认能正常跑起来，且 app 侧读到的 `SCB->VTOR` 就是 `0x08020400`
-3. 写下**最终采用的 header 大小**，以及它是实测确认的还是仍按架构规则推的
+1. **在 app 里量 `SCB->VTOR` 实际实现了哪几位**：写 `0x08020080`（bit[6:0] 非零）→ 读回 →
+   打印 → 写回原值。读回值的低位被丢掉多少，就是硬件强制的对齐。
+   **这一步把 `TBLOFF` 从 CMSIS 抄件换成实测。** 代码放 `$TOOL/TestCase/onboard/vtor_probe/`
+2. **确认 app 侧读到的 `SCB->VTOR` 就是 `0x08020000`** —— 「app 的 VTOR 只由 bootloader 一处设定」
+   这个依赖现在成立且没人验过
+3. 写下**最终采用的 header 大小**，以及它哪部分是实测、哪部分仍按架构规则推
+   （第 1 步答不了「对齐 ≥ 向量表长度」那条，那条要么查 ARM 手册原文，要么接受按规则推）
 
 > 对照参考：`ref/Hello_World_OpenPLC/Core/Src/system_stm32h7xx.c` 是「app 侧 VTOR 怎么设」的现成样例，
 > **它是对照不是权威，不要改它**。
