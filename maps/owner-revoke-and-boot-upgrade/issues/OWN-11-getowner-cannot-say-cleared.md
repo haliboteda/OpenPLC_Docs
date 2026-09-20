@@ -51,9 +51,26 @@ Use setowner with the current owner's key to hand it over.
 ## 怎么算答完
 
 1. 定下 `getowner` 的线上契约，写进 [M2 归属与信任](../../../docs/modules/M2-ownership.md)
-2. **`T2-05`（恢复出厂，然后能重新认领）在真板子上从头走通一次** ——
-   它今天标 ✅ 但实际过不去，见下
-3. 说清 `getowner` 对一块已清空的板子该怎么措辞
+2. ~~**`T2-05`（恢复出厂，然后能重新认领）在真板子上从头走通一次**~~ —— ✅ **2026-09-21 走通了**，见下
+3. 说清 `getowner` 对一块已清空的板子该怎么措辞 —— **还没答，这是本票剩下的全部**
 
-⚠️ **`T2-05` 的 ✅ 是错的。** 这条用例的判据就是「再 `takeown` 能成功」，
-而 2026-09-21 实测走不通。已就地改成 ❌。
+
+## 2026-09-21：选 ③，已实施并在真板子上验过。**票不关** —— 第 3 项还没答
+
+**做法**：`$TOOL/owner.go` 的 `RunTakeOwn()` 不再在 `gen != 0` 时拒绝，改成把看到的状态**报出来**，
+命令照发，由板子决定。理由是这个项目自己的规矩 —— **结果问板子要，工具不能自己证明自己**；
+而且不损失信息：板子对真正已认领的情况会自己回
+`** takeown refused: this board is already claimed ... **`。安全性不变，门一直是板子上的 BOOT0。
+
+**真板子验收**：恢复出厂（generation 5，回落公开根）→ `takeown` → **成功，generation 6**，
+`getpubkey` 回的正是新密钥。⇒ `T2-05` 转 ✅。
+
+⚠️ **顺带修了一个用例自己的缺陷**：`tools/run_takeown.py` 把判据写死成 `expected 1`，
+而 `owner_slot_claim()` 明写「reset-then-reclaim 之后 **Not always 1**」。
+改成判**增量**（认领后 = 认领前 + 1）。
+
+### 还欠第 3 项
+
+「`getowner` 对一块已清空的板子该怎么措辞」**还没定** —— 它现在仍然把刚恢复出厂的板子
+报成「Claimed at generation 5 ... Only firmware signed by that key will start」。
+候选 ① 的那个字段就是为这件事留的。
