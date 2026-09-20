@@ -1,0 +1,103 @@
+# metadata 从 journal 扇区搬进 app 头部
+
+## 怎么看进度（不用问任何人）
+
+```
+python tools/list_wayfinder_map_frontier.py --all
+```
+
+> 打出每张票是 `TAKEABLE` / `claimed` / `resolved` / `paused`，以及谁挡着谁。**别凭记忆，跑它。**
+
+## 还要你拍几次板（**提前列出来，免得被逐个突袭**）
+
+| 还剩几次 | 要你定什么 | 哪张票 |
+|---|---|---|
+| 1 | **换主之后旧根签的固件还能不能启动** | [换主之后，旧根签的固件还能不能启动](issues/HDR-01-does-setowner-still-invalidate-installed-firmware.md) |
+| 2 | **八种事件日志留不留、留的话住哪** | [八种事件日志留不留，留的话住哪](issues/HDR-02-do-the-event-logs-survive.md) |
+| 3 | 让出来的 128 KiB 给谁 | [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md) |
+| 4 | header 里放什么、什么布局 | [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md) |
+| 5 | 发布和现场迁移怎么走 | [这次变更怎么发布，现场的板子怎么迁移](issues/HDR-06-how-does-this-ship-and-migrate.md) |
+
+**还要你动一次手**：[VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md) 要在真板子上验一次跳转。
+
+## Destination
+
+firmware metadata（`app_size` + `signature` + `cert`）**从独立的 128 KiB journal 扇区搬进 app 镜像开头的定长 header**，
+`IAP_STATE_SECTOR_ADDR` 那个扇区从此不再被 bootloader 用于启动判定。
+
+**这张图产出设计定稿** —— 每处要改的东西有形状、有判据，可以交给实施。**不写代码。**
+
+## Notes
+
+- 域：[M1 固件升级](../../docs/modules/M1-firmware-upgrade.md)、[M2 归属与信任](../../docs/modules/M2-ownership.md)、[Journal 设计说明](../../docs/modules/M1/JOURNAL.md)
+- **先文档再代码** —— 定稿先进 `M1-firmware-upgrade.md`，再动 `$BOOT`
+- 这次变更**同时动三个仓**：`$BOOT`（判定与写入）、`$CORE_REPO`（`build.flash_offset`）、`$TOOL`（6 个测试脚本的硬编码基址）。
+  ⚠️ **`upload.maximum_size` 本来就是跨仓镜像项**（`boards.txt:37` 的注释明写「must equal IAP_APP_MAX_SIZE」），这次是在已有耦合点上多改一个数，不是新开口子
+- **IAPTool 本体零改动** —— `flash <size> <crc> <sig> <cert> <noncesig>` 协议不变，header 由板子自己填
+- 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
+
+## 全集
+
+这张图会碰到的所有文件，由这条命令算出来（找的是「谁提到 app 基址、journal、或者编译期的 flash 偏移」，不是「我们打算在哪找」）：
+
+```
+grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.md --include=*.txt --include=*.ld \
+  -e 0x08020000 -e 0x8020000 -e 1835008 -e IAP_APP_ADDRESS -e IAP_APP_MAX_SIZE \
+  -e bootloader_state -e journal -e JOURNAL -e flash_offset -e VECT_TAB_OFFSET \
+  /e/WorkSpace/Schaeffer-AG
+```
+
+### 2026-09-20 首次对账
+
+去掉 `.metadata/`、`Middlewares/`、`Drivers/CMSIS/`、本图自己的 `maps/` 产物，以及三个不属于本产品的目录之后，命令输出 **52 个文件**。开图时的讨论只点到其中一部分，**这次对账抓出四处原先没想到的**：
+
+| 漏的 | 为什么要紧 |
+|---|---|
+| **`$BOOT` 自己的两份链接脚本**（`STM32H743IIKX_FLASH.ld` 和 `STM32H743IIKX_FLASH_PORTTOOL.ld`） | bootloader 侧也有 flash 布局常量，改 app 起点时要一起核对 |
+| **`$CORE_REPO/tools/platformio/platformio-build.py`** | PlatformIO 那条构建路径**不读 `platform.txt`**，`build.flash_offset` 改了它不会跟着变 |
+| **`$TOOL/TestCase/host/bootloader_unit/stubs/bootloader_state_stub.c`** | `T1-16` 拿真实 bootloader 源码在 PC 上跑，删掉 journal 之后这个桩整个失效 |
+| **`ref/Hello_World_OpenPLC/Core/Src/system_stm32h7xx.c`** | 是对照不是权威，**不改** —— 但它是「app 侧 VTOR 怎么设」的现成参照，验 `HDR-04` 时用得上 |
+
+⚠️ 输出里有一处误命中：`$CORE_REPO/libraries/STM32duino_LwIP/.../polarssl/des.c`，与本图无关。
+
+## 开图过程中撞见的文档漂移（**都还没改**）
+
+2026-09-20 讨论这张图时顺带核出五处「文档说的和代码不符」。**四处会被本图的实施吸收，一处不会**：
+
+| 哪里 | 文档说 | 代码实际 | 谁来收 |
+|---|---|---|---|
+| [`JOURNAL.md`](../../docs/modules/M1/JOURNAL.md) 扫描流程图 | `'M'（8格）… i += 8` | `i += IAP_METADATA_SLOTS`（**7**） | 本图（该文件整份重写或废弃） |
+| 同上，写入流程图 | `追加 M 记录（8格）` | `journal_write(&rec, 7)` | 同上 |
+| 同上，写入流程图 | `剩余格子 < 8` | `journal_room() < 7` | 同上。⚠️ **这处有实际后果**：剩正好 7 格时代码直接追加，追加完剩 0 格，那条 `UPDATE_OK` 日志写不进去 |
+| `$BOOT/IAPServer/bootloader_state.h` 头部注释 | journal 满状态 "reported at boot and **in the identity string**" | `iap_identity_string()` 只看 `app_is_valid`，**identity 里没有** | 本图（[八种事件日志留不留](issues/HDR-02-do-the-event-logs-survive.md) 会重写这段） |
+| ⚠️ [`M2-ownership.md`](../../docs/modules/M2-ownership.md) `R2-04` 旁注 | 「**状态仍是 ⬜ —— 设计定了，代码一行还没写**」 | 撤销已实现（commit `294fb20`），`T2-15`–`T2-18` **2026-09-20 真板子通过**，同一份文档第 485 行自己记着 | ❌ **不属于本图** —— 是 [撤销叶证书 + bootloader 原地升级](../owner-revoke-and-boot-upgrade/map.md) 的遗留。**这处会让人以为撤销还没实现** |
+
+## Decisions so far
+
+**以下八条 2026-09-20 在对话里定，开图之前就已成立**，所以没有对应的票：
+
+- **metadata 砍不得** —— 它支撑四条需求：`R1-26`（app 的签名在每次启动时被重新校验）、`R1-27`（掉电中断升级后板子仍可恢复）、`R1-28`（metadata 和事件记在 journal 里）、以及**跨模块的 `R2-04`（撤销叶子证书，回溯作废已装固件）**。最后那条写在 M2、实现却整个寄生在 metadata 的 `cert` 字段上，**最容易漏**
+- **「掉电恢复」不是 metadata 的独立功能** —— 它是启动校验在「app 被写坏」这个输入下的表现，**不占任何额外字节**。`T1-21`（掉电落在传输期）真正靠的是 SDRAM 暂存区设计，`T1-22`（掉电落在擦写窗口）靠的就是启动校验本身
+- **append-only 是 metadata 自己逼出来的，不是为了日志** —— NOR flash 最小擦除单位是整扇区，原地改写 metadata 等于每次升级擦一次；**metadata 跟 app 一起写之后，这个理由消失，journal 就没有存在必要了**
+- **事件日志支撑 0 条需求、零读出路径** —— `dropped_events()` / `journal_full()` / `auth_fail_log()` / `auth_fail_count()` 四个导出函数在 `bootloader_state.c` 之外**零调用者**；上位机 grep `journal` 零命中。唯一被消费的是 `last_log_event()`，用途是给日志**自己**去重
+- **尾附「哈希」不安全，尾附「签名 + 证书」安全** —— 差别不在位置，在**锚**：哈希没有锚，改镜像的人一次写入就把它一起改了；证书的 `root_sig` 锚在 owner 区，改镜像的人够不着。**开源不影响这一条 —— 安全来自密钥，不来自格式保密**
+- **只缓存叶公钥（不存整张 cert）是不安全的** —— 缓存的公钥没有任何东西约束它是否被认可，攻击者追加一条自带公钥 + 自带签名的记录就能通过。`bootloader_state.h` 里那句 `do not add one` 拦的是这个
+- **`app_size` 必须记** —— 不记就必须每次全擦 app 区（否则分不清「这一版的最后一个字节」和「上一版残留的第一个字节」），还要每次启动算满 1792 KiB 的哈希，并让上位机新增一个跨仓常量。**「不记长度 + 不全擦」在原理上不成立**
+- **业界对标：元数据跟镜像走是主流，独立 append-only 扇区没查到先例** —— MCUboot 的 image header 在镜像开头且装着 image size，ESP32 Secure Boot v2 的签名块紧跟镜像。⚠️ **PLC 厂商（Siemens / Beckhoff）只查得到「验不验签」这一层，查不到「元数据存哪」** —— 他们的 bootloader 是闭源的
+
+**以下两条 2026-09-20 由用户拍板，同样没有票：**
+
+- **选 S-e：header 放 app 镜像开头** —— 相比放尾部（S-a），它**不需要额外擦一个 128 KiB 扇区**，也没有「忘记擦」这个坑，代价是要改 `build.flash_offset`（一个数字）并因 VTOR 对齐浪费约 800 字节
+- **撤销只管未来** —— 叶 a 被撤销后，**已经装在板子上的、a 签的固件照常启动**；a 再上传仍然被拒。理由：`R2-04` 记录在案的需求是「员工离职换人」（持证几人到十几个，换人频率不定），离职一个同事不该让他经手过的板子集体停机。⚠️ **`T2-15`（撤销回溯作废已经装上的固件）判据要重写**，它 2026-09-20 刚在真板子上通过
+
+## Not yet specified
+
+- **`R1-32`（任何丢包 / 拒绝路径都能说出自己为什么）在新结构下还成不成立** —— 现在「板子起不来怎么查」那张八行索引表里，`metadata absent`（出厂空板）和 `App signature invalid`（装过但上次失败）是两行；header 跟 app 一起被擦之后这两行会塌缩成一个现象。**其余六行不受影响**。要等 `HDR-05` 定了 header 布局（有没有 magic、magic 能不能区分「从没写过」和「写了一半」）才说得清
+- **`P2`（跨仓镜像没分叉）要不要把 `build.flash_offset` 纳进去** —— 它现在守的是 owner 记录和证书那几份镜像。app 起始地址变成三处共识之后，谁来保证它们不分叉还没定
+- **bootloader 自己要不要也带 header** —— 本图只管 app。`flashboot` 原地升级（另一张图）落地后，bootloader 镜像自己的完整性怎么证，可能会回头影响这里的格式选择
+
+## Out of scope
+
+- **`flashboot` bootloader 原地升级** —— 在 [撤销叶证书 + bootloader 原地升级](../owner-revoke-and-boot-upgrade/map.md) 那张图里，**两张图并行**。本图不碰 bootloader 自身的升级路径
+- **给 flash 上写保护（WRP）** —— `M2-ownership.md` 已记载「太锋利，留给客户自己决定」，本图不重开
+- **`sha256` 硬件加速** —— 现在是纯软件实现（`IAPServer/sha256.c`）。S-e 下哈希范围不变（仍是实际镜像大小），**这次变更不改变哈希成本**，所以不在本图范围

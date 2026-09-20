@@ -3,7 +3,7 @@
 Type: task
 Opened: 2026-09-20
 Status: open
-Blocked by: -
+Blocked by: OWN-09
 
 ## Question
 
@@ -37,6 +37,12 @@ app 收到 `openplc_server_reboot` 之后不重启，继续以 `CUSAPP` 应答 U
 
 `T1-16` 覆盖不到这条：重启握手在 core 侧的 `udp_server.c` / `iap_auth.c`，
 不在那个主机台子上。
+
+⚠️ **2026-09-20 调查受阻**：做了能说话的探针之后发现，
+**app 里的 `printf` 压根没有输出通道**（实测 `printf` 0 行 / `Serial_Test` 18 行）——
+而要区分的三种结局恰恰只差在那几行 `printf` 上。
+**这张票被 [app 里的 printf 没有输出通道](OWN-09-printf-has-no-output-path-in-an-app.md) 挡着**，
+先把那条修了才查得下去。
 
 ## 怎么算答完
 
