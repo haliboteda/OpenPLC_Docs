@@ -169,3 +169,37 @@ live in the bootloader's own flash sector. Use `flashboot` to keep it.
 ⚠️ **这段有一条前提还没成立**：升到 `format_ver` 3 的那一次，v2 记录会被判无效，
 **所有权仍然会丢**。所以「所有权会保住」这句话**从 v3 之后的版本之间才为真** ——
 发布说明要把这一次切换单独说明。见票 [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md)。
+
+---
+
+## I · `'R'` 记录压缩到一个 flash word（2026-09-20 定，见 `DECISIONS.md` 58 / 59）
+
+**做这一节之前先修 [第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)** ——
+那是缺陷，这是有计划的格式变更，混在一起验的时候分不清是哪边的问题。
+
+新布局：owner 区 8192 字节切两段，**`'O'` 32 条（5120 字节）+ `'R'` 96 条（3072 字节）**。
+`'R'` 记录 32 字节 = `type`(1) + `format_ver`(2) + `uid`(12) + 叶公钥前 16 字节。
+
+| # | 改哪 | 改什么 | 谁拍板 |
+|---|---|---|---|
+| I1 | `$BOOT/IAPServer/owner_slot.h` | 拆出 `owner_revoke_rec_t`（32 字节）；`'O'` 段和 `'R'` 段各自的基址与条数常量；`_Static_assert` 锁两个尺寸 | 🤖 形状已定 |
+| I2 | 同上 · `owner_record_t` | **删掉 union 里的 `revoked[4][16]`** —— `'R'` 不再共用这个结构体，`'O'` 只剩 `root_pubkey` | 🤖 |
+| I3 | 同上 · `OWNER_FORMAT_VER` | **3 → 4**，硬切不做兼容（沿用 `OWN-03` 的先例） | 🤖 |
+| I4 | `owner_slot.c` · `resolve_chain()` | 只扫 `'O'` 段建链；`'R'` 段**独立扫一趟**，只查结构（type / format_ver / uid），不验签、不看 generation | 🤖 形状已定（决策 59） |
+| I5 | `owner_slot.c` · `owner_slot_revoke()` | 写 32 字节记录；去掉 generation 检查；签名验完即丢；**写之前查重复，已存在则不写并回 `OK already revoked`**（`I-D1`） | 🤖 |
+| I6 | `owner_slot.c` · `append_record()` | 拆成两个：`'O'` 往 `'O'` 段追加，`'R'` 往 `'R'` 段追加 | 🤖 |
+| I7 | `$CORE_REPO/libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}` | 跨仓镜像，常量和两段扫描要完全一致 | 🤖 |
+| I8 | `$TOOL/owner.go` · `RunRevoke()` | 不再算 generation、不再发送它；签名改成覆盖新的 31 字节 | 🤖 |
+| I9 | `$TOOL/TestCase/host/bootloader_unit/` | `T1-16` 拿真实 `owner_slot.c` 在 PC 上跑，桩和用例跟着改 | 🤖 |
+| I10 | `$TOOL/TestCase/tools/inject_owner_record.py` | `T2-04` 靠它手工拼记录字节，布局变了必须跟 | 🤖 |
+| I11 | `$TOOL/TestCase/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | 🤖 |
+| I12 | `$PROD/docs/modules/M2-ownership.md` | 新布局的字节表、两段的划分理由、`'R'` 读取不验签这条 | 🤖 |
+| I13 | 用例 | **新增两条**：① 剩 8 条时启动日志出现提醒；② 第 97 个被拒且一个字节未写 | 🤖 形状已定 |
+
+### I · 要你拍板的
+
+| # | 问题 | 状态 |
+|---|---|---|
+| **I-D1** | 同一个叶被重复提交作废时怎么办 | ✅ **2026-09-20 定：幂等** —— 写之前扫一遍 `'R'` 段，那 16 字节前缀已存在就**不写记录**，回 `OK already revoked`。工具用 `strings.Contains(reply, "OK")` 判成功，所以这个应答既算成功又能把“已存在”显示出来。**这同时就是防重放** —— 重放一百次也只占一个 word |
+| **I-D2** | `'R'` 段 96 条用满之后 | ✅ **2026-09-20 定**：**满了就不让添加**（回 `Refused`，一个字节不写）；**剩 8 条时启动日志开始提醒**，重点引导去**换根 + 重新授权**（`setowner`）而不是继续逐个作废。⚠️ **换根不腾空名额** —— 它让旧根签发的叶全部失效（所以**不再需要**逐个撤），但那 96 条记录仍占着 flash（读取不验签，板子无从分辨哪条属于哪一任根）。**真正回收名额只有两条路**：`flashboot` 原地升级时压缩（那半边还没做），或重烧 bootloader。**文案不得暗示「换根就能继续作废」**。⚠️ **2026-09-20 补**：用户希望换根时**把 `'O'`/`'R'` 两段全清空重写** —— 那会让名额真的回收，但把 `setowner` 变成擦扇区 0 的高风险操作，已单独开票：[换根的时候把 owner 区清空重写](issues/OWN-07-should-setowner-wipe-the-owner-area.md) |
+| **I-D3** | `revoke` 要不要支持一次提交多个叶 | ✅ **2026-09-20 定：不做**。今天没有具体场景，而代价是命令格式变复杂 + 要回答「写了 3 条第 4 条失败怎么办」。单条命令跑 N 次效果相同 |

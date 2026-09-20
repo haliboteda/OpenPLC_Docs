@@ -14,7 +14,8 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
-| **1** | **[第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)** —— `'R'` 记录的 generation 语义自相矛盾，三个候选 | **现在就能答**（在前沿） |
+| **0** | **设计全部走完，眼下没有要你拍板的** —— 剩下的都是 🤖 实施 | —— |
+| —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套** | 要先做一个能说话的探针 app |
 | 1 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
 | 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
 | 4 | 发布说明怎么改（草稿在 [CHANGE-LIST.md](CHANGE-LIST.md) 的 H 节，英文） | 代码落地前 |
@@ -82,6 +83,9 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 - [升级被打断之后，板子怎么让人知道](issues/OWN-04-how-does-an-interrupted-upgrade-announce-itself.md)：两条 journal 事件（开始 / 完成，住 Bank 2 不被擦）+ 两段定稿文案。**启动日志那行刻意不讲 DFU 怎么用** —— 那条写在发布说明里，两处不重复
 - [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md)：**升到 3，硬切不做兼容** —— 删了 `slots`、证书变 128 字节，布局整个变了，而现场没有已认领的板子
 - [工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md)：**信板子回的 `OK`，不加 `getrevoked`** —— `OK` 已经是板子重扫 flash 确认后才发的。顺带核实出 `B4` 是个不存在的问题（累加由板子自动做），且 `D7` 的形状原本写错了
+- **2026-09-20 在对话里定，没有对应的票**：`'R'` 记录压到**一个 flash word（32 字节）**，owner 区改成 **`'O'` 32 条 + `'R'` 96 条**两段定长；写入验签、**读取只查结构**。详见 `DECISIONS.md` 第 58 / 59 条，要改的东西在 [要改的东西，一条不落](CHANGE-LIST.md) 的 I 节
+- [换根的时候把 owner 区清空重写](issues/OWN-07-should-setowner-wipe-the-owner-area.md)：**按需清空，必须显式请求**。平时换根仍是低风险追加；剩 8 条时日志提示；`--wipe` 那一次才擦扇区 0。**实施排在 `flashboot` 之后**
+- [第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)：**`'R'` 退出链的行走，改成独立一趟扫描**。真板子验收通过（`T2-19`/`T2-20`），槽位 50 → 42、八次作废零浪费
 
 ## Not yet specified
 
