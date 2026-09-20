@@ -14,9 +14,9 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
-| **1** | **[工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md)** —— 三个候选摆好了，等你选 | **现在就能答**（在前沿） |
-| 2 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
-| 3 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
+| **1** | **[第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)** —— `'R'` 记录的 generation 语义自相矛盾，三个候选 | **现在就能答**（在前沿） |
+| 1 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
+| 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
 | 4 | 发布说明怎么改（草稿在 [CHANGE-LIST.md](CHANGE-LIST.md) 的 H 节，英文） | 代码落地前 |
 
 **不用你定的**：[要改的东西，一条不落](CHANGE-LIST.md) 里标 🤖 的那些，形状已经由已关的票定死了。
@@ -81,11 +81,14 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 - [擦扇区 0 的时候，那段代码从哪执行](issues/OWN-02-where-does-the-erase-code-run.md)：**必须放 `RAM_D1`（`0x24000000`）里跑，全程关中断**。⚠️ RM0433 §4.3.7 的 RWW 只跨 bank 有效，而**擦完扇区 0 之后取到的指令是 `0xFF`，RWW 救不回来**。链接脚本和启动代码**不用改**（`.RamFunc` 段已经有了）
 - [升级被打断之后，板子怎么让人知道](issues/OWN-04-how-does-an-interrupted-upgrade-announce-itself.md)：两条 journal 事件（开始 / 完成，住 Bank 2 不被擦）+ 两段定稿文案。**启动日志那行刻意不讲 DFU 怎么用** —— 那条写在发布说明里，两处不重复
 - [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md)：**升到 3，硬切不做兼容** —— 删了 `slots`、证书变 128 字节，布局整个变了，而现场没有已认领的板子
+- [工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md)：**信板子回的 `OK`，不加 `getrevoked`** —— `OK` 已经是板子重扫 flash 确认后才发的。顺带核实出 `B4` 是个不存在的问题（累加由板子自动做），且 `D7` 的形状原本写错了
 
 ## Not yet specified
 
 - **`flashboot` 的线上协议**：帧格式、分块、和现有 `flash` 命令共用多少
-- **撤销之后客户怎么知道「哪几块板上的固件需要重传」** —— 撤掉某人，他签过的固件下次启动会被拒、停在 bootloader
+- **撤销之后客户怎么知道「哪几块板上的固件需要重传」** —— 撤掉某人，他签过的固件下次启动会被拒、停在 bootloader。
+  ⚠️ **要的不是撤销名单** —— 板子启动时已经在算「当前 app 的签名者被撤了没有」（`IAP_server.c:621`），
+  最小做法是把那个布尔值报出来。这条 2026-09-20 由 [工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md) 改准
 - **发布说明要怎么改** —— 现在写着「换 bootloader 要重传 app + 重新认领」，原地升级做出来之后这句话会过期
 
 ## Out of scope
