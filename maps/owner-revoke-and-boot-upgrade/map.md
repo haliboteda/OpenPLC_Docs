@@ -16,7 +16,7 @@ python tools/list_wayfinder_map_frontier.py --all
 |---|---|---|
 | **2** | **`getowner` 对一块刚恢复出厂的板子怎么措辞** —— 它现在报「Claimed at generation N」，读的人会以为板子还被占着 | **现在就能问**，见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md) 的第 3 项 |
 | —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套** | 要先做一个能说话的探针 app |
-| 1 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
+| **1** | **`flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少** | **现在就能问** —— 形状 2026-09-20 已定完，见[`flashboot` 的线上协议长什么样](issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md) |
 | 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
 | 4 | 发布说明怎么改（草稿在 [CHANGE-LIST.md](CHANGE-LIST.md) 的 H 节，英文） | 代码落地前 |
 
