@@ -192,7 +192,7 @@ flowchart TD
 | `0x08000000` | 120 KiB | **bootloader 代码**，内置根公钥在它的 rodata 里 | ST-Link | 整扇区 |
 | `0x0801E000` | 8 KiB | **owner 记录区**，51 条 × 160 字节 | bootloader | **只追加，永不擦除** |
 | `0x08020000` | 1792 KiB | **app 区**，第 1 步每次启动现算这块的 SHA-256 | bootloader | 提交时 |
-| `0x081E0000` | 128 KiB | **扇区 15** —— 前 8 KiB **校准值**（固定地址）+ 后 120 KiB **metadata**（3840 格 × 32 字节，548 条）。⚠️ **代码未改，今天整块都是 journal** | bootloader / 工装 | 只在 metadata 区满时，且要先搬校准值 |
+| `0x081E0000` | 128 KiB | **扇区 15** —— 前 8 KiB **校准值**（固定地址）+ 后 120 KiB **metadata**（3840 格 × 32 字节，548 条） | bootloader / 工装 | 只在 metadata 区满时，且要先搬校准值 |
 | `0xC0000000` | 2 MiB | **SDRAM 暂存区** | bootloader | — |
 | `0x38000000` | 32 B | 交接记录（SRAM4） | bootloader / app | 读即消费 |
 
@@ -270,7 +270,7 @@ flowchart TD
 | **R1-25** | 传输与校验 | **校验失败的上传不破坏已装好的 app** | `T1-14` `P16` ⁶ | ✅ |
 | **R1-26** | 启动切换 | app 的签名在**每次启动时**被重新校验 | `T1-13` | ✅ |
 | **R1-27** | 启动切换 | 掉电中断升级后板子仍可恢复 | `T1-21` `T1-22` | ✅ |
-| **R1-28** | 记录与诊断 | metadata 和事件记在 journal 里，一次成功升级 = 8 槽。⚠️ **已定重写** ⁵ | `T1-26` | ✅ |
+| **R1-28** | 记录与诊断 | metadata 记在扇区 15 的 metadata 区，**一次成功升级 = 7 槽** ⁵ | `T1-26` | ✅ |
 | **R1-29** | 记录与诊断 | 扇区满了能 reclaim 并恢复。⚠️ **已定重写** ⁵ —— **reclaim 不会消失**：metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回 | `T1-28` | ✅ |
 | **R1-30** | 记录与诊断 | 复位原因能正确报出（PIN / SOFT / POR） | 手工 | ✅ |
 | **R1-31** | 记录与诊断 | RTC 备份域失效（VBAT 没电）时能被发现 | 手工 | ✅ |
@@ -333,7 +333,7 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 ¹ **正向对照不是可选的。** 反向用例（「板子应该沉默」）没有对照就分不清「以太网栈没起」和「板子死了」——2026-09-17 实测时对照组失败过一次，脚本正确地报了「这一轮什么都没证明」而不是通过。
 
-² **两头必须用 ST-Link 复位，不能走 IAP。** 任何经过 IAP 的路径（包括被拒绝的上传）自己都会写 journal 事件，那样测出来的差值含测量本身的开销。
+² **两头必须用 ST-Link 复位，不能走 IAP。** 改动前任何经过 IAP 的路径（包括被拒绝的上传）自己都会写一条事件，差值会含测量本身的开销。事件日志删掉之后只有成功的升级才写，但**这条约束仍然照旧**：走 IAP 复位会多绕一遍上传路径。
 
 ## 5 · 测试怎么跑
 
@@ -370,7 +370,7 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-23` | `R1-01` `R1-03` | 一次真实上传走完，且擦除在验证之后 | 日志出现 `Staging in SDRAM`，且 `Erasing application region` 在 `Transfer complete, verifying` **之后** | `python tools/upload_and_watch.py --bin <app.bin> --ip <IP>`（或 `--cdc <COM>`） | 真板子 | ✅ |
 | `T1-24` | `R1-22` | 坏 CRC 必须在验签之前被拒 | 板子回 `Checksum Failed` 而**不是** `Signature Failed` —— 「先」过 CRC32 这半句正是它证明的 | `python tools/run_case.py --case T1-24 --bin <app.bin>` | 真板子 | ✅ |
 | `T1-25` | `R1-05` | CDC 上传模式下以太网栈不起来 | 板子进 CDC 模式后不应答 UDP 发现，**且同一轮的正向对照答得出** ¹ | `python tools/run_cdc_does_not_start_ethernet.py --cdc <COM> --ip <IP> --ports <日志口>` | 真板子 | ✅ |
-| `T1-26` | `R1-28` | 一次成功升级消耗 8 个 journal 槽 | 上传前后各复位一次读 `Bootloader state: N/M journal slots used`，差值 **= 8** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
 | `T1-28` | `R1-29` | journal 扇区满了能 reclaim 并恢复 | 灌满后板子报 `N/4096 journal slots used`，一次上传后日志出现 `Reclaiming state sector (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 
@@ -402,9 +402,9 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 `tools/run_au1.py` 自己的头注释写着 `prompts you to pull the plug`。
 
 ⁵ ⚠️ **2026-09-21 改定，推翻了 2026-09-20 那一版**：**metadata 留在扇区 15**（不搬进 header）、八种事件日志全部删除、扇区**最前 8 KiB 划给校准值**。见 `DECISIONS.md` 第 61 条和[烧录前比版本 + 校准值住进扇区 15](../../maps/version-gate-and-calibration/map.md)。
-`R1-28` 因此重写（不再有 journal 槽这个概念），`R1-29` 因此删除（不再有 reclaim），
-`T1-26`、`T1-28` 两条用例一并删除。**代码尚未改动**，上面两行的 ✅ 记的是改动前的行为。
-决定和进度在 [metadata 从 journal 扇区搬进 app 头部](../../maps/app-header-replaces-journal/map.md)。
+`R1-28` 因此重写（槽仍然有，一次升级从 8 槽变 7 槽），**`R1-29` 保留** —— reclaim 没有消失，
+metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回。
+✅ **代码已改并上板验收**：实测 `21/3840` → `28/3840`。
 
 ⁶ **`P16` 证的是结构，不是某一次运行。** flash 写入中途失败时，若从循环里直接 return，
 `HAL_FLASH_Lock()` 和 `SCB_EnableICache()` 都会被跳过 —— **flash 就一直开着锁**，
@@ -436,8 +436,8 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 | 串口打的是 | 说明什么 | 怎么确认 | 怎么恢复 |
 |---|---|---|---|
-| `metadata absent` | **出厂空板**，从来没成功上传过 | journal 第一格就是 `0xFF`；UDP 发现回的角色是 `BOOTLD-INVALID` | 第一次上传就正常了 |
-| `unrecognised record at slot 0` | **换过 bootloader**，journal 里是旧格式的字节 | 多出这一行；而且 `s_format_unknown` 为真时新事件全丢，日志停止增长 | 重传一次 app → reclaim 整扇区。⚠️ **owner 记录也一起被擦过，要重新认领** |
+| `metadata absent` | **出厂空板 / 刚被擦过**，没有有效的 metadata | metadata 区第一格就是 `0xFF`；UDP 发现回的角色是 `BOOTLD-INVALID` | 第一次上传就正常了 |
+| `unrecognised record at slot 0` | **换过 bootloader**，metadata 区里是旧格式的字节 | 多出这一行，且该区转为只读 | 重传一次 app → reclaim 整扇区。⚠️ **owner 记录也一起被擦过，要重新认领** |
 | `App signature invalid or absent` + 前面有 `metadata present` | 上传中断，或验签不过 | 看有没有 `SIG_FAIL` / `CRC_FAIL` 日志；app 区内容和 metadata 对不上 | 重传 |
 | 同上，**而且你刚做过 `setowner`** | **换根把现有 app 追溯作废了。这是设计行为，不是故障** | metadata 里那张 cert 是旧根签的，`root_sig` 在新根下验不过 | 用新根（或新根签的证书）重传 |
 | `** BOOT0 held **` | **不是故障**。有人按住了 BOOT0，物理逃生口赢过一切 | 模式是 `IAP_ALL`，reason 打的是 `BOOT0 held` | 松开 BOOT0 再复位 |

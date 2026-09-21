@@ -44,7 +44,6 @@
 | A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | 🤖 **已定**（「没有有效 owner 能授权的操作一律物理在场」） |
 | A12 | **新文件** · 原地升级 | 收镜像→SDRAM ／ owner 根验签 ／ **查尺寸 ≤ 120 KiB** ／ 搬 owner 记录进 SDRAM ／ 擦扇区 0 ／ **先写 owner 再写 bootloader** ／ 写回时压缩 | 🤖 **已定 2026-09-20** —— 擦写例程放 `RAM_D1`，全程关中断，不调 HAL |
 | A13 | 链接脚本 / 启动代码 | ✅ **不用改** —— `.RamFunc` 段已经收在 `.data` 里（`STM32H743IIKX_FLASH.ld:166-167`）、启动代码已经会拷贝。**只要用** | 🤖 **已定 2026-09-20**，核实过 |
-| A14 | **载体待定**（原写 journal 事件表） | 「升级开始 / 升级完成」两条记号。⚠️ **journal 事件已被 `HDR-02` 全删，这一行指向的东西不存在了** | ⏳ 票「升级被打断怎么报，原方案的载体已经没了」 |
 | A16 | `owner_record_t.slots` | **删掉这个字段** | 🤖 **已定 2026-09-19** —— 变长记录不做了，它是个永远不触发的校验 |
 | A17 | 构建尺寸 | 新增代码会涨。当前 **103,144 B**，上限 **122,880 B**，余 **19,736 B**。`CHK-A4` 自动卡 | 🤖 自动 |
 | A18 | `IAPServer/iap_cert.h` | **删 `iap_cert_t.serial`**：`IAP_CERT_SIZE` 132 → **128**，`IAP_CERT_SIGNED_LEN` 68 → **64**，`_Static_assert` 跟着改 | 🤖 **已定 2026-09-19** |
@@ -109,7 +108,7 @@
 | F4 | 同上 · 边界一节 | ⚠️ **「ST-Link 重烧 bootloader = 所有权重置」这句要改** —— 原地升级之后不再成立 |
 | F5 | 同上 · BOOT0 那节 | 写进「没有有效 owner 能授权的操作一律物理在场」 |
 | F6 | 同上 · 「定下来的取舍」表 | ✅ **2026-09-20 已标** `serial` 要删。⏳ `IAPServer/keys/README.md` 里讲发号那段等代码改完再动 |
-| F7 | `docs/modules/M1-firmware-upgrade.md` | 新增 `flashboot` 通道（一条新需求 + 用例）；⚠️ **「journal 事件表加两条」作废**，改成票「升级被打断怎么报，原方案的载体已经没了」定下来的载体 |
+| F7 | `docs/modules/M1-firmware-upgrade.md` | 新增 `flashboot` 通道（一条新需求 + 用例） |
 | F8 | `docs/tables/STATUS.md` | M2 条数变了；场景表「**同事离职，或他的叶私钥泄露了**」那一行的去向要改 |
 | F9 | `docs/tables/DECISIONS.md` | 追加这一轮拍板的几条 |
 | F10 | `docs/tables/ACCEPTANCE-CHECKLIST.md` | `CHK-B` 加一条「原地升级走一遍」 |

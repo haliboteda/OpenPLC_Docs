@@ -14,7 +14,6 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
-| **1** | **[升级被打断怎么报，原方案的载体已经没了](issues/OWN-10-interrupted-upgrade-has-lost-its-carrier.md)** —— 原方案靠两条 journal 事件活下来，而那八种事件已被另一张图全删。四个候选，等你选 | **现在就能问**，它挡着 `flashboot` 实施 |
 | **2** | **`getowner` 对一块刚恢复出厂的板子怎么措辞** —— 它现在报「Claimed at generation N」，读的人会以为板子还被占着 | **现在就能问**，见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md) 的第 3 项 |
 | —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套** | 要先做一个能说话的探针 app |
 | 1 | `flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少 | 形状定了之后 |
@@ -86,7 +85,6 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 - [撤销记录点名的是序号还是公钥](issues/OWN-01-revoke-by-serial-or-by-pubkey.md)：**按叶公钥，取前 16 字节，一条记录装 4 个**。`serial` 整个删掉；`R4` 改成「撤销项 == 当前生效的根 → 忽略该项」；撤销检查**给 `iap_cert_verify()` 加参数**，让编译器保证没有调用点漏掉
 - [擦扇区 0 的时候，那段代码从哪执行](issues/OWN-02-where-does-the-erase-code-run.md)：**必须放 `RAM_D1`（`0x24000000`）里跑，全程关中断**。⚠️ RM0433 §4.3.7 的 RWW 只跨 bank 有效，而**擦完扇区 0 之后取到的指令是 `0xFF`，RWW 救不回来**。链接脚本和启动代码**不用改**（`.RamFunc` 段已经有了）
-- [升级被打断之后，板子怎么让人知道](issues/OWN-04-how-does-an-interrupted-upgrade-announce-itself.md)：两条 journal 事件（开始 / 完成，住 Bank 2 不被擦）+ 两段定稿文案。**启动日志那行刻意不讲 DFU 怎么用** —— 那条写在发布说明里，两处不重复
 - [加了 'R' 记录，format_ver 要不要升到 3](issues/OWN-03-does-format-ver-go-to-3.md)：**升到 3，硬切不做兼容** —— 删了 `slots`、证书变 128 字节，布局整个变了，而现场没有已认领的板子
 - [工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md)：**信板子回的 `OK`，不加 `getrevoked`** —— `OK` 已经是板子重扫 flash 确认后才发的。顺带核实出 `B4` 是个不存在的问题（累加由板子自动做），且 `D7` 的形状原本写错了
 - **2026-09-20 在对话里定，没有对应的票**：`'R'` 记录压到**一个 flash word（32 字节）**，owner 区改成 **`'O'` 32 条 + `'R'` 96 条**两段定长；写入验签、**读取只查结构**。详见 `DECISIONS.md` 第 58 / 59 条，要改的东西在 [要改的东西，一条不落](CHANGE-LIST.md) 的 I 节

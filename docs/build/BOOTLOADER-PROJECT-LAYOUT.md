@@ -33,7 +33,7 @@
 |---|---|---|
 | bootloader | `0x08000000`–`0x0801FFFF`（sector 0，128K） | 本工程 |
 | application | `0x08020000` 起，上限 `0x081E0000` | 1,835,008 B |
-| bootloader 状态 | `0x081E0000`（bank2 sector 7，128K） | metadata + 事件 journal |
+| bootloader 状态 | `0x081E0000`（bank2 sector 7，128K） | 前 8K 校准值 + 后 120K metadata（append，548 条） |
 
 ⚠️ **`RESERVED_TAIL_SECTORS`（`Core/Inc/usbd_cdc_flash.h`）当前值 1 是对的，别动。** 三处地址守卫都锚在 `IAP_STATE_SECTOR_ADDR` 上，一个都不看这个常量 —— 改它保护不了任何东西，只会静默弄坏 reclaim，而且不会编译报错。
 
@@ -49,7 +49,7 @@
 |---|---|
 | `Core/Src/main.c` | 时钟/MPU/外设初始化，主循环 `IAP_task()` + `MX_LWIP_Process()` |
 | `IAPServer/IAP_server.c` | 命令状态机 + 启动决策（`server_decide()`）+ 交权（`server_jump_to_app()`） |
-| `IAPServer/bootloader_state.c` | flash 上的 metadata 与事件 journal，含 reclaim |
+| `IAPServer/bootloader_state.c` | 扇区 15：metadata 的 append 与 reclaim，reclaim 时带走/写回校准值 |
 | `IAPServer/fw_verify.c` | ECDSA P-256 验签（micro-ecc） |
 | `IAPServer/iap_auth.c` | 挑战应答认证；nonce 计数器在 RTC 备份寄存器 `DR1`，VBAT 见证在 `DR3` |
 | `IAPServer/iap_keyderive.c` | 每设备密钥 = `HMAC-SHA256(固定密码, UID)` |

@@ -260,7 +260,7 @@ RWW 在这里**不是决定性的那条**。就算同 bank 的读只是被拖住
 | R3 | **不 `printf`，不碰任何 `const` / 字符串字面量** | `.rodata` 在 flash（map 里 `.rodata` 起 `0x08014aa0`）。GCC 会把函数自己的 literal pool 跟着 `.RamFunc` 一起搬，**但 `.rodata` 里的数组和字符串不会跟着走** |
 | R4 | **全程 `__disable_irq()`** | 见下面「中断向量表」一段 |
 | R5 | **源数据从 SDRAM（`0xC0000000`）读，不从 flash 读** | `IAP_STAGE_BASE`，`Core/Inc/IAP_config.h:35`。这本来就是既定设计（A12） |
-| R6 | **写完不回 flash，直接软复位** | 回去也得先 invalidate I-cache，而且新旧镜像的函数地址不保证一致。复位最干净，并且和 [OWN-04（升级被打断怎么让人知道）](issues/OWN-04-how-does-an-interrupted-upgrade-announce-itself.md) 的「重启后自己报」对得上 |
+| R6 | **写完不回 flash，直接软复位** | 回去也得先 invalidate I-cache，而且新旧镜像的函数地址不保证一致。复位最干净：新 bootloader 起来后自己报状态，不需要写回前的那段代码去解释发生了什么 |
 
 ### 落点为什么是 `RAM_D1`（`0x24000000`）而不是 SDRAM
 

@@ -483,7 +483,7 @@ python3 tools/run_boot0_upload_mode.py --ports COM5
 | **为什么用咔哒声当信号** | `Core/Src/main.c` 的 `boot_window_relay()` 把三个继电器各拨 500 ms 并全程轮询 BOOT0，**那 1.5 秒的响声就是窗口本身**。PC 这边看不见它 |
 | ⛔ **破坏性** | 长按超过 10 秒会**武装恢复出厂，松手就执行**。而这条用例需要长按，两者分不开。**在已认领的板子上跑会抹掉 owner 密钥** |
 
-## T1-28 · journal 扇区满了能回收，怎么跑
+## T1-28 · metadata 区满了能回收，怎么跑
 
 ```bash
 python3 tools/run_journal_reclaim.py --bin <app.bin>
@@ -492,9 +492,9 @@ python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
 
 | | |
 |---|---|
-| **判据** | 灌满后板子报 `N/4096 journal slots used`；一次上传后日志出现 `Reclaiming state sector (<n> slots discarded)`；**且板子照常启动 app** |
-| **为什么不能靠反复上传灌满** | 一次上传只占 8 槽，4096 槽要 512 次上传、大半天 |
-| **为什么必须整片读回来再整片写回去** | 扇区里存着当前 app 的 metadata（签名和证书**伪造不了**），而 `STM32_Programmer_CLI` 写之前会擦整个扇区 |
+| **判据** | 灌满后板子报 `N/3840 metadata slots used`；一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`；**且板子照常启动 app**。⚠️ **校准值区那 8 KiB 必须原样还在** —— reclaim 擦的是整个扇区 |
+| **为什么不能靠反复上传灌满** | 一次上传只占 7 槽，3840 槽要 548 次上传、大半天 |
+| **为什么必须整片读回来再整片写回去** | 扇区里存着当前 app 的 metadata（签名和证书**伪造不了**）**以及校准值**，而 `STM32_Programmer_CLI` 写之前会擦整个扇区 |
 | **留的空槽必须少于 7** | 回收只发生在写 metadata 的那一刻，而一条 metadata 占 7 槽 |
 
 ## 未覆盖
