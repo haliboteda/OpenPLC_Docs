@@ -39,8 +39,8 @@
 | A6 | `IAPServer/owner_slot.c` | **`R4` 落地**：撤销项 == 当前生效的根公钥前 16 字节 → **忽略该项**（不拒整条，一条装 4 个人），并在启动日志喊一声 | 🤖 **已定 2026-09-20** |
 | A7 | `IAPServer/owner_slot.c` · `report_root_trust()` | 启动日志加「owner 槽还剩 N 条」+ 撤销集合大小 | 🤖 |
 | A8 | `IAPServer/iap_cert.c/.h` | **给 `iap_cert_verify()` 加一个参数**，让编译器保证每个调用点都处理撤销 —— 今天两个调用点：`iap_auth.c:122`、`IAP_server.c:428` | 🤖 **已定 2026-09-20** |
-| A9 | `IAPServer/IAP_server.c` | 新增命令 `revoke` | ⏳ 迷雾「`flashboot` 的线上协议」一并定 |
-| A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | ⏳ 同上 |
+| A9 | `IAPServer/IAP_server.c` | 新增命令 `revoke` | ✅ **已实现并真板子验过**（`T2-19`/`T2-20`）|
+| A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | 🤖 **可做了 2026-09-22** —— 形状见 [FLASHBOOT.md](../../docs/modules/M1/FLASHBOOT.md) |
 | A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | 🤖 **已定**（「没有有效 owner 能授权的操作一律物理在场」） |
 | A12 | **新文件** · 原地升级 | 收镜像→SDRAM ／ owner 根验签 ／ **查尺寸 ≤ 120 KiB** ／ 搬 owner 记录进 SDRAM ／ 擦扇区 0 ／ **先写 owner 再写 bootloader** ／ 写回时压缩 | 🤖 **已定 2026-09-20** —— 擦写例程放 `RAM_D1`，全程关中断，不调 HAL |
 | A13 | 链接脚本 / 启动代码 | ✅ **不用改** —— `.RamFunc` 段已经收在 `.data` 里（`STM32H743IIKX_FLASH.ld:166-167`）、启动代码已经会拷贝。**只要用** | 🤖 **已定 2026-09-20**，核实过 |
@@ -56,7 +56,7 @@
 | # | 改哪 | 改什么 | 谁拍板 |
 |---|---|---|---|
 | B1 | `app.go` | 新增 `IAPTool revoke <ip> --key=owner.pem --leaf=<公钥>` | 🤖 **已定 2026-09-20** |
-| B2 | `app.go` | 新增 `IAPTool flashboot <boot.bin> <ip>` | ⏳ 迷雾（协议） |
+| B2 | `app.go` | 新增 `IAPTool flashboot <boot.bin> <ip>` | 🤖 **可做了 2026-09-22**，要 `--key=owner.pem`（根私钥）|
 | B3 | `app.go` | 帮助文本、`Invalid mode` 那行的命令列表 | 🤖 |
 | B4 | `owner.go` | `RunRevoke()` —— 读板子的 generation + uid，拼签名前缀，签，下发，**再读回来确认** | 🤖 形状已定；⏳ 「已经撤过谁」怎么查还在迷雾 |
 | B5 | `owner.go` | `RunFlashBoot()` | ⏳ 迷雾 |

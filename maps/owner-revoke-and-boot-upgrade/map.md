@@ -16,7 +16,7 @@ python tools/list_wayfinder_map_frontier.py --all
 |---|---|---|
 | **2** | **`getowner` 对一块刚恢复出厂的板子怎么措辞** —— 它现在报「Claimed at generation N」，读的人会以为板子还被占着 | **现在就能问**，见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md) 的第 3 项 |
 | —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套** | 要先做一个能说话的探针 app |
-| **1** | **`flashboot` 的线上协议：帧格式、分块、和现有 `flash` 共用多少** | **现在就能问** —— 形状 2026-09-20 已定完，见[`flashboot` 的线上协议长什么样](issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md) |
+| ~~1~~ | ~~**`flashboot` 的线上协议**~~ ✅ **2026-09-22 定：选 B** | — |
 | 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
 | 4 | 发布说明怎么改（草稿在 [CHANGE-LIST.md](CHANGE-LIST.md) 的 H 节，英文） | 代码落地前 |
 
@@ -64,6 +64,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Decisions so far
 
+- [`flashboot` 的线上协议长什么样](issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md)：**帧格式和传输照搬 `flash`，但镜像签名用 owner 根验，叶证书换不掉 bootloader**；`cert`/`noncesig` 仍只管会话认证与防重放
 - [恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md)：
   **takeown 不再做前置判断，命令直接发给板子**（已实施并真板子验过，`T2-05` 转 ✅）；
   `getowner` 的措辞**只改工具文案，协议不动** —— 加字段会打断 6 个测试脚本，

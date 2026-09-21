@@ -276,12 +276,16 @@ flowchart TD
 | **R1-31** | 记录与诊断 | RTC 备份域失效（VBAT 没电）时能被发现 | 手工 | ✅ |
 | **R1-32** | 记录与诊断 | 任何丢包 / 拒绝路径都能说出自己为什么 | 代码审查 | ✅ |
 | **R1-33** | 启动切换 | app 的起始地址满足向量表的对齐要求 | `P15` ⁷ | ✅ |
+| **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ⬜ |
+| **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ⬜ |
+| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（owner 区原样搬过去） | `T1-31` | ⬜ |
+| **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ⬜ |
 
-**共 33 条。其中 25 条有测试用例直接测它，8 条没有。**
+**共 37 条。其中 29 条有测试用例直接测它，8 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T1-xx` 用例直接测 | **25** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` |
+| 有 `T1-xx` 用例直接测 | **29** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-37`（后四条的用例已定义，**还没跑过**） |
 | 纯手工 | **3** | `R1-13` `R1-30` `R1-31` |
 | 只有静态检查 P2 | **2** | `R1-06` `R1-14` |
 | 只有静态检查 `P15` | **1** | `R1-33` |
@@ -373,8 +377,12 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
 | `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复 | 灌满后板子报 `** Metadata area full - the next successful update reclaims it. **`，一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin>` | 真板子 | ⬜ |
+| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --sign-with-leaf` | 真板子 | ⬜ |
+| `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ⬜ |
+| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --unclaimed` | **真板子 + 人按 BOOT0** | ⬜ |
 
-**共 34 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 38 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 
 ⚠️ **这个数 2026-09-20 之前写着「共 30 条」，和上表对不上。** 数字是按上表重数的 ——
 补用例的时候没有回头改小结，这类漂移没有任何检查看得见。
@@ -475,5 +483,6 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 | 文档 | 讲什么 |
 |---|---|
 | [BOOT-SEQUENCE.md](M1/BOOT-SEQUENCE.md) | 每次复位走完的完整流程：谁被读、谁被初始化、外设以什么状态交给 app |
-| [SECTOR-15.md](M1/SECTOR-15.md) | journal 扇区的记录格式、回收机制、三种「读不到 metadata」的情况 |
+| [SECTOR-15.md](M1/SECTOR-15.md) | 扇区 15 的切法、metadata 记录格式、回收机制、三种「读不到 metadata」的情况 |
+| [FLASHBOOT.md](M1/FLASHBOOT.md) | `flashboot` 原地升级：命令形状、谁能授权、为什么擦写必须在 RAM 里跑、断在哪会怎样 |
 | [CHALLENGE-AUTH.md](M1/CHALLENGE-AUTH.md) | 挑战应答的全部细节：nonce 怎么造、一次性消费、证书是独立一步 |

@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-22
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -42,3 +42,30 @@ flash <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 1. 定下命令字符串的确切形状，写进 `$PROD/docs/modules/M1-firmware-upgrade.md` 的 `flashboot` 通道一节
 2. 说清**谁能授权** —— 根还是叶，以及未认领板子上的 BOOT0 分支
 3. `CHANGE-LIST.md` 的 `A9`/`A10`/`B2` 三行从 ⏳ 转成可做
+
+
+## Answer
+
+2026-09-22 用户定：**B**。
+
+帧格式照搬 `flash`，传输与 SDRAM 暂存完全复用：
+
+```
+flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
+```
+
+和 `flash` 的区别只有四处：
+
+1. **`imgsig` 用 owner 根公钥验**，不用 `cert` 里那把叶。叶证书换不掉 bootloader
+2. `cert` / `noncesig` 仍然只管**会话认证和防重放**，走和 `flash` 同一条路
+3. 尺寸上限 120 KiB（bootloader 区），不是 `IAP_APP_MAX_SIZE`
+4. 落盘目标是扇区 0，写之前先把 owner 记录搬进 SDRAM，擦完**先写 owner 再写 bootloader**
+
+未认领的板子没有根可验，走物理在场（`s_boot0_held`），和 `takeown` 同一条规则。
+
+**否掉 C**（另设分块协议）—— `flash` 那条传输已在真板子上跑过很多轮，另起一套等于把验过的东西重验一遍。
+
+## 引出了什么新的未知
+
+没有。剩下的都是实施：`CHANGE-LIST.md` 的 `A10`（bootloader 侧命令）、
+`A11`（未认领时查 BOOT0）、`A12`（RAM 里擦写扇区 0）、`B2`（`IAPTool flashboot`）。
