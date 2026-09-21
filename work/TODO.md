@@ -62,5 +62,4 @@
 
 | 待验 | 怎么算做完 | 来自哪 |
 |---|---|---|
-| **`enter_bootloader.py` 对已认领的板子无效** —— 它调 `IAPTool ether` 时不传 `--key`，用默认公开根签的证书，板子正确拒绝并打印 `Rejected unauthenticated ...`，而脚本只报「board does not appear to be in the bootloader」 | 已认领的板子上跑它，要么能通（透传 `--key`），要么报错点名「这块板已认领，需要 --key」 | [有些叶证书驱动不了重启握手](../maps/owner-revoke-and-boot-upgrade/issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md) 2026-09-21 第四轮 |
 | **`Flash_If_Write()` 的 I-cache**：上板回归（烧写本身没被这次改动弄坏） | `T1-23` / `T1-24` 在真板子上各跑一轮 | 代码 `886b0ad`。⚠️ **「每条出口都重开 I-cache」那条已由 `P16` 静态证明**，比制造一次失败写入强 —— 上板只剩回归这一半 |

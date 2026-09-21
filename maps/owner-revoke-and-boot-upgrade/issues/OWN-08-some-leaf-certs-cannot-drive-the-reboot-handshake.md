@@ -201,3 +201,16 @@ UDP 包跨 pbuf 段、app 处理长包时崩溃、app 重启但没进 bootloader
 `enter_bootloader.py` 对**已认领的板子**无效，而它自己的文档没说这件事。
 要么加 `--key` 透传，要么在板子已认领时给出可操作的报错，而不是「board does not appear
 to be in the bootloader」。已记进 `work/TODO.md`。
+
+## 2026-09-21 晚：那个已查清的病根修掉了，票仍然开着
+
+`enter_bootloader.py` 调 `IAPTool ether` 时不传 `--key` —— 这条在真板子上复现并修了：
+
+- 复现条件是**板子已认领**。当天早些时候板子处于未认领状态，脚本能用；重新认领（generation 1）之后再跑，板子打印
+  `Rejected unauthenticated openplc_server_reboot request`，而脚本只说「board does not appear to be in the bootloader」
+- **修了两处**：加 `--key` 并透传给 `IAPTool`；失败时读它**本来就已经抓到**的板子日志，
+  看到 `Rejected unauthenticated` 就点名「这块板已认领，这次请求是公开根签的」
+- 两条路都验过：不带 `--key` 退出码 1 且点名原因，带 `--key` 退出码 0 且进了 bootloader
+
+⚠️ **本票不关**：它记的是最早那个观察 —— **同一把根签发的两张叶，一张能驱动重启握手、另一张不能**。
+那个还没复现过，和「拿错钥匙」不是一回事。**等它自己再出现。**
