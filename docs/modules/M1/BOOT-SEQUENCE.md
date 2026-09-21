@@ -3,7 +3,7 @@
 **这份回答一件事：一次复位之后，板子怎么决定跑 app 还是留在 bootloader，以及怎么把硬件交出去。**
 
 2026-09-16 从固件注释里整理出来。判据和用例在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`，
-已拍板的取舍在 `$PROD/docs/tables/DECISIONS.md`，flash 上那本账在 [JOURNAL.md](JOURNAL.md)。
+已拍板的取舍在 `$PROD/docs/tables/DECISIONS.md`，flash 上那本账在 [SECTOR-15.md](SECTOR-15.md)。
 
 ## 两个阶段，分开的理由
 

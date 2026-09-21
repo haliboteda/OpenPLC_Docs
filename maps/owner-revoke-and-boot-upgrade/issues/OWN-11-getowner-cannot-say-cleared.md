@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-21
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -74,3 +74,57 @@ Use setowner with the current owner's key to hand it over.
 「`getowner` 对一块已清空的板子该怎么措辞」**还没定** —— 它现在仍然把刚恢复出厂的板子
 报成「Claimed at generation 5 ... Only firmware signed by that key will start」。
 候选 ① 的那个字段就是为这件事留的。
+
+## Answer
+
+2026-09-21 定（本票剩下的第 3 项）
+
+**选 ⑨：只改工具文案，线上协议一个字节不动。**
+
+### 为什么不加字段（① / ②）—— 代价比看上去大
+
+`getowner` 的响应**不止 IAPTool 在读**，还有 **6 个测试脚本**：
+`run_takeown.py`、`run_setowner.py`、`run_revoke_leaf.py`、`run_rotate_root_revokes_old_leaf.py`、
+`run_delegated_cert_on_real_board.py`（以及 `run_revoke_leaf.py` 内部两处）。
+**它们全都期望一个纯数字**（错误文案就叫 `getowner did not answer with a number`）。
+
+| | 会发生什么 |
+|---|---|
+| **① 回 `"5 1"` 两个字段** | IAPTool 的 `strconv.ParseUint`（`owner.go:89`）对整串解析 ⇒ 报错；**6 个脚本一起挂** |
+| **② cleared 时回 `0`** | `run_setowner.py` 读 `getowner` 算 `gen+1`，拿到 0 就签出 generation=1 的记录，而板子要求 6（`owner_slot.c:441`）⇒ **换主这条路断掉** |
+
+### 为什么不加新命令（⑥）—— 没有场景
+
+逐个查过三处「可能需要自动判断出厂态」的地方，**没有一处用得上**：
+
+| 地方 | 实际怎么判 |
+|---|---|
+| **产线** | **不判** —— 产线直接强制出厂（用户 2026-09-21） |
+| [出厂态怎么造，怎么证明它真的是出厂态](../../five-paths-e2e-test/issues/E2E-01-how-to-make-and-prove-factory-state.md) | 用**启动日志 + 捕获证明**两类独立证据，不读 `getowner` |
+| 6 个测试脚本 | 全都只拿 generation 做**增量检查**（认领后 = 认领前 + 1），**没有一个判断「是不是清空过」** |
+
+⇒ 为一个不存在的调用者加协议命令，不做。
+
+### 改什么
+
+`$TOOL/owner.go` 的 `RunGetOwner()`，末尾补一句，说清换主的两条路：
+
+```
+Claimed at generation 5.
+Trusted key: 6183...
+Only firmware signed by that key will start.
+
+To hand this board to a different key: setowner (needs the current owner's key),
+or takeown after a factory reset (hold BOOT0 - physical presence required).
+```
+
+**为什么这样就够**：原来的误导是「用户看到 Claimed 就以为没路可走」。
+而 `takeown` 那一半 2026-09-21 已经改成不做前置判断了 —— 路一直在，只是没说。
+补这两句就把路说出来了，**不需要板子先证明自己是不是清空过**。
+
+⚠️ **代价写明**：这两句对**任何**已认领的板子都会显示，不区分状态。
+这是刻意的 —— 它陈述的是「这个产品有哪两条换主的路」，而不是在猜这块板现在是什么状态。
+
+## 引出了什么新的未知
+
+没有。

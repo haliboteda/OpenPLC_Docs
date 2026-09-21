@@ -59,7 +59,7 @@ metadata 不再走 journal 之后，**那个时机不存在了** —— 日志�
 |---|---|
 | `$BOOT/IAPServer/bootloader_state.{c,h}` | `journal_log()` / `journal_reclaim()` / `journal_write()` / `iap_log_rec_t` / `bootloader_event_type_t` 八个枚举 / 四个零调用者的导出函数（`dropped_events` `journal_full` `auth_fail_log` `auth_fail_count`）/ `last_log_event()` |
 | `$BOOT/IAPServer/IAP_server.c` | 九处 `bootloader_state_log_event()` 调用；`IAP_server.c:662` 那段 `BOOT_VERIFY_FAIL` 去重 |
-| `$PROD/docs/modules/M1/JOURNAL.md` | **整份删除** |
+| `$PROD/docs/modules/M1/SECTOR-15.md` | **整份删除** |
 | `$PROD/docs/modules/M1-firmware-upgrade.md` | 「日志的四条规则」一节、八种事件那一段、`R1-28` 重写、`R1-29` 删除 |
 | `$TOOL/TestCase/tools/run_journal_reclaim.py` | 删（`T1-28` 的驱动） |
 | `$TOOL/TestCase/tools/run_journal_slot_accounting.py` | 删（`T1-26` 的驱动） |

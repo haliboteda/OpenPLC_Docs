@@ -41,11 +41,11 @@
 
 | # | 做什么 | 判据 |
 |---|---|---|
-| CHK-B1 | 版本号三处一致（用例 **P1**） | `IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明 |
+| CHK-B1 | 版本号三处一致（用例 **P1**） | `$BOOT/Core/Inc/IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明。⚠️ **这三处都是「卡包版本」**；sketch 的 **app 版本不在其中**，它每个 sketch 都不同，不是跨仓镜像 |
 | CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
 | CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） |
 | CHK-B4 | **公开根告警仍然会响**（用例 **T2-06**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/modules/M2-ownership.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
-| CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与当前 journal 格式相符 |
+| CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的格式**相符。⚠️ 格式已定要改（校准值 8 KiB + metadata），改完这条判据要一起更新 |
 | CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传 → 正常启动 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
 

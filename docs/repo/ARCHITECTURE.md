@@ -83,7 +83,7 @@
 |---|---|---|---|
 | 1 | MAC 从 UID 派生的算法 | bootloader `LWIP/Target/ethernetif.c`（USER CODE MACADDRESS 块）<br>core `libraries/OpenPLC_Net/src/ethernetif.c` | P2 |
 | 2 | 发现回复限流 `discovery_reply_allowed()` | bootloader `IAPServer/udp_server.c`<br>core `libraries/OpenPLC_IAP/src/udp_server.c` | P2（上限 + 窗口两项）。⚠️ **只比数值，不比注释** —— 两边的解释 2026-09-16 已经分叉（core 那份丢了「at 115200 baud」） |
-| 3 | 身份字符串格式 `name_uid_role_version` | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`<br>core `libraries/OpenPLC_IAP/src/udp_server.c`<br>tool `IAP_Ether.go` 的 `strings.Split(raw, "_")`、`IAP_CDC.go` | P2 |
+| 3 | 身份字符串格式 `name_uid_role_version`。⚠️ **2026-09-21 已定改成五段** `name_uid_role_<卡包版本>_<app版本>`，bootloader 那一份第 5 段填 `-`；**代码尚未改动**，改时三处要同步（见[决策票](../../maps/version-gate-and-calibration/issues/VER-04-how-does-identity-carry-both-versions.md)） | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`<br>core `libraries/OpenPLC_IAP/src/udp_server.c`<br>tool `IAP_Ether.go` 的 `strings.Split(raw, "_")`、`IAP_CDC.go` | P2 |
 | 4 | SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
 | 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
 | 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | ❌ **没有任何东西在比两份 C。** T1-16 只编 bootloader 那份。⚠️ 正文目前一字不差，差别只有 `#include` |

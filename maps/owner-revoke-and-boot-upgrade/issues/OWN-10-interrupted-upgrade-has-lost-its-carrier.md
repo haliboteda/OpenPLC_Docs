@@ -15,8 +15,8 @@ Blocked by: -
 
 | 哪张票 | 定了什么 |
 |---|---|
-| [八种事件日志留不留，留的话住哪](../../app-header-replaces-journal/issues/HDR-02-do-the-event-logs-survive.md) | **全删** —— 八种事件、`journal_log()`、`M1/JOURNAL.md` 一起删 |
-| [让出来的 128 KiB state 扇区给谁](../../app-header-replaces-journal/issues/HDR-03-who-gets-the-freed-sector.md) | 整个扇区划给**校准值** |
+| [八种事件日志留不留，留的话住哪](../../app-header-replaces-journal/issues/HDR-02-do-the-event-logs-survive.md) | **全删** —— 八种事件、`journal_log()`、`M1/SECTOR-15.md` 一起删 |
+| ~~[让出来的 128 KiB state 扇区给谁](../../app-header-replaces-journal/issues/HDR-03-who-gets-the-freed-sector.md)~~ | ~~整个扇区划给**校准值**~~ ⚠️ **2026-09-21 已作废**，见下 |
 
 两张图各自都写明「本图不碰对方那半边」，于是这处对撞正好落在两张图的缝里，**谁都没发现**。
 
@@ -44,7 +44,7 @@ Blocked by: -
 2. 把 [要改的东西，一条不落](../CHANGE-LIST.md) 的 **A14** 和 **F7** 两行按新答案改掉
 3. 说清**这条新机制自己怎么验** —— 掉电中断 `flashboot` 是个破坏性用例，
    判据要写成能判真假的话（参照 `T1-21`/`T1-22` 怎么验「掉电中断升级后仍可恢复」）
-4. 若选 ②，回头说明 HDR-03 的「整个扇区归校准值」要不要改口
+4. 若选 ②，回头说明 HDR-03 的「整个扇区归校准值」要不要改口。⚠️ **2026-09-21：HDR-03 已被用户重开**（「补偿值不一定非要存在 15 扇区」），这条判据等新结论
 
 
 ## 2026-09-21 查证：候选的可行性不是等价的
@@ -63,3 +63,20 @@ Blocked by: -
 
 **空闲的备份寄存器**（真要用的话）：`DR0`、`DR5`–`DR9`，共 6 个。分配表在
 `docs/repo/ARCHITECTURE.md`，⚠️ 认领前必看 —— 2026-08-17 撞过一次车。
+
+## ⚠️ 2026-09-21：前提又变了一次，本票要重看
+
+[校准值和 metadata 怎么共用扇区 15](../../version-gate-and-calibration/issues/VER-02-how-do-calibration-and-metadata-share-the-sector.md)
+（决策 61）把扇区 15 排满了：
+
+```
+0x081E0000  校准值区    8 KiB   固定地址
+0x081E2000  metadata 区 120 KiB append，548 条
+```
+
+**metadata 不再搬进 header**，所以这个扇区不是「整个划给校准值」，而是**两样东西已经占满**。
+本票原先推荐的「用扇区 15 承载 flashboot 的掉电标记」**位置没了** ——
+它需要重新回答：那几个字节挤在哪。
+
+候选（都还没论证）：校准值区 8 KiB 内部留一小块 / metadata 记录的 `reserved[20]` /
+两区之间再划一块。⚠️ **注意 metadata 区满时会擦整扇区**，标记放哪都要考虑这一点。

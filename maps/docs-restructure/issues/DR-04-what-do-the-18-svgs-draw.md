@@ -50,7 +50,7 @@ Blocked by: -
 |---|---|
 | `OWNERSHIP.md` 的记录格式表写「**最大 generation 的那条有效记录获胜**」 | **图对，md 错。** `owner_slot.c:121` 原文 `never "highest generation wins". That shortcut would be a hole`。而且同一份 md 的状态机 ASCII 写的是「沿链取最后一条有效的」—— **文档内部自相矛盾** |
 | `OWNERSHIP.md` 说自签证书「纯粹是 **160 字节** + 一次验签」 | **图对，md 错。** `iap_cert.h:34` `IAP_CERT_SIZE 132U` 带 `_Static_assert`；160 是 `OWNER_RECORD_SIZE`，抄串了相邻章节 |
-| 参考 7 底部红字指责「`JOURNAL.md` 里 M 记录还写着 4 格」 | **图自己过期了。** 实测 `docs/modules/M1/JOURNAL.md` 五处全是 8 格。转图时这条要删，抄过去等于凭空造一条假缺陷 |
+| 参考 7 底部红字指责「`JOURNAL.md` 里 M 记录还写着 4 格」 | **图自己过期了。** 实测当时那份 `JOURNAL.md` 五处全是 8 格（⚠️ 该文件 2026-09-21 改名为 `SECTOR-15.md`，且 M 记录已定改回 7 格 —— 这一行记的是当时的实测结果）。转图时这条要删，抄过去等于凭空造一条假缺陷 |
 | 参考 8 写「链在**中途**断了 ⇒ 回落」 | **md 对，图错。** 代码只在 `s_effective == NULL` 或链尾 cleared 时回落 |
 | 换 owner 的代数举例，md 用 G2→G3、图用 G1→G2→G3 | 都不错，并排读会误导。统一成 G(n+1) 被 G(n) 签 |
 

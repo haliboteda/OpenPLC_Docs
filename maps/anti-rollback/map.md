@@ -1,7 +1,13 @@
 # 防回滚：拒绝装回有已知漏洞的旧固件
 
+> ⚠️ **2026-09-21：板子侧的防回滚已由决策 62 否掉。** 逐个场景核实后，它挡不住有物理接触的人，
+> 也挡不住能自己造固件的人，而**撤销机制覆盖得更彻底**；剩下的真实价值是「防自己人误推旧版本」，
+> 那个放在上位机侧就够。落点改到
+> [烧录前比版本 + 校准值住进扇区 15](../version-gate-and-calibration/map.md)。
+> **这张图保留备查**（6 条核实过的硬约束仍然成立），但不再是活路线。
+
 Status: paused
-Paused because: 只开图占位，**故意不拆票**（用户 2026-09-20 定）。等 [metadata 从 journal 扇区搬进 app 头部](../app-header-replaces-journal/map.md) 走完，或出现明确的合规/安全需求，再拆。
+Paused because: **2026-09-21 被决策 62 取代**（板子侧不做防回滚，改在上位机侧拦）。原因：只开图占位，**故意不拆票**（用户 2026-09-20 定）。等 [metadata 从 journal 扇区搬进 app 头部](../app-header-replaces-journal/map.md) 走完，或出现明确的合规/安全需求，再拆。
 
 ## 怎么看进度（不用问任何人）
 
@@ -36,7 +42,7 @@ python tools/list_wayfinder_map_frontier.py --all
 ```
 grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.md --include=*.txt \
   -e anti-rollback -e antirollback -e getversion -e security_counter -e rollback \
-  -e fw_version -e FW_VERSION -e image_version -e ih_ver \
+  -e fw_version -e FW_VERSION -e image_version \
   /e/WorkSpace/Schaeffer-AG
 ```
 
@@ -100,23 +106,19 @@ git -C <bootloader 仓> show b9eb7e6^:IAPServer/IEC62443_CHECKLIST.md
 
 ### 空间开销（2026-09-20 算的，用来判断「留余地」值不值）
 
-按 MCUboot 的三段式（header 在前、payload 居中、签名在后）：
-
 | 部分 | 大小 | 说明 |
 |---|---|---|
-| **header** | **1024 B** | 由 VTOR 对齐决定，**不是由内容决定** —— 实际只用约 32 B（magic + format_ver + app_size + version + flags），其余是 padding。**加不加版本号，这 1024 B 都要占** |
-| **trailer**（signature + cert） | **224 B** | 7 个 flash word。比两段式多花的就是这一块 |
+| **版本号 / security counter** | **4 B** | 定长小字段。**放哪由 [metadata 从 journal 扇区搬进 app 头部](../app-header-replaces-journal/map.md) 定**，本图只要求它落在签名覆盖范围内 |
 | **计数器**（扇区 15 内） | 约 **8 KiB** | 256 个 word = 256 个版本。扇区 15 本来就大量闲置 |
-| **app 净损失** | **1248 B**，占 1792 KiB 的 **0.068%** | 1792 KiB → 约 1790.8 KiB |
 
-> ✅ **结论：按三段式留余地几乎免费** —— 相对两段式只多 224 字节，计数器占的是本来就闲置的空间。而**将来补做的代价是再来一次全现场重传 app + 换板卡包**。
+> ✅ **结论：留余地几乎免费** —— 4 字节的版本号，加一块本来就闲置的计数器区。而**将来补做的代价是再来一次全现场重传 app + 换板卡包**。
 
 ## Not yet specified
 
 拆票时这些各自会变成一张或几张票，**现在还不够清楚，不预先切分**：
 
 - **版本号的形状** —— 几个字段（major/minor/patch/build？）、多大、怎么比大小、预发布版本怎么排序
-- **计数器什么时候增** —— 上传成功就增？还是像 MCUboot 那样要「确认」之后才增（给一次回滚机会）？两者的运维含义完全不同
+- **计数器什么时候增** —— 上传成功就增？还是要等新固件「确认」自己起来了才增（给一次回滚机会）？两者的运维含义完全不同
 - **降级逃生口的具体形态** —— 物理在场 / owner 签名的专用命令 / 两者都要；以及逃生之后计数器要不要退回
 - **在哪比较** —— 上传时拒绝、启动时拒绝，还是两处都做。⚠️ 启动时检查对**有物理接触的人**无效（他能同时改计数器），所以它挡的是谁要先想清楚
 - **`flash` 命令要不要加版本号字段** —— 那是协议变更，会波及 `$TOOL` 和 `$CORE_REPO` 的解析器

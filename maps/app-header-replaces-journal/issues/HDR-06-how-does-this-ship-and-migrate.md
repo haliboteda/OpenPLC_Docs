@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-20
-Status: open
+Status: resolved
 Blocked by: HDR-03, HDR-05
 
 ## Question
@@ -40,3 +40,19 @@ Blocked by: HDR-03, HDR-05
 4. 回答第 4 条：现场看到的那行串口输出**原文**是什么
 5. 核对 [`docs/modules/M1-firmware-upgrade.md`](../../../docs/modules/M1-firmware-upgrade.md) 第 7 节
    「板子起不来怎么查」那张八行索引表**要加哪一行**
+
+## Answer
+
+2026-09-21 定
+
+**问题仍然存在，但换了图** —— 转到
+[这次变更怎么发布，现场的板子怎么迁移](../../version-gate-and-calibration/issues/VER-07-how-does-this-ship-and-migrate.md)。
+
+不搬 header 之后，`build.flash_offset` 和板卡包不用动了，
+但 **metadata 的 on-flash 布局仍然要改**（扇区 15 前面让出 8 KiB 给校准值），
+和 `a92a8c7` 同一类：**装了新 bootloader 的板子会认为已装的 app 无效，要重传一次**。
+所以「怎么发布、现场怎么迁移」这个问题没有消失，只是范围小了。
+
+## 引出了什么新的未知
+
+没有。

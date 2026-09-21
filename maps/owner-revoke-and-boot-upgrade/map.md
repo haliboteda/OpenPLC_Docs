@@ -65,6 +65,11 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Decisions so far
 
+- [恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md)：
+  **takeown 不再做前置判断，命令直接发给板子**（已实施并真板子验过，`T2-05` 转 ✅）；
+  `getowner` 的措辞**只改工具文案，协议不动** —— 加字段会打断 6 个测试脚本，
+  加新命令则没有任何调用者需要它
+
 **以下八条 2026-09-19 在对话里定，开图之前就已成立**，所以没有对应的票：
 
 - **离职换人是真实需求** —— `R2-04`（撤销叶证书）原来标 ⬜「等真实需求」，那个理由到期，重开

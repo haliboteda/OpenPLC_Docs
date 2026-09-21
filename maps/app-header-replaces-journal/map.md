@@ -1,5 +1,15 @@
 # metadata 从 journal 扇区搬进 app 头部
 
+Status: paused
+Paused because: **2026-09-21 用户改了方向，这张图的终点已作废** —— metadata **不搬**，
+留在扇区 15；journal 只删事件日志；校准值放扇区最前 8 KiB。
+新路线在 [烧录前比版本 + 校准值住进扇区 15](../version-gate-and-calibration/map.md)。
+
+> ⛔ **这张图已归档，六张票全部关闭，不要再从这里开工。**
+> 仍然成立的结论已经搬进新图的 `## 从这张图继承的结论`，**下面整份保留备查**。
+> 作废的是三条：选 S-e（header 放 app 镜像开头）、S-e 的安全模型、业界对标（元数据跟镜像走）。
+
+
 ## 怎么看进度（不用问任何人）
 
 ```
@@ -12,7 +22,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 哪张票 |
 |---|---|---|
-| 1 | **header 分几段** —— 两段式（都在开头）还是 MCUboot 式三段（header 前 / 签名后）。⚠️ **这条决定将来能不能加防回滚和 SBOM** | [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md) |
+| 1 | **header 里放什么** —— magic、`format_ver`、padding、编译期断言。⚠️ **「分几段」（两段式 / 三段式）2026-09-21 用户划掉，不再讨论** | [header 那一千多字节里放什么](issues/HDR-05-what-goes-in-the-header.md) |
 | 2 | 发布和现场迁移怎么走 | [这次变更怎么发布，现场的板子怎么迁移](issues/HDR-06-how-does-this-ship-and-migrate.md) |
 
 **还要你动一次手**：[VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md) 要在真板子上验一次跳转。
@@ -46,7 +56,7 @@ firmware metadata（`app_size` + `signature` + `cert`）**从独立的 128 KiB j
 
 ## Notes
 
-- 域：[M1 固件升级](../../docs/modules/M1-firmware-upgrade.md)、[M2 归属与信任](../../docs/modules/M2-ownership.md)、[Journal 设计说明](../../docs/modules/M1/JOURNAL.md)
+- 域：[M1 固件升级](../../docs/modules/M1-firmware-upgrade.md)、[M2 归属与信任](../../docs/modules/M2-ownership.md)、[Journal 设计说明](../../docs/modules/M1/SECTOR-15.md)
 - **先文档再代码** —— 定稿先进 `M1-firmware-upgrade.md`，再动 `$BOOT`
 - 这次变更**同时动三个仓**：`$BOOT`（判定与写入）、`$CORE_REPO`（`build.flash_offset`）、`$TOOL`（6 个测试脚本的硬编码基址）。
   ⚠️ **`upload.maximum_size` 本来就是跨仓镜像项**（`boards.txt:37` 的注释明写「must equal IAP_APP_MAX_SIZE」），这次是在已有耦合点上多改一个数，不是新开口子
@@ -83,7 +93,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 | 哪里 | 文档说 | 代码实际 | 谁来收 |
 |---|---|---|---|
-| [`JOURNAL.md`](../../docs/modules/M1/JOURNAL.md) 扫描流程图 | `'M'（8格）… i += 8` | `i += IAP_METADATA_SLOTS`（**7**） | 本图（该文件整份重写或废弃） |
+| [`SECTOR-15.md`](../../docs/modules/M1/SECTOR-15.md) 扫描流程图 | `'M'（8格）… i += 8` | `i += IAP_METADATA_SLOTS`（**7**） | 本图（该文件整份重写或废弃） |
 | 同上，写入流程图 | `追加 M 记录（8格）` | `journal_write(&rec, 7)` | 同上 |
 | 同上，写入流程图 | `剩余格子 < 8` | `journal_room() < 7` | 同上。⚠️ **这处有实际后果**：剩正好 7 格时代码直接追加，追加完剩 0 格，那条 `UPDATE_OK` 日志写不进去 |
 | `$BOOT/IAPServer/bootloader_state.h` 头部注释 | journal 满状态 "reported at boot and **in the identity string**" | `iap_identity_string()` 只看 `app_is_valid`，**identity 里没有** | 本图（[八种事件日志留不留](issues/HDR-02-do-the-event-logs-survive.md) 会重写这段） |
@@ -100,7 +110,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 - **尾附「哈希」不安全，尾附「签名 + 证书」安全** —— 差别不在位置，在**锚**：哈希没有锚，改镜像的人一次写入就把它一起改了；证书的 `root_sig` 锚在 owner 区，改镜像的人够不着。**开源不影响这一条 —— 安全来自密钥，不来自格式保密**
 - **只缓存叶公钥（不存整张 cert）是不安全的** —— 缓存的公钥没有任何东西约束它是否被认可，攻击者追加一条自带公钥 + 自带签名的记录就能通过。`bootloader_state.h` 里那句 `do not add one` 拦的是这个
 - **`app_size` 必须记** —— 不记就必须每次全擦 app 区（否则分不清「这一版的最后一个字节」和「上一版残留的第一个字节」），还要每次启动算满 1792 KiB 的哈希，并让上位机新增一个跨仓常量。**「不记长度 + 不全擦」在原理上不成立**
-- **业界对标：元数据跟镜像走是主流，独立 append-only 扇区没查到先例** —— MCUboot 的 image header 在镜像开头且装着 image size，ESP32 Secure Boot v2 的签名块紧跟镜像。⚠️ **PLC 厂商（Siemens / Beckhoff）只查得到「验不验签」这一层，查不到「元数据存哪」** —— 他们的 bootloader 是闭源的
+- **业界对标：元数据跟镜像走是主流，独立 append-only 扇区没查到先例** —— ESP32 Secure Boot v2 的签名块紧跟镜像。⚠️ **PLC 厂商（Siemens / Beckhoff）只查得到「验不验签」这一层，查不到「元数据存哪」** —— 他们的 bootloader 是闭源的
 
 **以下两条 2026-09-20 由用户拍板，同样没有票：**
 
@@ -112,7 +122,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 - [换主之后，旧根签的固件还能不能启动](issues/HDR-01-does-setowner-still-invalidate-installed-firmware.md)：**不能，停在 bootloader —— 维持今天的行为，不跟撤销走同一个语义**。两者问的不是同一个问题：撤销问「这个人还值不值得信」，换主问「这块板还是不是你的」。header 因此仍存整张 `cert`，196 字节不变
 - [八种事件日志留不留，留的话住哪](issues/HDR-02-do-the-event-logs-survive.md)：**全删，连 `JOURNAL.md` 一起删**。「日志满了靠什么回收」这个问题随之消失；state 扇区**完全**空出来，不是部分
-- [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md)：**留给 bootloader 侧，归校准值**。不是「放这儿方便」，是排除法之后的唯一去处 —— 板上**没有 EEPROM**、microSD 可拔插、RTC 备份寄存器会随电池丢失且撞过车、app 区和 header 每次升级被擦重写。附带解掉第 45 条那个「reclaim 搬运校准值、掉电就丢」的既存冲突。⚠️ **本票不改 `IAP_APP_MAX_SIZE`** —— 它会因 header 而变，那是另一张票的事，别重复改
+- [让出来的 128 KiB state 扇区给谁](issues/HDR-03-who-gets-the-freed-sector.md)：~~留给 bootloader 侧，归校准值~~ ⚠️ **2026-09-21 用户重开** —— 「补偿值不一定非要存在扇区 15」，归属待重议。原结论的理由是排除法之后的唯一去处 —— 板上**没有 EEPROM**、microSD 可拔插、RTC 备份寄存器会随电池丢失且撞过车、app 区和 header 每次升级被擦重写。附带解掉第 45 条那个「reclaim 搬运校准值、掉电就丢」的既存冲突。⚠️ **本票不改 `IAP_APP_MAX_SIZE`** —— 它会因 header 而变，那是另一张票的事，别重复改
 - [VTOR 对齐到底要多少字节](issues/HDR-04-what-is-the-real-vtor-alignment.md)：**header 取 1024**。真板子实测硬件只强制 128（`TBLOFF = bit[31:7]` 坐实），1024 来自架构规则「对齐 ≥ 向量表长度取整到 2 的幂」，664 → 1024，**那一半测不了也不必测**
 
 ## Not yet specified
