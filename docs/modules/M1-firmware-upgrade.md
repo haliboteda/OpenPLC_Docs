@@ -377,10 +377,10 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
 | `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复 | 灌满后板子报 `** Metadata area full - the next successful update reclaims it. **`，一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
-| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin>` | 真板子 | ⬜ |
-| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --sign-with-leaf` | 真板子 | ⬜ |
+| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子 | ⬜ |
+| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ⬜ |
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ⬜ |
-| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --unclaimed` | **真板子 + 人按 BOOT0** | ⬜ |
+| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ⬜ |
 
 **共 38 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 

@@ -40,9 +40,9 @@
 | A7 | `IAPServer/owner_slot.c` · `report_root_trust()` | 启动日志加「owner 槽还剩 N 条」+ 撤销集合大小 | 🤖 |
 | A8 | `IAPServer/iap_cert.c/.h` | **给 `iap_cert_verify()` 加一个参数**，让编译器保证每个调用点都处理撤销 —— 今天两个调用点：`iap_auth.c:122`、`IAP_server.c:428` | 🤖 **已定 2026-09-20** |
 | A9 | `IAPServer/IAP_server.c` | 新增命令 `revoke` | ✅ **已实现并真板子验过**（`T2-19`/`T2-20`）|
-| A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | 🤖 **可做了 2026-09-22** —— 形状见 [FLASHBOOT.md](../../docs/modules/M1/FLASHBOOT.md) |
-| A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | 🤖 **已定**（「没有有效 owner 能授权的操作一律物理在场」） |
-| A12 | **新文件** · 原地升级 | 收镜像→SDRAM ／ owner 根验签 ／ **查尺寸 ≤ 120 KiB** ／ 搬 owner 记录进 SDRAM ／ 擦扇区 0 ／ **先写 owner 再写 bootloader** ／ 写回时压缩 | 🤖 **已定 2026-09-20** —— 擦写例程放 `RAM_D1`，全程关中断，不调 HAL |
+| A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | ✅ **2026-09-22 已实现**（和 `flash` 同一条分支，`verb` 区分）—— 未上板 |
+| A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | ✅ **2026-09-22 已实现**（`owner_slot_root_is_public()` 且 `!s_boot0_held` → `Refused`）|
+| A12 | **新文件** · 原地升级 | ✅ **2026-09-22 已实现** `IAPServer/boot_selfupgrade.{c,h}`（`.RamFunc`、关中断、不调 HAL）。⚠️ **写回时压缩还没做** —— 等 I 节，owner 区 8 KiB 原样搬 |
 | A13 | 链接脚本 / 启动代码 | ✅ **不用改** —— `.RamFunc` 段已经收在 `.data` 里（`STM32H743IIKX_FLASH.ld:166-167`）、启动代码已经会拷贝。**只要用** | 🤖 **已定 2026-09-20**，核实过 |
 | A16 | `owner_record_t.slots` | **删掉这个字段** | 🤖 **已定 2026-09-19** —— 变长记录不做了，它是个永远不触发的校验 |
 | A17 | 构建尺寸 | 新增代码会涨。当前 **103,144 B**，上限 **122,880 B**，余 **19,736 B**。`CHK-A4` 自动卡 | 🤖 自动 |
@@ -56,15 +56,15 @@
 | # | 改哪 | 改什么 | 谁拍板 |
 |---|---|---|---|
 | B1 | `app.go` | 新增 `IAPTool revoke <ip> --key=owner.pem --leaf=<公钥>` | 🤖 **已定 2026-09-20** |
-| B2 | `app.go` | 新增 `IAPTool flashboot <boot.bin> <ip>` | 🤖 **可做了 2026-09-22**，要 `--key=owner.pem`（根私钥）|
-| B3 | `app.go` | 帮助文本、`Invalid mode` 那行的命令列表 | 🤖 |
+| B2 | `app.go` | 新增 `IAPTool flashboot <boot.bin> <ip>` | ✅ **2026-09-22 已实现** `RunEtherFlashBoot()` |
+| B3 | `app.go` | 帮助文本、`Invalid mode` 那行的命令列表 | ✅ **2026-09-22 已实现** |
 | B4 | `owner.go` | `RunRevoke()` —— 读板子的 generation + uid，拼签名前缀，签，下发，**再读回来确认** | 🤖 形状已定；⏳ 「已经撤过谁」怎么查还在迷雾 |
 | B5 | `owner.go` | `RunFlashBoot()` | ⏳ 迷雾 |
 | B6 | `iapcert/iapcert.go` | **整套删掉**：`serial` 字段、`SelfSignedSerial`、`NextSerial()`、`CounterPath()`、`.certserial` 文件 | 🤖 **已定 2026-09-19**（层①：删字段） |
 | B7 | `iapcert/iapcert.go` | `Cert` 结构和 `SignedLen` 跟着改成 128 / 64 | 🤖 跟 B6 |
 | B8 | `cert.go` | `issueLeafCert()` 去掉发号和 warning 返回值 | 🤖 跟 B6 |
 | B9 | `$BOOT/IAPServer/keys/` | 删掉 `*.pem.certserial` 文件本身，以及 `keys/README.md` 里讲发号的那段 | 🤖 跟 B6 |
-| B10 | `README.md` | 新命令的说明 | 🤖 |
+| B10 | `README.md` | 新命令的说明 | ✅ **2026-09-22 已实现**（`$TOOL/README.md` 「Replacing the bootloader」一节）|
 
 ## C · Arduino 板卡包（`$CORE` = `open_plc_arduino`）
 
@@ -108,7 +108,7 @@
 | F4 | 同上 · 边界一节 | ⚠️ **「ST-Link 重烧 bootloader = 所有权重置」这句要改** —— 原地升级之后不再成立 |
 | F5 | 同上 · BOOT0 那节 | 写进「没有有效 owner 能授权的操作一律物理在场」 |
 | F6 | 同上 · 「定下来的取舍」表 | ✅ **2026-09-20 已标** `serial` 要删。⏳ `IAPServer/keys/README.md` 里讲发号那段等代码改完再动 |
-| F7 | `docs/modules/M1-firmware-upgrade.md` | 新增 `flashboot` 通道（一条新需求 + 用例） |
+| F7 | `docs/modules/M1-firmware-upgrade.md` | 新增 `flashboot` 通道—— ✅ **2026-09-22 已写**：`R1-34`–`R1-37` 四条需求 + `T1-29`–`T1-32` 四条用例（全 ⬜ 未跑），细节在 [FLASHBOOT.md](../../docs/modules/M1/FLASHBOOT.md) |
 | F8 | `docs/tables/STATUS.md` | M2 条数变了；场景表「**同事离职，或他的叶私钥泄露了**」那一行的去向要改 |
 | F9 | `docs/tables/DECISIONS.md` | 追加这一轮拍板的几条 |
 | F10 | `docs/tables/ACCEPTANCE-CHECKLIST.md` | `CHK-B` 加一条「原地升级走一遍」 |
@@ -149,7 +149,6 @@ From this release the bootloader can be updated in place with `IAPTool flashboot
 - **Do not cut power during the update.** If power is lost the board will not start.
   Hold BOOT0 through a reset to enter the ST ROM DFU and re-flash the bootloader over
   USB; whether ownership survived depends on where it stopped, and the boot log says so.
-- The update also discards superseded entries in the owner record area, reclaiming slots.
 
 ⚠️ Re-flashing the bootloader over **ST-Link still wipes ownership** -- the owner records
 live in the bootloader's own flash sector. Use `flashboot` to keep it.

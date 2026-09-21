@@ -35,6 +35,14 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 （链接脚本已经把这个段收进 `.data`、启动代码已经会拷贝，**不用改脚本**），
 全程关中断 —— 向量表也在扇区 0 —— 且不调 HAL，直接写 FLASH 寄存器序列，因为 HAL 在 flash 里。
 
+代码落在 `RAM_D1`（`0x24000000`），**那里可执行** —— MPU region 0 把子区 1
+（`0x20000000`–`0x3FFFFFFF`）排除在外（`SubRegionDisable = 0xC7`，见 `Core/Src/main.c` 的 `MPU_Config()`），
+落回默认内存图，SRAM 在那里不是 XN。
+
+⚙️ **链接时会多一条 `LOAD segment with RWX permissions`** —— `.RamFunc` 进了 `.data`，
+那个段就同时可写可执行。这是要的效果，已在 `$TOOL/TestCase/tools/build_image.py`
+的 `KNOWN_WARNINGS` 里按原文匹配放行。
+
 ## 顺序为什么是「先 owner 后 bootloader」
 
 掉电落在两次写之间时，owner 记录已经在了、bootloader 还没有：板子起不来，但**所有权还在**。
@@ -57,3 +65,7 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 **压缩 owner 记录**（丢掉历史 `'R'` 快照、只留完整有效链）要等 `'R'` 记录压缩到一个 flash word
 那批改完 —— 见 `maps/owner-revoke-and-boot-upgrade/CHANGE-LIST.md` 的 I 节。
 在那之前 `flashboot` 把 owner 区 **8 KiB 原样搬过去**。
+
+## 镜像尺寸
+
+加完 `flashboot` 后 bootloader **104,964 字节**，122,880 的预算还剩 17,916（2026-09-22 实测）。
