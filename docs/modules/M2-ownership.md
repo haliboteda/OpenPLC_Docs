@@ -518,7 +518,7 @@ flowchart TD
 | **R2-01** | 根从哪来 | **客户自己编译时能把自己的根编进去**，出厂即安全 | `T2-07` `T2-10` | ✅ |
 | **R2-02** | 换成自己的 | 板子有办法脱离"出厂公开根"，且不需要 ST-Link | `T2-01`–`T2-06` `T2-08` `T2-09` `T2-12`–`T2-14` | ✅ |
 | **R2-03** | 授权别人 | 板子从第一版就懂证书链，简单模式走同一条验证路径 | `T1-18d`–`T1-18f` `T1-16` ¹ `T2-11` ² | ✅ |
-| **R2-04** | 收回授权 | 撤销叶子证书，且**永不能撤到一个有效根都不剩** | `T2-15`–`T2-24` ⁶ | 🟡 |
+| **R2-04** | 收回授权 | 撤销叶子证书，且**永不能撤到一个有效根都不剩** | `T2-15`–`T2-25` ⁶ | 🟡 |
 
 **共 4 条，都有测试。** `R2-04` 仍标 🟡 的原因见 ⁸。
 
@@ -587,9 +587,10 @@ flowchart TD
 | `T2-21` | `R2-04` | **当前生效的根撤不掉自己**（代码里叫 `R4`） | 喂一块假 owner 记录区、跑**真实**的 core 侧 `owner_root_ro.c`：第一条 `'R'` 记录点名当任根 → **根没被撤**；**紧跟其后的两条照常生效**（R4 跳过那一条，不中断整段扫描）；没被点名的叶不算被撤 ⁸ | `python host/owner_revoke/build.py` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里有 `does NOT free these slots`（换根不腾空名额）¹¹ | `python host/owner_capacity/build.py capacity` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-23` | `R2-04` | **第 97 条作废被拒，且一个字节没写** | 96 条全部写入且逐条读回都是「已撤销」；第 97 条 `owner_slot_revoke()` 返回 false，**假 flash 的写入字节计数不变**，`'R'` 段 3072 字节逐字节和拒绝前相同，当任根也没变 ¹¹ | 同上 ¹¹ | 主机侧（要 gcc/clang） | ✅ |
+| `T2-25` | `R2-04` | **`setowner --wipe` 在真板子上回收名额** | 一块已认领、有 6 个叶被撤销的板子：`--wipe` 换根 → 板子擦掉扇区 0 并自己写回来 → 复位后 `getowner` 报 generation 2、新根，启动日志 `96/96 revoke slot(s) free, 0 leaf(s) revoked` ¹² | `IAPTool setowner <ip> --current-key=<a.pem> --new-key=<b.pem> --wipe` | 真板子 + ST-Link 在手边 | ✅ |
 | `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 新区里只有那一条记录（**签名被剥掉**）、其余 8064 字节全 `0xFF`；把它当新 flash 重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `python host/owner_capacity/build.py wipe` | 主机侧（要 gcc/clang） | ✅ |
 
-**共 24 条。** `T2-01` `T2-05` `T2-09` 要人动手按 BOOT0，其余不用；`T2-06` `T2-21`–`T2-24` 在主机上跑，不需要板子。
+**共 25 条。** `T2-01` `T2-05` `T2-09` 要人动手按 BOOT0，其余不用；`T2-06` `T2-21`–`T2-24` 在主机上跑，不需要板子。
 
 ⚠️ **2026-09-20 改正一处**：`T2-12`–`T2-14` 最初登记时误标成「要人按 BOOT0」，核实后是错的 ——
 它们跑的是 `setowner`，`IAP_server.c:251` 注释原文写明「No BOOT0 here, deliberately: the current
@@ -604,7 +605,9 @@ owner's signature IS the authorisation」。**只有认领本身（`T2-01`/`T2-0
 [五条路径里「测安全性」各指什么](../../maps/five-paths-e2e-test/issues/E2E-02-what-does-security-mean-per-path.md)。
 
 ✅ **`T2-15`–`T2-18` 2026-09-20 在真板子上全部通过**（generation 1、一个叶被撤）。
-⚠️ **那次跑的是 v3 布局**（51 条混排槽位）；v4 改成两段之后启动日志的措辞变了，判据已按 v4 更新，**板上没有重跑过**。
+✅ **2026-09-22 在 v4 上整批重跑，六条全过。** 一次作废正好花一个 32 字节 word
+（`96/96 → 95/96 → 94/96`），重复作废**一个槽都不花**，而 `'O'` 段全程停在 `31/32` ——
+作废不再吃所有权槽位，这正是 v4 要解决的事。
 关键证据：启动日志 `Owner slot: 49/51 slot(s) free, 1 leaf(s) revoked` +
 `** App signature invalid or absent - staying in bootloader **`；被撤叶上传被拒且
 app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
@@ -647,6 +650,12 @@ app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
 那份文件的**写入**路径，而 `T1-33` 也确实构造了自指的 `'R'` 记录 —— 但它验的是
 压缩会丢掉那条，不是 `owner_slot_is_revoked()` 会跳过它。bootloader 那侧的
 `R4` 本身仍然只有真板子跑得到。（`T1-16` 的 owner 槽是**桩**，`stubs/owner_slot_stub.c`。）
+
+¹² **`T2-25` 是 `T2-24` 的上板对照**，判据同 `ACCEPTANCE-CHECKLIST.md` 的 `CHK-B8`。
+真板子上跑到的、主机跑不到的那部分：扇区 0 真的被擦掉重写了一次，而板子自己的 bootloader
+就住在那里。板子当天的记录：`** owner area will be rewritten with one unsigned record at
+generation 2: 1 owner record(s) and 6 revocation(s) dropped **`。
+⚠️ 顺带印证了换根会作废已装固件 —— 换完之后那个 app 立刻变成 `App signature invalid or absent`。
 
 ¹¹ **`T2-22`–`T2-24` 在主机上跑，不上板，这是刻意的** —— `T2-22`/`T2-23` 要把 96 个作废名额
 全部用掉，而那些名额**只有擦掉扇区 0 才能回收**，在唯一一块板子上做一次就再也做不了

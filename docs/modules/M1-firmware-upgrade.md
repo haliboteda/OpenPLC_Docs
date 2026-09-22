@@ -276,16 +276,16 @@ flowchart TD
 | **R1-31** | 记录与诊断 | RTC 备份域失效（VBAT 没电）时能被发现 | 手工 | ✅ |
 | **R1-32** | 记录与诊断 | 任何丢包 / 拒绝路径都能说出自己为什么 | 代码审查 | ✅ |
 | **R1-33** | 启动切换 | app 的起始地址满足向量表的对齐要求 | `P15` ⁷ | ✅ |
-| **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ⬜ |
-| **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ⬜ |
-| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**，且 owner 区**顺手压缩** —— 擦扇区是回收槽位的唯一时机 | `T1-31` `T1-33` | 🟡 |
-| **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ⬜ |
+| **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ✅ |
+| **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ✅ |
+| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**，且 owner 区**顺手压缩** —— 擦扇区是回收槽位的唯一时机 | `T1-31` `T1-33` | ✅ |
+| **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
 
 **共 37 条。其中 29 条有测试用例直接测它，8 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T1-xx` 用例直接测 | **29** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-37`（后四条的用例已定义，**还没跑过**） |
+| 有 `T1-xx` 用例直接测 | **29** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-37`（后四条 2026-09-22 在真板子上跑过） |
 | 纯手工 | **3** | `R1-13` `R1-30` `R1-31` |
 | 只有静态检查 P2 | **2** | `R1-06` `R1-14` |
 | 只有静态检查 `P15` | **1** | `R1-33` |
@@ -376,14 +376,25 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-25` | `R1-05` | CDC 上传模式下以太网栈不起来 | 板子进 CDC 模式后不应答 UDP 发现，**且同一轮的正向对照答得出** ¹ | `python tools/run_cdc_does_not_start_ethernet.py --cdc <COM> --ip <IP> --ports <日志口>` | 真板子 | ✅ |
 | `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
-| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复 | 灌满后板子报 `** Metadata area full - the next successful update reclaims it. **`，一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
-| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子 | ⬜ |
-| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ⬜ |
-| `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ⬜ |
-| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ⬜ |
+| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复，**且校准值那 8 KiB 原样搬过去** ⁹ | 灌满后板子报 `** Metadata area full - the next successful update reclaims it. **`，一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子 | ✅ |
+| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ✅ |
+| `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
+| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：走过的链和还生效的作废都在，其余的都不在 | 喂一块故意乱掉的 owner 区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_compact()`：留下的正好是前两条，**无签名那条没有被压缩顺手扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条前移。**再把压缩结果当作新 flash 重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
 
 **共 39 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+
+✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
+bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，
+所有权和已装的 app 都在。关键证据：
+`** owner area compacted: 1 of 1 owner record(s) and 6 of 6 revocation(s) kept **`、
+`flashboot: erasing and rewriting sector 0 (106336 bytes)`、升级前后 `getowner` 同为
+generation 1 同一把根。当天一共换了五次 bootloader，五次都成功。
+
+⚠️ **`T1-30` 第一次判失败，问题在工具不在板子。** 板子拒绝得干干净净且扇区 0 一字节未动，
+但 `IAPTool` 把拒绝报成了成功 —— 镜像签名是整包传完才验的，而工具传完就不再读应答。
+缺陷当天修掉（`$TOOL` 的 `IAP_Ether.go`），`T1-30` 随后通过。
 
 ⚠️ **这个数 2026-09-20 之前写着「共 30 条」，和上表对不上。** 数字是按上表重数的 ——
 补用例的时候没有回头改小结，这类漂移没有任何检查看得见。
@@ -409,6 +420,12 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 ⚠️ **要人工断电的是三条，不是两条**：`T1-17`（nonce 跨掉电不重复）也要 ——
 `tools/run_au1.py` 自己的头注释写着 `prompts you to pull the plug`。
+
+⁹ **校准值搬运 2026-09-22 第一次真的跑到了。** 在校准值区写一段可辨认的字节、
+灌满 metadata、触发一次 reclaim，擦完之后那段字节逐字节还在。
+⚠️ **这条以前跑不出来，原因在测试脚本自己**：`STM32_Programmer_CLI -w` 写扇区任一部分
+都会先擦整个扇区，所以「只写 metadata 那一半」的填充步骤**先把校准值毁了**，
+reclaim 再怎么正确也看不出来。脚本已改成整扇区读写。
 
 ⁸ **`T1-33` 在主机上跑，不上板** —— `owner_slot_compact()` 只有真的换一次 bootloader 才会在板子上执行一次，
 而它一旦留错东西，板子就此不认主人且无从恢复。主机侧跑的是**真实的 `owner_slot.c`**，喂一块 RAM 假 flash。
