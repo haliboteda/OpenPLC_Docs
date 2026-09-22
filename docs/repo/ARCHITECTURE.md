@@ -90,10 +90,16 @@
 | 7 | 证书线格式（128 字节，签名覆盖前 64） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
 | 8 | owner 记录格式（v3，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
+| 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
+| 12 | **`iap_auth.c`**：`next_counter` 和 `iap_auth_issue_challenge` 两个函数整体；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件，也不比整个 `verify_and_consume`** —— core 那份是刻意的子集（没有 `iap_auth_get_counter` / `iap_auth_report_backup_domain`），而 `verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同 |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
-> ✅ **10 条里 8 条 P2 真的在查，第 6 条完全没查，第 9 条只查一半。**
+> ✅ **12 条里 10 条 P2 真的在查，第 6 条完全没查，第 9 条只查一半。**
 > 所以「只能靠注释约束」这个旧说法对多数条目已经不成立 —— **但第 6、9 两条仍然只靠人。**
+
+> ⚠️ **第 11、12 条 2026-09-22 新增**，决定见 [DECISIONS.md 第 65 条](../tables/DECISIONS.md)。
+> 它们**没有**推翻上面的规矩 3：两个仓各自仍是一个真实文件，没有 submodule、没有生成拷贝，
+> 同步照旧按规矩 1、2 手工做 —— 变的只是忘了同步会当场报错。
 
 ### RTC 备份寄存器分配表
 
