@@ -2424,8 +2424,9 @@ LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:463-466`），app �
 **上传路径（`IAP_server.c:489`）不动** —— 被撤的叶再上传照旧被拒。
 ⚠️ **`T2-15`（撤销回溯作废已经装上的固件）判据届时反转**，其余六条撤销用例不受影响。
 
-**代码尚未改动**（2026-09-20）。实施随
-[metadata 从 journal 扇区搬进 app 头部](../../maps/app-header-replaces-journal/map.md) 一起走。
+**2026-09-22 实施，不挂靠任何一张图。** 原先写着随
+[metadata 从 journal 扇区搬进 app 头部](../../maps/app-header-replaces-journal/map.md) 一起走，
+那张图 2026-09-21 已作废，接替它的 `version-gate-and-calibration` 没有承接这一条。
 
 **什么情况下重开**：出现「某把叶的私钥泄露，必须立刻阻断现场所有板子」这类需求 ——
 那是安全事件响应，和离职换人不是一回事，届时可能需要两种撤销强度。
@@ -2494,3 +2495,24 @@ LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:463-466`），app �
 
 **什么情况下重开**：出现明确的合规要求（IEC 62443-4-2 或 CRA 把防回滚列为强制项 ——
 这一条至今**未核实**），或者出现「叶私钥泄露且来不及撤销」这类真实事件。
+
+---
+
+## 63 · 撤销之后，靠一条新命令报出「这块板的 app 签名者被撤了没有」
+
+用户 2026-09-22 拍板：**先报出来**，不做网段批量扫描。
+
+第 60 条让被撤的叶签的固件照常启动，现场因此没有任何信号 ——
+客户要知道哪几块板该重传固件，只能逐块问板子。
+
+**为什么是新命令而不是加字段**：另外三条路都已被先前的决议堵上。
+
+| 路 | 为什么不走 |
+|---|---|
+| `getowner` 加字段 | 回包是个裸十进制数，工具整串 `strconv.ParseUint`；加字段会打断 6 个测试脚本（[OWN-11](../../maps/owner-revoke-and-boot-upgrade/issues/OWN-11-getowner-cannot-say-cleared.md) 已否） |
+| 撤销名单命令 `getrevoked` | [OWN-05](../../maps/owner-revoke-and-boot-upgrade/issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md) 已否 —— 那问的是「名单里有谁」，这条问的是「这块板中招没有」 |
+| 发现应答加字段 | 发现应答是**广播**，每块板每次都往整个网段推这一条，而这件事一年问一次；解析同样会断。⚠️ **不是出于保密** —— 新命令同样不认证就答，和 `getowner`／`getpubkey` 一个级别 |
+
+**形状**：一个动词一个裸值，和 `getuid` / `getpubkey` / `getowner` 一致。
+
+**什么情况下重开**：客户要求一条命令扫完整个网段 —— 那是上位机把发现结果逐个问一遍的活，板子侧这条不用改。

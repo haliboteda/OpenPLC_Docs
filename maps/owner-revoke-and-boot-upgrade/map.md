@@ -14,10 +14,10 @@ python tools/list_wayfinder_map_frontier.py --all
 
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
-| **2** | **`getowner` 对一块刚恢复出厂的板子怎么措辞** —— 它现在报「Claimed at generation N」，读的人会以为板子还被占着 | **现在就能问**，见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md) 的第 3 项 |
+| ~~2~~ | ~~**`getowner` 对刚恢复出厂的板子怎么措辞**~~ ✅ **2026-09-21 已实施** —— `$TOOL/owner.go:178` 起补了两行，把 `setowner` 和「恢复出厂后 `takeown`」两条换主的路直接印出来；票已 resolved | — |
 | ~~——~~ | ~~另有一张调查票：有些叶证书驱动不了重启握手~~ ✅ **2026-09-22 结案** —— 和叶证书无关，是重启握手那一串 UDP **一次都不重试**而旁边的 identify 重试三次。加了重试，五轮全过（两轮触发重试）。见[那张票](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md) | — |
 | ~~1~~ | ~~**`flashboot` 的线上协议**~~ ✅ **2026-09-22 定：选 B** | — |
-| 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
+| ~~1~~ | ~~**撤销之后，客户怎么知道「哪几块板上的固件需要重传」**~~ ✅ **2026-09-22 定：先报出来，不做网段批量扫描** —— 新命令 `getapprevoked`，逐块问，板子答 `yes`/`no`/`none`。见 [DECISIONS.md 第 63 条](../../docs/tables/DECISIONS.md) | — |
 | ~~4~~ | ~~发布说明怎么改~~ ✅ **2026-09-22 用户说「一起改了」，已改完** —— `revoke` / `setowner --wipe` / `flashboot` 三条新命令补齐，「IAP 不能更新 bootloader」那节重写，另加了「升进 0.1.3 那一次要有人按 BOOT0」 | — |
 
 **不用你定的**：[要改的东西，一条不落](CHANGE-LIST.md) 里标 🤖 的那些，形状已经由已关的票定死了。
@@ -64,6 +64,9 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Decisions so far
 
+- **撤销之后客户怎么知道哪几块板要重传**（2026-09-22，用户直接定，没开票）：**新命令 `getapprevoked`，一块板一次询问**。
+  ⚠️ 顺带发现这条原来的记法已经过时 —— 它写着「板子启动时已经在算那个布尔值，报出来就行」，
+  而[第 60 条](../../docs/tables/DECISIONS.md)同一天把启动路径的撤销检查拿掉了，那个布尔值不再存在，得单独算
 - [`flashboot` 的线上协议长什么样](issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md)：**帧格式和传输照搬 `flash`，但镜像签名用 owner 根验，叶证书换不掉 bootloader**；`cert`/`noncesig` 仍只管会话认证与防重放
 - [恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md)：
   **takeown 不再做前置判断，命令直接发给板子**（已实施并真板子验过，`T2-05` 转 ✅）；
@@ -96,9 +99,6 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 ## Not yet specified
 
 - **`flashboot` 的线上协议**：帧格式、分块、和现有 `flash` 命令共用多少
-- **撤销之后客户怎么知道「哪几块板上的固件需要重传」** —— 撤掉某人，他签过的固件下次启动会被拒、停在 bootloader。
-  ⚠️ **要的不是撤销名单** —— 板子启动时已经在算「当前 app 的签名者被撤了没有」（`IAP_server.c:621`），
-  最小做法是把那个布尔值报出来。这条 2026-09-20 由 [工具怎么确认一次撤销真的进去了](issues/OWN-05-how-does-the-tool-confirm-a-revocation-landed.md) 改准
 - **发布说明要怎么改** —— 现在写着「换 bootloader 要重传 app + 重新认领」，原地升级做出来之后这句话会过期
 
 ## Out of scope
