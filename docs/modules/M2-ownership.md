@@ -568,7 +568,7 @@ flowchart TD
 | `T2-04` | `R2-02` | 无签名的高 generation 记录**夺不走**板子 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 | `python tools/inject_owner_record.py --key <hex> --also-unsigned 9` | 真板子 | ✅ |
 | `T2-05` | `R2-02` | 恢复出厂，然后能重新认领 | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、**公开根告警回来** → 再 `takeown` 能成功 | 同 `T2-01` 的驱动 | **真板子 + 人按住 BOOT0 十秒** | ✅ ¹⁰ |
 | `T2-06` | `R2-02` | 「信任公开根」的告警不能失灵 | bootloader 认出那把公开根靠的是编进 `owner_slot.c` 的 SHA-256 指纹常量，这条查它还对得上 | `python tools/check_public_root.py` | 主机侧 | ✅ |
-| `T2-07` | `R2-01` | 换成自己的根之后，公开根告警不再出现 | 启动日志里 `Owner slot: empty` **在**，而 `This board trusts the PUBLISHED root key` 两行**不在**；再用新密钥签的 app 装得进且能启动 | `rotate_keys.sh --yes` → `build_image.py` → `flash_bootloader.py --skip-build` → `upload_and_watch.py` | 真板子 + ST-Link | ✅ |
+| `T2-07` | `R2-01` | 换成自己的根之后，公开根告警不再出现 | 启动日志里 `Owner slot: empty` **在**，而 `This board trusts the PUBLISHED root key` 两行**不在**；再用新密钥签的 app 装得进且能启动 **换根三步**：`rotate_keys.sh --yes` → `build_image.py` → `flash_bootloader.py --skip-build`；**判定**：`python tools/run_custom_root_has_no_warning.py --bin <app.bin> --key <新根.pem>` ¹³ | 真板子 + ST-Link | ✅ |
 
 | `T2-08` | `R2-02` | 公开根告警是**常驻的**，不是一次性提示 | **连续复位 3 次**，每次日志都有 `trusts the PUBLISHED root key`；任一次缺失即失败 | `python tools/run_public_root_warning_is_persistent.py` | 真板子 | ✅ |
 | `T2-09` | `R2-02` | 认领会让板上**原有的 app 失效** | `takeown` 之后复位，日志出现 `App signature invalid or absent`，且**不出现** `APP Mod` | `python tools/run_claim_invalidates_existing_app.py` | **真板子 + 人按住 BOOT0** | ✅ |
@@ -656,6 +656,14 @@ app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
 就住在那里。板子当天的记录：`** owner area will be rewritten with one unsigned record at
 generation 2: 1 owner record(s) and 6 revocation(s) dropped **`。
 ⚠️ 顺带印证了换根会作废已装固件 —— 换完之后那个 app 立刻变成 `App signature invalid or absent`。
+
+¹³ **判定 2026-09-22 才有脚本和退出码。** 在那之前这条用例是四条命令加肉眼看日志，
+所以没人说得出它上一次是什么时候过的。⚠️ 脚本**只判定，不换根** —— 换根那三步是破坏性的，
+把它们塞进判定脚本里，就没法在不换根的情况下重新判一次。
+
+⚠️ **它拒绝只凭「告警消失」就通过**：已认领的板子同样不告警，那是另一回事。
+必须同时看见 `Owner slot: empty` 在、告警不在，而且要先看见一条**必然会打印**的行
+（`Bootloader state:`）—— 否则没抓到的日志和「板子没说」长得一模一样。
 
 ¹¹ **`T2-22`–`T2-24` 在主机上跑，不上板，这是刻意的** —— `T2-22`/`T2-23` 要把 96 个作废名额
 全部用掉，而那些名额**只有擦掉扇区 0 才能回收**，在唯一一块板子上做一次就再也做不了

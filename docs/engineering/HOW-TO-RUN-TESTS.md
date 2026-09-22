@@ -515,6 +515,34 @@ python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
 > ⚠️ **整轮要人到板子跟前 2 次**，都是按住 BOOT0（②-b 的 `takeown`、⑤-0 的 `takeown`）。
 > 其余全部可自动化 —— **回到出厂态走 ST-Link，不用人按**。
 
+### 怎么跑
+
+```bash
+python3 tools/run_five_paths.py               # 整轮
+python3 tools/run_five_paths.py --dry-run     # 只打印计划，什么都不碰
+python3 tools/run_five_paths.py --from 3      # 从路径 ③ 续跑
+python3 tools/run_five_paths.py --only 1 2    # 只跑这几条
+```
+
+⚠️ **破坏性**：整片擦除、换掉编译进 bootloader 的根、前后认领三次。
+⚠️ **要你在板子跟前两次**，都是按住 BOOT0。脚本等**板子自己报**手势落地，不用你敲回车 ——
+但它会一直等到你做完为止。
+
+**某一步没过就停**，不往下跑：后面每一步都建立在前一步留下的状态上，
+在一块状态不明的板子上继续跑，出来的结论没有意义。
+
+⚠️ **三个顺序陷阱，脚本里处理掉了**（照顺序表逐条直跑会踩）：
+
+| 陷阱 | 为什么 | 怎么绕 |
+|---|---|---|
+| **②-d** 的 `inject_owner_record.py` **会重烧 bootloader** | 它靠重烧来写那条记录，而这会擦掉 ②-b 刚建立的认领 | 传同一把根进去，板子回来还是同一个主人，不用再按一次 BOOT0 |
+| **②-e** 的脚本**自己会 takeown** | 单独再跑 ②-b 就认领了两次 | ②-b 和 ②-e 合成一次调用 |
+| **⑤-c..⑤-e** 的脚本**自己会 `setowner`** —— 那次换根**就是** ⑤-b | 先跑一次 `run_setowner.py` 会白烧一个 generation，而且把板子交给后面脚本不知道的密钥 | 只单独跑 ⑤-a 的负向；⑤-b 由那个脚本自己的换根满足 |
+
+⚠️ **路径 ③ 之后再回出厂态，要先 `rotate_keys.sh --restore=<快照>` 再重编** ——
+磁盘上那个 ELF 已经信自编根了，`reset_board_to_factory_state.py` 烧的就是它，
+不会自己处理这个交接。
+
 ### 步骤与顺序
 
 | 步 | 做什么 | 做完板子是什么状态 | 要人吗 |
