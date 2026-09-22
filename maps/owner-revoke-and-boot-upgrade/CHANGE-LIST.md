@@ -42,7 +42,7 @@
 | A9 | `IAPServer/IAP_server.c` | 新增命令 `revoke` | ✅ **已实现并真板子验过**（`T2-19`/`T2-20`）|
 | A10 | `IAPServer/IAP_server.c` | 新增命令 `flashboot` | ✅ **2026-09-22 已实现**（和 `flash` 同一条分支，`verb` 区分）—— 未上板 |
 | A11 | `IAPServer/IAP_server.c` | 未认领时 `flashboot` 检查 `s_boot0_held` | ✅ **2026-09-22 已实现**（`owner_slot_root_is_public()` 且 `!s_boot0_held` → `Refused`）|
-| A12 | **新文件** · 原地升级 | ✅ **2026-09-22 已实现** `IAPServer/boot_selfupgrade.{c,h}`（`.RamFunc`、关中断、不调 HAL）。⚠️ **写回时压缩还没做** —— 等 I 节，owner 区 8 KiB 原样搬 |
+| A12 | **新文件** · 原地升级 | ✅ **2026-09-22 已实现** `IAPServer/boot_selfupgrade.{c,h}`（`.RamFunc`、关中断、不调 HAL）。**写回时的压缩当天补齐** —— `owner_slot_compact()` 在关中断之前跑完，`ram_burn()` 只负责写它交出来的 8 KiB；压缩若拒绝则原样搬过去（回收不了但丢不了所有权）。用例 `T1-33` |
 | A13 | 链接脚本 / 启动代码 | ✅ **不用改** —— `.RamFunc` 段已经收在 `.data` 里（`STM32H743IIKX_FLASH.ld:166-167`）、启动代码已经会拷贝。**只要用** | 🤖 **已定 2026-09-20**，核实过 |
 | A16 | `owner_record_t.slots` | **删掉这个字段** | 🤖 **已定 2026-09-19** —— 变长记录不做了，它是个永远不触发的校验 |
 | A17 | 构建尺寸 | 新增代码会涨。当前 **103,144 B**，上限 **122,880 B**，余 **19,736 B**。`CHK-A4` 自动卡 | 🤖 自动 |

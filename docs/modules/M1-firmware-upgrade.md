@@ -278,7 +278,7 @@ flowchart TD
 | **R1-33** | 启动切换 | app 的起始地址满足向量表的对齐要求 | `P15` ⁷ | ✅ |
 | **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ⬜ |
 | **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ⬜ |
-| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（owner 区原样搬过去） | `T1-31` | ⬜ |
+| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**，且 owner 区**顺手压缩** —— 擦扇区是回收槽位的唯一时机 | `T1-31` `T1-33` | 🟡 |
 | **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ⬜ |
 
 **共 37 条。其中 29 条有测试用例直接测它，8 条没有。**
@@ -381,8 +381,9 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ⬜ |
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ⬜ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ⬜ |
+| `T1-33` | `R1-36` | **压缩留对了东西**：走过的链和还生效的作废都在，其余的都不在 | 喂一块故意乱掉的 owner 区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_compact()`：留下的正好是前两条，**无签名那条没有被压缩顺手扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条前移。**再把压缩结果当作新 flash 重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
 
-**共 38 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 39 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 
 ⚠️ **这个数 2026-09-20 之前写着「共 30 条」，和上表对不上。** 数字是按上表重数的 ——
 补用例的时候没有回头改小结，这类漂移没有任何检查看得见。
@@ -408,6 +409,10 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 ⚠️ **要人工断电的是三条，不是两条**：`T1-17`（nonce 跨掉电不重复）也要 ——
 `tools/run_au1.py` 自己的头注释写着 `prompts you to pull the plug`。
+
+⁸ **`T1-33` 在主机上跑，不上板** —— `owner_slot_compact()` 只有真的换一次 bootloader 才会在板子上执行一次，
+而它一旦留错东西，板子就此不认主人且无从恢复。主机侧跑的是**真实的 `owner_slot.c`**，喂一块 RAM 假 flash。
+**测不到的是**：真的擦一次扇区 0，以及擦写中途掉电。那一条归 `T1-29`/`T1-31`。
 
 ⁵ ⚠️ **2026-09-21 改定，推翻了 2026-09-20 那一版**：**metadata 留在扇区 15**（不搬进 header）、八种事件日志全部删除、扇区**最前 8 KiB 划给校准值**。见 `DECISIONS.md` 第 61 条和[烧录前比版本 + 校准值住进扇区 15](../../maps/version-gate-and-calibration/map.md)。
 `R1-28` 因此重写（槽仍然有，一次升级从 8 槽变 7 槽），**`R1-29` 保留** —— reclaim 没有消失，

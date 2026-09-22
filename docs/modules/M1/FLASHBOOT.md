@@ -1,6 +1,6 @@
 # `flashboot` · bootloader 原地升级
 
-**一条命令把新的 bootloader 写进扇区 0，同时把 owner 记录原样搬过去。**
+**一条命令把新的 bootloader 写进扇区 0，同时把 owner 记录压缩后搬过去。**
 类比 BIOS 升级：**中途不允许断电**。
 
 形状定于 2026-09-19（走原地升级、用 owner 根验签、没有有效 owner 就要物理在场），
@@ -19,7 +19,7 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 | `imgsig` 用谁验 | `cert` 里那把叶公钥 | **owner 根公钥**（`owner_slot_root()`） |
 | 尺寸上限 | `IAP_APP_MAX_SIZE`（1792 KiB） | **120 KiB**（`OWNER_SLOT_BASE - FLASH_BASE`） |
 | 落盘目标 | `IAP_APP_ADDRESS` | **扇区 0**（`0x08000000`） |
-| 落盘之前 | 无 | 把 owner 区 8 KiB 搬进 SDRAM；擦完**先写 owner 再写 bootloader** |
+| 落盘之前 | 无 | 把 owner 区**压缩**进 SDRAM 的 8 KiB；擦完**先写 owner 再写 bootloader** |
 
 `cert` / `noncesig` 的作用不变 —— 会话认证与防重放，和 `flash` 同一条路。
 
@@ -60,12 +60,29 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 ⚠️ **扇区 15 不受影响** —— `STM32_Programmer_CLI -w <elf>` 只擦 ELF 占的那些扇区，
 所以 ST-Link 救砖不会带走 metadata 和校准值。
 
-## 现在不做的
+## 顺手压缩：擦扇区是回收槽位的唯一时机
 
-**压缩 owner 记录**（丢掉历史 `'R'` 快照、只留完整有效链）要等 `'R'` 记录压缩到一个 flash word
-那批改完 —— 见 `maps/owner-revoke-and-boot-upgrade/CHANGE-LIST.md` 的 I 节。
-在那之前 `flashboot` 把 owner 区 **8 KiB 原样搬过去**。
+owner 区只能追加，槽位用掉就回不来 —— **除非整个扇区被擦掉**，而这正是 `flashboot` 干的事。
+所以压缩就挂在这里，`owner_slot_compact()`（`$BOOT/IAPServer/owner_slot.c`）。
+
+| 段 | 留什么 | 丢什么 |
+|---|---|---|
+| `'O'` | **链真正走过的那几条**，按走过的顺序前移 | 坏格式、写了一半、以及**链没走到的** |
+| `'R'` | 还生效的作废，前移 | 坏格式、别的板子的、以及点名当任根的（R4 本来就忽略） |
+
+⚠️ **链没走到的 `'O'` 记录必须丢，不能前移。** 链遇到一条验不过的就地停住，
+后面那些从来没被评判过。把坏的那条删掉、后面的留下，等于让压缩替攻击者
+把验证器拒绝过的那一环扶正 —— 这是这个函数唯一真正危险的地方。
+
+**压缩在关中断之前跑完**，用的是普通代码：那时 flash 还读得到、`printf` 还出得来。
+`ram_burn()` 只负责把交给它的那 8 KiB 写下去，一个判断都不做。
+
+**压缩拒绝时原样搬过去。** 板子已认领、压出来的链却是空的，那是这个函数自己出了问题；
+这时候回收不了槽位无所谓，丢了所有权没有任何办法补救。
+
+判据见 `T1-33`（[M1 固件升级](../M1-firmware-upgrade.md)）—— 主机上跑真实的
+`owner_slot.c`，压完再把结果当新 flash 重扫一遍。
 
 ## 镜像尺寸
 
-加完 `flashboot` 后 bootloader **104,964 字节**，122,880 的预算还剩 17,916（2026-09-22 实测）。
+加完 `flashboot` 和压缩后 bootloader **105,768 字节**，122,880 的预算还剩 17,112（2026-09-22 实测）。
