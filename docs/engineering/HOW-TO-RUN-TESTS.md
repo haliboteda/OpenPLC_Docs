@@ -480,7 +480,7 @@ python3 tools/run_boot0_upload_mode.py --ports COM5
 |---|---|
 | **判据** | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` |
 | **为什么复位不能由 ST-Link 驱动** | BOOT0 是**启动模式引脚**。按住它的时候复位，芯片去启动 ST 自带的 DFU，我们的 bootloader 根本不执行 —— 串口全程静默，USB 上出现 `DFU in FS Mode`，要等下一次「BOOT0 为低」的复位才退出。2026-09-18 这么试了 11 次，每次都报「没按」，而板子其实在 DFU 里 |
-| **为什么用咔哒声当信号** | `Core/Src/main.c` 的 `boot_window_relay()` 把三个继电器各拨 500 ms 并全程轮询 BOOT0，**那 1.5 秒的响声就是窗口本身**。PC 这边看不见它 |
+| **为什么用咔哒声当信号** | `Core/Src/main.c` 的 `boot_window_relay()` 让**一个继电器**响两轮（吸 500 ms、放 500 ms，共两次），**那 2 秒的响声就是窗口本身**。PC 这边看不见它。⚠️ **期间根本不看 BOOT0**，只在 2 秒那一刻读一次 |
 | ⛔ **破坏性** | 长按超过 10 秒会**武装恢复出厂，松手就执行**。而这条用例需要长按，两者分不开。**在已认领的板子上跑会抹掉 owner 密钥** |
 
 ## T1-28 · metadata 区满了能回收，怎么跑
