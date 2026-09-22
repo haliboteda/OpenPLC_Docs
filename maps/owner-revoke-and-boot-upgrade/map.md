@@ -15,7 +15,7 @@ python tools/list_wayfinder_map_frontier.py --all
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
 | **2** | **`getowner` 对一块刚恢复出厂的板子怎么措辞** —— 它现在报「Claimed at generation N」，读的人会以为板子还被占着 | **现在就能问**，见[恢复出厂之后 takeown 被工具拦下，因为线上没法表达「已清空」](issues/OWN-11-getowner-cannot-say-cleared.md) 的第 3 项 |
-| —— | 另有一张调查票：[有些叶证书驱动不了重启握手](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md)，**不阻塞作废那套**。⚠️ 2026-09-22 复现两次，但证明**变量不是证书** —— 票名已不成立，根因仍未定位 | 已有能说话的探针 app，下一步是量「app 启动到受理重启请求」之间那段窗口 |
+| ~~——~~ | ~~另有一张调查票：有些叶证书驱动不了重启握手~~ ✅ **2026-09-22 结案** —— 和叶证书无关，是重启握手那一串 UDP **一次都不重试**而旁边的 identify 重试三次。加了重试，五轮全过（两轮触发重试）。见[那张票](issues/OWN-08-some-leaf-certs-cannot-drive-the-reboot-handshake.md) | — |
 | ~~1~~ | ~~**`flashboot` 的线上协议**~~ ✅ **2026-09-22 定：选 B** | — |
 | 2 | 撤销之后，客户怎么知道「哪几块板上的固件需要重传」 | 同上 |
 | ~~4~~ | ~~发布说明怎么改~~ ✅ **2026-09-22 用户说「一起改了」，已改完** —— `revoke` / `setowner --wipe` / `flashboot` 三条新命令补齐，「IAP 不能更新 bootloader」那节重写，另加了「升进 0.1.3 那一次要有人按 BOOT0」 | — |
