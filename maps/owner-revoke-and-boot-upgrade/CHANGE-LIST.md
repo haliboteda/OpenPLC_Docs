@@ -133,7 +133,15 @@
 
 ⚠️ **G10 卡在第二块板上**，和 `R1-14`（两块板 MAC 不同）是同一个条件。
 
-## H · `RELEASE-NOTES.md` 的草稿（英文，等用户改）
+## H · `RELEASE-NOTES.md` ✅ 2026-09-22 已改完
+
+用户说「一起改了」。落地的比这份草稿多：`revoke` 和 `setowner --wipe` 这两条命令
+草稿里压根没提，而「Flashing the bootloader」那一节写着「IAP 永远不能更新 bootloader」
+—— `flashboot` 做出来之后那句是假的，已重写成一张「哪条路保住什么」的对照表。
+另外补了一条草稿没预见的：**升进 0.1.3 的那一次需要有人按 BOOT0**（0.1.3 之前编的
+app 读不懂新的 owner 记录，驱动不了软件重启握手，2026-09-22 上板发现）。
+
+### 原草稿（留档）
 
 `open_plc_cube_ide/RELEASE-NOTES.md` 现在的 Upgrade rules 写着「换 bootloader 要重传 app **和**
 重新认领」。原地升级做出来之后那句过期，换成：
