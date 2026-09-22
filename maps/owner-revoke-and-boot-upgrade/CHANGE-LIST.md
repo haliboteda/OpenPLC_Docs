@@ -162,27 +162,29 @@ live in the bootloader's own flash sector. Use `flashboot` to keep it.
 
 ## I · `'R'` 记录压缩到一个 flash word（2026-09-20 定，见 `DECISIONS.md` 58 / 59）
 
-**做这一节之前先修 [第二次撤销写得进去但不生效](issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)** ——
-那是缺陷，这是有计划的格式变更，混在一起验的时候分不清是哪边的问题。
+✅ **整节 2026-09-22 实现完毕**，链接通过（**105,296 字节，还剩 17,584**），selfcheck 24 项全绿。
+⚠️ **一行都没上过板** —— v4 是硬切，要重烧 bootloader 并重新认领。
 
 新布局：owner 区 8192 字节切两段，**`'O'` 32 条（5120 字节）+ `'R'` 96 条（3072 字节）**。
-`'R'` 记录 32 字节 = `type`(1) + `format_ver`(2) + `uid`(12) + 叶公钥前 16 字节。
+`'R'` 记录 32 字节 = `type`(1) + `reserved0`(1) + `format_ver`(2) + `uid`(12) + 叶公钥前 16 字节。
+⚠️ **实现时把 `reserved0` 也纳入签名** —— 记录里没有签名字段要排除，「签的就是板子要写的那几个字节」
+在这里能做到一个不差，所以签的是整条 32 字节，不是决策 58 里算的 31 字节内容。
 
 | # | 改哪 | 改什么 | 谁拍板 |
 |---|---|---|---|
-| I1 | `$BOOT/IAPServer/owner_slot.h` | 拆出 `owner_revoke_rec_t`（32 字节）；`'O'` 段和 `'R'` 段各自的基址与条数常量；`_Static_assert` 锁两个尺寸 | 🤖 形状已定 |
-| I2 | 同上 · `owner_record_t` | **删掉 union 里的 `revoked[4][16]`** —— `'R'` 不再共用这个结构体，`'O'` 只剩 `root_pubkey` | 🤖 |
-| I3 | 同上 · `OWNER_FORMAT_VER` | **3 → 4**，硬切不做兼容（沿用 `OWN-03` 的先例） | 🤖 |
-| I4 | `owner_slot.c` · `resolve_chain()` | 只扫 `'O'` 段建链；`'R'` 段**独立扫一趟**，只查结构（type / format_ver / uid），不验签、不看 generation | 🤖 形状已定（决策 59） |
-| I5 | `owner_slot.c` · `owner_slot_revoke()` | 写 32 字节记录；去掉 generation 检查；签名验完即丢；**写之前查重复，已存在则不写并回 `OK already revoked`**（`I-D1`） | 🤖 |
-| I6 | `owner_slot.c` · `append_record()` | 拆成两个：`'O'` 往 `'O'` 段追加，`'R'` 往 `'R'` 段追加 | 🤖 |
-| I7 | `$CORE_REPO/libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}` | 跨仓镜像，常量和两段扫描要完全一致 | 🤖 |
-| I8 | `$TOOL/owner.go` · `RunRevoke()` | 不再算 generation、不再发送它；签名改成覆盖新的 31 字节 | 🤖 |
-| I9 | `$TOOL/TestCase/host/bootloader_unit/` | `T1-16` 拿真实 `owner_slot.c` 在 PC 上跑，桩和用例跟着改 | 🤖 |
-| I10 | `$TOOL/TestCase/tools/inject_owner_record.py` | `T2-04` 靠它手工拼记录字节，布局变了必须跟 | 🤖 |
-| I11 | `$TOOL/TestCase/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | 🤖 |
-| I12 | `$PROD/docs/modules/M2-ownership.md` | 新布局的字节表、两段的划分理由、`'R'` 读取不验签这条 | 🤖 |
-| I13 | 用例 | **新增两条**：① 剩 8 条时启动日志出现提醒；② 第 97 个被拒且一个字节未写 | 🤖 形状已定 |
+| I1 | `$BOOT/IAPServer/owner_slot.h` | 拆出 `owner_revoke_rec_t`（32 字节）；`'O'` 段和 `'R'` 段各自的基址与条数常量；`_Static_assert` 锁两个尺寸 | ✅ **2026-09-22 已实现** |
+| I2 | 同上 · `owner_record_t` | **删掉 union 里的 `revoked[4][16]`** —— `'R'` 不再共用这个结构体，`'O'` 只剩 `root_pubkey` | ✅ **2026-09-22 已实现** |
+| I3 | 同上 · `OWNER_FORMAT_VER` | **3 → 4**，硬切不做兼容（沿用 `OWN-03` 的先例） | ✅ **2026-09-22 已实现** |
+| I4 | `owner_slot.c` · `resolve_chain()` | 只扫 `'O'` 段建链；`'R'` 段**独立扫一趟**，只查结构（type / format_ver / uid），不验签、不看 generation | ✅ **2026-09-22 已实现** |
+| I5 | `owner_slot.c` · `owner_slot_revoke()` | 写 32 字节记录；去掉 generation 检查；签名验完即丢；**写之前查重复，已存在则不写并回 `OK already revoked`**（`I-D1`） | ✅ **2026-09-22 已实现**，签名覆盖整条 32 字节 |
+| I6 | `owner_slot.c` · `append_record()` | 拆成两个：`'O'` 往 `'O'` 段追加，`'R'` 往 `'R'` 段追加 | ✅ **2026-09-22 已实现**。`'R'` 只有一个 flash word，没有先写体后写头那一步 |
+| I7 | `$CORE_REPO/libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}` | 跨仓镜像，常量和两段扫描要完全一致 | ✅ **2026-09-22 已实现**（live 编译验过再拷进仓） |
+| I8 | `$TOOL/owner.go` · `RunRevoke()` | 不再算 generation、不再发送它；签名改成覆盖新的 32 字节（整条记录） | ✅ **2026-09-22 已实现** |
+| I9 | 主机侧 C 用例 | ⚠️ **原描述有误**：`T1-16` 的 owner 槽一直是**桩**，不是真实 `owner_slot.c`。真正跑真实代码的是 `host/owner_revoke/`（core 镜像）—— 已按两段布局改完并跑过；写入路径的主机覆盖由新增的 `host/owner_capacity/` 补上（见 I13） | ✅ **2026-09-22 已实现** |
+| I10 | `$TOOL/TestCase/tools/inject_owner_record.py` | `T2-04` 靠它手工拼记录字节，布局变了必须跟 | ✅ **2026-09-22 已实现**（`format_ver` 4、`'O'` 段寻址不变；脚本本来就没有 `'R'` 路径） |
+| I11 | `$TOOL/TestCase/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | ✅ **2026-09-22 已实现**，新增 5 个锚点，`P2` 全绿 |
+| I12 | `$PROD/docs/modules/M2-ownership.md` | 新布局的字节表、两段的划分理由、`'R'` 读取不验签这条 | ✅ **2026-09-22 已实现**（顺带修好了那节停在 v2 的旧字节表） |
+| I13 | 用例 | **新增两条**：① 剩 8 条时启动日志出现提醒；② 第 97 个被拒且一个字节未写 | ✅ **2026-09-22 已实现** `T2-22`/`T2-23`，新建 `host/owner_capacity/` 在主机上跑真实 `owner_slot.c` 的写入路径（上板会永久烧掉全部 96 个名额） |
 
 ### I · 要你拍板的
 
