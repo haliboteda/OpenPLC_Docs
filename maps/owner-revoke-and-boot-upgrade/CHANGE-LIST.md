@@ -162,7 +162,7 @@ live in the bootloader's own flash sector. Use `flashboot` to keep it.
 
 ## I · `'R'` 记录压缩到一个 flash word（2026-09-20 定，见 `DECISIONS.md` 58 / 59）
 
-✅ **整节 2026-09-22 实现完毕**，链接通过（**105,296 字节，还剩 17,584**），selfcheck 24 项全绿。
+✅ **整节 2026-09-22 实现完毕**，链接通过（**106,324 字节，还剩 16,556**，含后来补的压缩和 `--wipe`），selfcheck 27 项全绿。
 ⚠️ **一行都没上过板** —— v4 是硬切，要重烧 bootloader 并重新认领。
 
 新布局：owner 区 8192 字节切两段，**`'O'` 32 条（5120 字节）+ `'R'` 96 条（3072 字节）**。
@@ -185,6 +185,20 @@ live in the bootloader's own flash sector. Use `flashboot` to keep it.
 | I11 | `$TOOL/TestCase/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | ✅ **2026-09-22 已实现**，新增 5 个锚点，`P2` 全绿 |
 | I12 | `$PROD/docs/modules/M2-ownership.md` | 新布局的字节表、两段的划分理由、`'R'` 读取不验签这条 | ✅ **2026-09-22 已实现**（顺带修好了那节停在 v2 的旧字节表） |
 | I13 | 用例 | **新增两条**：① 剩 8 条时启动日志出现提醒；② 第 97 个被拒且一个字节未写 | ✅ **2026-09-22 已实现** `T2-22`/`T2-23`，新建 `host/owner_capacity/` 在主机上跑真实 `owner_slot.c` 的写入路径（上板会永久烧掉全部 96 个名额） |
+
+## J · `setowner --wipe`（2026-09-22 实施，票 [换根的时候把 owner 区清空重写](issues/OWN-07-should-setowner-wipe-the-owner-area.md)）
+
+| # | 改哪 | 改什么 | 状态 |
+|---|---|---|---|
+| J1 | `$BOOT/IAPServer/owner_slot.{c,h}` | `build_handover_record()` 从 `owner_slot_set_owner()` 里拆出来，和新的 `owner_slot_build_wipe_area()` 共用，两条路对「合法换主」不可能给出不同答案 | ✅ |
+| J2 | `$BOOT/IAPServer/boot_selfupgrade.{c,h}` | `boot_selfupgrade_wipe_owner()`：把自己这份 bootloader 读进 SDRAM（**掐掉尾部全 `0xFF` 的字**，缩短掉电窗口）、擦扇区 0、写回。`arm_and_burn()` 从 `flashboot` 拆出来共用 | ✅ |
+| J3 | `$BOOT/IAPServer/IAP_server.c` | 新命令 `setownerwipe <gen> <key> <sig>`。成功不回应答（板子已复位），回 `Refused` 就说明一个字节都没擦 | ✅ |
+| J4 | `$TOOL/owner.go` · `app.go` · `README.md` | `--wipe` 布尔标志；成功一路当作「板子要复位了」，不做回读 | ✅ |
+| J5 | 用例 | `T2-24`，主机侧（`host/owner_capacity/build.py wipe`） | ✅ |
+| J6 | `$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md` | 新增 `CHK-B8`「清空重写走一遍」—— `OWN-07`「怎么算答完」第 3 条要求的 | ✅ |
+
+⚠️ **写回去那条记录必须不带签名**，否则板子会变无主 —— 实施时才发现，理由写在
+[M2 归属与信任](../../docs/modules/M2-ownership.md) 和 `owner_slot_build_wipe_area()` 的注释里。
 
 ### I · 要你拍板的
 

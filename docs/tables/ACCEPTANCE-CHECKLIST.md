@@ -47,6 +47,7 @@
 | CHK-B4 | **公开根告警仍然会响**（用例 **T2-06**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/modules/M2-ownership.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
 | CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的格式**相符。⚠️ 格式已定要改（校准值 8 KiB + metadata），改完这条判据要一起更新 |
 | CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传 → 正常启动 |
+| CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。⚠️ **这一步会擦扇区 0**，做之前确认 ST-Link 在手边 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
 
 ⚠️ **CHK-B7 是唯一能抓住捆绑升级风险的用例。** 只测 CHK-B6 永远发现不了"新 bootloader 读不懂旧 journal"。
