@@ -20,6 +20,9 @@ python tools/list_wayfinder_map_frontier.py --all
 - 板卡包改动方向单向：先改 `$CORE_LIVE`，验过再拷进 `$CORE_REPO`
 - ⚠️ **发布是对外动作**（推 tag、发 release、改线上索引），每一次发布前单独问用户
 - 只在 Windows 上验
+- **这一版统一叫 `0.1.3`**，发布就发 `0.1.3`（用户 2026-09-24 定）。板卡包 = `$CORE_REPO`（`open_plc_arduino`）；
+  `package_index_json` 是 IDE 加载这个插件用的索引；IDE 装出来的位置 `$CORE_LIVE` 和 `$CORE_REPO` 内容相同。
+  固件和 `boards.txt` 已是 `0.1.3`，**带 `-pre` 的只剩索引里那一项和它装出来的目录名**
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
 ### 开图时已定（2026-09-24 用户定）
@@ -42,6 +45,11 @@ ls package_index_json/*.json                                  # Board Manager �
 ```
 
 ## Decisions so far
+
+- [IDE 上传时用哪把密钥，已认领的板子要用户准备什么](issues/IDE-02-which-key-does-an-ide-upload-use.md)：IDE 不传密钥参数，IAPTool 用工具包里 `keys\fw_signing_key.pem`（加同名 `.cert`）；三种板子状态各放什么已列出
+- [一个发布版今天是怎么到 Board Manager 的](issues/IDE-01-how-does-a-release-reach-board-manager.md)：全手工、对外 6 步；网上的 `0.1.3-pre` 能装但内容是 4 月的，工具包里的 IAPTool 不会签名
+- [假板子要像到什么程度，arduino-cli 的 upload 才能走完](issues/IDE-04-how-real-must-the-fake-board-be.md)：停在 bootloader 时现有假板子已够；跑 app 时补约 25 行，原型已走通
+- [CAN 和 SD 卡在 Arduino 下最少要补什么](issues/IDE-03-what-can-and-sd-need-in-arduino.md)：CAN 照板上跑通的代码写薄封装；SD 用上游 STM32SD，但先把变体里 27 项的 SD 引脚表砍到真实接的脚
 
 ## Not yet specified
 

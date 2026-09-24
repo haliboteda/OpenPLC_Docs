@@ -3,7 +3,7 @@
 Type: task
 Opened: 2026-09-24
 Status: open
-Blocked by: IDE-02, IDE-04
+Blocked by: IDE-02, IDE-04, IDE-13
 
 ## Question
 
@@ -11,4 +11,4 @@ Blocked by: IDE-02, IDE-04
 
 ## 怎么算答完
 
-脚本对两种板子状态都退出码 0；故意让假板子拒一次（错的密钥），脚本报红。并写清这条模拟测不到什么。
+脚本对两种板子状态都退出码 0；故意让假板子拒一次（错的密钥），脚本报红。并写清这条模拟测不到什么。假板子在「重启」期间必须真的静默，否则成功判据是空的；三个已知的坑见 [IDE-04-findings.md](../IDE-04-findings.md)。

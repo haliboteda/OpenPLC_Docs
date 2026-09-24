@@ -35,7 +35,7 @@
 | `E2E-01`–`E2E-05` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 5 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
 | `FG-01`–`FG-03` | wayfinder 的票，属于「补记录框架自己的洞」 | 3 | [framework-gaps/issues/](../../maps/framework-gaps/issues) |
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
-| `IDE-01`–`IDE-12` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 12 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
+| `IDE-01`–`IDE-14` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 14 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
 | `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
