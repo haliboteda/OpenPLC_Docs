@@ -360,13 +360,13 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `go test ./TestCase/...` | 主机侧 | ✅ |
 | `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `host/bootloader_unit/build.py` | 主机侧 | ✅ |
 | `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电后计数器不归零，本轮 nonce 全不同 | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
-| `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | 主机侧 | ✅ |
-| `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | 主机侧 | ✅ |
-| `T1-18c` | `R1-21` | 老 bootloader 不认这条命令时不卡住 | 板子答 `Unknown command`，工具照走并说 `skipping key match check` | 同上 | 主机侧 | ✅ |
-| `T1-18d` | `R1-21` ³ | 委托证书由这块板的根签发 | 板子答签发根，工具报 `Certificate was issued by this board's root` | 同上 | 主机侧 | ✅ |
-| `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | 主机侧 | ✅ |
-| `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | 主机侧 | ✅ |
-| `T1-18g` | `R1-21` | 一把密钥都没有 | 工具拒并说 `no signing key found` | 同上 | 主机侧 | ✅ |
+| `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | 假板子 | ✅ |
+| `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | 假板子 | ✅ |
+| `T1-18c` | `R1-21` | 老 bootloader 不认这条命令时不卡住 | 板子答 `Unknown command`，工具照走并说 `skipping key match check` | 同上 | 假板子 | ✅ |
+| `T1-18d` | `R1-21` ³ | 委托证书由这块板的根签发 | 板子答签发根，工具报 `Certificate was issued by this board's root` | 同上 | 假板子 | ✅ |
+| `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | 假板子 | ✅ |
+| `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | 假板子 | ✅ |
+| `T1-18g` | `R1-21` | 一把密钥都没有 | 工具拒并说 `no signing key found` | 同上 | 假板子 | ✅ |
 | `T1-19` | `R1-24` | SHA-256 编码交叉验证 | 独立第三实现逐向量比对 | `host/crypto_ref/run_checks.py` | 主机侧 | ✅ |
 | `T1-20` | `R1-24` | ECDSA 编码交叉验证 | 同上 | 同上 | 主机侧 | ✅ |
 | `T1-21` | `R1-27` | 掉电落在传输期 | 断电后重新上电，**旧 app 照常启动** | `python tools/run_s4.py` ⁴ | **真板子 + 人工断电** | ✅ |

@@ -94,9 +94,8 @@ find OpenPLC_Docs/docs -type f
 
 ## Not yet specified
 
-- **四份模块文档必须一起建齐，不能一份一份来。** 先建一份，别的模块引用它的地方
-  会被 P9（文档里提到的路径必须存在）一直判成断链 —— 实测触发 4 处。
-  所以 M1 定稿暂时留在 `maps/`，等需求归模块定完四份一起搬进 `docs/modules/`
+2026-09-24 清理：四份模块文档已一起建齐。
+
 ## Out of scope
 
 - **`docs/tables/DECISIONS.md` 的 48 条编号**：明令不可重排（`docs/agents/domain.md`），

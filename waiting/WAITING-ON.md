@@ -15,6 +15,10 @@
 | **硬件工程师回答 `ef1=`/`ef2=` 哪个电平算故障** | 把判据写进方案文件（判据和限值由他写，我方只报电平，见 DECISIONS 44） | 同上 |
 
 | **用户拍板并自己写校准值写 flash 的代码** | **位置 2026-09-21 已定**（决策 61）：扇区 15 **最前 8 KiB**，固定地址，metadata 接在后面 append。⚠️ **工装要按板子 UID 留一份副本** —— 那是 metadata 满时唯一那个掉电窗口的兜底 —— 见[让出来的 128 KiB state 扇区给谁](../maps/app-header-replaces-journal/issues/HDR-03-who-gets-the-freed-sector.md) | 原 `ISS-C1`。**用户 2026-09-16：「暂时不动」** |
+| **用户定：认证失败的 RAM 环形缓冲删不删** —— `$BOOT/IAPServer/bootloader_state.c` 的 `s_auth_fail[]`，两个读取函数零调用者 | 删：连同 `bootloader_state_note_auth_fail()` 的写入一起删；留：接一个读出命令 | [八种事件日志留不留，留的话住哪](../maps/app-header-replaces-journal/issues/HDR-02-do-the-event-logs-survive.md) |
+| **用户定：bootloader 的 IAP 协议要不要一份独立文档** —— 命令现在只活在代码注释和决策里（工装有 [PORTTOOL-FLOW.md](../docs/modules/M4/PORTTOOL-FLOW.md)，bootloader 没有） | 要：在 `docs/modules/M1/` 下补一份命令一览，每条给格式、认证要求、应答 | [参考层按什么分类](../maps/docs-migration/issues/MIG-02-reference-layer-taxonomy.md) |
+| **用户定：`ID-MAP.md` 要不要改成脚本生成** —— 手维护已经漂了：需求那一行还是 2026-09-17 重排之前的旧编号，很多行指向已不存在的「最近结果」栏 | 要：写扫描脚本生成它并进 selfcheck；不要：手工把整表对到现状 | [P7/P8/P9 和 selfcheck 怎么跟着搬](../maps/docs-migration/issues/MIG-05-doc-checks-follow.md) |
+| **用户定：五条路径跑出来的结果记在哪、方案进验收单哪一层**（`CHK-A` 改动后自检 / `CHK-B` 发版 / `CHK-C` 单板出厂） | 按定下的层写进 [ACCEPTANCE-CHECKLIST.md](../docs/tables/ACCEPTANCE-CHECKLIST.md)；结果落点要一个工具输出位置，没有就先开票 | [五条路径共用一块板，顺序怎么排](../maps/five-paths-e2e-test/issues/E2E-03-what-order-do-the-five-paths-run-in.md) |
 
 
 ## 最低优先级 · 交接时那两个坏字节，原因未知

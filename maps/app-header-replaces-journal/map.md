@@ -127,10 +127,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Not yet specified
 
-- **`AUTH_FAIL` 的 RAM 环形缓冲要不要一起删** —— `s_auth_fail[32]` 和 `bootloader_state_note_auth_fail()` 不占 flash（刻意 RAM-only，防止未认证调用者磨损扇区），但它的两个读取函数同样**零调用者**。按「日志全删」的口径该删，但它和 flash 日志不是同一个东西，**属于清理死代码，要单独确认**
-- **`R1-32`（任何丢包 / 拒绝路径都能说出自己为什么）在新结构下还成不成立** —— 现在「板子起不来怎么查」那张八行索引表里，`metadata absent`（出厂空板）和 `App signature invalid`（装过但上次失败）是两行；header 跟 app 一起被擦之后这两行会塌缩成一个现象。**其余六行不受影响**。要等 `HDR-05` 定了 header 布局（有没有 magic、magic 能不能区分「从没写过」和「写了一半」）才说得清
-- **`P2`（跨仓镜像没分叉）要不要把 `build.flash_offset` 纳进去** —— 它现在守的是 owner 记录和证书那几份镜像。app 起始地址变成三处共识之后，谁来保证它们不分叉还没定
-- **bootloader 自己要不要也带 header** —— 本图只管 app。`flashboot` 原地升级（另一张图）落地后，bootloader 镜像自己的完整性怎么证，可能会回头影响这里的格式选择
+2026-09-24 清理：本图已归档（metadata 不搬）。`R1-32` 两行塌缩、`P2` 纳入 `build.flash_offset`、bootloader 带 header 三条都以「要搬」为前提，不再成立；`AUTH_FAIL` 环形缓冲那条转入 [WAITING-ON](../../waiting/WAITING-ON.md)。
 
 ## Out of scope
 

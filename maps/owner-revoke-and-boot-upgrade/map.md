@@ -98,8 +98,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Not yet specified
 
-- **`flashboot` 的线上协议**：帧格式、分块、和现有 `flash` 命令共用多少
-- **发布说明要怎么改** —— 现在写着「换 bootloader 要重传 app + 重新认领」，原地升级做出来之后这句话会过期
+2026-09-24 清理：`flashboot` 协议见 [FLASHBOOT.md](../../docs/modules/M1/FLASHBOOT.md)；发布说明已改成用 `flashboot` 保留所有权（`$BOOT/RELEASE-NOTES.md`）。
 
 ## Out of scope
 

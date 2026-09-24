@@ -104,6 +104,10 @@ python tools/list_wayfinder_map_frontier.py
 - **编号只活在文件名里。** 图的正文、提交说明、对话里一律用票的**标题**
 - 脚本文件名写长一点，说清它干什么 —— `list_wayfinder_map_frontier.py`，不是 `frontier.py`
 
+## 一张图走完之后
+
+目录原地不动。[INDEX.md](INDEX.md) 的状态栏写 **✅ 走完**（加日期和票数），被后来的决定作废的写 **⛔ 归档**（加取代它的决策或图）。迷雾区要么清空、要么只剩在等外部条件的条目。
+
 ## 一个会话只关一张票
 
 `research` 票除外（那种可以并行跑）。

@@ -107,7 +107,6 @@ journal 就没必要了」。**本图不搬 metadata，所以 append 仍然需�
 ## Not yet specified
 
 - **校准值区那 8 KiB 内部怎么组织** —— magic / 长度 / CRC 要不要，放几条，怎么判「这里还没写过」
-- **metadata 记录本身要不要瘦身** —— 事件日志删掉之后，记录头里的 `type` / `slots` 还有没有用
 - **工装按 UID 存校准值副本的形态** —— 存哪、什么格式、谁来读。这条可能整个属于产测那条线，不在本图
 
 ## Out of scope
@@ -117,3 +116,5 @@ journal 就没必要了」。**本图不搬 metadata，所以 append 仍然需�
   本图做的是**上位机侧的防呆**，不是安全机制。见 [防回滚](../anti-rollback/map.md)
 - **MCUboot** —— 2026-09-21 用户定「这个版本不考虑」，待办见 `work/TODO.md`
 - **app header 的布局** —— 本图不搬 metadata，它留在扇区 15
+
+- **metadata 记录瘦身**（事件日志删掉后 `type` / `slots` 还有没有用）—— 没有需求指向它。2026-09-24 划出
