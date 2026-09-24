@@ -2551,7 +2551,7 @@ owner 区存的是一条**每条由上一任签名**的链，能一路回溯到�
 |---|---|---|
 | `sha256.c` `sha256.h` | **真重复**，原先只有头注释不同 | `P2` 强制**字节一致** |
 | `iap_cert.c` | **真重复**，原先差一行注释 | `P2` 强制**字节一致** |
-| `iap_auth.c` | **刻意的子集** —— core 只要验证半边，没有 `iap_auth_report_backup_domain` | `P2` 比 `iap_auth_issue_challenge` 的**规范化正文**，外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**那三行 ⚠️。`next_counter` 随第 66 条一起删了；取随机数的 `rng_words` 两边**故意不同**（句柄不同），不比 |
+| `iap_auth.c` | **刻意的子集** —— core 只要验证半边，没有 `iap_auth_report_backup_domain` | `P2` 比 `iap_auth_issue_challenge` 的**规范化正文**，外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**那三行 ⚠️。`next_counter` 随第 66 条一起删了；取随机数的 `rng_words` 两边**故意不同**（bootloader 用 CubeMX 的句柄，core 转调 `OpenPLC_Net` 的 `openplc_rng_words()`，第 67 条），不比 |
 | `iap_auth.h` `iap_cert.h` | 同上 | 原有的格式常量比对不变 |
 
 ⚠️ **不引入共享文件，[ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的规矩 3 仍然有效** ——
@@ -2583,3 +2583,30 @@ owner 区存的是一条**每条由上一任签名**的链，能一路回溯到�
 
 **什么情况下重开**：换到没有 TRNG 的芯片。
 
+## 67 · RNG 的另外两个用处：lwIP 的随机数和 TCP 初始序列号
+
+用户 2026-09-24 定。两边（bootloader、app）同样做：
+
+| 用处 | 做法 | 理由 |
+|---|---|---|
+| lwIP 的 `LWIP_RAND()`（DHCP 事务号、临时端口） | **开机在 lwIP 初始化前取一个 RNG 字给 `srand()`**，`LWIP_RAND()` 仍是 `rand()` | 这几处只要「每次开机不同、每块板不同」；改 `cc.h` 会被 CubeMX / 上游库覆盖且无人报警 |
+| TCP 初始序列号 | `lwipopts.h` 定义 `LWIP_HOOK_TCP_ISN`，每个连接取一个 RNG 字，取不到退回 `rand()` | lwIP 官方钩子，不碰第三方文件；默认实现从 6510 累加，可预测 |
+| 开机选继电器 | **不改**，仍用 RTC | 那一步在「阶段 1」，跳 app 前不许留外设状态；现做法实测六个都用得上 |
+
+app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`OpenPLC_IAP` 的 `rng_words()` 只转调它 ——
+因为 `OpenPLC_IAP` 依赖 `OpenPLC_Net`，反过来不行。
+
+**什么情况下重开**：同第 66 条，换到没有 TRNG 的芯片。
+
+## 68 · 上游库的例程也要在这块板上编得过
+
+用户 2026-09-24 定：板卡包里上游 STM32duino 库的例程（`Wire`、`SPI`、`EEPROM` 等）
+**一律补上 `OPENPLC_APP_VERSION(1, 0, 0);`**，`P5` 从只编自有库扩到上游库。
+
+**理由**：第 [VER-01](../../maps/version-gate-and-calibration/issues/VER-01-how-does-the-sketch-version-reach-the-core.md) 票让没写版本号的 sketch 编不过，
+而用户在 IDE 里打开的第一个例程多半是上游的 —— 不改就是开箱即报错。
+
+本来就不面向 H743 的例程不强求，列进 `P5` 的排除表并写明理由。
+⚠️ **从上游同步这些库时要保留那一行。**
+
+**什么情况下重开**：版本号改回可选。

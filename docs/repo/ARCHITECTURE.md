@@ -91,7 +91,7 @@
 | 8 | owner 记录格式（v3，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
-| 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同 |
+| 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同（core 那份转调 `OpenPLC_Net` 的 `openplc_rng_words()`，决议 67） |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
 > ✅ **12 条里 11 条 P2 真的在查，第 9 条只查一半。**

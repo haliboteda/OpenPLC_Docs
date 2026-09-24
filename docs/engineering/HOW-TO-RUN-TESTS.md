@@ -293,9 +293,11 @@ python naive.py --port COM5 --long                 # 连全量的 SD 压力和 S
 | `host/fakeboard/` | `python run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
 | `host/crypto_ref/` | `python run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL:TestCase/host/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
 | `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
-| `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译 core 自有库的**每一个 example**。⚠️ **约十分钟，故意不进 selfcheck** —— 见下 |
+| `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约十分钟，故意不进 selfcheck** —— 见下 |
 
 ### P5 · example 不能腐烂
+
+**范围**：自有库（`OpenPLC_*`）和上游库的例程都编。上游例程里本来就不面向 H743 的（别的芯片的外设、这块板没有的 USB 功能）列在 `build.py` 的排除表里，每条带一句理由（决议 68）。
 
 **什么时候跑**：改了 `open_plc_arduino` 的任何库之后，以及发版前。**不在 `selfcheck` 里** —— selfcheck 是"改完代码就跑"的东西，往里加十分钟只会让人不跑它。
 
@@ -315,7 +317,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P2` | `tools/check_mirror_sync.py` | 跨仓镜像 **12 个锚点** + RTC 备份寄存器占用 | ✅ |
 | `P3` | `tools/check_core_sync.py` | `$CORE_LIVE` 与 git 仓库一致 | ✅ |
 | `P4` | `host/variant_check/build.py` | Arduino 变体头的编译期断言 | ✅ |
-| `P5` | `host/examples_build/build.py` | core 自有库的每个 example 都编得过 | ⛔ 约十分钟，故意不进 |
+| `P5` | `host/examples_build/build.py` | 板卡包里每个能在这块板上编的 example 都编得过 | ⛔ 约十分钟，故意不进 |
 | `T2-06` | `tools/check_public_root.py` | 公开根指纹。**它是用例不是 `P` 系列** —— 退役的旧号登记在 [ID-MAP.md](../tables/ID-MAP.md) | ✅ |
 | `P7` | `tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ |
 | `P8` | `tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ |
