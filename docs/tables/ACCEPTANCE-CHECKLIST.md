@@ -49,6 +49,7 @@
 | CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传 → 正常启动 |
 | CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。⚠️ **这一步会擦扇区 0**，做之前确认 ST-Link 在手边 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
+| CHK-B9 | **五条用户路径各走一遍** | 从出厂态开始，五条路径的步骤和判据见 [出厂到五条用户路径的端到端测试方案](../../maps/five-paths-e2e-test/map.md)；每条都达到它自己的判据。要真板子、要人按 BOOT0（[决议 69](DECISIONS.md)） |
 
 ⚠️ **CHK-B7 是唯一能抓住捆绑升级风险的用例。** 只测 CHK-B6 永远发现不了"新 bootloader 读不懂旧 journal"。
 

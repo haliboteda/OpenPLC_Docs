@@ -508,3 +508,4 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 | [SECTOR-15.md](M1/SECTOR-15.md) | 扇区 15 的切法、metadata 记录格式、回收机制、三种「读不到 metadata」的情况 |
 | [FLASHBOOT.md](M1/FLASHBOOT.md) | `flashboot` 原地升级：命令形状、谁能授权、为什么擦写必须在 RAM 里跑、断在哪会怎样 |
 | [CHALLENGE-AUTH.md](M1/CHALLENGE-AUTH.md) | 挑战应答的全部细节：nonce 怎么造、一次性消费、证书是独立一步 |
+| [IAP-PROTOCOL.md](M1/IAP-PROTOCOL.md) | 线上命令一览：bootloader 和 app 各认哪些命令、要什么认证、回什么 |

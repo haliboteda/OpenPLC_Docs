@@ -330,6 +330,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P15` | `host/vector_alignment/build.py` | **app 的起始地址必须是 1024 的倍数**。正：当前 `build.flash_offset` 编得过；**反：传 `0x20200` 必须链接失败**，且错误里点名对齐。需要 arduino-cli | ✅ |
 | `P16` | `tools/check_icache_is_restored.py` | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ |
 | `P17` | `tools/check_cproject_ld.py` | **`.cproject` 的链接脚本必须是 `${PLC_LD_SCRIPT}` 变量，不是写死的文件名** —— CubeMX 每次生成都会写死它，写死之后工装镜像编不出来。生成后的自动修在 `$BOOT/tools/restore_ld_script.bat`，这道检查兜它失效的情况。见 [../build/CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | ✅ |
+| `P18` | `$PROD/tools/gen_id_map.py --check` | **`ID-MAP.md` 的现行编号表和各文档里真正定义的编号一致** —— 那张表由这个脚本扫出来写进去（决议 69），手改或者新增编号忘了重新生成，都会报红。修法：`python tools/gen_id_map.py --write` | ✅ |
 
 ⚠️ **这张表和 `selfcheck.py` 的 `CATALOG` 现在由 `P7` 对账**（2026-09-21 补的第三头）。
 `P14` 曾经从这个缝里漏过去：它进了 `CATALOG`、每次都在跑，文档里却一个字都没有。
