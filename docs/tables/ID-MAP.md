@@ -17,11 +17,11 @@
 
 | 编号 | 是什么 | 条数 | 定义在哪 |
 |---|---|---|---|
-| `R1-01`–`R1-37` | 需求（一句可判定的话） | 37 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `R1-01`–`R1-38` | 需求（一句可判定的话） | 38 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
 | `R3-01`–`R3-06` | 需求（一句可判定的话） | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01` | 需求（一句可判定的话） | 1 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
-| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-33` | 测试用例 | 39 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-04` | 测试用例 | 4 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-02` | 测试用例 | 2 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |

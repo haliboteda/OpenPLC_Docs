@@ -280,12 +280,13 @@ flowchart TD
 | **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ✅ |
 | **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**，且 owner 区**顺手压缩** —— 擦扇区是回收槽位的唯一时机 | `T1-31` `T1-33` | ✅ |
 | **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
+| **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：未认领的用随包的公开根兜底并打警告；已认领的用用户配置目录里的密钥；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` | ✅ |
 
-**共 37 条。其中 29 条有测试用例直接测它，8 条没有。**
+**共 38 条。其中 30 条有测试用例直接测它，8 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T1-xx` 用例直接测 | **29** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-37`（后四条 2026-09-22 在真板子上跑过） |
+| 有 `T1-xx` 用例直接测 | **30** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-38`（`R1-34`–`R1-37` 2026-09-22 在真板子上跑过；`R1-38` 只在假板子上，见 ¹⁰） |
 | 纯手工 | **3** | `R1-13` `R1-30` `R1-31` |
 | 只有静态检查 P2 | **2** | `R1-06` `R1-14` |
 | 只有静态检查 `P15` | **1** | `R1-33` |
@@ -382,8 +383,9 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：走过的链和还生效的作废都在，其余的都不在 | 喂一块故意乱掉的 owner 区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_compact()`：留下的正好是前两条，**无签名那条没有被压缩顺手扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条前移。**再把压缩结果当作新 flash 重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
+| `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领、用户目录里没有密钥 → 退出码 0，输出有 `signing with the PUBLISHED key`；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 
-**共 39 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 40 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 
 ✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
 bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，
@@ -441,6 +443,9 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 此后任何走飞的写入都能改掉已装好的 app。制造一次失败写入只走通其中一条出口，
 证不了另外几条；静态检查覆盖全部出口。⚠️ **它证不到的**：运行时 I-cache 真的是开的，
 以及这次改动有没有把烧写本身弄坏 —— 那两条归 `T1-23` / `T1-24` 的上板回归。
+
+¹⁰ **`T1-34` 测的是 PC 这一侧**：arduino-cli → discovery → 板卡包里那份 IAPTool → 找密钥 → 重启握手 → 传输 → 判决。脚本把 IAPTool 拷到临时目录再用（`--upload-property path=`），因为包里 `keys\` 可能已有 `fw_signing_key.pem`，会挡住公开根兜底；`APPDATA` / `TEMP` 也指到临时目录，真实的用户密钥和上传锁都不碰。**不进 selfcheck**：一遍要几分钟（密钥不对那种要等 IAPTool 问满三次重启），超出 selfcheck 一分钟的预算。
+**测不到**：板子侧的任何校验（镜像签名、证书链、nonce、CRC）、固件真的写进去、真实复位时序和发现限流、板子在另一台机器上的真实局域网、IDE 图形界面（只走 arduino-cli）、Linux / macOS。假板子只比对证书里叶公钥的字节，所以委托证书在它那里一律被拒。板子侧归 `T1-23`、`T1-11` 这些真板子用例。详见 [IDE-04-findings.md](../../maps/arduino-examples-and-ide-flow/IDE-04-findings.md)「这条模拟测不到什么」。
 
 ⁷ **`P15` 守的是一个链接期不变式，不是一次运行。** app 的向量表就在 FLASH 起点，
 所以 VTOR 的对齐要求落在 `LD_FLASH_OFFSET` 上；而 `ldscript.ld` 对 `.isr_vector`

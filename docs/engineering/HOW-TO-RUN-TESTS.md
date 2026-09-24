@@ -44,6 +44,7 @@ TestCase/
 │   ├── porttool_plan/    ← T1-15  方案文件、判据算子、执行器、报告，以及方案页的
 │   │                          HTTP 面（板子由脚本假扮，逐条命令自己决定怎么答）
 │   ├── fakeboard/        ← T1-18a–T1-18g  IAPTool 传输前的密钥/证书匹配决策，七种情况
+│   │                        T1-34  IDE 那条上传命令在假板子上走通（run_ide_upload.py）
 │   └── crypto_ref/       ← T1-19/T1-20  SHA-256 与 ECDSA 的独立实现交叉验证
 ├── onboard/              ← 需要烧到板子上跑
 │   └── rs232/SerialPort/ ← T3-04  UART + CDC 回显 sketch
@@ -291,6 +292,7 @@ python naive.py --port COM5 --long                 # 连全量的 SD 压力和 S
 | `host/porttool_panel/` | `python run.py --port COMx`（**真板子**）或 `--port sim`（**模拟板，不用板子**，见下），都要 playwright + Chrome | **T4-02** 面板在真浏览器里点一遍。判据：①页面先过一遍语法（用 playwright 自带的 node `--check`，板子都不用）②页面抛的任何异常、控制台任何 error 直接判失败 ③串口列表、未连接时的门闸、按板子分组 ④**逐个端口按一次「开始测试」，每个端口的结论必须是这台工位应该出的那一个** —— 缺激励的端口要失败，并且失败原因里要点出是哪个读数 ⑤**方案文件里的参数真的发出去了** —— `on=1:1` / `mv=1:1000` / `duty=1:100` / `mode=extloop` 在日志里能查到 ⑥**持续测试**：「单次 / 持续」两个单选，持续下面才出现时长（1/2/3/4 小时 / 一直跑）；左边可以勾多个端口、一次启动；**看门狗在续期**（日志里 `OK hold=` 一直在涨，不是只武装了一次）；点停止要同时出 `OK stopped all` 和 `OK hold=off`。⚠️ **断言看的是板子的回复不是发出去的命令** —— 续期由服务端直接走串口发，不过 `/api/command`，页面日志里没有那一行 ⑦两个 tab、日志的暂停/清空/过滤、断开、记下的控制口 ⑧**改了参数就不给结论** —— 改一个参数再按「开始测试」，结论不能是「失败」，卡片要说清哪一项和方案不一样，点「恢复方案参数」之后又能判（2026-09-11 用户实测撞出来的：勾 DO3、占空比 50，1.4 秒出一个假失败）⑨**卡片上不许剩协议词** —— 逐个端口扫一遍，命中 `BANNED_ON_CARDS` 里任何一个（`duty`、`freq`、`miss`、`Klemmblock`…）就判失败 ⑩**四个一直没被点过的控件**（2026-09-11 补）：「单独跑」单个 `pt.run` 目标、「自动回环应答」勾选框、「绑上/解开」对端串口、**方案页的「运行」按钮**（用 `bench-smoke.json` 跑完整一轮，每一步都要回判据）。⚠️ **「绑上」在模拟板上只能证明控件通到服务端并且能解开** —— 「绑对了适配器才闭合链路」只有真工位能证明，因为模拟板自己演所有对端。⚠️ 覆盖不到的是**真外观** —— 颜色间距好不好看只能人看 |
 | `host/porttool_plan/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 判据算子（缺字段一律判失败）；执行器（超时与判据失败分得开、重试保留被它替掉的那次失败、失败后的门闸看最后一个真跑过的步骤）；随包发布的 `plans/bench-smoke.json` 和 `plans/station6-poweron.json` 都能拿假板子跑通；方案里的 `pt.run` 目标对着 caps 的 `runs=` 离线校验（打错名字、写一个固件没报过的目标，两种都要报）；方案页四个接口 —— **写盘前先验、方案名出不了 plans 目录、跑方案期间面板自己的回环应答器停摆** |
 | `host/fakeboard/` | `python run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
+| `host/fakeboard/` | `python run_ide_upload.py [--keep]`，需要 arduino-cli | **T1-34** 从 `arduino-cli upload`（IDE 那条命令）烧一块跑 app 的假板子：未认领 / 已认领 / 密钥不对。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **几分钟，不进 selfcheck** |
 | `host/crypto_ref/` | `python run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL:TestCase/host/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
 | `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |

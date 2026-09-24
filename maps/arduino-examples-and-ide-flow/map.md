@@ -52,12 +52,13 @@ ls package_index_json/*.json                                  # Board Manager �
 - [CAN 和 SD 卡在 Arduino 下最少要补什么](issues/IDE-03-what-can-and-sd-need-in-arduino.md)：CAN 照板上跑通的代码写薄封装；SD 用上游 STM32SD，但先把变体里 27 项的 SD 引脚表砍到真实接的脚
 - [一个例程长什么样](issues/IDE-05-what-does-one-example-look-like.md)：照 DO 原型，文件头四段、USB 串口 115200、英文输出
 - [IDE 上传用的密钥放在哪、怎么放进去](issues/IDE-13-where-does-the-ide-upload-key-live.md)：`%AppData%\openplc\keys\`，公开根私钥随包兜底，找不到或不对时报出路径
+- [模拟台上走通 IDE 烧录](issues/IDE-11-ide-upload-on-the-simulator.md)：用例 `T1-34`，arduino-cli 对跑 app 的假板子上传，未认领 / 已认领 / 密钥不对三种都按预期，手工跑
 - [0.1.3 怎么命名、按什么顺序发](issues/IDE-14-how-is-0-1-3-named-and-released.md)：tag `0.1.3`、工具包也升 0.1.3、客户用一个固定索引地址
+- 端口例程（[数字量](issues/IDE-06-digital-io-examples.md)、[模拟量](issues/IDE-07-analog-examples.md)、[串口](issues/IDE-08-serial-examples.md)、[以太网](issues/IDE-09-ethernet-example.md)、[CAN 和 SD](issues/IDE-10-can-and-sd.md)）：13 个例程在 `OpenPLC_Ports`，`P5` 全绿，未上板
 
 ## Not yet specified
 
 - **KNX、SDRAM 现有的 7 个例程要不要改成统一格式** —— 要等「一个例程长什么样」定了才说得清
-- **发布之后怎么上板逐条验** —— 顺序、哪些要人动手，等例程和发布流程都定了再排
 
 ## Out of scope
 

@@ -387,6 +387,20 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | c | C27（CVDDHV）是 220 µF / **10 V**，Table 2 要求 ≥ 35 V | ❌ 只能手工量 |
 | d | C20（CREF）是 470 nF / **10 V**，同样要求 ≥ 35 V。VREF 自己的 KNX_OK 门限在 9.7 V…13.5 V | ❌ 只能手工量 |
 
+## microSD 卡座（SDMMC1，1 位，Bridge J6）
+
+2026-09-25 核实：Bridge 原理图 `Hardware/Production/Bridge/1436_01_SCHAE-BR/1436_01_SCHAE-BR_页面_4.png`（Sheet 4 "Bridge I/O"，D1–D5 区）看网络 + xlsx `GPIO_ASSIGNMENT` 行 49–52 看 MCU 引脚。Bridge 没有网表，没做逐脚网表核对。
+
+| 信号 | MCU 引脚 | 说明 |
+|---|---|---|
+| `SDIO1_CLK` | **PC12**（A12） | 经 EMI 滤波 U5（VEMI65AC-HCI-GS08）到 J6 CLK |
+| `SDIO1_CMD` | **PD2**（D12） | 同上，10k 上拉 |
+| `SDIO1_D0` | **PC8**（G14） | 同上，10k 上拉 |
+| `SDIO1_CD` | **PE6**（B3） | 10k 上拉 + 100R 到 J6 CD1，CD2 接地：**低 = 已插入** |
+| `SDIO1_D1/D2/D3` | — | 原理图标「not used」，只在 J6 侧上拉，**不接 MCU** → 只能跑 1 位总线 |
+
+**软件含义**：板卡包的 `PinMap_SD[]` 只该有 PC8 / PC12 / PD2 三条，SD 库必须设 1 位总线。
+
 ## 引脚分配表：硬件工程师的 xlsx
 
 `Hardware/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx`，单张 sheet `GPIO_ASSIGNMENT`，138 行覆盖 UFBGA176 上用到的每一个脚。列是：序号、引脚名、**BGA 球号**、备用功能全表、附加功能（ADC/DAC/WKUP）、**信号名**、电源域、中英文说明。取自原理图 Sheet05-MPU。
