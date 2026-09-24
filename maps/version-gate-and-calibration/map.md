@@ -10,9 +10,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## 还要你拍几次板（**提前列出来，免得被逐个突袭**）
 
-| 还剩几次 | 要你定什么 | 哪张票 |
-|---|---|---|
-| 1 | 发布和现场迁移怎么走 | [这次变更怎么发布，现场的板子怎么迁移](issues/VER-07-how-does-this-ship-and-migrate.md) |
+**0 次** —— 七张票全部已关，最后一张是 [这次变更怎么发布，现场的板子怎么迁移](issues/VER-07-how-does-this-ship-and-migrate.md)。
 
 ## Destination
 
