@@ -596,7 +596,7 @@ flowchart TD
 | `T2-25` | `R2-04` | **`setowner --wipe` 在真板子上回收名额** | 一块已认领、有 6 个叶被撤销的板子：`--wipe` 换根 → 板子擦掉扇区 0 并自己写回来 → 复位后 `getowner` 报 generation 2、新根，启动日志 `96/96 revoke slot(s) free, 0 leaf(s) revoked` ¹² | `IAPTool setowner <ip> --current-key=<a.pem> --new-key=<b.pem> --wipe` | 真板子 + ST-Link 在手边 | ✅ |
 | `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 新区里只有那一条记录（**签名被剥掉**）、其余 8064 字节全 `0xFF`；把它当新 flash 重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `python host/owner_capacity/build.py wipe` | 主机侧（要 gcc/clang） | ✅ |
 
-**共 25 条。** `T2-01` `T2-05` `T2-09` 要人动手按 BOOT0，其余不用；`T2-06` `T2-21`–`T2-24` 在主机上跑，不需要板子。
+**共 27 条。** `T2-01` `T2-05` `T2-09` 要人动手按 BOOT0，其余不用；`T2-06` `T2-21`–`T2-24` `T2-27` 在主机上跑，不需要板子。
 
 ⚠️ **2026-09-20 改正一处**：`T2-12`–`T2-14` 最初登记时误标成「要人按 BOOT0」，核实后是错的 ——
 它们跑的是 `setowner`，`IAP_server.c:251` 注释原文写明「No BOOT0 here, deliberately: the current
@@ -696,10 +696,8 @@ generation 2: 1 owner record(s) and 6 revocation(s) dropped **`。
 测的是客户真正会走的那条路，不是一个重新实现。
 `T2-04` 是例外：出货工具做不出坏签名，所以那条在用例里手工拼记录。
 
-⚠️ **K 族和 T1-16 覆盖不到的那一段**：`T1-18d`–`T1-18f` 用假板子覆盖了**工具的**判断，
-`T1-16` 用真实 bootloader 源码覆盖了**板子的**判断，
-**两者中间那段 —— 真板子收下一张委托证书并据此执行固件 —— 只能手工走一遍**，发版前值得跑。
-步骤在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md` 的「委托证书怎么在真板子上复现」。
+⚠️ **委托证书分三段测**：`T1-18d`–`T1-18f` 用假板子测**工具的**判断，
+`T1-16` 用真实 bootloader 源码测**板子的**判断，中间那段 —— 真板子收下委托证书并据此执行固件 —— 是 `T2-11`。
 
 
 ⚠️ **`T2-07` 的判据为什么不是「槽空就告警」** —— 自己编译固件的客户，owner 槽同样是空的，板子却是安全的。`owner_slot.c` 的 `report_root_trust()` 刻意只看**编进去的根是不是那把公开的**。所以这条用例要同时看见两件事：`Owner slot: empty` 在、告警不在。**只看告警没了是不够的** —— 日志没抓到也会是 0 行。
