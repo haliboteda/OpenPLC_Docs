@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-24
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -18,3 +18,21 @@ Blocked by: -
 ## 怎么算答完
 
 每一件有定案；得到一份发 `0.1.3` 的逐步清单，标出哪一步是对外动作。
+
+## Answer
+
+2026-09-25 定（用户按推荐）。
+
+| 事 | 定案 |
+|---|---|
+| tag 名 | **`0.1.3`，不带 `v`**（`v0.1.3` 已是分支名，不撞名也不删分支） |
+| 工具包 STM32Tools | **升到 `0.1.3`**，和板卡包同号 |
+| 客户填的索引地址 | **一个固定地址**：`package_index_json` 仓主分支上的索引文件，列出所有版本；README 写明 |
+| 本机装上 0.1.3 之后 | Board Manager 卸掉 `0.1.3-pre`，重跑 `init_machine.py` 更新 `CORE_LIVE` |
+| SD 用的 STM32SD + FatFs | **用户从库管理器装**，例程文件头写明（来自 [CAN 和 SD 卡在 Arduino 下最少要补什么](IDE-03-what-can-and-sd-need-in-arduino.md)） |
+
+推 12 个本地 commit、打 tag、发 release、改线上索引都在 [发一个版本，像用户一样从网上装](IDE-12-release-and-install-like-a-user.md) 里做，**动手前单独问用户**。
+
+## 引出了什么新的未知
+
+没有。

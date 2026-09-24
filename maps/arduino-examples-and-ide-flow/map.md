@@ -50,6 +50,9 @@ ls package_index_json/*.json                                  # Board Manager �
 - [一个发布版今天是怎么到 Board Manager 的](issues/IDE-01-how-does-a-release-reach-board-manager.md)：全手工、对外 6 步；网上的 `0.1.3-pre` 能装但内容是 4 月的，工具包里的 IAPTool 不会签名
 - [假板子要像到什么程度，arduino-cli 的 upload 才能走完](issues/IDE-04-how-real-must-the-fake-board-be.md)：停在 bootloader 时现有假板子已够；跑 app 时补约 25 行，原型已走通
 - [CAN 和 SD 卡在 Arduino 下最少要补什么](issues/IDE-03-what-can-and-sd-need-in-arduino.md)：CAN 照板上跑通的代码写薄封装；SD 用上游 STM32SD，但先把变体里 27 项的 SD 引脚表砍到真实接的脚
+- [一个例程长什么样](issues/IDE-05-what-does-one-example-look-like.md)：照 DO 原型，文件头四段、USB 串口 115200、英文输出
+- [IDE 上传用的密钥放在哪、怎么放进去](issues/IDE-13-where-does-the-ide-upload-key-live.md)：`%AppData%\openplc\keys\`，公开根私钥随包兜底，找不到或不对时报出路径
+- [0.1.3 怎么命名、按什么顺序发](issues/IDE-14-how-is-0-1-3-named-and-released.md)：tag `0.1.3`、工具包也升 0.1.3、客户用一个固定索引地址
 
 ## Not yet specified
 
