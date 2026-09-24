@@ -472,7 +472,7 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 | 同上，**而且你刚做过 `setowner`** | **换根把现有 app 追溯作废了。这是设计行为，不是故障** | metadata 里那张 cert 是旧根签的，`root_sig` 在新根下验不过 | 用新根（或新根签的证书）重传 |
 | `** BOOT0 held **` | **不是故障**。有人按住了 BOOT0，物理逃生口赢过一切 | 模式是 `IAP_ALL`，reason 打的是 `BOOT0 held` | 松开 BOOT0 再复位 |
 | `flash command failed authentication` | 工具版本不对，或证书不是这块板信的根签的 | ⚠️ **0.1.2 的 IAPTool 刷 0.1.3 的板必然到这里，而且失败得很安静** —— 没有一句话说版本不对 | 换新版 IAPTool；用 `getpubkey` 查板子信哪把根 |
-| `replay protection is weakened` | **RTC 备份域丢过**，nonce 计数器归零了。⚠️ **不一定是电池** —— 两边 RTC 时钟源不一致也会清空它，见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md) | DR3 里的见证值不见了 | 不影响上传。**刻意打这行而不是静默少一层保护** |
+| `Backup domain was lost` | **RTC 备份域丢过**，RTC 从固定时间重新起。⚠️ **不一定是电池** —— 两边 RTC 时钟源不一致也会清空它，见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md) | DR3 里的见证值不见了 | 不影响上传，也不影响认证（决议 66 起 nonce 由 TRNG 出）。影响的是走时和开机挑哪个继电器 |
 | 启动就有不设防告警，**但你确定认领过** | owner 记录链断了，或被 ST-Link 重烧擦掉了 | `getowner` 回 0 = 未认领；回 n 但仍告警 = 当前根恰好等于公开根 | 重新认领，见 [M2 归属与信任](M2-ownership.md) |
 
 ## 8 · 这个模块的边界

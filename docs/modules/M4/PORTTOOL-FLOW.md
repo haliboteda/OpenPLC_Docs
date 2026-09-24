@@ -96,7 +96,7 @@ flowchart TB
 | `sdram.sweep` | `ready` `patterns` `words_each` `mismatches` `first_bad` `bad_pattern` `write_ms` `verify_ms` | **整片 64 MiB 四种花样**，产线要的那个「压力测试零错误」。⚠️ 几十秒，方案里的 `timeout_ms` 要留够 |
 | `sd.probe` | `detected` `ready` `blocks` `block_size` `mib` `v2x` `class` | `detected=0` 是没插卡，`detected=1 ready=0` 是接口 |
 | `sd.integrity` | `mounted` `wrote` `read_back` `identical` `bytes` 两个 CRC `fresult` | 一轮 4 KiB |
-| `rtc.read` | `init` `clk` `date` `time` | 自己按需 `MX_RTC_Init()`。**只读不写** —— 备份域里住着 iap_auth 的 nonce 计数器 |
+| `rtc.read` | `init` `clk` `date` `time` | 自己按需 `MX_RTC_Init()`。**只读不写** —— 备份域 `DR3` 里住着 bootloader 的 VBAT 见证值 |
 | `led.blink` | `pin` `pulses` `half_ms` `observed=unknown` | PE2 闪六次。**没有回读，`observed` 永远是 unknown**，看没看见是人的判断 |
 
 

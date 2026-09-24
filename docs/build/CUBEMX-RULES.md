@@ -57,9 +57,16 @@ stm32cubeidec.exe … -D PORTTOOL_ENABLE=1 -E PLC_LD_SCRIPT=STM32H743IIKX_FLASH_
 
 ⚠️ **`.ioc` 里也没有这个字段**（`ProjectManager.*` 只有 `CompilerLinker=GCC`），所以没有「在 CubeMX 界面里把它配成变量」这条路。
 
-**结论：治不了，只能每次修。** 好在改坏了藏不住 —— 工装镜像 16 万字节装不进 bootloader 脚本的 120K，链接器当场 `region 'FLASH' overflowed`；`build_image.py` 另有一道核对链接器命令行的检查。**照下面查就行。**
+**结论：让 CubeMX 不改是治不了的，只能改完再修回来。** 好在改坏了藏不住 —— 工装镜像 16 万字节装不进 bootloader 脚本的 120K，链接器当场 `region 'FLASH' overflowed`；`build_image.py` 另有一道核对链接器命令行的检查。
 
-⚠️ **重新生成后必查这两处**：
+### 2026-09-24 起：生成后自动修回来
+
+`.ioc` 的 `ProjectManager.UAScriptAfterPath` 指向 `tools/restore_ld_script.bat`，CubeMX 每次生成完自动跑它，把那一行改回 `${PLC_LD_SCRIPT}`。2026-09-24 实测：填相对路径即可，重新生成后不用手动干预，`P17` 直接是绿的。
+
+⚠️ **自动修靠的是「CubeMX 写完 `.cproject` 之后才跑脚本」这个顺序，而顺序由 ST 决定** ——
+哪天变了会静默失效，所以静态检查 **`P17`** 不能省：它直接查 `.cproject` 里那一行是不是变量。
+
+⚠️ **重新生成后必查这两处**（`P17` 只盯第 1 条）：
 
 1. 那个选项的值有没有被 CubeMX 改回写死的 `STM32H743IIKX_FLASH.ld`。⚠️ **`.cproject` 里 ST 自己那个 `||` 分隔的大字符串（`com.st.stm32cube.ide.common.services.build.inputs…`）里仍然写着 bootloader 那份文件名** —— 那是 ST 用来回写的记录，所以这一处**被改回去的概率不低**。改回去的表现不是报错，是**工装镜像忽然又受 120K 限制**。
 2. `.settings/org.eclipse.cdt.core.prefs` 还在不在、默认值还是不是 bootloader 那份。**这个文件没了，`${PLC_LD_SCRIPT}` 会展开成空**，链接器拿不到 `-T`。2026-09-10 实测过：把它移走再编 bootloader，得到的是 `ld returned 1 exit status` —— 报错离真正的原因隔着好几层。⚠️ **它以前被 `.gitignore` 的 `.settings/` 整个挡在 git 外面，也就是说一份全新 clone 编不出 bootloader**（工装镜像不受影响，因为 `build_image.py` 自己传 `-E PLC_LD_SCRIPT=…`）。现在单独放行了这一个文件 —— 它只有六行，全是这一个变量，没有任何机器相关的东西；`.settings/` 其余三个照旧忽略。

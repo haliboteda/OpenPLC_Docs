@@ -327,6 +327,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P14` | `tools/check_changelist_has_no_orphans.py` | **没做完的活不许只活在某张图的 `CHANGE-LIST` 里** —— 每份 `CHANGE-LIST` 要有横幅说明未完成的块搬去了哪，且 `work/TODO.md` 里找得到 | ✅ |
 | `P15` | `host/vector_alignment/build.py` | **app 的起始地址必须是 1024 的倍数**。正：当前 `build.flash_offset` 编得过；**反：传 `0x20200` 必须链接失败**，且错误里点名对齐。需要 arduino-cli | ✅ |
 | `P16` | `tools/check_icache_is_restored.py` | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ |
+| `P17` | `tools/check_cproject_ld.py` | **`.cproject` 的链接脚本必须是 `${PLC_LD_SCRIPT}` 变量，不是写死的文件名** —— CubeMX 每次生成都会写死它，写死之后工装镜像编不出来。生成后的自动修在 `$BOOT/tools/restore_ld_script.bat`，这道检查兜它失效的情况。见 [../build/CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | ✅ |
 
 ⚠️ **这张表和 `selfcheck.py` 的 `CATALOG` 现在由 `P7` 对账**（2026-09-21 补的第三头）。
 `P14` 曾经从这个缝里漏过去：它进了 `CATALOG`、每次都在跑，文档里却一个字都没有。
@@ -701,8 +702,11 @@ python3 tools/reset_board_to_factory_state.py --check-only # 只验证，绝不�
 
 | 方向 | 怎么出现的 | bootloader 打的 |
 |---|---|---|
-| 域丢了 | witness 写进去之后被 app 清掉（当时两边 RTC 时钟源不一致） | `** Backup domain was lost ... **` + `Nonce counter is zero` |
-| 域还在 | 时钟源统一之后 | `Backup domain retained, nonce counter = 1` |
+| 域丢了 | witness 写进去之后被 app 清掉（当时两边 RTC 时钟源不一致） | `** Backup domain was lost ... **` + `The RTC has restarted from a fixed time.` |
+| 域还在 | 时钟源统一之后 | `Backup domain retained` |
+
+⚠️ **这两行 2026-09-24 起不再提重放保护**（决议 66：nonce 改由 TRNG 出，不再住备份域）。
+丢了域影响的是 RTC 走时和开机挑哪个继电器，**不影响上传能不能通过认证**。
 
 ⚠️ **要再现得自己制造一次备份域丢失。** core 自带 `resetBackupDomain()`
 （`$CORE_REPO/cores/arduino/stm32/backup.h`）能清整个域，不必拆电池。

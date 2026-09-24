@@ -51,7 +51,7 @@
 | `IAPServer/IAP_server.c` | 命令状态机 + 启动决策（`server_decide()`）+ 交权（`server_jump_to_app()`） |
 | `IAPServer/bootloader_state.c` | 扇区 15：metadata 的 append 与 reclaim，reclaim 时带走/写回校准值 |
 | `IAPServer/fw_verify.c` | ECDSA P-256 验签（micro-ecc） |
-| `IAPServer/iap_auth.c` | 挑战应答认证；nonce 计数器在 RTC 备份寄存器 `DR1`，VBAT 见证在 `DR3` |
+| `IAPServer/iap_auth.c` | 挑战应答认证；nonce 取自 RNG 外设，VBAT 见证在 `DR3` |
 | `IAPServer/iap_keyderive.c` | 每设备密钥 = `HMAC-SHA256(固定密码, UID)` |
 | `IAPServer/sha256.c` | SHA-256 / HMAC-SHA-256 |
 | `IAPServer/IAP_boot_handoff.c` | **SRAM4 里的交接记录**，app 用它请求进上传模式 |

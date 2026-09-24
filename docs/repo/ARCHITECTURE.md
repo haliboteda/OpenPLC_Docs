@@ -91,7 +91,7 @@
 | 8 | owner 记录格式（v3，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
-| 12 | **`iap_auth.c`**：`next_counter` 和 `iap_auth_issue_challenge` 两个函数整体；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件，也不比整个 `verify_and_consume`** —— core 那份是刻意的子集（没有 `iap_auth_get_counter` / `iap_auth_report_backup_domain`），而 `verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同 |
+| 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同 |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
 > ✅ **12 条里 11 条 P2 真的在查，第 9 条只查一半。**
@@ -109,9 +109,9 @@
 | 寄存器 | bootloader | app / core | |
 |---|---|---|---|
 | DR0 | — | — | 空 |
-| DR1 | **nonce 计数器**（`IAPServer/iap_auth.c`） | `RTC_BKP_INDEX`（`cores/arduino/stm32/backup.h:34` 定义，**当前无人写**） | ⚠️ 潜在冲突：谁引入 STM32RTC 库谁就会踩 |
-| DR2 | — | **nonce 计数器**（`libraries/OpenPLC_IAP/src/iap_auth.c:21`） | |
-| DR3 | **VBAT witness** | — | |
+| DR1 | — | `RTC_BKP_INDEX`（`cores/arduino/stm32/backup.h:34` 定义，**当前无人写**） | 2026-09-24 起 bootloader 不再用它（决议 66），撞车随之消失 |
+| DR2 | — | — | 空。2026-09-24 起 app 也不用（决议 66） |
+| DR3 | **VBAT witness** | — | 只证明备份域活着（RTC 走时、开机挑继电器要它），**不再与重放保护有关** |
 | DR4 | — | `HID_MAGIC_NUMBER_BKP_INDEX` | |
 | DR5–DR9 | — | — | 空 |
 | DR10 | — | `HID_OLD_MAGIC_NUMBER_BKP_INDEX` | |
@@ -123,6 +123,10 @@
 > 后果是双向的：app 的计数器覆盖 witness，导致 bootloader 每次启动都误报"备份域丢失"（表象）；而 witness 的写入把 app 的计数器重置成固定值，**导致 app 每次经过 bootloader 之后重复发放同一批 nonce 编号**（真正的缺陷 —— 重放保护只剩 tick 在撑）。
 >
 > 现已把 witness 挪到 DR3。**加新用途时更新这张表。**
+
+> ⚠️ **这张表现在只剩三个占用格，但规矩不变。** 两个 nonce 计数器 2026-09-24 随
+> [决议 66](../tables/DECISIONS.md)（改用 TRNG）一起删了 —— **不等于以后可以随便占**：
+> 没有分配器这件事没变，加新用途仍然先改这张表。
 
 ## 密钥
 

@@ -2354,6 +2354,9 @@ bootloader 自己的第一个扇区（`0x08020000` 之前）本来就不给 app 
 
 ## 56 · IAP 升级的防重放继续用挑战-应答 + RTC 备份寄存器，不借鉴 KNX 的序列号机制
 
+⚠️ **「RTC 备份寄存器」那半条已被第 66 条推翻**（2026-09-24 改用 TRNG）。
+**没被推翻的是「不借鉴 KNX 序列号机制」** —— 下面那条理由至今成立。
+
 用户 2026-09-19 拍板：**「那先不管 KNX 的思路了，按现在的方案继续。」**
 
 KNX Data Security 的序列号防重放绑在共享对称密钥上——`securityKey()` 要查到 group/p2p key
@@ -2369,6 +2372,10 @@ KNX Data Security 的序列号防重放绑在共享对称密钥上——`securit
 ## 57 · bootloader 和 Arduino core 的 RTC 时钟源必须一致，统一走 LSE
 
 用户 2026-09-19 拍板：两边都用 LSE，不是把 bootloader 退回 LSI。
+
+⚠️ **这条当初的理由（保住 `DR1` 的 nonce 计数器）已随第 66 条失效，但结论不变** ——
+备份域还装着 RTC 的走时，而开机挑哪个继电器响就靠它（`$BOOT/Core/Src/main.c` 的
+`boot_window_pick_relay()`，复位后只有 RTC 在动）。
 
 **理由**：改 `RCC_BDCR.RTCSEL` 会强制复位整个备份域（HAL 的 `__HAL_RCC_BACKUPRESET_FORCE()`），
 两边选不同的源就会在每次 bootloader ↔ app 切换时清空 `DR0`–`DR31`，
@@ -2544,7 +2551,7 @@ owner 区存的是一条**每条由上一任签名**的链，能一路回溯到�
 |---|---|---|
 | `sha256.c` `sha256.h` | **真重复**，原先只有头注释不同 | `P2` 强制**字节一致** |
 | `iap_cert.c` | **真重复**，原先差一行注释 | `P2` 强制**字节一致** |
-| `iap_auth.c` | **刻意的子集** —— core 只要验证半边，没有 `iap_auth_get_counter` / `iap_auth_report_backup_domain` | `P2` 比 `next_counter` / `iap_auth_issue_challenge` 两个函数的**规范化正文**，外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**那三行 ⚠️ |
+| `iap_auth.c` | **刻意的子集** —— core 只要验证半边，没有 `iap_auth_report_backup_domain` | `P2` 比 `iap_auth_issue_challenge` 的**规范化正文**，外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**那三行 ⚠️。`next_counter` 随第 66 条一起删了；取随机数的 `rng_words` 两边**故意不同**（句柄不同），不比 |
 | `iap_auth.h` `iap_cert.h` | 同上 | 原有的格式常量比对不变 |
 
 ⚠️ **不引入共享文件，[ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的规矩 3 仍然有效** ——
@@ -2558,6 +2565,21 @@ owner 区存的是一条**每条由上一任签名**的链，能一路回溯到�
 必须一致的只有**线上契约** —— 签名覆盖 `nonce || msg`、这个顺序、这个长度。
 两边对不上，任何重启请求都验不过。
 
-**什么情况下重开**：`next_counter` 或 `iap_auth_issue_challenge` 需要在两边**故意**不同 ——
+**什么情况下重开**：`iap_auth_issue_challenge` 需要在两边**故意**不同 ——
 那时比对正文会变成误报机器，得跟着换成更小的锚点。
+
+## 66 · nonce 改用 TRNG，废掉 RTC 备份寄存器里的那两个计数器
+
+用户 2026-09-24 定：启用 RNG 外设，nonce 直接取 16 字节真随机数，
+`DR1`（bootloader）和 `DR2`（app）两个持久计数器一并删除。**这条重开第 56 条。**
+
+**理由**：计数器只是「记住 nonce 发到几号了」的笔记本，为了让它跨掉电活着，
+牵出了 VBAT 电池、`DR3` 见证值、第 57 条的时钟源约束、以及 `DR1` 和 core
+`backup.h` 的撞车。TRNG 用概率取代记账，这条依赖链整条消失。
+**一次性消费和 30 秒 TTL 不变** —— 真正挡住重放的是那两条。
+
+⚠️ **RNG 取不到数就拒发挑战**（`iap_auth_issue_challenge()` 因此改成返回 `bool`）——
+读不出来时寄存器多半是 0，拿它当 nonce 等于每次都发同一个，比现方案更糟。
+
+**什么情况下重开**：换到没有 TRNG 的芯片。
 
