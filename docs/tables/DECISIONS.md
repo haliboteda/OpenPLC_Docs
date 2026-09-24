@@ -2002,7 +2002,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**总表在** [../test/PROD-CONFIG-ITEMS.md](../modules/M4/PROD-CONFIG-ITEMS.md)：九个分类、每项的说明与用法、十四条互斥关系及其出处。
+**总表在** [../modules/M4/PROD-CONFIG-ITEMS.md](../modules/M4/PROD-CONFIG-ITEMS.md)：九个分类、每项的说明与用法、十四条互斥关系及其出处。
 
 
 

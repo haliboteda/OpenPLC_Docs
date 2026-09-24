@@ -1,6 +1,6 @@
 # 验收单
 
-**每一条都要有判据**，"看起来正常"不算通过。判据的写法沿用 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 的四栏格式。
+**每一条都要有判据**，"看起来正常"不算通过。判据的写法沿用 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 的四栏格式。
 
 三份清单用途不同，不要混：
 
@@ -18,7 +18,7 @@
 
 | # | 做什么 | 判据 | 命令 |
 |---|---|---|---|
-| CHK-A1 | 主机侧 Go 测试（用例 **T1-15**） | 全过 | 见 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 的 host 层表 |
+| CHK-A1 | 主机侧 Go 测试（用例 **T1-15**） | 全过 | 见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 的 host 层表 |
 | CHK-A2 | 主机侧 C 测试（用例 **T1-16**） | 全过 | `host/bootloader_unit/build.py` —— 编译器路径填 `config/machine.py` 的 `HOST_CC` |
 | CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `go vet ./...` |
 | CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **122,880 B** | `tools/build_image.py`（自己按链接脚本判尺寸），或 `tools/flash_bootloader.py` 的构建阶段 |
@@ -31,7 +31,7 @@
 
 ⚠️ **CHK-A4 的上限是 122,880 不是 131,072。** 扇区确实是 128K，但**尾部 8K 已经划给 owner 记录区**（需求 R2-02，2026-08-18），链接脚本只把 120K 给链接器。按 131,072 判会多算 8K 余量，并且掩盖真正开始失败的那个点。超了链接器会报 `region FLASH overflowed`。
 
-⚠️ **CHK-A6 里 `all` 不含要人动手的用例**（T1-17、T2-01、T2-05），它们会被点名跳过而不是静默略过。要跑得单独按 id 跑，见 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md)。
+⚠️ **CHK-A6 里 `all` 不含要人动手的用例**（T1-17、T2-01、T2-05），它们会被点名跳过而不是静默略过。要跑得单独按 id 跑，见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)。
 
 ---
 
@@ -72,7 +72,7 @@
 
 MAC 由芯片 UID 派生，**「两块板互不相同」从未被观察过** —— 手上只有一块板。派生算法要是有缺陷，量产时表现为同网段大面积 IP 冲突，而那时已经晚了。
 
-**拿到第二块板的第一件事就是验这条**（对应 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md) 未覆盖表里的 M3）。产线要留 MAC 记录，否则"不重复"无从判起。
+**拿到第二块板的第一件事就是验这条**（对应 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 未覆盖表里的 M3）。产线要留 MAC 记录，否则"不重复"无从判起。
 
 ---
 
@@ -80,7 +80,7 @@ MAC 由芯片 UID 派生，**「两块板互不相同」从未被观察过** —
 
 任何上板测试之前都先过这一关。`tools/flash_bootloader.py` 会自动判。
 
-⚠️ **这条 2026-08-22 之前叫 `T0`。** 它不属于 `T1-07`–`T1-10` 那一系列（那些是设备行为用例，定义在 [../TEST-CASES.md](../engineering/HOW-TO-RUN-TESTS.md)，`T0` 从来不在那里），所以给了它自己的前缀。
+⚠️ **这条 2026-08-22 之前叫 `T0`。** 它不属于 `T1-07`–`T1-10` 那一系列（那些是设备行为用例，定义在 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)，`T0` 从来不在那里），所以给了它自己的前缀。
 
 | 日志 | 含义 | 接下来 |
 |---|---|---|

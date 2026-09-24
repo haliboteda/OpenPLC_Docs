@@ -1,6 +1,6 @@
 # 构建与测试
 
-路径变量（`$IDE`、`$CORE_LIVE`、`$TOOL` 等）的定义见 [../design/ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的「路径变量」。本机路径由 `$TOOL/TestCase/tools/init_machine.py` 探测生成。
+路径变量（`$IDE`、`$CORE_LIVE`、`$TOOL` 等）的定义见 [../repo/ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的「路径变量」。本机路径由 `$TOOL/TestCase/tools/init_machine.py` 探测生成。
 
 > **写路径一律用 `/`。** Windows 的 .NET 路径 API 全都接受正斜杠，Linux 不接受反斜杠 —— `/` 是唯一两边都对的写法。可执行文件后缀（`.exe` 或空）不要写死，脚本里用 `common.py` 的 `$EXE`。
 

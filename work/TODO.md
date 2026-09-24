@@ -10,7 +10,6 @@
 |---|---|---|
 | **TRNG nonce 上板验收** —— 主机侧全绿、两边都编过，**一次都没上过板** | 真板子上：开机日志打 `Backup domain retained`（不再提计数器）；`authchallenge` 连发两次拿到两个不同 nonce；一次完整的 ether 上传通过认证；同一块板重启两次，DHCP 事务号不同；抓两次到板子的 TCP 连接，SYN-ACK 的序列号不同（bootloader 和 app 各验一次） | 决议 66（nonce 改用 TRNG）、决议 67（lwIP 随机数和 TCP 初始序列号也改用 RNG），都是 2026-09-24 |
 | **开机日志自相矛盾**：先打 `Ethernet link is DOWN - this board will not answer discovery`，随后 DHCP 拿到 IP、服务可达（`$BOOT/IAPServer/IAP_server.c` 的 `IAP_servers_start()`）。疑为 PHY 自协商未完成就判了，**未核实** | 上板核实原因；之后 link 真断时才打这句，协商中不打 | [出厂态怎么造，怎么证明它真的是出厂态](../maps/five-paths-e2e-test/issues/E2E-01-how-to-make-and-prove-factory-state.md) |
-| **`P9` 查 `#锚点` 和链接文字** —— 现在只查目标文件存在。2026-09-16 实测漏过「全部 9 条命令」（标题已是 8 条）和一条文字仍是旧路径的链接 | 故意造一条错锚点、一条旧文字，`P9` 都报红；全仓现有链接无误报（锚点按 GitHub 的 slug 规则算） | [注释和文档怎么保持同步](../maps/docs-from-code/issues/DFC-06-what-the-comment-becomes.md) |
 | 五个通信口做「异常可恢复」：上位机从帧里看出断了（`conn` 掉 0、`miss` 连增），自己计时到恢复 | 产测文档 3.10 的判定栏能填出「误码 / 恢复时间」，人只要动手拔线、不用回来汇报 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 `ISS-D1`）。⚠️ 2026-09-16 起**等工装的使用反馈**再动 |
 | 上位机面板左边按九个配置项分类分段 | 九类各自成段；**端口本身仍按板子分组**（Bridge / Upper / Lower / 整板），那条已定不要重开 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 `ISS-D2`）。⚠️ 同样等反馈 |
 | 每个端口逐个打通到真板子上过 | 每个端口在真板子上跑过一轮并记下结果 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 PORT-BRINGUP-PLAN.md 整份，该文件已删） |

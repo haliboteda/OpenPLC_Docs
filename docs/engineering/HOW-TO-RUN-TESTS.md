@@ -321,7 +321,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 | `T2-06` | `tools/check_public_root.py` | 公开根指纹。**它是用例不是 `P` 系列** —— 退役的旧号登记在 [ID-MAP.md](../tables/ID-MAP.md) | ✅ |
 | `P7` | `tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ |
 | `P8` | `tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ |
-| `P9` | `tools/check_doc_paths.py` | 文档里点名的每条路径都存在 | ✅ |
+| `P9` | `tools/check_doc_paths.py` | 文档里点名的每条路径都存在，链接的锚点和路径型链接文字也对得上 | ✅ |
 | `P10` | `tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
 | `P11` | `tools/check_tool_sync.py` | 板卡包里的 `IAPTool` 不落后于仓库 | ✅ |
 | `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ |
@@ -403,7 +403,9 @@ python tools/check_doc_dupes.py          # 加 --min 40 只看更长的断言；
 python tools/check_doc_paths.py          # 加 --list 打印它 resolve 出的每条路径
 ```
 
-只检查三种能明确判断"相对谁"的写法：markdown 链接（相对当前文档）、`$BOOT`/`$TOOL`/`$CORE` 这类仓库变量路径、反引号包住的 `docs/`开头的路径（相对某个仓库根）。**故意不检查其余所有反引号路径**——一条不带仓库变量的裸路径意思是"相对这段话在讲哪个仓库"，检查脚本猜不出来。想让某条裸路径也被查到，就给它加上仓库变量前缀。路径里的行号（如 `fmc.c` 后面跟的行号范围）在检查前会被去掉——文件必须存在，行号只是提示，本来就会漂。退出码：0 每条路径都能 resolve，1 至少一条断链，2 环境问题。
+只检查三种能明确判断"相对谁"的写法：markdown 链接（相对当前文档）、`$BOOT`/`$TOOL`/`$CORE` 这类仓库变量路径、反引号包住的 `docs/`开头的路径（相对某个仓库根）。**故意不检查其余所有反引号路径**——一条不带仓库变量的裸路径意思是"相对这段话在讲哪个仓库"，检查脚本猜不出来。想让某条裸路径也被查到，就给它加上仓库变量前缀。路径里的行号（如 `fmc.c` 后面跟的行号范围）在检查前会被去掉——文件必须存在，行号只是提示，本来就会漂。另外两条（2026-09-24 起）：**链接带 `#锚点` 的，锚点必须是目标文件里某个标题按 GitHub 规则生成的锚点**；**链接文字本身写成一个路径的，文字里的文件名必须和链接目标一致**（防止目标改对了、文字还是旧路径）。链接文字是一句话的不查。
+
+退出码：0 每条路径都能 resolve，1 至少一条断链，2 环境问题。
 
 ### P11 · 包里的 IAPTool 不能落后于仓库
 

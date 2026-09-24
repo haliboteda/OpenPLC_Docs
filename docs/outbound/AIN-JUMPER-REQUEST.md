@@ -2,7 +2,7 @@
 
 **这份是拿去问硬件同事用的。** 一页说清：要焊哪四处、焊了得到什么、不焊会怎样、以及焊之前需要硬件确认的两件事。
 
-事实来源全部是 `Hardware/Production/UpperDeck/` 的网表 + BOM + 贴片坐标，2026-08-27 逐脚核对，细节在 [../design/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 的「模拟输入前端」一节。
+事实来源全部是 `Hardware/Production/UpperDeck/` 的网表 + BOM + 贴片坐标，2026-08-27 逐脚核对，细节在 [../hardware/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 的「模拟输入前端」一节。
 
 ---
 
@@ -56,7 +56,7 @@
 
 ## 四、焊了之后能得到什么
 
-两条路径都正好配 2.5 V 满量程（这也是当初选 VREFBUF SCALE0 的理由）。**具体的换算系数、满量程对应值、以及电流档那颗 374R 保护电阻的作用，见 [../design/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 的「模拟输入前端」一节** —— 那里是这些数字的唯一出处，这份不抄一遍。
+两条路径都正好配 2.5 V 满量程（这也是当初选 VREFBUF SCALE0 的理由）。**具体的换算系数、满量程对应值、以及电流档那颗 374R 保护电阻的作用，见 [../hardware/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 的「模拟输入前端」一节** —— 那里是这些数字的唯一出处，这份不抄一遍。
 
 **对工装的意义**：焊了之后 AIN 才第一次有真读数，`analog-in` 那一步才可能从「缺激励」转成真判据。而且激励可以完全由板子自己产生 —— 见下一节。
 

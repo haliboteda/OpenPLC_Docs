@@ -70,9 +70,9 @@
 
 | 图 | 为什么转不了 | 该怎么办 |
 |---|---|---|
-| **参2 所有权生命周期**（`:827`） | 它不是一张图，是**一整篇带状态骨架的文章**：viewBox 高 3190 px，63 个 `<text>`、8 个分节标题，正文体量远大于图形。Mermaid 的 `stateDiagram-v2` 只能表达「状态 + 迁移」，装不下每个状态里那 5–6 条论证 | 拆成两半：**一张极小的 `stateDiagram-v2`**（状态 A 不设防 ⇄ 状态 B 已认领，边 = takeown / setowner / factory reset）+ **其余全部落成 M2 文档的正文小节**。这张图的内容和 [OWNERSHIP.md](../../docs/modules/M2-ownership.md) 重合度最高，先去重再决定写多少 |
+| **参2 所有权生命周期**（`:827`） | 它不是一张图，是**一整篇带状态骨架的文章**：viewBox 高 3190 px，63 个 `<text>`、8 个分节标题，正文体量远大于图形。Mermaid 的 `stateDiagram-v2` 只能表达「状态 + 迁移」，装不下每个状态里那 5–6 条论证 | 拆成两半：**一张极小的 `stateDiagram-v2`**（状态 A 不设防 ⇄ 状态 B 已认领，边 = takeown / setowner / factory reset）+ **其余全部落成 M2 文档的正文小节**。这张图的内容和 OWNERSHIP.md（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)） 重合度最高，先去重再决定写多少 |
 | **参6 flash 与内存布局**（`:1408`） | 是**按比例画的地址条**：2 MiB 内部 flash 切 4 段，颜色块宽度对应大小，还有一条括号标注「bootloader 代码 + owner 区同属扇区 0」。**Mermaid 没有任何内存布局图型**，flowchart 画出来比例和相邻关系全丢 —— 而「同一个扇区」正是 owner 区选址的全部理由 | 转成 **markdown 地址表**（起始 / 大小 / 内容 / 谁写 / 能不能擦），另加一句话说明哪几段同扇区。图里那两个警告框（`RESERVED_TAIL_SECTORS` 地雷、RTC 备份寄存器三仓共享）本来就是正文 |
-| **参7 三个 on-flash 格式**（`:1528`） | 四条**字节级条带**，分段矩形按字节数成比例，上面标偏移刻度 0 / 64 / 68 / 76 / 88 / 152。Mermaid 没有这种图型 | 每个结构一张「偏移 / 长度 / 字段 / 说明」表。[OWNERSHIP.md:195-212](../../docs/modules/M2-ownership.md)「记录格式」已经有 `owner_record_t` 那张，照它的样子补另外两张 |
+| **参7 三个 on-flash 格式**（`:1528`） | 四条**字节级条带**，分段矩形按字节数成比例，上面标偏移刻度 0 / 64 / 68 / 76 / 88 / 152。Mermaid 没有这种图型 | 每个结构一张「偏移 / 长度 / 字段 / 说明」表。`OWNERSHIP.md:195-212`（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)）「记录格式」已经有 `owner_record_t` 那张，照它的样子补另外两张 |
 | **参9 nonce 与防重放**（`:1760`） | **SVG 里一条边都没有**（0 个 `<path>`）。上半是 16 字节 nonce 的 4 段等宽条带，下半是四张并排的性质卡。**没有任何流程关系可画** | nonce 组成一张表（字段 / 字节 / 来源）+ 四条性质一张表 + 两段正文（为什么 counter 必须跨掉电、为什么见证值是 DR3） |
 | **参10 BOOT0 手势时间轴**（`:1857`） | 一条**水平时间轴**加判定点。Mermaid 的 `gantt` 画的是区间，表达不了「1.5 秒**那一刻**读一次引脚」这个判定语义；`timeline` 图型又不带分支，而这张图的重点恰恰是三个分支 | 一张「时刻 / 这一刻发生什么 / 此时松手的结果」表，**外加**一张三分支 `flowchart`（丢掉时间比例，但把分支留住）。两个都要，只留一个都会丢东西 |
 
@@ -80,7 +80,7 @@
 
 ## 3. 图和 markdown 文字对不上的地方 ⭐
 
-[OWNERSHIP.md:3](../../docs/modules/M2-ownership.md) 写着「⚠️ 和本文打架时以本文为准」。
+`OWNERSHIP.md:3`（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)） 写着「⚠️ 和本文打架时以本文为准」。
 **核对下来确实打架了，而且有一条是 OWNERSHIP.md 自己错。**
 以下每条都回到了源头核实 —— bootloader 仓库 `$BOOT/IAPServer/` 的代码，不是任何抄件。
 
@@ -135,13 +135,13 @@
 - 链在**第一条**就断 → `s_effective == NULL` → 回落 ✅
 - 链在**第二条及以后**断 → 用断点前那条记录的根，**不回落** ❌
 
-> ✅ **结论**：**markdown 对，图错。** [OWNERSHIP.md:74-87](../../docs/modules/M2-ownership.md)
+> ✅ **结论**：**markdown 对，图错。** `OWNERSHIP.md:74-87`（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)）
 > 「状态机」那张 ASCII 只写了两条回落，反而和代码一致。转图时这条要么删，
 > 要么改成「链在**第一条**就断」。
 
 ### ⚠️ 分歧 5（例子编号对不上，不是事实错）
 
-[OWNERSHIP.md:144-152](../../docs/modules/M2-ownership.md) 的「三个操作」表：
+`OWNERSHIP.md:144-152`（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)） 的「三个操作」表：
 ① `takeown` 追加 **G1**；② 换 owner 追加 **G3**，必须被 **G2** 签名。
 参8 画的链是 G1（认领）→ G2（换主人）→ G3（再换）。
 
@@ -163,7 +163,7 @@
 - 告警触发条件是「当前根 == 公开根」而不是「槽空」（OWNERSHIP.md:89「告警的触发条件」vs 参2「为什么 ② 不会被告警」，代码 `report_root_trust()` 佐证）
 - owner 区选址三选一的比较表（OWNERSHIP.md:41「为什么是这里」vs 参6）
 - `RESERVED_TAIL_SECTORS` 那颗地雷（OWNERSHIP.md:70 vs 参6，图里还反链回了 OWNERSHIP.md）
-- R1–R4 四条规则的挡住 / 挡不住（[OWNERSHIP.md:156-163](../../docs/modules/M2-ownership.md)「规则」vs 参12）
+- R1–R4 四条规则的挡住 / 挡不住（`OWNERSHIP.md:156-163`（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)）「规则」vs 参12）
 - 抄了谁 / 避开了谁（OWNERSHIP.md:256「借鉴与避坑」vs 参12：UEFI / Android Verified Boot / Chromebook / ESP32 aggressive revoke）
 - WRP 厂商不上、C12 不做（**C12 = 「撤销叶子证书，且永不能撤到一个有效根都不剩」，状态 ⬜ 等真实需求，定义在 [../../docs/tables/STATUS.md:132](../../docs/tables/STATUS.md)**；OWNERSHIP.md:270「定下来的取舍」vs 参12）
 - 撤销状态不放 RTC 备份域、DR2 撞过车（OWNERSHIP.md:187 + CHALLENGE-AUTH.md vs 参6 / 参9）
@@ -199,9 +199,9 @@
 
 | 文件 | 现在 | 图搬完之后 | 够不够独立成文 |
 |---|---|---|---|
-| [OWNERSHIP.md](../../docs/modules/M2-ownership.md) | 292 行，19 KB | **几乎全留**。它是三份里唯一写「设计推理」的 —— 为什么出厂必然不设防、三个选址候选怎么比的、UEFI 同构、诚实的上限。图（尤其参2 / 参12）是它的**摘要版**，反过来 | ✅ **它就是 M2 文档的主体**。删的是被参2 抄走又抄错的那几行，加的是第 4 节里属于 M2 的 3 条 |
+| OWNERSHIP.md（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)） | 292 行，19 KB | **几乎全留**。它是三份里唯一写「设计推理」的 —— 为什么出厂必然不设防、三个选址候选怎么比的、UEFI 同构、诚实的上限。图（尤其参2 / 参12）是它的**摘要版**，反过来 | ✅ **它就是 M2 文档的主体**。删的是被参2 抄走又抄错的那几行，加的是第 4 节里属于 M2 的 3 条 |
 | [CHALLENGE-AUTH.md](../../docs/modules/M1/CHALLENGE-AUTH.md) | 89 行，4 KB | **会变厚不会变薄**。它现在缺 TTL、缺全局单 nonce、缺签名消息的确切字节 —— 这三条只在图里 | ⚠️ 现在**不够**，补完第 4 节前三行才够。补完后它是 M1 里「会话认证」那一节 |
-| [KEYS.md](../../docs/modules/M2-ownership.md) | 23 行，1.7 KB | **一行不动**。它讲的是 `$BOOT/IAPServer/keys/` 这个目录里有哪些文件、哪些提交，18 张图**一张都没画这件事** | ⚠️ 够是够，但**太小，撑不起一份独立文档**。它更像 M2 文档底下的一个小节，或者干脆并进 [../../docs/repo/ARCHITECTURE.md](../../docs/repo/ARCHITECTURE.md) —— 由 [DR-05](issues/DR-05-where-does-each-doc-file-go.md) 那张票统一定去处 |
+| KEYS.md（现 [M2-ownership.md](../../docs/modules/M2-ownership.md)） | 23 行，1.7 KB | **一行不动**。它讲的是 `$BOOT/IAPServer/keys/` 这个目录里有哪些文件、哪些提交，18 张图**一张都没画这件事** | ⚠️ 够是够，但**太小，撑不起一份独立文档**。它更像 M2 文档底下的一个小节，或者干脆并进 [../../docs/repo/ARCHITECTURE.md](../../docs/repo/ARCHITECTURE.md) —— 由 [DR-05](issues/DR-05-where-does-each-doc-file-go.md) 那张票统一定去处 |
 
 > ✅ **结论**：三份 markdown **没有一份会因为转图而被掏空**。
 > 反过来才对 —— HTML 的 18 张图里，真正**只存在于图里**的事实只有第 4 节那 10 条，

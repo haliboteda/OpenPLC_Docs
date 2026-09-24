@@ -3,7 +3,7 @@
 **回答一件事：网络上来的「烧一个新镜像」「强制重启进 bootloader」这类命令，板子凭什么相信它。**
 
 2026-09-16 从 `$BOOT/IAPServer/iap_auth.{c,h}` 和 `iap_cert.h` 的注释整理出来。
-所有权与信任根见 [OWNERSHIP.md](../../modules/M2-ownership.md)，密钥目录见 [KEYS.md](../../modules/M2-ownership.md)。
+所有权与信任根、密钥目录都见 [M2-ownership.md](../../modules/M2-ownership.md)。
 
 ## 没有它会怎样
 
@@ -12,7 +12,7 @@
 ## 板子不保存任何秘密
 
 **这套机制里板子一个秘密都没有** —— 只有公钥和证书。
-（为什么是这个形态，见 [OWNERSHIP.md](../../modules/M2-ownership.md)。）
+（为什么是这个形态，见 [M2-ownership.md](../../modules/M2-ownership.md)。）
 
 ## nonce 怎么造出来的：TRNG 直接读 16 字节
 

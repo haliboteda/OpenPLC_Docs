@@ -632,7 +632,7 @@ flowchart LR
 ```
 
 ⚠️ **端子是真 ±12V，必须用 USB-RS232 适配器，接 TTL 适配器可能烧掉**（[HARDWARE-FACTS.md:17](../../hardware/HARDWARE-FACTS.md)）。
-⚠️ **这条通道被工装占用，所以工装测不了 RS232 端子本身** —— 见 [B.3.3](#b33-rs232--rs232klemmblock-c)。
+⚠️ **这条通道被工装占用，所以工装测不了 RS232 端子本身** —— 见 [B.7](#b7-rs232--自动发自动收会话-)。
 ⚠️ `PB10` 拉低 = MAX3221 整片关断，printf 一个字节都出不来。`main.c` 在 `MX_UART4_Init()` 前已 `Enable_RX_RS232()`。
 
 ## C.3 三种用法，固件只有一套
