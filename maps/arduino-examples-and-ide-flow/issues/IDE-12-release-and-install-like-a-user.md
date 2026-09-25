@@ -2,7 +2,7 @@
 
 Type: task
 Opened: 2026-09-24
-Status: open
+Status: claimed
 Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 
 ## Question
@@ -28,3 +28,14 @@ Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 | 7 | 卸掉 `0.1.3-pre`，重跑 `init_machine.py` 更新 `CORE_LIVE` | 否 |
 
 ⚠️ 第 3 步的校验和取自 GitHub 自动生成的 zip；GitHub 不保证这个 zip 永远逐字节不变，若日后装不上先查这一条。
+
+## 进度（2026-09-25）
+
+| # | 状态 |
+|---|---|
+| 1 | ✅ 包在 `E:\tmp\rel013\STM32Tools.tar.gz`（SHA-256 `a50f4d07b83e85d12985ab2e75a062f4f78f664a3304b3bc3667d3b921c34c52`，13320192 字节）；丢了可用 `git -C Arduino_Tools archive --format=tar.gz --prefix=Arduino_Tools-0.1.3/ 0.1.3` 重打 |
+| 4 前半 | ✅ `Arduino_Tools` 本地提交 `324b5724` + tag `0.1.3`，**未推** |
+| 2、3、4 后半、5 | ⛔ 推送被 Claude Code 自动权限拦下，等用户手动推或放行；`open_plc_arduino` 的 tag `0.1.3` 还没打 |
+| 6、7 | 未开始 |
+
+⚠️ `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 在 git 里是 `100644`，`git archive` 打出的包在这两个平台上可能没有可执行位；本图只验 Windows，未修。
