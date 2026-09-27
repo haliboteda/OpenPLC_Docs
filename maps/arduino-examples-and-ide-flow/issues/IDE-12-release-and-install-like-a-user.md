@@ -50,5 +50,5 @@ Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 ## 引出了什么新的未知
 
 - `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 没有可执行位（见上文 ⚠️），这两个平台装上后上传未验
-- 填了旧的按版本钉死地址（`releases/download/v0.1.3-pre/...`）的人看不到 `0.1.3`，要改填固定地址
+- 填了旧的按版本钉死地址（`releases/download/v0.1.3-pre/...`）的人看不到 `0.1.3`，要改填固定地址。用户 2026-09-27 定：由他把固定地址发给用户
 - 板卡包 `platform.txt` 仍写 `version=0.1.0rc0`；IDE 按索引版本号装，不影响安装

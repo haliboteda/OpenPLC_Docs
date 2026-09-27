@@ -61,7 +61,6 @@ ls package_index_json/*.json                                  # Board Manager �
 
 - **KNX、SDRAM 现有的 7 个例程要不要改成统一格式** —— 要等「一个例程长什么样」定了才说得清
 - **linux / macosx 上装的 `IAPTool` 没有可执行位**（发出去的包里是 `-rw-rw-r--`），那两个平台的 IDE 上传未验 —— 本图只验 Windows
-- **填旧的按版本钉死索引地址的人看不到 `0.1.3`** —— 要不要通知、怎么通知
 
 ## Out of scope
 
