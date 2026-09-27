@@ -432,3 +432,14 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | PG10 / PB2 | B10 / M6 | `SPI1_NSS` / `SPI3_MOSI` | 预留 |
 
 `DIN1`–`DIN8` 在表里的信号名带编码器后缀（`DIN1_PC6-Enc1a` … `DIN8_PI6-Enc4b`），八路兼作四组编码器 A/B 相。
+
+## 两路板载温度是 LM50 线性传感器
+
+2026-09-28 按下层板网表 `$HW/Production/LowerDeck/netlist.ipc` 核实。
+
+| 位号 | 器件 | 脚 1 | 脚 2（输出） | 脚 3 |
+|---|---|---|---|---|
+| U1 | LM50BIM3/NOPB | `5V0` | `TEMP_SCPROT` → PA0 | `GNDD` |
+| U2 | LM50BIM3/NOPB | `5V0` | `TEMP_HSSW` → PA3 | `GNDD` |
+
+输出 500 mV + 10 mV/°C（LM50 数据手册），`BoardTemperature` 例程按此换算，是对的。⚠️ 与两处抄件不符，以网表为准：`$CORE_REPO/variants/STM32H7xx/H743/variant_PLC_H743.h:228-229` 写作 NTC；`$HW/LowerDeck_overview.txt:32,85` 写作 5V 线性稳压器。
