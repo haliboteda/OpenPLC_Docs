@@ -46,7 +46,6 @@ ls open_plc_arduino/libraries/OpenPLC_Ports/examples
 ## Not yet specified
 
 - **`Serial` 从哪引出来**：`USB.USB_UART` 接 usb2（没核实能不能枚举），还是 IDE 选 "CDC (no generic 'Serial')" 让 `Serial` 走 UART4（要专门编一版）
-- **板载温度传感器是 NTC 还是线性器件**：变体头和 `BoardTemperature` 说法不一，要查原理图
 
 - **metadata 记录由脚本拼出，和 bootloader 的格式是两份**：要么让 bootloader 自己写（需要 Renode 里的以太网或 USB CDC 能用），要么加一道检查盯住两边一致
 
