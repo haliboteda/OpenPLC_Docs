@@ -33,7 +33,7 @@ Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 
 | # | 状态 |
 |---|---|
-| 1 | ✅ 包在 `E:\tmp\rel013\STM32Tools.tar.gz`（SHA-256 `a50f4d07b83e85d12985ab2e75a062f4f78f664a3304b3bc3667d3b921c34c52`，13320192 字节）；丢了可用 `git -C Arduino_Tools archive --format=tar.gz --prefix=Arduino_Tools-0.1.3/ 0.1.3` 重打 |
+| 1 | ✅ 包即 `Arduino_Tools` release `0.1.3` 的附件（SHA-256 `a50f4d07b83e85d12985ab2e75a062f4f78f664a3304b3bc3667d3b921c34c52`，13320192 字节）；丢了可用 `git -C Arduino_Tools archive --format=tar.gz --prefix=Arduino_Tools-0.1.3/ 0.1.3` 重打 |
 | 2 | ✅ 2026-09-27 用户已推，本地与 `origin/v0.1.3-dev` 一致 |
 | 3 | ✅ tag `0.1.3` → `1765861` 已推；GitHub zip SHA-256 `f5c60c9197d3e29974365a8bac7c6cce8b8eae6ff4a8a3667606ff3befe11ed4`，18986779 字节 |
 | 4 | ✅ `Arduino_Tools` 的 `main` 和 tag `0.1.3`（→ `324b5724`）已推；release 附件下载回来与第 1 步逐字节一致 |
