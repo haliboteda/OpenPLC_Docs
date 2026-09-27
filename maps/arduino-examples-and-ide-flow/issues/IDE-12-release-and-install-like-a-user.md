@@ -2,7 +2,7 @@
 
 Type: task
 Opened: 2026-09-24
-Status: claimed
+Status: resolved
 Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 
 ## Question
@@ -39,6 +39,16 @@ Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 | 4 | ✅ `Arduino_Tools` 的 `main` 和 tag `0.1.3`（→ `324b5724`）已推；release 附件下载回来与第 1 步逐字节一致 |
 | 5 | ✅ `package_index_json` `f9fabee` 已推，线上固定地址列出 `0.1.3` |
 | 6 | ✅ 空数据目录的 arduino-cli（IDE 自带那份，只填固定地址）从网上装上 `0.1.3` 及全部依赖，校验通过；`OpenPLC_Ports` 13 个例程都在；装上的 IAPTool 与 `Output/windows/IAPTool.exe` 逐字节一致；`T1-34` 对着这份安装三种情况全过。没点 IDE 图形界面 |
-| 7 | ✅ 2026-09-27 本机 IDE 索引地址换成固定地址，装上 `0.1.3`（arduino-cli 顺带卸掉 `0.1.3-pre` 和 STM32Tools `0.1.2`），`CORE_LIVE` 已重新探测。⚠️ 之后 `P3` 红：25 个文件只差换行符（网上装的是 LF，本地仓库检出是 CRLF），内容一致 |
+| 7 | ✅ 2026-09-27 本机 IDE 索引地址换成固定地址，装上 `0.1.3`（arduino-cli 顺带卸掉 `0.1.3-pre` 和 STM32Tools `0.1.2`），`CORE_LIVE` 已重新探测；`P3` 改为不计换行符差异后全绿 |
 
-⚠️ `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 在 git 里是 `100644`，`git archive` 打出的包在这两个平台上可能没有可执行位；本图只验 Windows，未修。
+⚠️ `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 在 git 里是 `100644`，发出去的包里这两个文件是 `-rw-rw-r--`，没有可执行位（2026-09-27 `tar tv` 核实）；本图只验 Windows，未修。
+
+## Answer
+
+2026-09-27 定。`0.1.3` 已发布，客户填 `package_index_json` README 里的固定地址即可从 Board Manager 装上；空数据目录装上的这一版例程齐全，`T1-34` 三种情况全过（假板子，未点 IDE 图形界面，未上真板）。
+
+## 引出了什么新的未知
+
+- `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 没有可执行位（见上文 ⚠️），这两个平台装上后上传未验
+- 填了旧的按版本钉死地址（`releases/download/v0.1.3-pre/...`）的人看不到 `0.1.3`，要改填固定地址
+- 板卡包 `platform.txt` 仍写 `version=0.1.0rc0`；IDE 按索引版本号装，不影响安装

@@ -365,7 +365,7 @@ python tools/check_mirror_sync.py        # 或 python tools/check_mirror_sync.py
 python tools/check_core_sync.py          # 或 python tools/check_core_sync.py
 ```
 
-比对 Arduino IDE **真正加载**的那份（`$CORE_LIVE`）和板卡包的 git 版（`$CORE_REPO`）。方向天生单向：改动在 `$CORE_LIVE` 里做、验证、再拷回仓库提交——`$CORE_LIVE` 不进版本控制，验证过忘了拷回来，那段代码就只活在这台机器上，重装一次 IDE 就没了。六类刻意排除在比对之外：IDE 自己的安装元数据、Go 构建产物、编辑器备份、`.claude/`、`.vscode/`。对应 **CHK-B3**。退出码：0 一致，1 有差异，2 仓库路径不对。
+比对 Arduino IDE **真正加载**的那份（`$CORE_LIVE`）和板卡包的 git 版（`$CORE_REPO`）。方向天生单向：改动在 `$CORE_LIVE` 里做、验证、再拷回仓库提交——`$CORE_LIVE` 不进版本控制，验证过忘了拷回来，那段代码就只活在这台机器上，重装一次 IDE 就没了。六类刻意排除在比对之外：IDE 自己的安装元数据、Go 构建产物、编辑器备份、`.claude/`、`.vscode/`。**CRLF 与 LF 视为相同**：从网上装的包是 LF，仓库在 `core.autocrlf=true` 下检出是 CRLF，只差换行符不算差异。对应 **CHK-B3**。退出码：0 一致，1 有差异，2 仓库路径不对。
 
 ### P7 · 总表和用例名单不得漂
 

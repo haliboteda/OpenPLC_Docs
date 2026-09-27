@@ -55,10 +55,13 @@ ls package_index_json/*.json                                  # Board Manager �
 - [模拟台上走通 IDE 烧录](issues/IDE-11-ide-upload-on-the-simulator.md)：用例 `T1-34`，arduino-cli 对跑 app 的假板子上传，未认领 / 已认领 / 密钥不对三种都按预期，手工跑
 - [0.1.3 怎么命名、按什么顺序发](issues/IDE-14-how-is-0-1-3-named-and-released.md)：tag `0.1.3`、工具包也升 0.1.3、客户用一个固定索引地址
 - 端口例程（[数字量](issues/IDE-06-digital-io-examples.md)、[模拟量](issues/IDE-07-analog-examples.md)、[串口](issues/IDE-08-serial-examples.md)、[以太网](issues/IDE-09-ethernet-example.md)、[CAN 和 SD](issues/IDE-10-can-and-sd.md)）：13 个例程在 `OpenPLC_Ports`，`P5` 全绿，未上板
+- [发一个版本，像用户一样从网上装](issues/IDE-12-release-and-install-like-a-user.md)：`0.1.3` 已发布，从固定索引地址装上后例程齐全、`T1-34` 全过
 
 ## Not yet specified
 
 - **KNX、SDRAM 现有的 7 个例程要不要改成统一格式** —— 要等「一个例程长什么样」定了才说得清
+- **linux / macosx 上装的 `IAPTool` 没有可执行位**（发出去的包里是 `-rw-rw-r--`），那两个平台的 IDE 上传未验 —— 本图只验 Windows
+- **填旧的按版本钉死索引地址的人看不到 `0.1.3`** —— 要不要通知、怎么通知
 
 ## Out of scope
 
