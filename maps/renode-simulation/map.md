@@ -38,6 +38,10 @@ ls open_plc_arduino/libraries/OpenPLC_Ports/examples
 
 ## Decisions so far
 
+- [Renode 能不能走 bootloader → app 的启动链](issues/REN-01-can-renode-boot-through-the-bootloader.md)：能，flash 填 `0xFF` 后放 bootloader、签好名的 app 和一条 metadata 记录，只用 `LoadBinary` 加载
+
 ## Not yet specified
+
+- **metadata 记录由脚本拼出，和 bootloader 的格式是两份**：要么让 bootloader 自己写（需要 Renode 里的以太网或 USB CDC 能用），要么加一道检查盯住两边一致
 
 ## Out of scope
