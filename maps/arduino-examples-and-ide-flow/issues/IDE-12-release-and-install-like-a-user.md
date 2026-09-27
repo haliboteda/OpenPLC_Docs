@@ -37,7 +37,8 @@ Blocked by: IDE-01, IDE-14, IDE-06, IDE-07, IDE-08, IDE-09, IDE-10, IDE-11
 | 2 | ✅ 2026-09-27 用户已推，本地与 `origin/v0.1.3-dev` 一致 |
 | 3 | ✅ tag `0.1.3` → `1765861` 已推；GitHub zip SHA-256 `f5c60c9197d3e29974365a8bac7c6cce8b8eae6ff4a8a3667606ff3befe11ed4`，18986779 字节 |
 | 4 | ✅ `Arduino_Tools` 的 `main` 和 tag `0.1.3`（→ `324b5724`）已推；release 附件下载回来与第 1 步逐字节一致 |
-| 5 | 索引条目本地写好，等推送 |
-| 6、7 | 未开始 |
+| 5 | ✅ `package_index_json` `f9fabee` 已推，线上固定地址列出 `0.1.3` |
+| 6 | ✅ 空数据目录的 arduino-cli（IDE 自带那份，只填固定地址）从网上装上 `0.1.3` 及全部依赖，校验通过；`OpenPLC_Ports` 13 个例程都在；装上的 IAPTool 与 `Output/windows/IAPTool.exe` 逐字节一致；`T1-34` 对着这份安装三种情况全过。没点 IDE 图形界面 |
+| 7 | 未开始。⚠️ 本机 IDE 的索引地址还是 `v0.1.3-pre` release 那个按版本钉死的地址，看不到 `0.1.3`，要先换成固定地址 |
 
 ⚠️ `Arduino_Tools` 里 linux / macosx 的 `IAPTool` 在 git 里是 `100644`，`git archive` 打出的包在这两个平台上可能没有可执行位；本图只验 Windows，未修。
