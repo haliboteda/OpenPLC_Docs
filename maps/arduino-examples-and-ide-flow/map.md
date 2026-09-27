@@ -60,7 +60,7 @@ ls package_index_json/*.json                                  # Board Manager �
 ## Not yet specified
 
 - **KNX、SDRAM 现有的 7 个例程要不要改成统一格式** —— 要等「一个例程长什么样」定了才说得清
-- **linux / macosx 上装的 `IAPTool` 没有可执行位**（发出去的包里是 `-rw-rw-r--`），那两个平台的 IDE 上传未验 —— 本图只验 Windows
+- **linux / macosx 上装的 `IAPTool` 没有可执行位**（发出去的包里是 `-rw-rw-r--`），那两个平台的 IDE 上传未验 —— 本图只验 Windows。**有 Linux 和 macOS 用户**（用户 2026-09-27），要修，0.1.3 的包也要带上可执行位
 
 ## Out of scope
 
