@@ -722,4 +722,3 @@ python3 tools/reset_board_to_factory_state.py --check-only # 只验证，绝不�
 
 | ID | 内容 | 为什么还没做 |
 |---|---|---|
-| M3 | 两块板子的 MAC 不同 | ⛔ 手上只有一块板 |

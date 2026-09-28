@@ -89,6 +89,18 @@ USART3 TX，那是 **PB10 —— 本板的 RS232 使能脚**。
 
 当前 FQBN 用的是 `usb=CDCgen`，此时 `Serial` 被 `#define` 成 `SerialUSB`，**它不是硬件串口**。已在设备上证实：全用 `Serial` 的回显 sketch 是通过 USB CDC 回显的。
 
+## USB FS 只接了 PA11 / PA12
+
+2026-09-28 核实自 xlsx `GPIO_ASSIGNMENT` 行 60/61/123/124/143 和 `Hardware/Production/UpperDeck/netlist.ipc`：USB 只有 D-/D+（PA11 / PA12），**没有 VBUS、ID、SOF**。OTG_FS 的另外三个候选脚另有他用：
+
+| 脚 | 板上是 |
+|---|---|
+| PA8 | `HSFET_5`（Digital Out 5） |
+| PA9 | `HSFET_6`（Digital Out 6） |
+| PA10 | `KNX_RX` |
+
+**软件含义**：板卡包的 `PinMap_USB_OTG_FS[]` 只该有 PA11 / PA12 —— USB 初始化会把表里每一条都配成 USB 功能，多一条就抢走一个脚。
+
 ## PG9 就是 BOOT0 网
 
 核实：Bridge 原理图第 5 页网表 + 实测（2026-08-12）。

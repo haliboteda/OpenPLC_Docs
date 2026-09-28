@@ -27,11 +27,11 @@ Blocked by: REN-01, REN-02
 | `AI_Inputs` | ADC3 通道 1、ADC1 通道 3 | ✅ |
 | `BoardTemperature` | ADC1 通道 15、16 | ✅ |
 | `AO_Outputs` | 两路 DAC 依次写 0 / 838 / 1677 / 2515 / 3354，循环 | ✅ |
-| `CAN_Counter` | 第一帧对：TXBC `0x08000200`，消息 RAM `0x048C0000`（ID 0x123）、`0x00040000`（DLC 4），TXBAR `0x1`。**但第一帧后约 75 ms `loop()` 不再被调用**，停在哪还没查到 | ⏳ 在查 |
-| `Ethernet_IP` | 还没测。已写好带 LAN8742A PHY 的平台叠加文件 | ⏳ |
-| `USB_Serial` | 还没测 | ⏳ |
+| `CAN_Counter` | 第一帧：TXBC `0x08000200`，消息 RAM `0x048C0000`（ID 0x123）、`0x00040000`（DLC 4），TXBAR `0x1`；14 s 内发出 5 帧 | ✅ 曾以为第一帧后 `loop()` 停住，是测法的错，见下表 |
+| `Ethernet_IP` | 经 MDIO 读到 PHY link up（`last_link` = 1）；MAC 发出 DHCP DISCOVER 及 3 次重发 | ✅ 拿地址测不到：Renode 的 NetworkServer 没有 DHCP |
+| `USB_Serial` | OTG_FS 初始化正确（FDMOD、DCFG 全速、软连接）。**发现 core 的 bug**：USB 初始化把 PA8/PA9/PA10（DO5、DO6、KNX_RX）也配成了 USB 功能，见 [HARDWARE-FACTS.md](../../../docs/hardware/HARDWARE-FACTS.md)「USB FS 只接了 PA11 / PA12」。已修，2026-09-28 真板子上确认 | ✅ 枚举和收发测不到，真板子上回显正常 |
 
-①：13 个都通过（`SD_ReadWrite` 要挂卡）。⚠️ 但原型脚本在结束 PC 读不到时默认「没卡住」，`CAN_Counter` 就这样漏判了；已改成读不到即失败，**另外 12 个要用改后的脚本重跑一遍 ①**。
+①：13 个都通过（`SD_ReadWrite` 要挂卡），改后的脚本上跑过两轮：USB 修复前一轮、修复后一轮。
 
 ## 测法上踩过的坑（不是固件的错）
 
@@ -43,4 +43,6 @@ Blocked by: REN-01, REN-02
 | DAC 控制寄存器读回 0 | DAC1 在平台里只是 Tag，不存值 | 只看数据寄存器 DHR12R1/R2 |
 | 日志里 `HIT loop (37)` | Renode 合并连续重复的日志行 | 计数要按括号里的次数加 |
 | 全量记录 FDCAN / 消息 RAM 访问后 25 s 仿真跑了 5 小时 | `loop()` 每圈都轮询 FDCAN，日志拖垮仿真 | 改用函数入口钩子 |
+| 不带 `delay()` 的例程第一圈后 `loop()` 像是停了、仿真极慢 | `loop()` 上常驻的 Python 钩子每圈都执行 | 钩子打一次就摘；结束后再挂一次、多跑 10 s，确认 `loop()` 还在转 |
+| `fdcan1: FrameSent is not initialized` | FDCAN 没接总线 | 无害，不用接 CAN hub |
 | 每次启动 bootloader 要约 6.5 s 虚拟时间才跳进 app | 开机继电器窗口等 | 仿真时长按「6.5 s + 例程所需」给 |

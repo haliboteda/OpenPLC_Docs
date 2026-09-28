@@ -74,8 +74,7 @@
 |---|---|---|---|
 | **ENG-09** | 每块出厂板有逐板检查单 | `CHK-C1`–`CHK-C7` | 🟡 |
 
-`ENG-09` 是 🟡 而不是 ✅：检查单存在（`CHK-C1`–`CHK-C7`），但其中 **`CHK-C3`（MAC 唯一）现在做不了**
-——比对需要第二块板，而手上只有一块。见 [waiting/WAITING-ON.md](../../waiting/WAITING-ON.md)。
+`ENG-09` 是 🟡 而不是 ✅：七条 2026-09-28 在第二块板上全过，但 **`CHK-C3` 要「和已出货记录比对」，出货记录存在哪还没定**，见 [ACCEPTANCE-CHECKLIST.md](../tables/ACCEPTANCE-CHECKLIST.md#chk-c--单板出厂)。
 
 ---
 

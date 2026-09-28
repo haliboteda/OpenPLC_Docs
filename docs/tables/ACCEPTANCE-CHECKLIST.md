@@ -69,11 +69,18 @@
 | CHK-C6 | RS232 | `onboard/rs232/SerialPort` 回显正常 |
 | CHK-C7 | 烧 app | 上传成功并正常启动 |
 
-### ⚠️ CHK-C3 现在做不了，但必须做
+### CHK-C1–C7 第一次完整跑过：2026-09-28，第二块板
 
-MAC 由芯片 UID 派生，**「两块板互不相同」从未被观察过** —— 手上只有一块板。派生算法要是有缺陷，量产时表现为同网段大面积 IP 冲突，而那时已经晚了。
+七条全过。两块板的 MAC：
 
-**拿到第二块板的第一件事就是验这条**（对应 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 未覆盖表里的 M3）。产线要留 MAC 记录，否则"不重复"无从判起。
+| 板 | UID，w0 w1 w2 | MAC |
+|---|---|---|
+| 第一块 | `00240039 3033510C 38313437` | `02:bb:49:3e:a8:02`（由 UID 按同一算法算出） |
+| 第二块 | `00390029 34325103 39393938` | `02:bb:f5:38:99:12`（开机日志实测，与算出的一致） |
+
+⚠️ 同一个 UID 有两种字序：porttool 的 `uid=` 是 w0 w1 w2（`$BOOT/TestCase/porttool/porttool.c`），发现报文的 `hardwareId` 是 w2 w1 w0（`$BOOT/IAPServer/iap_keyderive.c`）。
+
+⚠️ **CHK-C3 的「和已出货记录比对」还判不了**：出货记录存在哪没定，见 [逐板验收记录存在哪](../../maps/production-test-gap/map.md)（等工装反馈，暂停中）。
 
 ---
 

@@ -19,7 +19,7 @@
 |---|---|---|---|
 | `R1-01`–`R1-38` | 需求（一句可判定的话） | 38 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
-| `R3-01`–`R3-06` | 需求（一句可判定的话） | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
+| `R3-01`–`R3-07` | 需求（一句可判定的话） | 7 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01` | 需求（一句可判定的话） | 1 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
@@ -35,17 +35,18 @@
 | `E2E-01`–`E2E-05` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 5 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
 | `FG-01`–`FG-03` | wayfinder 的票，属于「补记录框架自己的洞」 | 3 | [framework-gaps/issues/](../../maps/framework-gaps/issues) |
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
-| `IDE-01`–`IDE-14` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 14 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
+| `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
 | `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
 | `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
+| `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
 
 <!-- END generated -->
 
 **表里没有的**：`H3`（`go vet`，卫生检查，见 [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) 的 `CHK-A3`）、
-`M3`（两块板的 MAC 不同，要第二块板）、`EV1`（⛔ 难以构造）三个零散用例号没有定义行。
+`M3`（两块板的 MAC 不同，2026-09-28 实测通过，结果记在 `R1-14`）、`EV1`（⛔ 难以构造）三个零散用例号没有定义行。
 `ISS-*` 和 `M1`–`M8` 两套已于 2026-09-16 废除，拆进了票、`$PROD/work/TODO.md` 和 `$PROD/waiting/WAITING-ON.md`。
 
 ---
@@ -95,7 +96,7 @@
 
 | 看到 | 可能是 | 怎么分辨 |
 |---|---|---|
-| **`M3`** | ① **用例**：两块板的 MAC 不同<br>② **设计模块**：app 侧 SDRAM 库 | 上下文提"MAC"或"第二块板"→ 用例；提"SDRAM 库"或"链接脚本"→ 模块。两者不相关 |
+| **`M3`** | ① **用例**：两块板的 MAC 不同<br>② **设计模块**：app 侧 SDRAM 库 | 上下文提"MAC"或"第二块板"→ 用例（已做完，见 `R1-14`）；提"SDRAM 库"或"链接脚本"→ 模块。两者不相关 |
 | **`T3-03`** | ① **用例**：`Serial_Test` 抗 `Serial4.begin()`<br>② **设计模块**：串口冲突 | **两者是同一个主题**，不会导致误解 |
 | **`D1`** | **硬件网络名**：SDRAM 的第 1 根数据线（`PD15`）。原来的需求号和 `ISS-D1` 都已不存在 | ⚠️ `D0`–`D15` 整套都是网络名 |
 
