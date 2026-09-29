@@ -244,6 +244,8 @@ porttool run --port sim --yes TestCase/plans/station6-poweron.json
 cd TestCase/host/porttool_panel && python run.py --port sim   # T4-02，不用板子
 ```
 
+**模拟板静态链接，不依赖任何 DLL。** 系统 PATH 上 `stlink_server` 目录带着一份 32 位的 `libwinpthread-1.dll`，动态链接时双击启动的面板会加载到它，模拟板一启动就以 `0xC000007B` 退出，面板上表现为连上 sim 却没有端口列表（2026-09-29）。
+
 **T4-02 旁边还有一个 `naive.py`，问的不是同一个问题。** `run.py` 知道每个控件在哪、
 该点哪一个；`naive.py` 只认页面：进一个端口，把印在上面的按钮按印出来的顺序挨个
 按一遍，读它自己那一段给出的结论，同时查这一段的排版（说明在不在、按钮是不是排在

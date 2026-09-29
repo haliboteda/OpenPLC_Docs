@@ -34,6 +34,7 @@
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
 | `E2E-01`–`E2E-05` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 5 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
+| `EXB-01`–`EXB-09` | wayfinder 的票，属于「core 里的例程在真板上逐个测通」 | 9 | [core-examples-on-board/issues/](../../maps/core-examples-on-board/issues) |
 | `FG-01`–`FG-03` | wayfinder 的票，属于「补记录框架自己的洞」 | 3 | [framework-gaps/issues/](../../maps/framework-gaps/issues) |
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
 | `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
