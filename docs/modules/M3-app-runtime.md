@@ -59,12 +59,13 @@ flowchart TD
 | **R3-06** | 串口对外 | RS232 端子 C05/C06 收发正常 | `T3-04` | ✅ |
 | **R3-07** | 网络不被 sketch 卡住 | sketch 在 `delay()` 里等待时，板子照样应答网络、能经网口上传 | 手工 | ✅ |
 | **R3-08** | 例程起得来 | `OpenPLC_Ports` 的每个例程经 bootloader 启动后，`setup()` 走完、`loop()` 一直在转、不进 fault | `T3-05` | ✅ |
+| **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` | ⬜ |
 
-**共 8 条。其中 5 条有测试用例直接测它，3 条没有。**
+**共 9 条。其中 6 条有测试用例直接测它，3 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T3-xx` 用例直接测 | **5** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` |
+| 有 `T3-xx` 用例直接测 | **6** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` `R3-09` |
 | 纯手工 | **2** | `R3-02` `R3-07` |
 | 只有静态检查 | **1** | `R3-04` |
 
@@ -89,8 +90,9 @@ flowchart TD
 | `T3-03` | `R3-05` | 诊断串口不被 sketch 掐掉 | `Serial4.begin()` 之后 `Serial_Test` 仍然收得到，5/5 回显 ³ | `python tools/run_m5.py`（自己编译、烧写、发字节、验回显） | 真板子 | ✅ |
 | `T3-04` | `R3-06` | RS232 端子收发 | 往端子 C05/C06 发字符，每个字节原样回显 | `$TOOL:TestCase/onboard/rs232/SerialPort` | 真板子 | ✅ |
 | `T3-05` | `R3-08` | 13 个例程经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
+| `T3-06` | `R3-09` | 自有库例程在真板上逐个测通 | 每个例程：经 USB CDC 上传后，脚本按表里那一行发输入、等输出，用正则认例程自己的人读输出；要人配合的步骤由脚本提示 ⁵ | `python tools/run_examples.py [--only NAME]` | 真板子 | ⬜ |
 
-**共 5 条。前 4 条要真板子；`T3-05` 在 Renode 里跑，不用板子。**
+**共 6 条。`T3-05` 在 Renode 里跑，其余要真板子。**
 
 ¹ **自检失败不改变任何控制流。** 板子仍然安全 —— 上传会在 CRC 那步失败、app 区不受影响。
 这行日志的作用只是**把根因直接说出来**，否则 SDRAM 坏掉的症状会表现成
@@ -104,6 +106,8 @@ flowchart TD
 板子失联、只能 ST-Link 救**。修法是把 `Serial_Test` 挪到 USART3（同样两个引脚，AF7 而非 AF8）。
 
 ⁴ **测不到端口行为**：只证明启动链和主循环没坏。各端口的寄存器读写 2026-09-28 查过一次，结论在 [REN-03](../../maps/renode-simulation/issues/REN-03-run-both-layers-on-all-examples.md)，不自动复查；真实电平、时序和 `Serial` 输出只能上真板。metadata 记录由脚本按 `$BOOT/IAPServer/bootloader_state.c` 的格式拼出，bootloader 每次启动都重新校验它，所以格式对不上会表现为「没跳进 app」。
+
+⁵ **判据住在脚本的表里，例程不加机器行**：文案一改用例就断，逼着文件头和实际输出一致。范围、优先级和人工步骤见 [core 里的例程在真板上逐个测通](../../maps/core-examples-on-board/map.md)。
 
 ## 4 · 为什么这里没有「证据日期」和「最近结果」
 

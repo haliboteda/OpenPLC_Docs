@@ -30,6 +30,8 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [测试脚本怎么判一个例程过没过](issues/EXB-01-how-does-the-script-judge-an-example.md)：认例程现有输出、判据在 Python 表里、经 USB CDC 上传、用例 `T3-06`
+
 - [上游例程哪些和本板有关](issues/EXB-04-which-upstream-examples-relate-to-this-board.md)：测 2、留着不测 11、建议删 19；删前逐个问用户；`EEPROM` 和 KNX 会擦扇区 15
 
 - [KNX 和 SDRAM 例程写死的引脚和本板对得上吗](issues/EXB-07-do-knx-and-sdram-examples-use-this-boards-pins.md)：引脚号基本对；KNX 例程头注释 19 处错、不开 RS232 使能所以无输出、库用 UART 驱动 STKNX 可能发不出合法帧

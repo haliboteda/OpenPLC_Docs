@@ -32,6 +32,7 @@ TestCase/
 │   ├── run_s3.py  run_s4.py    ← T1-13 启动期验签 / T1-21 T1-22 掉电中断
 │   ├── run_au1.py              ← T1-17 nonce 唯一性，绕一次真实掉电
 │   ├── run_m5.py  run_sdram.py ← T3-03 串口冲突 / T3-02 SDRAM 封装
+│   ├── run_examples.py         ← T3-06 自有库例程逐个上真板，判据在脚本的表里
 │   ├── run_takeown.py  run_setowner.py  inject_owner_record.py  ← 所有权 T2-01/T2-03
 │   ├── upload_and_watch.py     ← 走真实 IAPTool 上传并判 SDRAM 暂存行为
 │   └── can_send.py  can_watch.py  rs485_echo.py  ← 板级端口
