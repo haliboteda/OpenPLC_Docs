@@ -28,6 +28,8 @@ grep -rln "fw_public_key\|fw_pubkey" open_plc_cube_ide/IAPServer IAPTranfer_Tool
 
 ## Decisions so far
 
+- [H743 的 OTP 区能不能存根公钥](issues/ROOT-01-can-the-h743-otp-area-hold-the-root.md)：没有 OTP，根只能放 owner 区
+
 ## Not yet specified
 
 - **给用户的文档怎么改**：`keys/README.md` 现在写的是「自己的根要重编 bootloader」，要等前面几张票定了才知道改成什么
