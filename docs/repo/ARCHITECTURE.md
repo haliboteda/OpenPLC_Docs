@@ -92,9 +92,10 @@
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
 | 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同（core 那份转调 `OpenPLC_Net` 的 `openplc_rng_words()`，决议 67） |
+| 13 | **校准值区格式**（魔数、版本、通道数、布局、CRC-32）。格式见 [SECTOR-15.md](../modules/M1/SECTOR-15.md)「校准值区的格式」 | bootloader `IAPServer/calib_area.h`<br>core `libraries/OpenPLC_Ports/src/openplc_calib.h`<br>tool `internal/calarea/calarea.go` | P2。**2026-09-28 新增** |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
-> ✅ **12 条里 11 条 P2 真的在查，第 9 条只查一半。**
+> ✅ **13 条里 12 条 P2 真的在查，第 9 条只查一半。**
 > 所以「只能靠注释约束」这个旧说法已经不成立 —— **只剩第 9 条的另一半（core 的 `backup.h`
 > 和 HID indices）仍然只靠人。**
 
@@ -111,7 +112,7 @@
 | DR0 | — | — | 空 |
 | DR1 | — | `RTC_BKP_INDEX`（`cores/arduino/stm32/backup.h:34` 定义，**当前无人写**） | 2026-09-24 起 bootloader 不再用它（决议 66），撞车随之消失 |
 | DR2 | — | — | 空。2026-09-24 起 app 也不用（决议 66） |
-| DR3 | **VBAT witness** | — | 只证明备份域活着（RTC 走时、开机挑继电器要它），**不再与重放保护有关** |
+| DR3 | **VBAT witness** | — | 只证明备份域活着（RTC 走时要它），**不再与重放保护有关** |
 | DR4 | — | `HID_MAGIC_NUMBER_BKP_INDEX` | |
 | DR5–DR9 | — | — | 空 |
 | DR10 | — | `HID_OLD_MAGIC_NUMBER_BKP_INDEX` | |

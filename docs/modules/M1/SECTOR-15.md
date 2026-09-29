@@ -44,11 +44,36 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 `_Static_assert` 锁死结构体尺寸。**这些尺寸就是 on-flash 格式** —— 多一个 padding 字节
 会让已经写进去的每条记录的每个字段全部错位，所以让它编译失败，而不是运行时才发现。
 
+## 校准值区的格式
+
+2026-09-28 定（[校准值区那 8 KiB 里放什么格式](../../../maps/per-board-calibration/issues/CAL-05-what-is-the-layout-of-the-8-kib-area.md)）。
+**格式归 `$BOOT/IAPServer/calib_area.h`**，core 和工装照它读写，`P2` 查三边一致（[ARCHITECTURE.md](../../repo/ARCHITECTURE.md) 跨仓镜像第 13 条）。全部小端，从 `0x081E0000` 起：
+
+| 偏移 | 长度 | 字段 | 值 |
+|---|---|---|---|
+| 0 | 4 | `magic` | `0x4C41434F`（`"OCAL"`） |
+| 4 | 2 | `version` | `1` |
+| 6 | 2 | `channels` | `4` |
+| 8 | 12 | `uid` | 芯片 UID 三个字，w0 w1 w2 |
+| 20 | 32 | `ch[4]` | 每路 `float gain` + `float offset`，顺序 AI1、AI2、AO1、AO2 |
+| 52 | 4 | `crc32` | 偏移 0–51 的 CRC-32（IEEE 802.3，和 zlib 相同） |
+
+其余字节保持 `0xFF`。
+
+**系数的含义**：`实测 ≈ gain × 板子的标称值 + offset`，和工装的拟合同一个方向（`$TOOL/internal/ptcal`）。单位：AI1 是 mV，AI2、AO1、AO2 是 mA。
+输入直接套这条式子；输出要反过来算：要出目标值，写给硬件的是 `(目标 − offset) / gain`。
+
+| 读到的情况 | 判为 | app 怎么做 |
+|---|---|---|
+| `magic` 不对 | 没写过 | 退回标称换算，打一行日志 |
+| `crc32` 不对，或 `version` 不认识 | 写坏了 / 格式不认识 | 同上 |
+| `uid` 和本机不同 | 不是这块板的 | 同上 |
+
 ## 三条写入路径
 
 | 路径 | 谁在场 | 多久一次 | 擦什么 | 掉电后果 |
 |---|---|---|---|---|
-| **工装写校准值** | **人在场** | 出厂 + 偶尔重校 | 读校准值区到 RAM → 擦整扇区 → 写回 | 当场重来 |
+| **工装写校准值** | **人在场** | 出厂 + 偶尔重校 | PC 经 JLINK 读出扇区 15 → 换掉前 8 KiB → 擦整扇区 → 写回（[修正值怎么写进板子](../../../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md)） | 当场重来；PC 上按 UID 留着存档 |
 | **升级写 metadata** | 无人值守 | 548 次里的 547 次 | **不擦**，纯 append | 校准值零风险 |
 | **metadata 区满** | 无人值守 | 548 次升级一次 | 读校准值 8 KiB → 擦整扇区 → 写回校准值 + 一条新 metadata | ⚠️ **唯一的风险窗口** |
 

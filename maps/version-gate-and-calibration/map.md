@@ -106,8 +106,7 @@ journal 就没必要了」。**本图不搬 metadata，所以 append 仍然需�
 
 ## Not yet specified
 
-- **校准值区那 8 KiB 内部怎么组织** —— magic / 长度 / CRC 要不要，放几条，怎么判「这里还没写过」
-- **工装按 UID 存校准值副本的形态** —— 存哪、什么格式、谁来读。这条可能整个属于产测那条线，不在本图
+- 校准值区的格式和工装留副本，2026-09-28 移到 [每块板校准那张图](../per-board-calibration/map.md)
 
 ## Out of scope
 

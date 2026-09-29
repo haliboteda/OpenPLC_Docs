@@ -2,7 +2,7 @@
 
 Type: task
 Opened: 2026-09-28
-Status: claimed
+Status: resolved
 Blocked by: REN-01, REN-02
 
 ## Question
@@ -45,4 +45,14 @@ Blocked by: REN-01, REN-02
 | 全量记录 FDCAN / 消息 RAM 访问后 25 s 仿真跑了 5 小时 | `loop()` 每圈都轮询 FDCAN，日志拖垮仿真 | 改用函数入口钩子 |
 | 不带 `delay()` 的例程第一圈后 `loop()` 像是停了、仿真极慢 | `loop()` 上常驻的 Python 钩子每圈都执行 | 钩子打一次就摘；结束后再挂一次、多跑 10 s，确认 `loop()` 还在转 |
 | `fdcan1: FrameSent is not initialized` | FDCAN 没接总线 | 无害，不用接 CAN hub |
-| 每次启动 bootloader 要约 6.5 s 虚拟时间才跳进 app | 开机继电器窗口等 | 仿真时长按「6.5 s + 例程所需」给 |
+| 每次启动 bootloader 要约 6.5 s 虚拟时间才跳进 app | 开机窗口等 | 仿真时长按「6.5 s + 例程所需」给 |
+
+## Answer
+
+2026-09-28 定。13 个例程两层都过，判失败的都是测法的错（见上表）。进仓库只做第 ① 层：用例 `T3-05`，脚本在 `$TOOL/TestCase/host/renode/`，判据见 [M3 应用运行环境](../../../docs/modules/M3-app-runtime.md) 的「测试怎么跑」节；第 ② 层的结论就是上面的进度表，不自动复查。
+
+脚本拼的 metadata 记录不另加一致性检查：bootloader 每次启动都校验它，格式不对 `T3-05` 就判「没跳进 app」。
+
+## 引出了什么新的未知
+
+没有。

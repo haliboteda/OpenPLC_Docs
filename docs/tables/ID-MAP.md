@@ -19,23 +19,25 @@
 |---|---|---|---|
 | `R1-01`–`R1-38` | 需求（一句可判定的话） | 38 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
-| `R3-01`–`R3-07` | 需求（一句可判定的话） | 7 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
+| `R3-01`–`R3-08` | 需求（一句可判定的话） | 8 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01` | 需求（一句可判定的话） | 1 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
-| `T3-01`–`T3-04` | 测试用例 | 4 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
+| `T3-01`–`T3-05` | 测试用例 | 5 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-02` | 测试用例 | 2 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `P1`–`P5` `P7`–`P18` | 静态检查（不碰硬件，看源码和文档） | 17 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–69 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 67 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–71 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 69 | [DECISIONS.md](DECISIONS.md) |
+| `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
 | `E2E-01`–`E2E-05` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 5 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
 | `FG-01`–`FG-03` | wayfinder 的票，属于「补记录框架自己的洞」 | 3 | [framework-gaps/issues/](../../maps/framework-gaps/issues) |
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
 | `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
+| `IEC-01`–`IEC-06` | wayfinder 的票，属于「出厂状态符合 IEC 61131-2」 | 6 | [iec-61131-2-factory-state/issues/](../../maps/iec-61131-2-factory-state/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
 | `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |

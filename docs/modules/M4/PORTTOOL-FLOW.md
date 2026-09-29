@@ -588,7 +588,7 @@ flowchart TD
     INIT --> SW{PORTTOOL_ENABLE}
 
     SW -->|"1 · 硬件测试模式"| PT["PortTool_Run<br/>永不返回"]
-    SW -->|"0 · 业务模式（默认）"| BIZ["boot_window_relay<br/>BOOT0 手势窗口"]
+    SW -->|"0 · 业务模式（默认）"| BIZ["boot_window<br/>BOOT0 手势窗口"]
 
     BIZ --> DECIDE["server_decide"]
     DECIDE -->|IAP_NONE| JUMP["server_jump_to_app<br/>交权给 app"]

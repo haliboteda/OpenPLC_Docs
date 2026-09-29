@@ -42,11 +42,12 @@ ls open_plc_arduino/libraries/OpenPLC_Ports/examples
 
 - [Renode 能不能走 bootloader → app 的启动链](issues/REN-01-can-renode-boot-through-the-bootloader.md)：能，flash 填 `0xFF` 后放 bootloader、签好名的 app 和一条 metadata 记录，只用 `LoadBinary` 加载
 - [13 个例程里哪些 Renode 判得了](issues/REN-02-which-examples-can-renode-judge.md)：5 个能、1 个能但有未核实项、6 个部分、`AO_Outputs` 不能，表见 [REN-02-findings.md](REN-02-findings.md)
+- [13 个例程在 Renode 里跑两层检查](issues/REN-03-run-both-layers-on-all-examples.md)：13 个两层都过；只把第 ① 层做成用例 `T3-05` 进仓库，第 ② 层结论留在票里
 
 ## Not yet specified
 
-- **`Serial` 从哪引出来**：`USB.USB_UART` 接 usb2（没核实能不能枚举），还是 IDE 选 "CDC (no generic 'Serial')" 让 `Serial` 走 UART4（要专门编一版）
-
-- **metadata 记录由脚本拼出，和 bootloader 的格式是两份**：要么让 bootloader 自己写（需要 Renode 里的以太网或 USB CDC 能用），要么加一道检查盯住两边一致
+（无）
 
 ## Out of scope
+
+- **`Serial` 从哪引出来**：两层检查都没用到 `Serial` 文字，第 ② 层又不进仓库，不需要了。2026-09-28 定

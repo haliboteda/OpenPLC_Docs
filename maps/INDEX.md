@@ -15,7 +15,9 @@
 | [metadata 从 journal 扇区搬进 app 头部](app-header-replaces-journal/map.md) | metadata 住进 app 镜像开头的定长 header，state 扇区不再参与启动判定 —— 设计定稿，不写代码 | ⛔ **2026-09-21 归档** —— 用户改了方向，metadata **不搬**。六张票全关，仍然成立的结论已搬进下一行那张图。**保留备查** |
 | [烧录前比版本 + 校准值住进扇区 15](version-gate-and-calibration/map.md) | sketch 必须带自己的版本号，烧录时上位机比对、低了拒绝可强制；校准值和 firmware metadata 共用扇区 15 —— 设计定稿，不写代码 | ✅ **七张票全关**（2026-09-21 开，当天走完）。全集对账 53 个文件，**抓出四处漏掉的**（两个 journal 测试脚本、`T1-16` 的桩、`JOURNAL.md` 整份、`ACCEPTANCE-CHECKLIST` 的 `CHK-B5`）。已实施，扇区 15 改造 2026-09-21/22 真板子验收通过；实施记录在 `work/TODO.md` |
 | [Arduino 例程与 IDE 烧录流程](arduino-examples-and-ide-flow/map.md) | 每个用户端口在 IDE 里有一个例程，并按客户的路（Board Manager 装 → 按 IP 选板 → Upload）烧得进去 —— **带执行** | 🟢 进行中（2026-09-24 开，12 张票） |
-| [没有板子时用 Renode 验证固件](renode-simulation/map.md) | Renode 里走 bootloader → app 的启动链，13 个例程自动判过不过，判不了的给替代方案 —— **带执行** | 🟢 进行中（2026-09-27 开，2 张票） |
+| [没有板子时用 Renode 验证固件](renode-simulation/map.md) | Renode 里走 bootloader → app 的启动链，13 个例程自动判过不过，判不了的给替代方案 —— **带执行** | ✅ 走完（2026-09-27 开，2026-09-28 走完，3 张票）。落成用例 `T3-05` |
+| [每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效](per-board-calibration/map.md) | 每块板在工装测试时校准，修正值写进扇区 15、出厂重烧后仍在，sketch 读写 AI/AO 时自动套用 —— **带执行** | 🟢 **六张票全关**（2026-09-28），在实施：实施项在 `work/TODO.md` |
+| [出厂状态符合 IEC 61131-2](iec-61131-2-factory-state/map.md) | 没有程序、上电、掉电、程序卡死时每个输出的状态逐条符合标准并写进手册；开机不再让继电器响 —— **带执行** | 🟢 进行中（2026-09-28 开，6 张票） |
 | [按功能模块重做文档与编号](docs-restructure/map.md) | `docs/` 成为一份自顶向下、按 M1–M4 划分的设计文档，需求 `R<模块>-<序号>` 与测试 `T<模块>-<序号>` 重排到位 | ✅ **走完**（2026-09-17 决策、同一提交 `b550a46` 完成实施：四份模块文档已建、18 张图转 Mermaid 后旧 HTML 已删、`check_no_stale_ids.py` 0 处残留旧编号） |
 
 ## 约定

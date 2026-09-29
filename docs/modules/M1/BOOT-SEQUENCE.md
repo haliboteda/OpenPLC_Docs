@@ -32,7 +32,7 @@ USB、以太网、FMC 一个都不用碰。
 | Phase 1 | `USER CODE BEGIN SysInit` | 只有最小 GPIO + UART4 |
 | Phase 2 | `USER CODE BEGIN 2` | 这个模式需要的外设都起来之后 |
 
-Phase 1 里先在开机继电器窗口内反复轮询 BOOT0，再把结果交给 `server_decide()`；
+Phase 1 里先在开机窗口（系统指示灯快闪那 2 秒）内反复轮询 BOOT0，再把结果交给 `server_decide()`；
 返回 `IAP_NONE` 就直接 `server_jump_to_app()`。
 
 ## BOOT0 按住的话，别的都不算
