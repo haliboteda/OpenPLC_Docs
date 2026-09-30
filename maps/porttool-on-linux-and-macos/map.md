@@ -13,6 +13,7 @@ python tools/list_wayfinder_map_frontier.py --all
 ## Notes
 
 - **终点是用户 2026-09-30 定的**，需求落在 [M4-production-fixture.md](../../docs/modules/M4-production-fixture.md) 的 `R4-02`
+- **用户 2026-09-30**：能并行的就开始做，只做必要的代码、功能和测试；同一会话可以做本图多张票
 - **「一次生成」是硬约束**：排除给 macOS 开 cgo（开了 Mac 版只能在 Mac 上编）
 - 现状（`$TOOL` 在 `9187f59`，2026-09-30 在 Windows 上交叉编译，未在 Linux / macOS 上运行）：
   - linux/amd64、linux/arm64、darwin/amd64、darwin/arm64 都编得过；`$TOOL/compile_tool.sh:14–35` 已一次出三个平台，但 `GOARCH=amd64` 写死
@@ -36,7 +37,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Decisions so far
 
-（还没有）
+- [要不要出 arm64 版](issues/XPT-02-whether-to-ship-arm64.md)：只给 PortTool 加 `Output/darwin-arm64/`，Linux 不出 arm64
 
 ## Not yet specified
 
