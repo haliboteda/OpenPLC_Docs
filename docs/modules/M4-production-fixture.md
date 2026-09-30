@@ -43,9 +43,10 @@ flowchart LR
 | # | 阶段 | 要做到什么 | 谁证明 | 状态 |
 |---|---|---|---|---|
 | **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` | 🔨 |
-| **R4-02** | — | 工装（`PortTool`）在 Windows、Linux、macOS 上都能运行，三个平台的可执行文件一条命令一次生成（用户 2026-09-30 定） | —（还没有用例，`T4-01` / `T4-02` 只在 Windows 上跑过；见 [工装在 Linux / macOS 上运行](../../maps/porttool-on-linux-and-macos/map.md)） | ❌ |
+| **R4-02** | — | 工装（`PortTool`）在 Windows、Linux、macOS 上都能运行，三个平台的可执行文件一条命令一次生成（用户 2026-09-30 定） | `T4-03`（Linux）；macOS 还没有用例，见 [工装在 Linux / macOS 上运行](../../maps/porttool-on-linux-and-macos/map.md) | ❌ |
+| **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | —`T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$TOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
 
-**共 2 条。**
+**共 3 条。**
 
 > ⚠️ **`🔨` 这个符号没有定义。** `docs/tables/STATUS.md` 开头只定义了六个状态符号
 > （✅ ⚠️ 🟡 ❌ ⬜ ⛔），`🔨` 是第七个，从来没写下它是什么意思。
@@ -65,8 +66,9 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | `T4-01` | `R4-01` | 端口工装的**协议契约** | C harness 拿真实固件源码跑，产出能力表并逐项比对 ¹ | `cd host/porttool_caps && python build.py`（要 gcc/clang） | 主机侧 | ✅ |
 | `T4-02` | `R4-01` | 面板在**真浏览器**里点一遍 | 10 组断言，含「改了参数就不给结论」「卡片上不许剩协议词」「看门狗真的在续期」 ² | `cd host/porttool_panel && python run.py --port sim`（模拟板）或 `--port COMx`（真板子），都要 playwright + Chrome | 主机侧 ³ / 真板子 | ✅ |
+| `T4-03` | `R4-02` `R4-03` | **Linux 版**面板在真浏览器里点一遍，接真板子 | 同 `T4-02`，加一条：带 VID 的串口行都写着它是什么（Linux 上是厂商 / 产品名和驱动名）⁴ | 串口先用 `usbipd` 挂进 WSL，再 `python run.py --wsl Debian --port /dev/ttyUSBx` | 真板子 + WSL | ✅ |
 
-**共 2 条。**
+**共 3 条。**
 
 ¹ 判据贴着代码放在 `$TOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`，**没有搬进文档仓**。
 
@@ -77,6 +79,8 @@ flowchart LR
 ³ ⚠️ **`--port sim` 跑得过不等于真板子跑得过。**
 模拟板**自己扮演所有对端**，所以「绑对了适配器才闭合链路」这件事在模拟板上永远成立 ——
 **只有真工位能证明它。** 覆盖不到的还有**真外观**：颜色、间距好不好看只能人看。
+
+⁴ 面板跑在 WSL 里，浏览器是 Windows 上的 Chrome。**测不到**：桌面 Linux 上双击打开、`xdg-open` 开浏览器、udev 和串口权限。
 
 ## 4 · 为什么这里没有「证据日期」和「最近结果」
 

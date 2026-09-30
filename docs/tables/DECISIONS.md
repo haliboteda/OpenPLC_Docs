@@ -2655,3 +2655,16 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 **理由**：继电器上接了负载时，每次上电都会被动作一次（IEC 61131-2:2003 6.3.1.4，见 [IEC-61131-2.md](../standards/IEC-61131-2.md)）；要按 BOOT0 的人就站在板子跟前，看得见灯。
 
 **什么情况下重开**：下一版硬件加了蜂鸣器或别的专用提示器件。
+
+---
+
+## 73 · 工装的对端串口由用户选、记在本机；串口列表要显示芯片
+
+用户 2026-09-30 定。
+
+| 事 | 定案 |
+|---|---|
+| 对端串口（如 RS485 的对端） | 由用户在面板里选，记在本机文件（`PortTool` 旁的 `porttool_ports.json`）；方案文件不写口名 |
+| 串口列表 | 每个口除了口名，还显示它是什么芯片 / 设备，Linux 上尤其要有 —— 只有 `ttyUSB0` 谁也认不出 |
+
+**理由**：口名随机器和插入顺序变，方案里写死的 `COM16` 在 Linux 上打不开，换台 Windows 也可能不对（[XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md) 的 Linux 实测）。

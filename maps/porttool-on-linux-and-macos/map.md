@@ -14,6 +14,9 @@ python tools/list_wayfinder_map_frontier.py --all
 
 - **终点是用户 2026-09-30 定的**，需求落在 [M4-production-fixture.md](../../docs/modules/M4-production-fixture.md) 的 `R4-02`
 - **用户 2026-09-30**：能并行的就开始做，只做必要的代码、功能和测试；同一会话可以做本图多张票
+- **用户 2026-09-30**：目前没有 Linux 实机和 Mac 实机；**先做 Linux**（WSL + `usbipd-win` 接真板子），没问题后再定 macOS —— 细节归 [在哪几台真机上验、用例怎么写](issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)
+- **用户 2026-09-30**：对端串口由用户选、记在本机，方案不写口名；串口列表要显示芯片 —— [DECISIONS.md](../../docs/tables/DECISIONS.md) 第 73 条
+- **用户 2026-09-30**：本图的改动全部测通后再提交，中途不提交
 - **「一次生成」是硬约束**：排除给 macOS 开 cgo（开了 Mac 版只能在 Mac 上编）
 - 现状（`$TOOL` 在 `9187f59`，2026-09-30 在 Windows 上交叉编译，未在 Linux / macOS 上运行）：
   - linux/amd64、linux/arm64、darwin/amd64、darwin/arm64 都编得过；`$TOOL/compile_tool.sh:14–35` 已一次出三个平台，但 `GOARCH=amd64` 写死

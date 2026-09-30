@@ -51,7 +51,7 @@
 | [M1 固件升级](../modules/M1-firmware-upgrade.md) | 38 | 36 | 2 | | | ✅ |
 | [M2 归属与信任](../modules/M2-ownership.md) | 4 | 4 | | | | ✅ |
 | [M3 应用运行环境](../modules/M3-app-runtime.md) | 8 | 7 | 1 | | | ✅ |
-| [M4 产线工装](../modules/M4-production-fixture.md) | 1 | | | | 1 | ⚠️ 三条没验 |
+| [M4 产线工装](../modules/M4-production-fixture.md) | 3 | 1 | | | 1 | ⚠️ 三条没验；`R4-02` ❌ |
 | [工程约束](../engineering/README.md) | 9 | 8 | 1 | | | ✅ |
 | **合计 60 条** | | **55** | **4** | | **1** | |
 
