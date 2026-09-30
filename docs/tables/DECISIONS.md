@@ -2705,3 +2705,18 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 | 驱动真板子的测试、静态检查、编译打包的脚本 | Python，不改写 |
 
 **理由**：用户拿到的程序已经不依赖 Python；`host/crypto_ref/` 这类测试要和 Go 代码互相独立，改写成 Go 就失去了裁判作用。
+
+---
+
+## 75 · 交给用户的说明文档中英两版
+
+用户 2026-09-30 定。
+
+| 事 | 定案 |
+|---|---|
+| 范围 | 只管交给用户和硬件工程师的说明（交付包的使用说明、`start.cmd` 菜单、用户拿到的仓库的 README）；设计文档和给开发者的说明照旧用中文 |
+| 版本 | 每份都有中文版和英文版 |
+| 文件名 | 仓库里 `README.md` 是英文、`README.zh-CN.md` 是中文，开头互相链接；交付包里 `README.zh-CN.html` / `README.en.html`（`start.cmd` 里不能写中文文件名，换代码页就找不到）；`start.cmd` 的菜单和提示每行中英并列 |
+| 现有几份 | `$TOOL/README.md` / `$TOOL/README.zh-CN.md`、`$TOOL/TestCase/tools/make_delivery.py` 里的 `README_ZH` / `README_EN` 和 `START_CMD`、`$CORE_REPO/libraries/OpenPLC_Ports/README.md` / `$CORE_REPO/libraries/OpenPLC_Ports/README.zh-CN.md`、`$CORE_REPO/libraries/OpenPLC_SDRAM/README.md` / `$CORE_REPO/libraries/OpenPLC_SDRAM/README.zh-CN.md` |
+
+⚠️ 两版之间没有自动检查，改一版要同时改另一版。

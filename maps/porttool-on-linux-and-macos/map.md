@@ -41,6 +41,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 - [macOS 上串口没有描述和 VID 怎么办](issues/XPT-01-macos-serial-port-without-description-or-vid.md)：调系统自带的 `ioreg` 补 VID / PID，不开 cgo
 - [要不要出 arm64 版](issues/XPT-02-whether-to-ship-arm64.md)：只给 PortTool 加 `Output/darwin-arm64/`，Linux 不出 arm64
+- [Linux / macOS 用户怎么拿到能运行的 PortTool](issues/XPT-04-how-linux-and-macos-users-get-a-runnable-porttool.md)：用户 clone 源码仓库自己 `go build`，README 有编译说明
 
 ## Not yet specified
 

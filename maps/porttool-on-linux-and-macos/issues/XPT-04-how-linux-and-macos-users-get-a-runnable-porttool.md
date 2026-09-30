@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: XPT-02
 
 ## Question
@@ -21,8 +21,20 @@ Blocked by: XPT-02
 
 | 事实 | 出处 |
 |---|---|
-| 用户用 git 把 PortTool 发给用户，所以可执行位要记在 git 里（文件模式 `100755`），和 IDE-15 的修法相同 | 用户 2026-09-30 |
+| 用户通过 git 拿到的是 `IAPTranfer_Tool` **源码仓库**，自己用 `go build` 编出本平台的 PortTool；仓库 README 补编译说明。自己编出来的文件本来就有可执行位，不用在 git 里记 | 用户 2026-09-30 |
+| 全新 clone、清空模块缓存后，只装 Go 1.23 就编得出 Windows / Linux 版 PortTool 和 IAPTool；第一次要联网下三个依赖 | 2026-09-30 在 Windows 上实测 |
 
 ## 怎么算答完
 
 一句话写明选了哪条；写出发布包的文件名和里面的目录；在 Linux 上实测「下载 → 解压 → 双击」能打开面板。
+
+## Answer
+
+2026-09-30 定：**不发可执行文件，用户 clone 源码仓库 `IAPTranfer_Tool` 后自己 `go build`** —— 上面 A / B / C 都不选。自己编出来的文件本来就有可执行位，Mac 上也不经过下载隔离。
+
+- `$TOOL/README.md` 新增「Building from source」一节：本机编译、交叉编译、`plans/` 要拷到可执行文件旁边、Linux 要 `dialout` 组
+- 实测（WSL Debian 13，Go 1.23.1）：全新 clone → `go build` → 两个文件都是 `-rwxr-xr-x`；面板能起并列出方案；接真板子 `bench-smoke.json` 7/7 过。WSL 里访问不了 HTTPS，依赖模块是从 Windows 那次全新下载的缓存拷进来的，「第一次联网下载依赖」只在 Windows 上验过
+
+## 引出了什么新的未知
+
+- Mac 上自己编译、运行：没有 Mac，归 [在哪几台真机上验、用例怎么写](XPT-03-which-real-machines-and-what-the-test-case-is.md)
