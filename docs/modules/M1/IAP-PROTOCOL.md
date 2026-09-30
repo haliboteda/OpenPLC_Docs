@@ -1,6 +1,6 @@
 # IAP 协议 · bootloader 和 app 在线上认哪些命令
 
-> ⚠️ **`takeown` / `getpubkey` / `flashboot` 三行按[决策 72](../../tables/DECISIONS.md) 写的是目标设计，代码尚未实施**，见 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。其余各行以代码为准。
+> ⚠️ **`takeown` / `getpubkey` / `flashboot` 三行的代码已按[决策 72](../../tables/DECISIONS.md) 实施（未提交、未上板验收）**，见 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。其余各行以代码为准。
 
 **这份是命令一览。** 每条命令的格式、要不要认证、会回什么。
 为什么是这个形状，各自的专门文档里写着，这里只给指针。

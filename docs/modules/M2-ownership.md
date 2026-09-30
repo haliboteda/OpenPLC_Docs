@@ -1,6 +1,6 @@
 # M2 · 归属与信任
 
-> ⚠️ **本文按[决策 72](../tables/DECISIONS.md) 描述目标设计，代码尚未实施**，见 [work/TODO.md](../../work/TODO.md)「出厂无根、第一次上传自动认领」。
+> ⚠️ **代码已按[决策 72](../tables/DECISIONS.md) 实施（未提交、未上板验收）**，见 [work/TODO.md](../../work/TODO.md)「出厂无根、第一次上传自动认领」。
 
 **外面的人能让这块板做什么**：把它绑到自己的钥匙上，从此只有自己能往里装固件；
 把这个权力交给别人；丢了钥匙时把板子收回来重新开始 —— **全程不需要 ST-Link，也不重编、不重写 bootloader**。
@@ -398,7 +398,7 @@ H743 的擦除粒度是**整个 128K 扇区**。根区写满必须擦一次才�
 | 多人合用 | 根持有者用 `IAPTool cert` 给同事签发叶证书，见上面「发证书」 |
 | 上传被拒 | 提示上面两条：拷根私钥，或向根持有者要叶证书 |
 
-`$BOOT/IAPServer/keys/` 下的 `fw_pubkey.inc`、`fw_signing_key.TEST_ONLY.pem` 和 `rotate_keys.sh` 在决策 72 实施时删除。
+bootloader 原来的 `IAPServer/keys/` 目录（`fw_pubkey.inc`、`fw_signing_key.TEST_ONLY.pem`、`rotate_keys.sh`）随决策 72 整个删除。
 
 ### 两条实现上的硬规矩
 
@@ -470,8 +470,8 @@ flowchart TD
 
 | # | 阶段 | 要做到什么 | 谁证明 | 状态 |
 |---|---|---|---|---|
-| **R2-01** | 根从哪来 | **出厂没有根；用户第一次经 USB 或网口上传时自动生成密钥并认领**，不按键、不用 ST-Link、不重编 bootloader | `T2-07` `T2-10`（决策 72 实施后改写成新判据） | 🟡 |
-| **R2-02** | 换成自己的 | 换根不限次数，不需要 ST-Link，也不改、不重写 bootloader | `T2-01`–`T2-06` `T2-08` `T2-09` `T2-12`–`T2-14`（部分在决策 72 实施后改写） | ✅ |
+| **R2-01** | 根从哪来 | **出厂没有根；用户第一次经 USB 或网口上传时自动生成密钥并认领**，不按键、不用 ST-Link、不重编 bootloader | `T2-28`–`T2-32` `T2-35` `T2-36`（`T2-07` 已作废） | 🟡 |
+| **R2-02** | 换成自己的 | 换根不限次数，不需要 ST-Link，也不改、不重写 bootloader | `T2-01`–`T2-05` `T2-09` `T2-10` `T2-12`–`T2-14` `T2-33` `T2-34`（`T2-06` `T2-08` 已作废） | 🟡 |
 | **R2-03** | 授权别人 | 板子从第一版就懂证书链，简单模式走同一条验证路径 | `T1-18d`–`T1-18f` `T1-16` ¹ `T2-11` ² | ✅ |
 | **R2-04** | 收回授权 | 撤销叶子证书，且**永不能撤到一个有效根都不剩** | `T2-15`–`T2-27` ⁶ | ✅ |
 
@@ -518,17 +518,17 @@ flowchart TD
 
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
-| `T2-01` | `R2-02` | 认领把板子绑到一把新密钥上 | `takeown` 回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得，**公开根告警消失**；**跑完那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_takeown.py` | **真板子 + 人按住 BOOT0** | ✅ （决策 72 实施后改写） |
-| `T2-02` | `R2-02` | BOOT0 没按时认领被拒（反向用例） | 回 `Refused`，`getpubkey` **一字节不变** | `python tools/run_takeown.py --expect-refused` | 真板子 | ✅ （决策 72 实施后改写） |
+| `T2-01` | `R2-02` | 认领把没有根的板子绑到一把新密钥上 | 无根板子上 `takeown` 不按键回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得；**跑完那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_takeown.py --key <new.pem>` | 真板子 | 🟡 决策 72 后未上板 |
+| `T2-02` | `R2-02` | 已有根的板子拒绝第二次认领（反向用例） | 回 `Refused`，`getpubkey` **一字节不变** | `python tools/run_takeown.py --key <另一把.pem> --expect-refused`；整轮里是路径 3-a | 真板子 | 🟡 决策 72 后未上板 |
 | `T2-03` | `R2-02` | 换 owner：现任签名才算数 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变；**跑完新主人那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_setowner.py --current-key a.pem`（加 `--bad-signature` 跑负向） | 真板子 | ✅ |
 | `T2-04` | `R2-02` | 无签名的高 generation 记录**夺不走**板子 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 | `python tools/inject_owner_record.py --key <hex> --also-unsigned 9` | 真板子 | ✅ |
-| `T2-05` | `R2-02` | 恢复出厂，然后能重新认领 | 按住 BOOT0 十秒 → `FACTORY RESET DONE` → 回落内置根、**公开根告警回来** → 再 `takeown` 能成功 | 同 `T2-01` 的驱动 | **真板子 + 人按住 BOOT0 十秒** | ✅ ¹⁰ （决策 72 实施后改写） |
-| `T2-06` | `R2-02` | 「信任公开根」的告警不能失灵 | bootloader 认出那把公开根靠的是编进 `owner_slot.c` 的 SHA-256 指纹常量，这条查它还对得上 | `python tools/check_public_root.py` | 主机侧 | ✅ （决策 72 实施后改写） |
-| `T2-07` | `R2-01` | 换成自己的根之后，公开根告警不再出现 | 启动日志里 `Owner slot: empty` **在**，而 `This board trusts the PUBLISHED root key` 两行**不在**；再用新密钥签的 app 装得进且能启动 **换根三步**：`rotate_keys.sh --yes` → `build_image.py` → `flash_bootloader.py --skip-build`；**判定**：`python tools/run_custom_root_has_no_warning.py --bin <app.bin> --key <新根.pem>` ¹³ | 真板子 + ST-Link | ✅ （决策 72 实施后改写） |
+| `T2-05` | `R2-02` | 恢复出厂回到没有根 | 复位后按住 BOOT0 超过 10 秒 → 板子打 `FACTORY RESET DONE`；之后 `getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（接在路径 1 之后） | **真板子 + 人按住 BOOT0 十秒** | 🟡 决策 72 后未上板 |
+| `T2-06` | `R2-02` | ~~「信任公开根」的告警不能失灵~~ | 决策 72 取消公开根和这条告警，检查脚本已删 | — | — | ⛔ 已作废 |
+| `T2-07` | `R2-01` | ~~换成自己的根之后，公开根告警不再出现~~ | 决策 72 取消公开根和编进 bootloader 的根，这条告警不再存在 | — | — | ⛔ 已作废 |
 
-| `T2-08` | `R2-02` | 公开根告警是**常驻的**，不是一次性提示 | **连续复位 3 次**，每次日志都有 `trusts the PUBLISHED root key`；任一次缺失即失败 | `python tools/run_public_root_warning_is_persistent.py` | 真板子 | ✅ （决策 72 实施后改写） |
-| `T2-09` | `R2-02` | 认领会让板上**原有的 app 失效** | `takeown` 之后复位，日志出现 `App signature invalid or absent`，且**不出现** `APP Mod` | `python tools/run_claim_invalidates_existing_app.py` | **真板子 + 人按住 BOOT0** | ✅ （决策 72 实施后改写） |
-| `T2-10` | `R2-01` | 换根之后**旧根签的固件装不进去** | 上传被拒，**且 app 区一字节未动**（读 flash 比对，不看日志） | `python tools/run_old_root_image_is_refused.py` | 真板子 + ST-Link | ✅ （决策 72 实施后改写） |
+| `T2-08` | `R2-02` | ~~公开根告警是常驻的~~ | 同 `T2-07` | — | — | ⛔ 已作废 |
+| `T2-09` | `R2-02` | 恢复出厂会让板上**原有的 app 失效** | 恢复出厂后普通复位，日志出现 `App signature invalid or absent`，且**不出现** `APP Mod`；`getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（路径 2-b） | **真板子 + 人按住 BOOT0 十秒** | 🟡 决策 72 后未上板 |
+| `T2-10` | `R2-02` | `setowner` 换根之后**旧根签的固件装不进去** | 上传被拒，**且 app 区一字节未动**（读 flash 比对，不看日志） | `python tools/run_old_root_image_is_refused.py --old-key <旧根.pem> --current-key <新根.pem>`；整轮里是路径 4-c | 真板子 + ST-Link | 🟡 决策 72 后未上板 |
 | `T2-11` | `R2-03` | **真板子**收下一张委托证书并据此执行固件 | 同事用叶私钥 + 根签发的证书上传 → 成功 + 复位后正常启动 | `python tools/run_delegated_cert_on_real_board.py` | 真板子 | ✅ |
 | `T2-12` | `R2-02` | 换根之后**旧叶签的 app 下次启动被拒** | `setowner` 换根 → 复位 → `App signature invalid or absent`，停在 bootloader | 见下 ³ | 真板子（**不需要按 BOOT0** —— `setowner` 靠现任签名授权，见下） | ✅ |
 | `T2-13` | `R2-02` | 换根之后旧叶**再上传**被拒 | 上传失败，**且 app 区一字节未动** | 同上 ³ | 真板子（**不需要按 BOOT0** —— `setowner` 靠现任签名授权，见下） | ✅ |
@@ -541,16 +541,25 @@ flowchart TD
 | `T2-19` | `R2-04` | **连续作废两个不同的叶，两个都生效** | 启动日志 `2 leaf(s) revoked`；两个叶各自上传都被拒；**第三张未被作废的叶照常传起** | `python tools/run_revoke_leaf.py --second-leaf` ⁷ | 真板子 | ✅ |
 | `T2-20` | `R2-04` | 重复作废同一个叶是**幂等**的 | 第二次回 `OK already revoked`，且 `N/96 revoke slot(s) free` **一个槽都没少** | 同上 ⁷ | 真板子 | ✅ |
 | `T2-21` | `R2-04` | **当前生效的根撤不掉自己**（代码里叫 `R4`） | 喂一块假 owner 记录区、跑**真实**的 core 侧 `owner_root_ro.c`：第一条 `'R'` 记录点名当任根 → **根没被撤**；**紧跟其后的两条照常生效**（R4 跳过那一条，不中断整段扫描）；没被点名的叶不算被撤 ⁸ | `python host/owner_revoke/build.py` | 主机侧（要 gcc/clang） | ✅ |
-| `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里有 `does NOT free these slots`（换根不腾空名额）¹¹ | `python host/owner_capacity/build.py capacity` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里点名 `setowner --wipe`（只有它腾空名额）¹¹ | `python host/owner_capacity/build.py capacity` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-23` | `R2-04` | **第 97 条作废被拒，且一个字节没写** | 96 条全部写入且逐条读回都是「已撤销」；第 97 条 `owner_slot_revoke()` 返回 false，**假 flash 的写入字节计数不变**，`'R'` 段 3072 字节逐字节和拒绝前相同，当任根也没变 ¹¹ | 同上 ¹¹ | 主机侧（要 gcc/clang） | ✅ |
 | `T2-26` | `R2-04` | **板子报得出「我这个 app 的签名者被撤了」** —— 第 60 条让它照常启动之后，这是现场唯一的信号 | 三支都判，前两支**同一段代码判**：撤销装机固件那张叶 → 答 `REVOKED`；`T2-17` 装上没被撤的叶签的镜像 → 答不是 `REVOKED`；板上无可运行固件 → 答「没有」 ¹⁶ | 随 `python tools/run_revoke_leaf.py` 一起跑；第三支手工 ¹⁶ | 真板子 | ✅ |
 | `T2-27` | `R2-04` | **撤销点名当任根时被忽略** —— `R4` 的 bootloader 侧那份实现，即「永不能撤到一个有效根都不剩」 | 造一条点名当任根的 `'R'` 记录 → `owner_slot_is_revoked(当任根)` 答否、当任根不变；**同时**点名别的键那条照常生效 ¹⁵ | `python host/owner_capacity/build.py self-revoke` | 主机侧（要 gcc/clang） | ✅ |
-| `T2-25` | `R2-04` | **`setowner --wipe` 在真板子上回收名额** | 一块已认领、有 6 个叶被撤销的板子：`--wipe` 换根 → 板子擦掉扇区 0 并自己写回来 → 复位后 `getowner` 报 generation 2、新根，启动日志 `96/96 revoke slot(s) free, 0 leaf(s) revoked` ¹² | `IAPTool setowner <ip> --current-key=<a.pem> --new-key=<b.pem> --wipe` | 真板子 + ST-Link 在手边 | ✅ （决策 72 实施后改写） |
-| `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 新区里只有那一条记录（**签名被剥掉**）、其余 8064 字节全 `0xFF`；把它当新 flash 重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `python host/owner_capacity/build.py wipe` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-25` | `R2-04` | **`setowner --wipe` 在真板子上回收名额** | 一块已认领、有 6 个叶被撤销的板子：`--wipe` 换根 → 板子回收扇区 15（不碰扇区 0） → 复位后 `getowner` 报 generation 2、新根，启动日志 `96/96 revoke slot(s) free, 0 leaf(s) revoked` ¹² | `IAPTool setowner <ip> --current-key=<a.pem> --new-key=<b.pem> --wipe` | 真板子 | 🟡 决策 72 后未上板 |
+| `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 回收要写回的内容里只有那一条记录（**签名被剥掉**）、没有作废记录；写进擦过的区再重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `python host/owner_capacity/build.py wipe` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-28` | `R2-01` | **出厂板第一次上传就被认领**，本机一把密钥都没有 | 假板子 `getpubkey` 答 `none`：工具在默认位置生成私钥并打印路径，`takeown` 那把公钥，再照常上传；假板子日志里认领的公钥 = 生成的那把，且收到整个镜像 | `python host/fakeboard/run_cases.py`（`claim-new-key`；selfcheck 的 `T1-18a`–`T1-18g` 那一步一起跑） | 假板子（经网口；USB 那条的认领逻辑由主机 Go 单测覆盖，真串口没跑） | ✅ |
+| `T2-29` | `R2-01` | **默认位置已有私钥时复用，不重新生成** | 认领的公钥 = 那把已有的，文件逐字节不变，随后照常上传 | 同上（`claim-reuse-key`） | 假板子 | ✅ |
+| `T2-30` | `R2-01` | **板子属于别人的根时，提示两条出路** | 输出里有本机私钥路径、`IAPTool pubkey`、`IAPTool cert`：拷根私钥过来，或向根持有者要叶证书 | 同上（`other-owner`） | 假板子 | ✅ |
+| `T2-31` | `R2-01` | **没有根的板子谁都不信，`takeown` 不设门** | 空区 → `owner_slot_root()` 为空、启动行说 `no root`；`setowner` 和 `revoke` 被拒且**一个字节没写**；`takeown` 被接受、根就是那把、generation 1；第二次 `takeown` 被拒、根不变 | `python host/owner_capacity/build.py no-root` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-32` | `R2-01` | **恢复出厂回到没有根，可以再认领** | 恢复出厂后 `owner_slot_root()` 为空；随后 `takeown` 被接受，generation 接在恢复出厂那条之后 | `python host/owner_capacity/build.py reset` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-33` | `R2-02` | **连续换根不限次数** | 连续 40 次 `setowner`：`'O'` 段写满时触发回收，最后生效的是第 40 把、generation 41，换根前记下的作废仍然生效 | `python host/owner_capacity/build.py rotate` | 主机侧（回收用桩代替，只清根区；真回收见 `T2-34`） | ✅ |
+| `T2-34` | `R2-02` | **扇区 15 回收中途断电** | 在回收的 7 次 flash 操作之前逐个断电：暂存完好 → 下次启动做完回收，根、作废、固件 metadata 都回来；电池没电或暂存被改一位 → 擦除之前断的不受影响，擦除之后断的一律**没有根**、没有 metadata，绝不会信一把原来没有的根。另验出厂扇区（只有校准值）不擦只打标记、旧布局扇区保校准值重建。擦除后、写回校准值前断电时校准值丢失，靠工装副本 | `python host/sector15_reclaim/build.py` | 主机侧，跑**真实**的 `bootloader_state.c` `bkp_stash.c` `owner_slot.c`（flash 和备份 SRAM 用 RAM 代替；备份 SRAM 在 VBAT 下保持要上板验） | ✅ |
+| `T2-35` | `R2-01` | **出厂板经 USB 第一次上传就被认领**（真板子） | IAPTool 输出 `This board has no root yet` 和 `Claimed.`，私钥生成在它打印的默认位置且文件存在；随后 v1 装上并启动 | `python tools/run_five_paths.py --only 1 --cdc <COM>`（先跑路径 0） | 真板子 + USB 线 | 🟡 决策 72 后未上板 |
+| `T2-36` | `R2-01` | **恢复出厂后经网口上传再次被认领**，用的是另一把新生成的私钥 | 同 `T2-35`，经以太网；认领的私钥和路径 1 那把不同 | `python tools/run_five_paths.py --only 2`（路径 2-c） | 真板子 + 人按住 BOOT0 十秒 | 🟡 决策 72 后未上板 |
 
-**共 27 条。** ⚠️ **决策 72 实施后改写**的 9 条：`T2-01` `T2-02` `T2-09`（认领不再按 BOOT0）、`T2-05`（恢复出厂回到没有根）、`T2-06` `T2-07` `T2-08` `T2-10`（公开根和编进去的根取消）、`T2-25`（`--wipe` 不再擦扇区 0）。编号保留，判据到时重写。
+**共 36 条，其中 `T2-06` `T2-07` `T2-08` 已作废（公开根和它的告警随决策 72 取消）。** `T2-01` `T2-02` `T2-05` `T2-09` `T2-10` `T2-25` 的判据已按决策 72 改写，`T2-35` `T2-36` 是新增的真板子用例；这 8 条都还没在新固件上跑过。
 
-今天 `T2-01` `T2-05` `T2-09` 要人动手按 BOOT0，其余不用；`T2-06` `T2-21`–`T2-24` `T2-27` 在主机上跑，不需要板子。
+`T2-05` `T2-09` `T2-36` 要人按住 BOOT0 十秒（恢复出厂），其余不用；`T2-21`–`T2-24` `T2-27` `T2-31`–`T2-34` 在主机上跑，`T2-28`–`T2-30` 在假板子上跑，都不需要板子。
 
 ⚠️ **2026-09-20 改正一处**：`T2-12`–`T2-14` 最初登记时误标成「要人按 BOOT0」，核实后是错的 ——
 它们跑的是 `setowner`，`IAP_server.c:251` 注释原文写明「No BOOT0 here, deliberately: the current

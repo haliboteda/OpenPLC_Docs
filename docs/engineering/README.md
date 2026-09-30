@@ -37,7 +37,7 @@
 | 看什么 | 讲什么 |
 |---|---|
 | [BUILD-AND-TEST.md](../build/BUILD-AND-TEST.md) | 怎么编 app、怎么编工装、怎么编 bootloader |
-| [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md) | bootloader 工程结构，以及那条 120K 的尺寸门禁 |
+| [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md) | bootloader 工程结构，以及那条 128K 的尺寸门禁 |
 
 ## 3 · 提交前
 

@@ -20,7 +20,7 @@
 ### 重新生成后仍须复查（不在 USER CODE 块内）
 
 - `.ioc` 里 PG9 的信号类型（见 [../hardware/HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md)）
-- `STM32H743IIKX_FLASH.ld` 的 `FLASH LENGTH` 必须是 **120K，不是 128K** —— 尾部 8K 是 owner 记录区（需求 R2-02）。⚠️ **看到 128K 不要“改回去”** ：那会让链接器把代码放进那 8K，把已经写在里面的所有权记录盖掉 —— 而那是静默的，板子会惄无声息地退回出厂根。理由见 [M2-ownership.md](../modules/M2-ownership.md)
+- `STM32H743IIKX_FLASH.ld` 的 `FLASH LENGTH` 是 **128K**，整个扇区 0 —— 根区在扇区 15（决策 72），扇区 0 里没有别的东西。上限不能再大：`0x08020000` 起是 app
 - **`.cproject` 里链接脚本那个选项的值必须是 `${workspace_loc:/${ProjName}/${PLC_LD_SCRIPT}}`，不是某个写死的 `.ld` 文件名** —— 见下一节
 
 ## 两份链接脚本，选哪份由环境变量决定
@@ -29,7 +29,7 @@
 
 | 镜像 | 脚本 | FLASH | 为什么 |
 |---|---|---|---|
-| bootloader | `STM32H743IIKX_FLASH.ld` | **120K** | 上面 0x08020000 起是 app，尾部 8K 是 owner 记录，都不能被盖 |
+| bootloader | `STM32H743IIKX_FLASH.ld` | **128K** | 上面 0x08020000 起是 app，不能被盖 |
 | 工装 | `STM32H743IIKX_FLASH_PORTTOOL.ld` | **2048K** | ST-Link 整片烧、不走 IAP，上面那两件东西一件都不存在 |
 
 **机制**：`.cproject` 里那个选项的值是 `${workspace_loc:/${ProjName}/${PLC_LD_SCRIPT}}`，变量的**工程默认值是 bootloader 那份**，写在 `.settings/org.eclipse.cdt.core.prefs` 里。工装构建靠 headless 的 `-E PLC_LD_SCRIPT=…` 临时换掉：
@@ -57,7 +57,7 @@ stm32cubeidec.exe … -D PORTTOOL_ENABLE=1 -E PLC_LD_SCRIPT=STM32H743IIKX_FLASH_
 
 ⚠️ **`.ioc` 里也没有这个字段**（`ProjectManager.*` 只有 `CompilerLinker=GCC`），所以没有「在 CubeMX 界面里把它配成变量」这条路。
 
-**结论：让 CubeMX 不改是治不了的，只能改完再修回来。** 好在改坏了藏不住 —— 工装镜像 16 万字节装不进 bootloader 脚本的 120K，链接器当场 `region 'FLASH' overflowed`；`build_image.py` 另有一道核对链接器命令行的检查。
+**结论：让 CubeMX 不改是治不了的，只能改完再修回来。** 好在改坏了藏不住 —— 工装镜像 16 万字节装不进 bootloader 脚本的 128K，链接器当场 `region 'FLASH' overflowed`；`build_image.py` 另有一道核对链接器命令行的检查。
 
 ### 2026-09-24 起：生成后自动修回来
 

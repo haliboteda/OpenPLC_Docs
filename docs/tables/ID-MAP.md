@@ -22,7 +22,7 @@
 | `R3-01`–`R3-09` | 需求（一句可判定的话） | 9 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01`–`R4-03` | 需求（一句可判定的话） | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
-| `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
+| `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-06` | 测试用例 | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-03` | 测试用例 | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `P1`–`P5` `P7`–`P19` | 静态检查（不碰硬件，看源码和文档） | 18 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |

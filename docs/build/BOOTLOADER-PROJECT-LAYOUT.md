@@ -34,7 +34,7 @@
 | bootloader | `0x08000000`–`0x0801FFFF`（sector 0，128K） | 本工程 |
 | application | `0x08020000` 起，上限 `0x081E0000` | 1,835,008 B |
 | └ KNX 数据（只在程序链接了 `OpenPLC_KNX` 时） | `0x081C0000`（bank2 sector 6，app 区最后一个扇区） | 协议栈 4 KiB + 应用配置，布局见 `$CORE_REPO/libraries/OpenPLC_KNX/src/knx_config.h`。这种程序上限因此是 1,703,936 B（1664 KiB），构建时由 `$CORE_REPO/system/extras/postbuild.sh` 检查 |
-| bootloader 状态 | `0x081E0000`（bank2 sector 7，128K） | 前 8K 校准值 + 后 120K metadata（append，548 条） |
+| bootloader 状态 | `0x081E0000`（bank2 sector 7，128K） | 校准值 8K + 根区 8K + metadata 约 112K（511 条）+ 完整标记，见 [SECTOR-15.md](../modules/M1/SECTOR-15.md) |
 
 **板卡包给 app 的链接上限就是 `upload.maximum_size`（1,835,008 B，等于 bootloader 的 `IAP_APP_MAX_SIZE`）**：`variants/STM32H7xx/H743/ldscript.ld` 的 `FLASH` 长度直接用 `LD_MAX_SIZE`，不再减 `LD_FLASH_OFFSET`，因为 `platform.txt` 传进来的已经是 app 上限。2026-09-30 之前多减了一次，只给了 1,703,936 B，用户同日定改正。
 
@@ -46,7 +46,7 @@
 
 ## 3. 编译产物
 
-**必须装进单个 128K 扇区的前 120K**（122,880 B —— 尾部 8K 给 owner 记录）。这是需求 **ENG-01**，构建时的尺寸门禁。
+**必须装进扇区 0 的 128K**（131,072 B；根区在扇区 15，扇区 0 只放代码）。这是需求 **ENG-01**，构建时的尺寸门禁。
 
 **当前大小和余量哪份文档都不记** —— 这个数每次构建都在变。要数字跑 `$TOOL:TestCase/tools/build_image.py`，它每次构建都打印，超了当场 Fail；或者自己看 `Debug/` 下那个 `.bin` 的大小。
 

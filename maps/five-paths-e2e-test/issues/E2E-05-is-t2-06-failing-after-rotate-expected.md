@@ -38,7 +38,7 @@ Blocked by: -
 
 ### 依据不是推理，是工具自己写的
 
-`$TOOL/TestCase/tools/check_public_root.py` 的文件头注释原文：
+`check_public_root.py`（决策 72 取消公开根后已删） 的文件头注释原文：
 
 > That fingerprint is a CONSTANT on purpose. Deriving it from fw_pubkey.inc at build time would
 > make the comparison true for every build, so the warning would also fire on a customer board

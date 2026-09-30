@@ -15,7 +15,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **范围只有 bootloader 和 IAPTool**（用户 2026-09-30 定）：工装不在这张图里，工装那边只做多语言
 - **这张图只做可行性和决定**，不带执行
 - 现状：bootloader 已经优先用 owner 区里的根，owner 区为空才用编进去的那把；`takeown` 写入、`setowner` 更换都不重烧。见 [M2 归属与信任](../../docs/modules/M2-ownership.md)
-- 把用户引向「重编 bootloader」的是 `rotate_keys.sh`，见 `$BOOT/IAPServer/keys/README.md`
+- 把用户引向「重编 bootloader」的是 `rotate_keys.sh`；它和 bootloader 的 `keys/` 目录 2026-09-30 已随决策 72 删除
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
 ## 全集

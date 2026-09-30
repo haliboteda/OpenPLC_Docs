@@ -189,10 +189,9 @@ flowchart TD
 
 | 起始 | 大小 | 内容 | 谁写 | 能不能擦 |
 |---|---|---|---|---|
-| `0x08000000` | 120 KiB | **bootloader 代码**，内置根公钥在它的 rodata 里 | ST-Link | 整扇区 |
-| `0x0801E000` | 8 KiB | **owner 记录区**，51 条 × 160 字节 | bootloader | **只追加，永不擦除** |
+| `0x08000000` | 128 KiB | **bootloader 代码**，只放代码（决策 72） | ST-Link / `flashboot` | 整扇区 |
 | `0x08020000` | 1792 KiB | **app 区**，第 1 步每次启动现算这块的 SHA-256 | bootloader | 提交时 |
-| `0x081E0000` | 128 KiB | **扇区 15** —— 前 8 KiB **校准值**（固定地址）+ 后 120 KiB **metadata**（3840 格 × 32 字节，548 条） | bootloader / 工装 | 只在 metadata 区满时，且要先搬校准值 |
+| `0x081E0000` | 128 KiB | **扇区 15** —— 校准值 8 KiB + **根区** 8 KiB（owner 链和撤销）+ metadata 约 112 KiB（511 条）+ 完整标记，见 [SECTOR-15.md](M1/SECTOR-15.md) | bootloader / 工装 | 只在回收时，先暂存进备份 SRAM |
 | `0xC0000000` | 2 MiB | **SDRAM 暂存区** | bootloader | — |
 | `0x38000000` | 32 B | 交接记录（SRAM4） | bootloader / app | 读即消费 |
 
@@ -278,9 +277,9 @@ flowchart TD
 | **R1-33** | 启动切换 | app 的起始地址满足向量表的对齐要求 | `P15` ⁷ | ✅ |
 | **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ✅ |
 | **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ✅ |
-| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**，且 owner 区**顺手压缩** —— 擦扇区是回收槽位的唯一时机 | `T1-31` `T1-33` | ✅ |
+| **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（根区在扇区 15，`flashboot` 不碰它）；根区在扇区 15 回收时**压缩** | `T1-31` `T1-33` | ✅ |
 | **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
-| **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：未认领的用随包的公开根兜底并打警告；已认领的用用户配置目录里的密钥；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` | ✅ |
+| **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：用用户配置目录里的密钥（没有根的出厂板在 bootloader 里，第一次上传自动认领，见 [M2 归属与信任](M2-ownership.md)）；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` | ✅ |
 
 **共 38 条。其中 30 条有测试用例直接测它，8 条没有。**
 
@@ -383,7 +382,7 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ✅ |
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
-| `T1-33` | `R1-36` | **压缩留对了东西**：走过的链和还生效的作废都在，其余的都不在 | 喂一块故意乱掉的 owner 区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_compact()`：留下的正好是前两条，**无签名那条没有被压缩顺手扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条前移。**再把压缩结果当作新 flash 重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
+| `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
 | `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领、用户目录里没有密钥 → 退出码 0，输出有 `signing with the PUBLISHED key`；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 
 **共 40 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
@@ -430,9 +429,8 @@ generation 1 同一把根。当天一共换了五次 bootloader，五次都成�
 都会先擦整个扇区，所以「只写 metadata 那一半」的填充步骤**先把校准值毁了**，
 reclaim 再怎么正确也看不出来。脚本已改成整扇区读写。
 
-⁸ **`T1-33` 在主机上跑，不上板** —— `owner_slot_compact()` 只有真的换一次 bootloader 才会在板子上执行一次，
-而它一旦留错东西，板子就此不认主人且无从恢复。主机侧跑的是**真实的 `owner_slot.c`**，喂一块 RAM 假 flash。
-**测不到的是**：真的擦一次扇区 0，以及擦写中途掉电。那一条归 `T1-29`/`T1-31`。
+⁸ **`T1-33` 在主机上跑，不上板** —— 压缩只在扇区 15 回收时执行，一旦留错东西，板子就此不认主人。
+主机侧跑的是**真实的 `owner_slot.c`**，喂一块 RAM 假 flash。**回收本身和中途掉电**由 `T2-34`（M2）盖。
 
 ⁵ ⚠️ **2026-09-21 改定，推翻了 2026-09-20 那一版**：**metadata 留在扇区 15**（不搬进 header）、八种事件日志全部删除、扇区**最前 8 KiB 划给校准值**。见 `DECISIONS.md` 第 61 条和[烧录前比版本 + 校准值住进扇区 15](../../maps/version-gate-and-calibration/map.md)。
 `R1-28` 因此重写（槽仍然有，一次升级从 8 槽变 7 槽），**`R1-29` 保留** —— reclaim 没有消失，
@@ -445,7 +443,7 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 证不了另外几条；静态检查覆盖全部出口。⚠️ **它证不到的**：运行时 I-cache 真的是开的，
 以及这次改动有没有把烧写本身弄坏 —— 那两条归 `T1-23` / `T1-24` 的上板回归。
 
-¹⁰ **`T1-34` 测的是 PC 这一侧**：arduino-cli → discovery → 板卡包里那份 IAPTool → 找密钥 → 重启握手 → 传输 → 判决。脚本把 IAPTool 拷到临时目录再用（`--upload-property path=`），因为包里 `keys\` 可能已有 `fw_signing_key.pem`，会挡住公开根兜底；`APPDATA` / `TEMP` 也指到临时目录，真实的用户密钥和上传锁都不碰。**不进 selfcheck**：一遍要几分钟（密钥不对那种要等 IAPTool 问满三次重启），超出 selfcheck 一分钟的预算。
+¹⁰ **`T1-34` 测的是 PC 这一侧**：arduino-cli → discovery → 板卡包里那份 IAPTool → 找密钥 → 重启握手 → 传输 → 判决。脚本把 IAPTool 拷到临时目录再用（`--upload-property path=`），因为包里 `keys\` 可能已有 `fw_signing_key.pem`，会挡住要测的那条查找路径；`APPDATA` / `TEMP` 也指到临时目录，真实的用户密钥和上传锁都不碰。**不进 selfcheck**：一遍要几分钟（密钥不对那种要等 IAPTool 问满三次重启），超出 selfcheck 一分钟的预算。
 **测不到**：板子侧的任何校验（镜像签名、证书链、nonce、CRC）、固件真的写进去、真实复位时序和发现限流、板子在另一台机器上的真实局域网、IDE 图形界面（只走 arduino-cli）、Linux / macOS。假板子只比对证书里叶公钥的字节，所以委托证书在它那里一律被拒。板子侧归 `T1-23`、`T1-11` 这些真板子用例。详见 [IDE-04-findings.md](../../maps/arduino-examples-and-ide-flow/IDE-04-findings.md)「这条模拟测不到什么」。
 
 ⁷ **`P15` 守的是一个链接期不变式，不是一次运行。** app 的向量表就在 FLASH 起点，
@@ -479,7 +477,7 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 | `** BOOT0 held **` | **不是故障**。有人按住了 BOOT0，物理逃生口赢过一切 | 模式是 `IAP_ALL`，reason 打的是 `BOOT0 held` | 松开 BOOT0 再复位 |
 | `flash command failed authentication` | 工具版本不对，或证书不是这块板信的根签的 | ⚠️ **0.1.2 的 IAPTool 刷 0.1.3 的板必然到这里，而且失败得很安静** —— 没有一句话说版本不对 | 换新版 IAPTool；用 `getpubkey` 查板子信哪把根 |
 | `Backup domain was lost` | **RTC 备份域丢过**，RTC 从固定时间重新起。⚠️ **不一定是电池** —— 两边 RTC 时钟源不一致也会清空它，见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md) | DR3 里的见证值不见了 | 不影响上传，也不影响认证（决议 66 起 nonce 由 TRNG 出）。影响的是走时 |
-| 启动就有不设防告警，**但你确定认领过** | owner 记录链断了，或被 ST-Link 重烧擦掉了 | `getowner` 回 0 = 未认领；回 n 但仍告警 = 当前根恰好等于公开根 | 重新认领，见 [M2 归属与信任](M2-ownership.md) |
+| 启动打 `no root`，**但你确定认领过** | 扇区 15 被重建过（旧布局、回收时断电且电池没电），或整片被 ST-Link 擦过 | 启动日志里有 `rebuilt with calibration only`，或 `getpubkey` 回 `none` | 再上传一次即自动认领，见 [M2 归属与信任](M2-ownership.md) |
 
 ## 8 · 这个模块的边界
 

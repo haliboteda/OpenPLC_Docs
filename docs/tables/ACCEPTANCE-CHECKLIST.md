@@ -25,11 +25,11 @@
 | CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，且 `.bin` ≤ **122,880 B** | `tools/build_image.py --porttool`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
 | CHK-A5 | 烧写 + 启动日志 | 见 [T3-01](#t3-01--启动门禁) | `tools/flash_bootloader.py` |
 | CHK-A6 | 设备行为用例 | 全过 | `TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
-| CHK-A7 | 变体断言 + 公开根指纹（用例 **P4** / **T2-06**） | 全过 | 都在 `tools/selfcheck.py` 里 |
+| CHK-A7 | 变体断言（用例 **P4**） | 全过 | 在 `tools/selfcheck.py` 里 |
 
 **CHK-A1–A3、CHK-A7 一条命令跑完：`tools/selfcheck.py`**（`--list` 先看它会跑哪些）。
 
-⚠️ **CHK-A4 的上限是 122,880 不是 131,072。** 扇区确实是 128K，但**尾部 8K 已经划给 owner 记录区**（需求 R2-02，2026-08-18），链接脚本只把 120K 给链接器。按 131,072 判会多算 8K 余量，并且掩盖真正开始失败的那个点。超了链接器会报 `region FLASH overflowed`。
+⚠️ **CHK-A4 的上限是 131,072**，整个扇区 0：根区 2026-09-30 起在扇区 15（决策 72）。超了链接器会报 `region FLASH overflowed`。
 
 ⚠️ **CHK-A6 里 `all` 不含要人动手的用例**（T1-17、T2-01、T2-05），它们会被点名跳过而不是静默略过。要跑得单独按 id 跑，见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)。
 
@@ -44,12 +44,12 @@
 | CHK-B1 | 版本号三处一致（用例 **P1**） | `$BOOT/Core/Inc/IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明。⚠️ **这三处都是「卡包版本」**；sketch 的 **app 版本不在其中**，它每个 sketch 都不同，不是跨仓镜像 |
 | CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
 | CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） |
-| CHK-B4 | **公开根告警仍然会响**（用例 **T2-06**） | 一块未认领的板子开机必须打出「trusts the PUBLISHED root key」。⚠️ 出货那把签名密钥**本来就是公开的、也必须公开**（见 `$PROD/docs/modules/M2-ownership.md`），厂商轮换它解决不了任何问题——这行告警是客户唯一会知道自己不设防的途径 |
+| CHK-B4 | **出厂板第一次上传就被认领**（用例 **T2-35**） | 一块刚造好出厂态的板子，本机没有私钥：经 USB 上传 → IAPTool 打印生成的私钥路径并认领 → app 起来；之后 `getpubkey` 返回那把公钥。见 [M2 归属与信任](../modules/M2-ownership.md) |
 | CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的格式**相符。⚠️ 格式已定要改（校准值 8 KiB + metadata），改完这条判据要一起更新 |
-| CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传 → 正常启动 |
-| CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。⚠️ **这一步会擦扇区 0**，做之前确认 ST-Link 在手边 |
+| CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传（没有根时自动认领）→ 正常启动 |
+| CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。板子回收的是扇区 15，不碰扇区 0 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
-| CHK-B9 | **五条用户路径各走一遍** | 从出厂态开始，五条路径的步骤和判据见 [出厂到五条用户路径的端到端测试方案](../../maps/five-paths-e2e-test/map.md)；每条都达到它自己的判据。要真板子、要人按 BOOT0（[决议 69](DECISIONS.md)） |
+| CHK-B9 | **五条用户路径各走一遍** | 从出厂态开始跑 `python3 tools/run_five_paths.py --elf <boot.elf> --cdc <COM口>`，步骤和判据见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)「五条用户路径 · 从出厂态跑一整轮」（按[决策 72](DECISIONS.md) 写）；每步都达到它自己的判据。要真板子、USB 线，人按一次 BOOT0 十秒（[决议 69](DECISIONS.md)） |
 
 ⚠️ **CHK-B7 是唯一能抓住捆绑升级风险的用例。** 只测 CHK-B6 永远发现不了"新 bootloader 读不懂旧 journal"。
 
