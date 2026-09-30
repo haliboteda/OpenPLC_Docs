@@ -39,6 +39,7 @@
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
 | `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
 | `IEC-01`–`IEC-06` | wayfinder 的票，属于「出厂状态符合 IEC 61131-2」 | 6 | [iec-61131-2-factory-state/issues/](../../maps/iec-61131-2-factory-state/issues) |
+| `LANG-01`–`LANG-08` | wayfinder 的票，属于「工装面板可选中文 / English / Deutsch」 | 8 | [porttool-panel-languages/issues/](../../maps/porttool-panel-languages/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
 | `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
