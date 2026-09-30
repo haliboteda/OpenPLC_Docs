@@ -37,10 +37,10 @@ python -c 'import re,glob; fs=[f for f in glob.glob("IAPTranfer_Tool/internal/pt
 ## Decisions so far
 
 - [面板上的字从哪几条路到页面上](issues/LANG-01-which-paths-bring-text-to-the-panel.md)：七条路，页面自己 861 条、Go 送上来 74 条；另有两处已经违反决策 11（持续测试日志文件头、导出的日志里夹着中文）
+- [页面上的字怎么组织、切换怎么生效](issues/LANG-03-how-page-strings-are-organized.md)：一张总词典 `web/strings.json` 嵌进 exe，切换即刷新页面，缺译文显示中文
 
 ## Not yet specified
 
-- **数字、日期、单位的写法要不要跟着语言变**（德文的小数逗号、`toLocaleString` 的千分位）：要等 [页面上的字怎么组织、切换怎么生效](issues/LANG-03-how-page-strings-are-organized.md) 定了才知道有没有地方放
 - **悬停里的协议原值**（`title` 里的 `duty` / `mode=extloop`）：现在是「中文 + 悬停英文原文」，换到英文界面后两者可能长得一样，是否还要悬停没想清楚
 - **暂停中的「端口列表怎么组织」**（`porttool-ui-audit` 那张图）一旦重排列表，会整批改分组名和说明 —— 和本图的先后要等那张图恢复时再看
 
