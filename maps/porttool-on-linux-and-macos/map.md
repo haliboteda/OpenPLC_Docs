@@ -17,7 +17,6 @@ python tools/list_wayfinder_map_frontier.py --all
 - **「一次生成」是硬约束**：排除给 macOS 开 cgo（开了 Mac 版只能在 Mac 上编）
 - 现状（`$TOOL` 在 `9187f59`，2026-09-30 在 Windows 上交叉编译，未在 Linux / macOS 上运行）：
   - linux/amd64、linux/arm64、darwin/amd64、darwin/arm64 都编得过；`$TOOL/compile_tool.sh:14–35` 已一次出三个平台，但 `GOARCH=amd64` 写死
-  - macOS 上串口只有名字、没有描述和 VID（`$TOOL/internal/serialx/enum_basic.go:1–13`），所以 `porttool answer --usb`（`$TOOL/cmd/porttool/answer.go:30,91`）在 macOS 上找不到板子的 USB 口
   - 浏览器、ping、模拟板文件名已按平台分开（`$TOOL/internal/ptpanel/panel.go:797`、`net.go:144`、`$TOOL/internal/simboard/simboard.go:40`）
 - 和 [Linux / macOS 用户怎么拿到能运行的 IAPTool](../arduino-examples-and-ide-flow/issues/IDE-15-how-do-linux-and-macos-users-get-an-executable-iaptool.md) 是同一类发布问题（可执行位），先后见本图的票
 - **要用到的 skill**：`grilling`（本图的票）
@@ -37,6 +36,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Decisions so far
 
+- [macOS 上串口没有描述和 VID 怎么办](issues/XPT-01-macos-serial-port-without-description-or-vid.md)：调系统自带的 `ioreg` 补 VID / PID，不开 cgo
 - [要不要出 arm64 版](issues/XPT-02-whether-to-ship-arm64.md)：只给 PortTool 加 `Output/darwin-arm64/`，Linux 不出 arm64
 
 ## Not yet specified

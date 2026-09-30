@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -18,3 +18,16 @@ macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只�
 ## 怎么算答完
 
 一句话写明选了哪条；选 A 写明 `--usb` 在 macOS 上的报错原文（英文，照决策 11）；选 B 写明在哪台 Mac、哪个系统版本上验。
+
+## Answer
+
+2026-09-30 定：**选 B** —— macOS 上调系统自带的 `ioreg` 读 VID / PID / 产品名 / 序列号，按口名并进 `serialx.List` 的结果；不开 cgo，一次生成照旧。理由：板子的 USB 口靠 `0483:5740` 认（`$TOOL/internal/ptecho/cdc.go:10–26`），而且不只 `porttool answer --usb`，方案里的 USB 那一路也靠它（`$TOOL/internal/ptseq/peer.go:132`）；只有口名的话 Mac 上 USB 那一路测不了，达不到本图终点。
+
+- 解析 `ioreg -r -c IOUSBHostDevice -l -w 0` 的文本输出：每个 USB 设备节点取 `idVendor` / `idProduct`（十进制，转成四位大写十六进制，与 Windows / Linux 一致）、`USB Product Name`、`USB Serial Number`，挂到它子树里的 `IOCalloutDevice` / `IODialinDevice` 上
+- `ioreg` 跑不了或解析不出东西时退回只有口名，不报错 —— 列口不能因为描述拿不到而失败
+- 解析函数不带平台标签，单元测试在 Windows 上跑；样本是按 `ioreg` 的已知格式手写的，**不是从真 Mac 录下来的**
+- 在真 Mac 上验归 [在哪几台真机上验、用例怎么写](XPT-03-which-real-machines-and-what-the-test-case-is.md)
+
+## 引出了什么新的未知
+
+- 手写样本和真 `ioreg` 输出是否一致：在真 Mac 上录一份替换样本，归 [在哪几台真机上验、用例怎么写](XPT-03-which-real-machines-and-what-the-test-case-is.md)

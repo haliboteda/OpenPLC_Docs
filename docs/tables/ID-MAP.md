@@ -20,7 +20,7 @@
 | `R1-01`–`R1-38` | 需求（一句可判定的话） | 38 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
 | `R3-01`–`R3-09` | 需求（一句可判定的话） | 9 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
-| `R4-01` | 需求（一句可判定的话） | 1 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
+| `R4-01`–`R4-02` | 需求（一句可判定的话） | 2 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-06` | 测试用例 | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
@@ -39,13 +39,14 @@
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
 | `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
 | `IEC-01`–`IEC-06` | wayfinder 的票，属于「出厂状态符合 IEC 61131-2」 | 6 | [iec-61131-2-factory-state/issues/](../../maps/iec-61131-2-factory-state/issues) |
-| `LANG-01`–`LANG-08` | wayfinder 的票，属于「工装面板可选中文 / English / Deutsch」 | 8 | [porttool-panel-languages/issues/](../../maps/porttool-panel-languages/issues) |
+| `LANG-01`–`LANG-09` | wayfinder 的票，属于「工装面板可选中文 / English / Deutsch」 | 9 | [porttool-panel-languages/issues/](../../maps/porttool-panel-languages/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
 | `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
 | `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `ROOT-01`–`ROOT-04` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 4 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
+| `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
 
 <!-- END generated -->
