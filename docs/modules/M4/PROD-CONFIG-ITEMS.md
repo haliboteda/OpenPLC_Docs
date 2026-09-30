@@ -69,7 +69,7 @@
 
 ## E · 判据（只读）
 
-**判据来自方案文件（`$TOOL/TestCase/plans/*.json`），面板上只显示不编辑。**
+**判据来自方案文件（`$PORTTOOL/TestCase/plans/*.json`），面板上只显示不编辑。**
 
 | 配置项 | 说明 | 用法 |
 |---|---|---|
@@ -121,7 +121,7 @@
 
 | # | 关系 | 表现 | 出处 |
 |---|---|---|---|
-| 1 | **`rs232` 会话吃控制口带宽** | 它是 `loop=self`，测试流量和所有端口的日志是同一根线；每帧走三趟（90+16+20 字节），别的端口只算 90 | `$BOOT/TestCase/porttool/porttool_rs232.c:117`、`$TOOL/internal/ptpanel/web/index.html:2612` |
+| 1 | **`rs232` 会话吃控制口带宽** | 它是 `loop=self`，测试流量和所有端口的日志是同一根线；每帧走三趟（90+16+20 字节），别的端口只算 90 | `$BOOT/TestCase/porttool/porttool_rs232.c:117`、`$PORTTOOL/internal/ptpanel/web/index.html:2612` |
 | 2 | **总带宽上限** | 勾中端口合计超 11520 B/s 的 80 % 就不让开始。**线一堵 `printf` 阻塞，所有端口采样周期一起失准且不报错** | `index.html:2665` |
 | 3 | **`pt.echo` 对 `loop=link` 端口被拒** | `can` / `rs485` 的计数器必须走被测链路。在控制口上答它会让计数器在链路已死时照涨 | `porttool.c:423`、`DECISIONS.md` 9 |
 | 4 | **`ain` / `aout` / `temp` 都要 VREFBUF** | 起不来就**拒绝启动**，不是给个坏数 | `porttool_ain.c:89`、`porttool_aout.c:136`、`porttool_temp.c:82` |

@@ -11,7 +11,7 @@ Blocked by: -
 
 固件在 `pt.caps` 里给每个端口声明了端子号。**哪几条和 01 建立的权威端子表对不上？**
 
-面板的标签全部由这些声明推导（`$TOOL/internal/ptproto/caps.go:185` 的 `TerminalLabels()`），所以声明错了，面板就一定错，而且错得看起来很正常。
+面板的标签全部由这些声明推导（`$PORTTOOL/internal/ptproto/caps.go:185` 的 `TerminalLabels()`），所以声明错了，面板就一定错，而且错得看起来很正常。
 
 ## 01 已经解掉的部分（2026-09-11）
 
@@ -36,7 +36,7 @@ Blocked by: -
 
 按这个，DO1=A03、DO3=**A05**、DO8=A10。
 
-但 `$PROD/docs/hardware/HARDWARE-FACTS.md:283`（出处 `netlist.ipc:245-256` + 原理图，两者一致）写着 **A07/C07=CAN L、A08/C08=CAN H、A09=CAN_GND、A10=RS485 A**，而面板自己的连接提示（`$TOOL/internal/ptpanel/web/index.html:259`）写着**控制口是端子 C05/C06**（RS232）。
+但 `$PROD/docs/hardware/HARDWARE-FACTS.md:283`（出处 `netlist.ipc:245-256` + 原理图，两者一致）写着 **A07/C07=CAN L、A08/C08=CAN H、A09=CAN_GND、A10=RS485 A**，而面板自己的连接提示（`$PORTTOOL/internal/ptpanel/web/index.html:259`）写着**控制口是端子 C05/C06**（RS232）。
 
 **这条怀疑不成立，已撤回。** 01 查明：`dout` 的 A 是 **Lower Deck Klemmblock A**，CAN 那些在 **Upper Deck Klemmblock C**，两排互不相干。`A03-A10` 是对的。
 
@@ -45,7 +45,7 @@ Blocked by: -
 1. 把 14 个端口的 `term=` / `terms=` 声明全列出来（`$BOOT/TestCase/porttool/` 下每个 porttool_ 开头的 .c 里各自的 `porttool_port_t`）。
 2. 逐条对 01 的权威表，产出三列：**端口 / 固件说的 / 硬件说的 / 是否一致**。
 3. 对不上的，判断是固件写错还是命名空间不同。
-4. ⚠️ **改固件的 `term=` 会让 `$TOOL/TestCase/host/porttool_caps/` 的契约测试（H4）跟着变** —— 那套是把固件 `.c` 原样编成 PC 程序来跑的，改了要一起过。
+4. ⚠️ **改固件的 `term=` 会让 `$PORTTOOL/TestCase/host/porttool_caps/` 的契约测试（H4）跟着变** —— 那套是把固件 `.c` 原样编成 PC 程序来跑的，改了要一起过。
 
 ## 产出
 

@@ -44,7 +44,7 @@ flowchart LR
 |---|---|---|---|---|
 | **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` | 🔨 |
 | **R4-02** | — | 工装（`PortTool`）在 Windows、Linux、macOS 上都能运行，三个平台的可执行文件一条命令一次生成（用户 2026-09-30 定） | `T4-03`（Linux）；macOS 还没有用例，见 [工装在 Linux / macOS 上运行](../../maps/porttool-on-linux-and-macos/map.md) | ❌ |
-| **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | —`T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$TOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
+| **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | —`T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$PORTTOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
 
 **共 3 条。**
 
@@ -70,7 +70,7 @@ flowchart LR
 
 **共 3 条。**
 
-¹ 判据贴着代码放在 `$TOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`，**没有搬进文档仓**。
+¹ 判据贴着代码放在 `$PORTTOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`，**没有搬进文档仓**。
 
 ² 完整的十条判据在 `docs/engineering/HOW-TO-RUN-TESTS.md` 的 `T4-02` 行，**这里不抄**。
 其中第 ⑧ 条是 2026-09-11 用户实测撞出来的：勾 DO3、占空比改成 50，1.4 秒出一个假失败 ——

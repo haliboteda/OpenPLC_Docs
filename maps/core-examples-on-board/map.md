@@ -17,7 +17,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **判定方式照工装**：板子只报原始值，上位机判（[决策 22](../../docs/tables/DECISIONS.md)）。例程本身不加自检，这和 [Arduino 例程与 IDE 烧录流程](../arduino-examples-and-ide-flow/map.md) 定的「例程不自己判过不过」不冲突
 - **人工配合**（用户 2026-09-29 定）：AO、DO 用户自己量；DI 用户按脚本提示从 0 到 24 V 加电压；KNX 用户在 ETS 里看总线、手动往总线发数据
 - **台子**（用户 2026-09-29 说）：板子通电，RS485、CAN、KNX 都接上了，KNX 只接了总线电源；AO1、AO2 各接 470 Ω
-- 现有的相关用例：P5 只编译、仿真用例 `T3-05` 只看启动，见 [HOW-TO-RUN-TESTS.md](../../docs/engineering/HOW-TO-RUN-TESTS.md)、[M3-app-runtime.md](../../docs/modules/M3-app-runtime.md)；工装判据在 `$TOOL/TestCase/plans/station6-poweron.json`
+- 现有的相关用例：P5 只编译、仿真用例 `T3-05` 只看启动，见 [HOW-TO-RUN-TESTS.md](../../docs/engineering/HOW-TO-RUN-TESTS.md)、[M3-app-runtime.md](../../docs/modules/M3-app-runtime.md)；工装判据在 `$PORTTOOL/TestCase/plans/station6-poweron.json`
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
 ## 全集

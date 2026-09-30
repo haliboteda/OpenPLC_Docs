@@ -16,7 +16,7 @@ Blocked by: PUI-02, PUI-03
 | 过什么 | 具体 |
 |---|---|
 | **参数名** | `mv=1:500`、`loop=ctrl`、`mode=quad`、`src=hw`、`ga=31/7/255` 这类，面板上直接抄了协议字面量的地方，有没有人话解释 |
-| **判据在哪** | 这个端口「通过」的标准是什么，面板上看不看得到。⚠️ 判定一律在上位机（DECISIONS 22），所以判据的出处是 `$TOOL/internal/ptcheck/`，不是固件 |
+| **判据在哪** | 这个端口「通过」的标准是什么，面板上看不看得到。⚠️ 判定一律在上位机（DECISIONS 22），所以判据的出处是 `$PORTTOOL/internal/ptcheck/`，不是固件 |
 | **哪些数不是判据** | `loop=ctrl` 的端口，回报的那三个计数只说明控制口活着，**不是该端口的判据**（DECISIONS 9）。必须和读数分区显示 |
 | **一次性动作 vs 会话 vs 交权** | 三类端口的操作语义不一样（`pt.run` 回来、`pt.handover` 不回来），按钮措辞有没有暴露这个区别 |
 | **坑要不要写在卡片上** | 例：`dout` 是软件 PWM 不是硬件定时器通道，两两共用比较单元；`freq` 封顶 2000 Hz。这些现在只在 `PORTTOOL-FLOW.md` 里 |
@@ -28,7 +28,7 @@ Blocked by: PUI-02, PUI-03
 
 ## 注意
 
-`$TOOL/internal/ptpanel/web/index.html` 里页面源码和渲染结果是两回事：H5 的断言不能用 `document.body.textContent`（源码里就有 `crc=raw` 这些字样），要等渲染出来的节点。改完页面记得这条。
+`$PORTTOOL/internal/ptpanel/web/index.html` 里页面源码和渲染结果是两回事：H5 的断言不能用 `document.body.textContent`（源码里就有 `crc=raw` 这些字样），要等渲染出来的节点。改完页面记得这条。
 
 ---
 

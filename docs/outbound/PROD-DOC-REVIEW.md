@@ -77,4 +77,4 @@
 
 ## 四、文档里还没有数的
 
-**所有限值都是 TBD** —— 功耗、模拟精度、速率门限。判据文件的形状已经有了（`$TOOL/TestCase/plans/*.json` 每一步自带 `checks`），缺的是数。**这些数由硬件/质量填进方案文件**，不写进代码（[DECISIONS.md 44](../tables/DECISIONS.md)）。
+**所有限值都是 TBD** —— 功耗、模拟精度、速率门限。判据文件的形状已经有了（`$PORTTOOL/TestCase/plans/*.json` 每一步自带 `checks`），缺的是数。**这些数由硬件/质量填进方案文件**，不写进代码（[DECISIONS.md 44](../tables/DECISIONS.md)）。

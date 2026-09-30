@@ -1,6 +1,6 @@
 # 三仓布局
 
-这个产品是**三个独立的代码库**，没有共享构建系统。一个功能通常要同时改动其中两到三个。
+这个产品是**三个独立的代码库**（外加工装上位机 `$PORTTOOL`，决策 76），没有共享构建系统。一个功能通常要同时改动其中两到三个。
 
 ## 路径变量
 
@@ -11,7 +11,8 @@
 | `$BOOT` | `open_plc_cube_ide` 的 clone —— bootloader 的 CubeIDE 工程 |
 | `$CORE_REPO` | `open_plc_arduino` 的 clone —— 板卡包，在版本控制下 |
 | `$CORE_LIVE` | Arduino IDE **真正加载**的那份板卡包（`$A15/packages/.../stm32/<版本>`），**不在版本控制下** |
-| `$TOOL` | `IAPTranfer_Tool` 的 clone —— PC 工具和全部测试资产 |
+| `$TOOL` | `IAPTranfer_Tool` 的 clone —— IAPTool 和全部测试资产 |
+| `$PORTTOOL` | `OpenPLC_PortsTestingTool` 的 clone —— PortTool（给硬件工程师的端口测试面板）和它的测试、交付打包（决策 76） |
 | `$HW` | `Hardware` 的 clone —— 原理图、netlist、生产文件 |
 | `$REF` | `Hello_World_OpenPLC` 的 clone —— 同一块板子的参考工程 |
 | `$IDE` | Arduino IDE 2.x 的安装根目录 |
@@ -32,6 +33,7 @@
 | **App 侧** | `$CORE_LIVE`（干活的地方）<br>`$CORE_REPO`（git 仓库） | 定制板卡包。编译用户应用；同时拥有 `cores/arduino/main.cpp`、变体头文件 `variants/STM32H7xx/H743/variant_PLC_H743.h`、引脚与外设映射、`libraries/OpenPLC_IAP`、`libraries/OpenPLC_Net`、`tools/discovery/` |
 | **Bootloader 侧** | `$BOOT` | STM32CubeIDE 工程（`IAPServer/`、`Core/`、`LWIP/`） |
 | **PC 工具侧** | `$TOOL` | Go，产出 `IAPTool.exe` 和 `TestCase.exe` |
+| **工装上位机** | `$PORTTOOL` | Go，产出 `PortTool.exe`；工装固件那一半在 `$BOOT/TestCase/porttool/` |
 
 ⚠️ **Arduino 板卡包是要分发给其他工程师的**，所以 core 层的改动是共享基础设施，不是本地小修小补。
 
@@ -92,10 +94,11 @@
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
 | 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同（core 那份转调 `OpenPLC_Net` 的 `openplc_rng_words()`，决议 67） |
-| 13 | **校准值区格式**（魔数、版本、通道数、布局、CRC-32）。格式见 [SECTOR-15.md](../modules/M1/SECTOR-15.md)「校准值区的格式」 | bootloader `IAPServer/calib_area.h`<br>core `libraries/OpenPLC_Ports/src/openplc_calib.h`<br>tool `internal/calarea/calarea.go` | P2。**2026-09-28 新增** |
+| 13 | **校准值区格式**（魔数、版本、通道数、布局、CRC-32）。格式见 [SECTOR-15.md](../modules/M1/SECTOR-15.md)「校准值区的格式」 | bootloader `IAPServer/calib_area.h`<br>core `libraries/OpenPLC_Ports/src/openplc_calib.h`<br>porttool `internal/calarea/calarea.go` | P2。**2026-09-28 新增** |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `internal/netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
+| 14 | **串口层 `internal/serialx` 整个目录** —— IAPTool 和 PortTool 用同一套开口、重试、枚举（决策 76） | tool `internal/serialx/`<br>porttool `internal/serialx/` | P2 **逐字节**，文件清单也要一致。**2026-09-30 新增** |
 
-> ✅ **13 条里 12 条 P2 真的在查，第 9 条只查一半。**
+> ✅ **14 条里 13 条 P2 真的在查，第 9 条只查一半。**
 > 所以「只能靠注释约束」这个旧说法已经不成立 —— **只剩第 9 条的另一半（core 的 `backup.h`
 > 和 HID indices）仍然只靠人。**
 

@@ -17,9 +17,9 @@ Blocked by: -
 
 ## 现状（2026-09-13 核实）
 
-**不是平铺，已经按板子分组。** `renderTree()`（`$TOOL/internal/ptpanel/web/index.html:1342`）按固件报的 `board=` 分成四组，顺序写死在 `const order = ["bridge","upper","lower","junction","whole"]`。
+**不是平铺，已经按板子分组。** `renderTree()`（`$PORTTOOL/internal/ptpanel/web/index.html:1342`）按固件报的 `board=` 分成四组，顺序写死在 `const order = ["bridge","upper","lower","junction","whole"]`。
 
-`pt.caps` 报 `ports=18`（`$TOOL/TestCase/host/porttool_caps/caps_golden.txt`）：
+`pt.caps` 报 `ports=18`（`$PORTTOOL/TestCase/host/porttool_caps/caps_golden.txt`）：
 
 | board | 端口 |
 |---|---|
@@ -45,7 +45,7 @@ Blocked by: -
 
 - **`soak` 端口整个删掉** —— `porttool_soak.c` 不再存在，固件 0.9.0 → 0.10.0
 - **不另开菜单**，改成：端口行上每个 `kind=session` 带一个复选框（`picked2`），勾几个一起跑；卡片上「**单次 / 持续**」两个单选 + 时长（1/2/3/4 小时 / 一直）
-- **计时和判定都在上位机**（`$TOOL/internal/ptpanel/hold.go`），板子只发数据；`pt.hold` 续期式看门狗到期 `stop_all()` + 点故障灯
+- **计时和判定都在上位机**（`$PORTTOOL/internal/ptpanel/hold.go`），板子只发数据；`pt.hold` 续期式看门狗到期 `stop_all()` + 点故障灯
 - **判据不分叉** —— 持续跑不给结论（「不自动给结论 —— 老化、调波形、量电压用」），判据仍只有 `internal/ptcheck` 一份
 
 ⚠️ `soak` 这个词在固件里还剩三个**交权目标**（`can.soak`、`sd.integrity.soak`、`sdram.retention.soak`，都是 `HANDOVER_ON_PORT_ROW`，挂在各自端口行上）。**它们不是端口，不在这张 ticket 的范围里。**

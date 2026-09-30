@@ -321,7 +321,7 @@ C01–C08 三方完全一致，冲突只在最后四个。
 
 Bridge 连接器出处：`Hardware/Production/Bridge/1436_01_SCHAE-BR.xlsx` 第 19–24 行（`J1` 2×16 排母、`J2`/`J3` 2×15 排母、`J4` RJ45 `74990111211`、`J5` USB-C `DX07S024WJ3`、`J6` microSD `104031-0811`、`J7` JTAG `FTSH-105-01-H-DV-K-P-TR`），与 `1436_01_SCHAE-BR.pdf` 第 3–5 页的图纸位号一致。
 
-**上位机面板不是独立抄件。** `IAPTranfer_Tool/internal/ptproto/caps.go:61-62` 只是把固件给的 `blk`/`term` 字符串原样带出来，Go 侧没有自己的端子表。所以**面板上显示的 `C09,C10`、`J1`、`J2` 全部来自固件**，要改就改固件那三处。
+**上位机面板不是独立抄件。** `OpenPLC_PortsTestingTool/internal/ptproto/caps.go:61-62` 只是把固件给的 `blk`/`term` 字符串原样带出来，Go 侧没有自己的端子表。所以**面板上显示的 `C09,C10`、`J1`、`J2` 全部来自固件**，要改就改固件那三处。
 
 ---
 
@@ -365,7 +365,7 @@ Bridge 连接器出处：`Hardware/Production/Bridge/1436_01_SCHAE-BR.xlsx` 第 
 | 以太网 RJ45 是 Bridge **J4**，不是 J1 | `Hardware/Production/Bridge/Pick Place for 1436_01_SCHAE-BR-PCB.txt:128` —— `J4  74990111211 ... "1 Port RJ45..."` | ✅ 成立 |
 | USB-C 是 Bridge **J5**，不是 J2 | 同上 `:139` —— `J5  DX07S024WJ3 ... "USB Type C, 24Pin"` | ✅ 成立 |
 | `Hardware/Bridge_overview.txt:91` 把 RJ45 写成 `J1` | 同一份文件 `:34` 又说 `J1` 是 32 针板间排针 —— **它自相矛盾**，且与贴装坐标表不符 | ✅ 该 overview 抄错了 |
-| 上位机面板不是独立抄件 | `IAPTranfer_Tool/internal/ptproto/caps.go:61-62`，`Term` 就是个透传字符串字段 | ✅ 成立 |
+| 上位机面板不是独立抄件 | `OpenPLC_PortsTestingTool/internal/ptproto/caps.go:61-62`，`Term` 就是个透传字符串字段 | ✅ 成立 |
 
 ## ⚠️ 主会话推翻的一条
 

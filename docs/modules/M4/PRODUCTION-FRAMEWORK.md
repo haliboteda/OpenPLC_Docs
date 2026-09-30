@@ -100,7 +100,7 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 **`limit_version` 必须有**：产线测试指南 2.6 要求每站记录「软件 / 限值版本」。方案文件改了就要动这个字段。
 
-**运行时从哪读**：PortTool 找 exe 旁边的 `plans/`，找不到才退回当前目录下的 `TestCase/plans`（从仓库根跑的情况）。`compile_tool.sh` 每次构建把 `$TOOL/TestCase/plans/*.json` 拷进 `Output/<平台>/plans/` —— **仓库那份是源头，`Output/` 那份是产物，会被下次构建覆盖**；产线自己新写的方案文件留在原地不动。方案页的「保存」写的也是这个目录，且**先验后写**：不通过校验的方案根本到不了磁盘，因为一份读不进来的方案迟早有人拿去跑。
+**运行时从哪读**：PortTool 找 exe 旁边的 `plans/`，找不到才退回当前目录下的 `TestCase/plans`（从仓库根跑的情况）。`compile_tool.sh` 每次构建把 `$PORTTOOL/TestCase/plans/*.json` 拷进 `Output/<平台>/plans/` —— **仓库那份是源头，`Output/` 那份是产物，会被下次构建覆盖**；产线自己新写的方案文件留在原地不动。方案页的「保存」写的也是这个目录，且**先验后写**：不通过校验的方案根本到不了磁盘，因为一份读不进来的方案迟早有人拿去跑。
 
 ### 六个通用字段的语义
 

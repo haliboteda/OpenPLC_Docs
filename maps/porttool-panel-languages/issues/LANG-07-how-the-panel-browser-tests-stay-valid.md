@@ -7,7 +7,7 @@ Blocked by: LANG-03
 
 ## Question
 
-用例 `T4-02`（面板在真浏览器里点一遍，见 [HOW-TO-RUN-TESTS.md](../../../docs/engineering/HOW-TO-RUN-TESTS.md)）的两个脚本靠中文找控件、判结果：`$TOOL/TestCase/host/porttool_panel/run.py` 有 74 个含中文的字面量，`naive.py` 有 70 个，而 `naive.py` 按设计就是「照页面上印的字点」。另外 `run.py:559` 的 `BANNED_ON_CARDS` 把 `Klemmblock`、`Digital Out`、`period`、`hold`、`temperature` 当成「漏出来的协议词」—— 在英文 / 德文界面里它们正是该显示的词。
+用例 `T4-02`（面板在真浏览器里点一遍，见 [HOW-TO-RUN-TESTS.md](../../../docs/engineering/HOW-TO-RUN-TESTS.md)）的两个脚本靠中文找控件、判结果：`$PORTTOOL/TestCase/host/porttool_panel/run.py` 有 74 个含中文的字面量，`naive.py` 有 70 个，而 `naive.py` 按设计就是「照页面上印的字点」。另外 `run.py:559` 的 `BANNED_ON_CARDS` 把 `Klemmblock`、`Digital Out`、`period`、`hold`、`temperature` 当成「漏出来的协议词」—— 在英文 / 德文界面里它们正是该显示的词。
 
 | 选项 | 代价 | 测不到什么 |
 |---|---|---|

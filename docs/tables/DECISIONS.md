@@ -1267,7 +1267,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**决定**：模拟板 = `TestCase/porttool/` 那些 `.c` **原样**编成 PC 可执行程序，只换掉底下的外设 stub 和最外层的 main（`$TOOL/TestCase/host/porttool_caps/harness/sim_main.c`，`python build.py --sim` 编）。它在 stdin/stdout 上说端口工装协议，上位机用保留端口名 **`sim`** 连它。
+**决定**：模拟板 = `TestCase/porttool/` 那些 `.c` **原样**编成 PC 可执行程序，只换掉底下的外设 stub 和最外层的 main（`$PORTTOOL/TestCase/host/porttool_caps/harness/sim_main.c`，`python build.py --sim` 编）。它在 stdin/stdout 上说端口工装协议，上位机用保留端口名 **`sim`** 连它。
 
 
 
@@ -1600,7 +1600,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-⚠️ **产线跑的不是 git 里那份**，是打包在 exe 旁边的 `Output/windows/plans/` 副本。所以「留痕靠 git」只对工程师的机器成立 —— 这正是限值必须由**服务端**而不是页面守住的原因：`$TOOL/internal/ptpanel/plan.go` 的 `keepLimits` 在每次保存时把 `checks` 和 `limit_version` 从磁盘那份原样取回，页面发什么都不算数。
+⚠️ **产线跑的不是 git 里那份**，是打包在 exe 旁边的 `Output/windows/plans/` 副本。所以「留痕靠 git」只对工程师的机器成立 —— 这正是限值必须由**服务端**而不是页面守住的原因：`$PORTTOOL/internal/ptpanel/plan.go` 的 `keepLimits` 在每次保存时把 `checks` 和 `limit_version` 从磁盘那份原样取回，页面发什么都不算数。
 
 
 
@@ -2071,8 +2071,8 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 | | 住哪 | 谁写 |
 |---|---|---|
 | 原始值（引脚电平、计数器、毫伏、原始码） | 帧里的字段 | 我方 |
-| 算子（`eq` `ne` `lt` …） | `$TOOL/internal/ptcheck` | 我方 |
-| **多少算合格、哪个电平算故障** | **方案文件 `$TOOL/TestCase/plans/*.json` 的 `checks`** | **硬件工程师** |
+| 算子（`eq` `ne` `lt` …） | `$PORTTOOL/internal/ptcheck` | 我方 |
+| **多少算合格、哪个电平算故障** | **方案文件 `$PORTTOOL/TestCase/plans/*.json` 的 `checks`** | **硬件工程师** |
 
 **直接后果**：
 
@@ -2131,7 +2131,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 | 在哪 | 做了什么 |
 |---|---|
-| `$TOOL/TestCase/host/porttool_panel/naive.py` 的 `WEARS_OUT` | 全端口扫描时 relay 只跑方案里那一个模式，不逐模式扫 |
+| `$PORTTOOL/TestCase/host/porttool_panel/naive.py` 的 `WEARS_OUT` | 全端口扫描时 relay 只跑方案里那一个模式，不逐模式扫 |
 | 面板 | 勾了 relay 又选「持续」时**当场拦住**，并把次数和额定寿命算给人看 |
 
 ⚠️ **面板原来只在说明里写了一句「触点有寿命」。** 一句警告挡不住一次误操作，而这个误操作是不可逆的。
@@ -2717,6 +2717,23 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 | 范围 | 只管交给用户和硬件工程师的说明（交付包的使用说明、`start.cmd` 菜单、用户拿到的仓库的 README）；设计文档和给开发者的说明照旧用中文 |
 | 版本 | 每份都有中文版和英文版 |
 | 文件名 | 仓库里 `README.md` 是英文、`README.zh-CN.md` 是中文，开头互相链接；交付包里 `README.zh-CN.html` / `README.en.html`（`start.cmd` 里不能写中文文件名，换代码页就找不到）；`start.cmd` 的菜单和提示每行中英并列 |
-| 现有几份 | `$TOOL/README.md` / `$TOOL/README.zh-CN.md`、`$TOOL/TestCase/tools/make_delivery.py` 里的 `README_ZH` / `README_EN` 和 `START_CMD`、`$CORE_REPO/libraries/OpenPLC_Ports/README.md` / `$CORE_REPO/libraries/OpenPLC_Ports/README.zh-CN.md`、`$CORE_REPO/libraries/OpenPLC_SDRAM/README.md` / `$CORE_REPO/libraries/OpenPLC_SDRAM/README.zh-CN.md` |
+| 现有几份 | `$TOOL/README.md` / `$TOOL/README.zh-CN.md`、`$PORTTOOL/TestCase/tools/make_delivery.py` 里的 `README_ZH` / `README_EN` 和 `START_CMD`、`$CORE_REPO/libraries/OpenPLC_Ports/README.md` / `$CORE_REPO/libraries/OpenPLC_Ports/README.zh-CN.md`、`$CORE_REPO/libraries/OpenPLC_SDRAM/README.md` / `$CORE_REPO/libraries/OpenPLC_SDRAM/README.zh-CN.md` |
 
 ⚠️ 两版之间没有自动检查，改一版要同时改另一版。
+
+## 76 · PortTool 从 `IAPTranfer_Tool` 拆成自己的仓库
+
+用户 2026-09-30 定。
+
+**决定**：PortTool（给硬件工程师的端口测试面板）搬出 `$TOOL`，单独成 `OpenPLC_PortsTestingTool` 仓库（`$PORTTOOL`）；`$TOOL` 只留 IAPTool（给客户的烧写工具）、bootloader 的构建和烧写、以及它们的测试资产。
+
+**理由**：两个工具做的是两件事、给不同的人用；两边唯一共用的是串口层 `internal/serialx`，除此之外没有任何代码复用。
+
+| 东西 | 去哪 |
+|---|---|
+| PortTool 的 Go 代码、`internal/calarea`、它的主机侧测试、`plans/`、交付打包（`delivery.cmd`、`make_delivery.py`）、工装那一半的构建菜单 | `$PORTTOOL` |
+| `internal/serialx` | 两边各一份，P2 逐字节比对（见 [ARCHITECTURE.md](../repo/ARCHITECTURE.md)「跨仓镜像的代码」第 14 条） |
+| `build_image.py`（bootloader 和工装镜像都由它编）、`flash_bootloader.py`、`selfcheck.py`、`config/machine.py` | 留在 `$TOOL`；`$PORTTOOL` 的脚本经 `$TOOL` 的 `common.py` 拿本机路径，自检入口仍只有 `$TOOL` 的 `selfcheck` 一个 |
+| 工装固件（`porttool.c`、`PORTTOOL_ENABLE`） | 不动，仍在 `$BOOT` |
+
+**什么情况下重开**：两边出现了 `serialx` 以外的真实代码复用。

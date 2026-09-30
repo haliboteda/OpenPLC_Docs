@@ -19,12 +19,12 @@ Blocked by: -
 
 | # | 路 | 出处 | 条数 | 今天 |
 |---|---|---|---|---|
-| 1 | 页面的静态 HTML | `$TOOL/internal/ptpanel/web/index.html` 1–387 行 | 55 行含中文 | 中文 |
+| 1 | 页面的静态 HTML | `$PORTTOOL/internal/ptpanel/web/index.html` 1–387 行 | 55 行含中文 | 中文 |
 | 2 | 页面脚本里的字面量和词表 | 同一文件，17 张词表：`CHAN_NAME` :749、`PORT_NAME` :753、`PORT_WIRING` :856、`CASE_TEXT` :887、`SESSION_WHAT` :1135、`PORT_LABEL` :1152、`PARAM_CN` :1170、`VALUE_CN` :1183、`FIELD_CN` :1202、`TARGET_CN` :1249、`VALUE_HELP` :1285、`PARAM_HELP` :1335、`STEPTYPE_CN` :1357、`PLANFIELD_CN` :1367、`EXECCOND_CN` :1385、`OP_CN` :1409、`BOARD_LABEL` :1456；判据句由 `checkCN` :1420 / `failCN` :1435 在页面拼 | 830 个含中文的字面量（1、2 合计 861） | 中文 |
-| 3 | Go 回的 `error` 字段 | `writeErr`（`$TOOL/internal/ptpanel/panel.go:141`）及直接写 `"error"` 的四处（`hold.go:86,90,237,255`）；页面用 `showMessage(j.error)` 显示（`index.html:657` 等） | 3、4、5 合计 70 | 中文 |
+| 3 | Go 回的 `error` 字段 | `writeErr`（`$PORTTOOL/internal/ptpanel/panel.go:141`）及直接写 `"error"` 的四处（`hold.go:86,90,237,255`）；页面用 `showMessage(j.error)` 显示（`index.html:657` 等） | 3、4、5 合计 70 | 中文 |
 | 4 | Go 回的 `why` 字段 | `judge.go:294`，页面存进 `judgeWhy`（`index.html:1512`） | 同上 | 中文 |
 | 5 | Go 推进日志窗的上位机自述 | `s.emit`（`link.go:374`）经 SSE 进 `addLog`（`index.html:670`）；`hold.go`、`runlog.go` 的 `[持续]` / `[故障]` 行 | 同上 | 中文 |
-| 6 | 模拟板在串口列表里的名字 | `simboard.Label`（`$TOOL/internal/simboard/simboard.go:32`），经 `panel.go:170,177` 送出；同文件另有 3 句启动失败的错误 | 4 | 中文 |
+| 6 | 模拟板在串口列表里的名字 | `simboard.Label`（`$PORTTOOL/internal/simboard/simboard.go:32`），经 `panel.go:170,177` 送出；同文件另有 3 句启动失败的错误 | 4 | 中文 |
 | 7 | 不含中文、但会上屏的字 | 拼进中文句子的 `err.Error()`（`internal/ptpanel` 非测试文件 17 处）；板子 `pt.caps` 报的端口 / 参数名（页面按路 2 的词表转）；Windows 给的串口描述（原样） | — | 英文或原样 |
 
 **今天已经和决策 11「日志文件英文」对不上的两处**：

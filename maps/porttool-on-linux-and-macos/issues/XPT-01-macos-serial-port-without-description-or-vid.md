@@ -7,7 +7,7 @@ Blocked by: -
 
 ## Question
 
-macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只有名字（`$TOOL/internal/serialx/enum_basic.go:1–13`；上游 `go.bug.st/serial@v1.6.2/enumerator/doc.go:13`）。后果：面板上认不出哪个口是哪个转接器；`porttool answer --usb` 按 ST 的 VID 找板子 USB 口（`$TOOL/cmd/porttool/answer.go:30,91`）在 macOS 上找不到。
+macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只有名字（`$TOOL/internal/serialx/enum_basic.go:1–13`；上游 `go.bug.st/serial@v1.6.2/enumerator/doc.go:13`）。后果：面板上认不出哪个口是哪个转接器；`porttool answer --usb` 按 ST 的 VID 找板子 USB 口（`$PORTTOOL/cmd/porttool/answer.go:30,91`）在 macOS 上找不到。
 
 | 选项 | 代价 | 风险 |
 |---|---|---|
@@ -21,7 +21,7 @@ macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只�
 
 ## Answer
 
-2026-09-30 定：**选 B** —— macOS 上调系统自带的 `ioreg` 读 VID / PID / 产品名 / 序列号，按口名并进 `serialx.List` 的结果；不开 cgo，一次生成照旧。理由：板子的 USB 口靠 `0483:5740` 认（`$TOOL/internal/ptecho/cdc.go:10–26`），而且不只 `porttool answer --usb`，方案里的 USB 那一路也靠它（`$TOOL/internal/ptseq/peer.go:132`）；只有口名的话 Mac 上 USB 那一路测不了，达不到本图终点。
+2026-09-30 定：**选 B** —— macOS 上调系统自带的 `ioreg` 读 VID / PID / 产品名 / 序列号，按口名并进 `serialx.List` 的结果；不开 cgo，一次生成照旧。理由：板子的 USB 口靠 `0483:5740` 认（`$PORTTOOL/internal/ptecho/cdc.go:10–26`），而且不只 `porttool answer --usb`，方案里的 USB 那一路也靠它（`$PORTTOOL/internal/ptseq/peer.go:132`）；只有口名的话 Mac 上 USB 那一路测不了，达不到本图终点。
 
 - 解析 `ioreg -r -c IOUSBHostDevice -l -w 0` 的文本输出：每个 USB 设备节点取 `idVendor` / `idProduct`（十进制，转成四位大写十六进制，与 Windows / Linux 一致）、`USB Product Name`、`USB Serial Number`，挂到它子树里的 `IOCalloutDevice` / `IODialinDevice` 上
 - `ioreg` 跑不了或解析不出东西时退回只有口名，不报错 —— 列口不能因为描述拿不到而失败

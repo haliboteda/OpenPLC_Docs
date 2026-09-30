@@ -9,8 +9,8 @@ Blocked by: LANG-01
 
 用户已定「日志、报告文件保持英文」。可是日志窗今天是两种东西混排：板子的协议原文（不译），和上位机自己说的话（`[持续]` / `[故障]` 行，中文）。而且有两处今天就把中文写进了文件（见 [面板上的字从哪几条路到页面上](LANG-01-which-paths-bring-text-to-the-panel.md)）：
 
-- 持续测试日志的文件头：`$TOOL/internal/ptpanel/runlog.go:91` 的 `# duration`、`:158` 的 `# stopped (…)`
-- 「导出」存的 `.txt`（`$TOOL/internal/ptpanel/web/index.html:518–531`），里面夹着上位机的中文行
+- 持续测试日志的文件头：`$PORTTOOL/internal/ptpanel/runlog.go:91` 的 `# duration`、`:158` 的 `# stopped (…)`
+- 「导出」存的 `.txt`（`$PORTTOOL/internal/ptpanel/web/index.html:518–531`），里面夹着上位机的中文行
 
 要定：
 

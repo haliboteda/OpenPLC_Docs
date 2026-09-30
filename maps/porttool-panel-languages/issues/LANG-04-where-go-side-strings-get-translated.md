@@ -29,7 +29,7 @@ Blocked by: LANG-01, LANG-03
 | `why`：只有 1 处，参数是方案名和端口名 | `judge.go:294–296` |
 | 日志窗行：panel.go 3、hold.go 6、link.go 7（都带 `[link …]` 前缀）、runlog.go 4 | `link.go:374` 汇总 |
 | 拼进中文句子的 `err`：**12 处**（不是 [LANG-01](LANG-01-which-paths-bring-text-to-the-panel.md) 写的 17 处；`internal/ptpanel` 里 `err.Error()` 共 31 处，其余不进句子）。来源：串口库 / `net` 5、`os` 3、自家代码 3、`os/exec` 1 | `panel.go:148,337,420,439`、`hold.go:255`、`judge.go:364`、`link.go:147,163,240`、`runlog.go:69,77`、`simboard.go:155` |
-| **模拟板的中文报错今天会打到 CLI 的 stderr**：`porttool run --port sim` 失败时 `run.go:152` 用 `%v` 把它拼进英文句子 —— 已违反决策 11「控制台英文」 | `simboard.go:109–111,155`；`$TOOL/cmd/porttool/run.go:147,152` |
+| **模拟板的中文报错今天会打到 CLI 的 stderr**：`porttool run --port sim` 失败时 `run.go:152` 用 `%v` 把它拼进英文句子 —— 已违反决策 11「控制台英文」 | `simboard.go:109–111,155`；`$PORTTOOL/cmd/porttool/run.go:147,152` |
 | `simboard.Label` 只进面板的端口列表，CLI 不打印 | `panel.go:170,177`；`porttool ports` 打的是 `serialx` 自己的 Label（`main.go:80–92`） |
 | 先例：判据句由 Go 回结构化的 `check`（`field` / `op` / `min` / `max` / `value` / `unit`），`what` / `why` 保持英文给 CLI 和 CSV，页面 `checkCN` / `failCN` 自己拼中文 | `judge.go:311–323`；`index.html:1420,1435` |
 

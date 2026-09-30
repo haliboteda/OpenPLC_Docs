@@ -34,31 +34,31 @@
 | 2 | `IAPTranfer_Tool/TestCase/host/fakeboard/fake_board.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `IAPTranfer_Tool/TestCase/host/fakeboard/run_cases.py` | 16 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `IAPTranfer_Tool/TestCase/host/iapcert/iapcert_test.go` | 38 | 1 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/build.py` | 239 | 20 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/sim_main.c` | 85 | 8 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/analog_stub.c` | 33 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/can_stub.c` | 15 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/dout_stub.c` | 20 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/entries_stub.c` | 59 | 12 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/hal_stub.c` | 30 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/knx_stub.c` | 15 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/lwip_fake.h` | 26 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/lwip_stub.c` | 19 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/rs485_stub.c` | 19 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/usb_device.h` | 4 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/usb_stub.c` | 13 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/usbd_cdc_if.h` | 3 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/stubs/usbd_def.h` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/harness/test_main.c` | 240 | 25 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/ptboard_test.go` | 22 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/pthold_test.go` | 39 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/ptpanel_test.go` | 57 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_caps/ptproto_test.go` | 49 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_panel/naive.py` | 72 | 8 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_panel/run.py` | 274 | 26 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_plan/fake_board_test.go` | 15 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_plan/panel_plan_test.go` | 35 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/porttool_plan/plan_test.go` | 124 | 13 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/build.py` | 239 | 20 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/sim_main.c` | 85 | 8 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/analog_stub.c` | 33 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/can_stub.c` | 15 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/dout_stub.c` | 20 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/entries_stub.c` | 59 | 12 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/hal_stub.c` | 30 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/knx_stub.c` | 15 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip_fake.h` | 26 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip_stub.c` | 19 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/rs485_stub.c` | 19 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usb_device.h` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usb_stub.c` | 13 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usbd_cdc_if.h` | 3 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usbd_def.h` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/test_main.c` | 240 | 25 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/ptboard_test.go` | 22 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/pthold_test.go` | 39 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/ptpanel_test.go` | 57 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/ptproto_test.go` | 49 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_panel/naive.py` | 72 | 8 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_panel/run.py` | 274 | 26 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/fake_board_test.go` | 15 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/panel_plan_test.go` | 35 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/plan_test.go` | 124 | 13 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/host/variant_check/build.py` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/build_image.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/can_watch.py` | 1 | 0 | **0 段，查过没有可搬的** |
@@ -76,8 +76,8 @@
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/init_machine.py` | 76 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/inject_owner_record.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/install_tool.py` | 1 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/make_delivery.py` | 13 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/md2html.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/tools/make_delivery.py` | 13 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_PortsTestingTool/TestCase/tools/md2html.py` | 4 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/rs485_echo.py` | 4 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/run_au1.py` | 21 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/run_m5.py` | 8 | 0 | **0 段，查过没有可搬的** |
@@ -91,34 +91,34 @@
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/test_init_machine.py` | 17 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/TestCase/tools/upload_and_watch.py` | 4 | 0 | **0 段，查过没有可搬的** |
 | 2 | `IAPTranfer_Tool/iapcert/iapcert.go` | 66 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 3–5 | `IAPTranfer_Tool/internal/ptboard/board.go` | 75 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptcal/ptcal.go` | 58 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptcal/ptcal_test.go` | 24 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptcheck/ptcheck.go` | 36 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptecho/cdc.go` | 8 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptecho/ptecho.go` | 46 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/hold.go` | 52 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/judge.go` | 95 | 11 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/link.go` | 75 | 4 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/link_test.go` | 30 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/net.go` | 35 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/net_test.go` | 16 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/panel.go` | 128 | 13 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/plan.go` | 52 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/remember.go` | 29 | 4 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptpanel/runlog.go` | 27 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptplan/ptplan.go` | 106 | 7 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptproto/caps.go` | 79 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptproto/proto.go` | 50 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptreport/ptreport.go` | 31 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptseq/peer.go` | 68 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/ptseq/ptseq.go` | 112 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptboard/board.go` | 75 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptcal/ptcal.go` | 58 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptcal/ptcal_test.go` | 24 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptcheck/ptcheck.go` | 36 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptecho/cdc.go` | 8 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptecho/ptecho.go` | 46 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/hold.go` | 52 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/judge.go` | 95 | 11 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/link.go` | 75 | 4 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/link_test.go` | 30 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/net.go` | 35 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/net_test.go` | 16 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/panel.go` | 128 | 13 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/plan.go` | 52 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/remember.go` | 29 | 4 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptpanel/runlog.go` | 27 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptplan/ptplan.go` | 106 | 7 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptproto/caps.go` | 79 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptproto/proto.go` | 50 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptreport/ptreport.go` | 31 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptseq/peer.go` | 68 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/ptseq/ptseq.go` | 112 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/internal/serialx/enum_basic.go` | 7 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/internal/serialx/enum_detailed.go` | 5 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `IAPTranfer_Tool/internal/serialx/serialx.go` | 47 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/internal/serialx/steady_test.go` | 10 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/simboard/simboard.go` | 36 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/internal/simboard/simboard_test.go` | 12 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/simboard/simboard.go` | 36 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `OpenPLC_PortsTestingTool/internal/simboard/simboard_test.go` | 12 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `open_plc_arduino/libraries/OpenPLC_IAP/src/OpenPLC_IAP_Autostart.h` | 11 | 0 | **0 段，查过没有可搬的** |
 | 2 | `open_plc_arduino/libraries/OpenPLC_IAP/src/fw_pubkey.c` | 4 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `open_plc_arduino/libraries/OpenPLC_IAP/src/fw_pubkey.h` | 8 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |

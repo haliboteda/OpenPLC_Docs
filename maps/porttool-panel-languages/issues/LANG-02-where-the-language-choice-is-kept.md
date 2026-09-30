@@ -11,7 +11,7 @@ Blocked by: -
 
 | 选项 | 代价 | 风险 |
 |---|---|---|
-| A. 加进现有的 `porttool_ports.json`（`$TOOL/internal/ptpanel/remember.go:38`），多一个 `lang` 字段 | 少一个文件 | 这个文件名说的是「哪个 COM 是哪个」；而且它刻意不和别的设置混（`remember.go:19–21` 的注释） |
+| A. 加进现有的 `porttool_ports.json`（`$PORTTOOL/internal/ptpanel/remember.go:38`），多一个 `lang` 字段 | 少一个文件 | 这个文件名说的是「哪个 COM 是哪个」；而且它刻意不和别的设置混（`remember.go:19–21` 的注释） |
 | B. 新开一个 `porttool_settings.json`，只放面板偏好 | 多一个文件、多一份读写代码 | 以后别的偏好也往里放，要守住「只放面板偏好」 |
 | C. 其他 | — | — |
 

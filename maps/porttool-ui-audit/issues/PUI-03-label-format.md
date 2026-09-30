@@ -11,7 +11,7 @@ Blocked by: -
 
 起因是用户的原话：**「上回我想开启 DO3 并且设置 pwm，但是在上位机上我完全不知道怎么弄，对应不上。」**
 
-现在的行为（`$TOOL/internal/ptproto/caps.go:185`）：**只显示端子号**。`dout` 第 3 路印的是 `A05`，而用户找的是 "DO3"。`TerminalLabels()` 推不出来时返回 nil，面板退回显示通道号 —— 设计上刻意不编造，这一点是对的。
+现在的行为（`$PORTTOOL/internal/ptproto/caps.go:185`）：**只显示端子号**。`dout` 第 3 路印的是 `A05`，而用户找的是 "DO3"。`TerminalLabels()` 推不出来时返回 nil，面板退回显示通道号 —— 设计上刻意不编造，这一点是对的。
 
 ## 要定的几件事
 
@@ -51,7 +51,7 @@ Blocked by: -
 
 ### 这条决定的两个连带后果
 
-1. **`term=` 不再是标签的来源。** `TerminalLabels()`（`$TOOL/internal/ptproto/caps.go:185`）现在从 `term=` 推标签，改完之后它不再喂给格子。端子号是否还要在 caps 里保留（给报告、给判据用），单独定。
+1. **`term=` 不再是标签的来源。** `TerminalLabels()`（`$PORTTOOL/internal/ptproto/caps.go:185`）现在从 `term=` 推标签，改完之后它不再喂给格子。端子号是否还要在 caps 里保留（给报告、给判据用），单独定。
 2. **RS485 那处端子号错误不再会误导面板用户**，但数据本身仍然是错的。优先级从「会坑人」降到「数据错」—— 见 `02-firmware-term-vs-hardware.md`。
 
 ### 还没定（本 ticket 未闭合的部分）
@@ -90,7 +90,7 @@ Blocked by: -
 
 ### 连带后果
 
-1. `TerminalLabels()`（`$TOOL/internal/ptproto/caps.go:185`）不再喂给格子。端子号是否仍保留在 caps 里（报告、判据用）单独定。
+1. `TerminalLabels()`（`$PORTTOOL/internal/ptproto/caps.go:185`）不再喂给格子。端子号是否仍保留在 caps 里（报告、判据用）单独定。
 2. RS485 的端子号错误不再出现在屏幕上 —— 从「会让人接错线」降级为「caps 里的错数据」。仍要改。
 3. 固件的 `terms=` 字段已能显式给标签（`relay` 在用），改它即可，**不必新增字段**。
 

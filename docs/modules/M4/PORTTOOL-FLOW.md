@@ -2,7 +2,7 @@
 
 **总分两部分。** [A 部分](#a-总--上位机怎么控制板子)讲**上位机和板子之间的完整契约**：控制什么、怎么控制、如何响应、响应什么 —— 只看这一部分就够写上位机。[B 部分](#b-分--每个端口怎么测)讲**每一个端口具体怎么测**：怎么接、敲什么、看到什么算过、哪些坑会让判据静默失效。[C 部分](#c-附--镜像开关物理连接用法)是环境与前提。
 
-代码在 `TestCase/porttool/`（固件侧）和 `$TOOL` 的 `internal/pt*` + `cmd/porttool`（上位机侧）。形态与分发方式见 [C.4](#c4-上位机怎么分发怎么起来)。**待办不在本文** —— 见 `$PROD/work/TODO.md` 和 `$PROD/maps/INDEX.md`。
+代码在 `TestCase/porttool/`（固件侧）和 `$PORTTOOL` 的 `internal/pt*` + `cmd/porttool`（上位机侧）。形态与分发方式见 [C.4](#c4-上位机怎么分发怎么起来)。**待办不在本文** —— 见 `$PROD/work/TODO.md` 和 `$PROD/maps/INDEX.md`。
 
 > 本文描述固件 **`0.5.0`** 的现状。取舍理由在 [DECISIONS.md 第 9–15 条](../../tables/DECISIONS.md)。⚠️ **原来这里指着 C.5「还没做的 — 三期计划」，那一节 2026-09-15 已删** —— 还没做的现在在 `$PROD/work/TODO.md` 和各张图里。
 引脚事实以 [HARDWARE-FACTS.md](../../hardware/HARDWARE-FACTS.md) 为准，本文不重复推导，只引用结论。
@@ -654,7 +654,7 @@ flowchart LR
 
 **一个 exe，两种模式。**2026-09-04 拍板，见 [DECISIONS.md 第 7、8 条](../../tables/DECISIONS.md)。
 
-> **和 IAPTool 的关系**（2026-09-07 定）：两者住在 `$TOOL` 同一个 Go module 里，共享 `internal/`（serialx 的开口与重试 · logx · config · buildinfo），`compile_tool.sh` 一次产出 **`IAPTool.exe` 和 `PortTool.exe` 两个文件**。
+> **和 IAPTool 的关系**（2026-09-30 定，[DECISIONS.md 第 76 条](../../tables/DECISIONS.md)）：两个工具各住一个仓库（`$TOOL` / `$PORTTOOL`），唯一共用的串口层 `internal/serialx` 两边各一份、逐字节相同，由 P2 查。
 >
 > 这不和上面那句冲突 —— 「一个 exe 两种模式」说的是 **PortTool 自己**既是面板又是 CLI，不是说这两个工具要合成一个。受众不同：硬件工程师的工具里不该出现固件签名和 `takeown`。
 >

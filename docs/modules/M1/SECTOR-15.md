@@ -70,7 +70,7 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 
 其余字节保持 `0xFF`。
 
-**系数的含义**：`实测 ≈ gain × 板子的标称值 + offset`，和工装的拟合同一个方向（`$TOOL/internal/ptcal`）。单位：AI1 是 mV，AI2、AO1、AO2 是 mA。
+**系数的含义**：`实测 ≈ gain × 板子的标称值 + offset`，和工装的拟合同一个方向（`$PORTTOOL/internal/ptcal`）。单位：AI1 是 mV，AI2、AO1、AO2 是 mA。
 输入直接套这条式子；输出要反过来算：要出目标值，写给硬件的是 `(目标 − offset) / gain`。
 
 | 读到的情况 | 判为 | app 怎么做 |

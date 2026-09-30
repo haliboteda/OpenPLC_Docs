@@ -7,7 +7,7 @@ Blocked by: LANG-03
 
 ## Question
 
-换到英文 / 德文界面后，页面上的数字、日期、单位写法要不要跟着变（德文小数逗号 `3,3`、千分位 `1.000`；日期顺序）。今天页面里 `toFixed` / `toLocaleString` 共 16 处（`$TOOL/internal/ptpanel/web/index.html`，如 :1954 的 `cycles.toLocaleString()`），`toLocaleString` 跟的是浏览器语言，不是面板选的语言。
+换到英文 / 德文界面后，页面上的数字、日期、单位写法要不要跟着变（德文小数逗号 `3,3`、千分位 `1.000`；日期顺序）。今天页面里 `toFixed` / `toLocaleString` 共 16 处（`$PORTTOOL/internal/ptpanel/web/index.html`，如 :1954 的 `cycles.toLocaleString()`），`toLocaleString` 跟的是浏览器语言，不是面板选的语言。
 
 | 选项 | 代价 | 风险 |
 |---|---|---|

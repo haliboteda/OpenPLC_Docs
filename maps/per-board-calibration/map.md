@@ -15,7 +15,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **这张图带执行**：票定完就写代码；先文档再代码，只做必要的
 - 已定的前提：[决策 61](../../docs/tables/DECISIONS.md)（校准值区在扇区 15 最前 8 KiB）、[决策 70](../../docs/tables/DECISIONS.md)（每块板都校准、整条链路、指标可改）
 - **「修正值」和文档里的「校准值」是同一个东西**，见 [GLOSSARY.md](../../GLOSSARY.md)
-- 工装那边已有的：多点测量和直线拟合（`$TOOL/internal/ptcal`），结果只显示、不写板子
+- 工装那边已有的：多点测量和直线拟合（`$PORTTOOL/internal/ptcal`），结果只显示、不写板子
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
 ## 全集
