@@ -25,11 +25,11 @@
 | `T2-01`–`T2-27` | 测试用例 | 27 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-06` | 测试用例 | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-03` | 测试用例 | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
-| `P1`–`P5` `P7`–`P18` | 静态检查（不碰硬件，看源码和文档） | 17 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
+| `P1`–`P5` `P7`–`P19` | 静态检查（不碰硬件，看源码和文档） | 18 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–71 73 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 70 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–74 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 72 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
@@ -45,9 +45,9 @@
 | `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
 | `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
-| `ROOT-01`–`ROOT-04` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 4 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
-| `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
+| `ROOT-01`–`ROOT-06` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 6 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
+| `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
 
 <!-- END generated -->
 

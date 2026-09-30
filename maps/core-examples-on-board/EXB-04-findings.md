@@ -76,7 +76,7 @@
 | 和 app、bootloader 区重不重叠 | 不重叠：bootloader `0x08000000`–`0x0801FFFF`，app `0x08020000`–`0x081DFFFF`（BOOTLOADER-PROJECT-LAYOUT.md:34-35）。**问题只在扇区 15** |
 | 能不能挪到别的扇区 | 现在没有空扇区：app 区一直到 `0x081E0000`，bank 2 sector 6（`0x081C0000`）已被 KNX 协议栈 NVM 占用（`libraries/OpenPLC_KNX/src/knx_nvm.cpp:13`） |
 
-所以 EEPROM 库在本板上**没有安全的落点**。可选做法：
+所以 EEPROM 库在本板上**没有安全的落点**。✅ **2026-09-30 用户定：整库删除**，见 [EXB-09](issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)。当时的可选做法：
 
 | 做法 | 代价 | 风险 |
 |---|---|---|

@@ -33,7 +33,14 @@
 |---|---|---|
 | bootloader | `0x08000000`–`0x0801FFFF`（sector 0，128K） | 本工程 |
 | application | `0x08020000` 起，上限 `0x081E0000` | 1,835,008 B |
+| └ KNX 数据（只在程序链接了 `OpenPLC_KNX` 时） | `0x081C0000`（bank2 sector 6，app 区最后一个扇区） | 协议栈 4 KiB + 应用配置，布局见 `$CORE_REPO/libraries/OpenPLC_KNX/src/knx_config.h`。这种程序上限因此是 1,703,936 B（1664 KiB），构建时由 `$CORE_REPO/system/extras/postbuild.sh` 检查 |
 | bootloader 状态 | `0x081E0000`（bank2 sector 7，128K） | 前 8K 校准值 + 后 120K metadata（append，548 条） |
+
+**板卡包给 app 的链接上限就是 `upload.maximum_size`（1,835,008 B，等于 bootloader 的 `IAP_APP_MAX_SIZE`）**：`variants/STM32H7xx/H743/ldscript.ld` 的 `FLASH` 长度直接用 `LD_MAX_SIZE`，不再减 `LD_FLASH_OFFSET`，因为 `platform.txt` 传进来的已经是 app 上限。2026-09-30 之前多减了一次，只给了 1,703,936 B，用户同日定改正。
+
+**扇区 15 只有 bootloader 能写**：app 擦它就会带走校准值和 metadata。core 里有代码写它时 `P19` 报错（`$TOOL/TestCase/tools/check_no_sector15_writes.py`）。
+
+**本板不提供模拟 EEPROM**：板上没有 EEPROM 芯片（`$HW/Production/Bridge/1436_01_SCHAE-BR.xlsx`），上游 `EEPROM` 库用内部 flash 模拟、默认落在扇区 15，所以整库删除（[EXB-09](../../maps/core-examples-on-board/issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)）。要存用户数据用 SD 卡。 从上游同步 core 时不要把这个库带回来，`P19` 会报红。
 
 ⚠️ **`RESERVED_TAIL_SECTORS`（`Core/Inc/usbd_cdc_flash.h`）当前值 1 是对的，别动。** 三处地址守卫都锚在 `IAP_STATE_SECTOR_ADDR` 上，一个都不看这个常量 —— 改它保护不了任何东西，只会静默弄坏 reclaim，而且不会编译报错。
 

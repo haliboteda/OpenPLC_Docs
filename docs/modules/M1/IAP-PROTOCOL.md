@@ -1,5 +1,7 @@
 # IAP 协议 · bootloader 和 app 在线上认哪些命令
 
+> ⚠️ **`takeown` / `getpubkey` / `flashboot` 三行按[决策 72](../../tables/DECISIONS.md) 写的是目标设计，代码尚未实施**，见 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。其余各行以代码为准。
+
 **这份是命令一览。** 每条命令的格式、要不要认证、会回什么。
 为什么是这个形状，各自的专门文档里写着，这里只给指针。
 
@@ -27,16 +29,16 @@ app 在 core 的 [`udp_server.c`](../../../../open_plc_arduino/libraries/OpenPLC
 | `ping` | 无 | `OK` |
 | `info` | 无 | bootloader 版本串 |
 | `getuid` | 无 | 机器 ID（十六进制） |
-| `getpubkey` | 无 | 板子**当前信任的根**公钥，128 个十六进制字符 |
+| `getpubkey` | 无 | 板子**当前信任的根**公钥，128 个十六进制字符；**没有根时回 `none`**（实施时定具体字样）。IAPTool 靠它判断要不要自动认领 |
 | `getowner` | 无 | 当前 owner 记录的 generation，未认领为 `0` |
 | `getapprevoked` | 无 | `yes` / `no` / `none` —— 签装着那个 app 的叶有没有被撤销；`none` 是没有可启动的 app |
 | `authchallenge` | 无 | 一个 nonce（32 个十六进制字符）；RNG 失败回 `ERR`。见 [CHALLENGE-AUTH.md](CHALLENGE-AUTH.md) |
-| `takeown <公钥hex>` | **物理在场**（开机时按住 BOOT0） | `OK` / `Refused` / `Bad key`。只用于第一次认领 |
+| `takeown <公钥hex>` | **不设门**（决策 72），USB 或网口都行；**只在板子没有根时接受** | `OK` / `Refused` / `Bad key`。只用于第一次认领，IDE 上传时由 IAPTool 自动发 |
 | `setowner <gen> <新公钥hex> <签名hex>` | 当前主人的签名 | `OK` / `Refused` / `Bad args` / `Bad length` / `Bad hex` |
 | `setownerwipe <gen> <新公钥hex> <签名hex>` | 同上 | 成功时板子复位、**不回话**；回 `Refused` 说明什么都没擦 |
 | `revoke <叶公钥前 16 字节hex> <签名hex>` | 当前主人的签名 | `OK` / `OK already revoked` / `Refused` / `Bad …` |
 | `flash <size> <crc32hex> <镜像签名hex> <证书hex> <nonce签名hex>` | 叶证书 + 挑战应答 | 见下一节 |
-| `flashboot …` | 同 `flash` 的字段；镜像签名用 **owner 根**验，未认领时要物理在场 | 见 [FLASHBOOT.md](FLASHBOOT.md) |
+| `flashboot …` | 同 `flash` 的字段；镜像签名用 **owner 根**验，**没有根时拒绝** | 见 [FLASHBOOT.md](FLASHBOOT.md) |
 | 其他 | — | `Unknown command` |
 
 签名覆盖哪些字节、证书格式：见 [M2 归属与信任](../M2-ownership.md) 和 [CHALLENGE-AUTH.md](CHALLENGE-AUTH.md)。

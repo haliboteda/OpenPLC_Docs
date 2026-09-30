@@ -3,11 +3,13 @@
 Type: grilling
 Opened: 2026-09-30
 Status: open
-Blocked by: ROOT-01
+Blocked by: ROOT-01, ROOT-05
 
 ## Question
 
 按住 BOOT0 十秒恢复出厂后，现在板子退回编进去的公开根；把根编进 bootloader 的用户退回的是他自己的根。根挪出 bootloader 之后，恢复出厂退回公开根、退回用户第一次写入的根，还是退回别处（如 OTP）存的根；丢了私钥的用户怎么救回板子。
+
+**2026-09-30 [决策 72](../../../docs/tables/DECISIONS.md) 之后**：出厂不写任何根，公开根和内置根都取消。照这条，恢复出厂就是回到「没有根」，下次上传自动重新认领；本票只剩确认这一点后关掉。
 
 ## 怎么算答完
 

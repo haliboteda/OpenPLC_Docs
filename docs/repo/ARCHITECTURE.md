@@ -88,7 +88,7 @@
 | 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
 | 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | P2 比两个函数的**规范化正文**（2026-09-22 补上，此前完全没查）。⚠️ 不比整个文件 —— `#include` 两边本来就不同（`main.h` / `Arduino.h`） |
 | 7 | 证书线格式（128 字节，签名覆盖前 64） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |
-| 8 | owner 记录格式（v3，签名前缀 88） | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
+| 8 | owner 记录格式（v4，签名前缀 88）。⚠️ [决策 72](../tables/DECISIONS.md) 实施时根区地址从 `0x0801E000` 改到 `0x081E2000`（[SECTOR-15.md](../modules/M1/SECTOR-15.md)），P2 要加查这个地址 | bootloader `IAPServer/owner_slot.h`<br>core `libraries/OpenPLC_IAP/src/owner_root_ro.c`<br>tool `owner.go` | P2（版本 + 签名前缀两项） |
 | 9 | **RTC 备份寄存器的分配** | bootloader `IAPServer/iap_auth.c`<br>core `libraries/OpenPLC_IAP/src/iap_auth.c`<br>分配表见下 —— **认领任何一个之前先看这里** | 🟡 **只查一半**：P2 只扫两个 `iap_auth.c`，不扫 core 的 `backup.h` 和 HID indices |
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
 | 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同（core 那份转调 `OpenPLC_Net` 的 `openplc_rng_words()`，决议 67） |
@@ -102,6 +102,16 @@
 > ⚠️ **第 11、12 条 2026-09-22 新增**，决定见 [DECISIONS.md 第 65 条](../tables/DECISIONS.md)。
 > 它们**没有**推翻上面的规矩 3：两个仓各自仍是一个真实文件，没有 submodule、没有生成拷贝，
 > 同步照旧按规矩 1、2 手工做 —— 变的只是忘了同步会当场报错。
+
+### 备份 SRAM 分配表
+
+备份 SRAM（`0x38800000`，4 KiB）和备份寄存器一样跨 bootloader / app 存在，同样没有分配器。
+
+| 范围 | 谁用 | 做什么 |
+|---|---|---|
+| 整块 4 KiB | **bootloader**（[决策 72](../tables/DECISIONS.md) 实施后） | 扇区 15 回收期间暂存根区和最后一条 metadata，回收完清掉（[SECTOR-15.md](../modules/M1/SECTOR-15.md)「回收的六步」） |
+
+**app / core 不得写备份 SRAM。** core 的 `cores/arduino/stm32/backup.h` 只有通用接口，今天没有调用者。
 
 ### RTC 备份寄存器分配表
 

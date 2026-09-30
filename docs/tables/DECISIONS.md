@@ -2658,6 +2658,30 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 
 ---
 
+## 72 · 出厂不写任何根，第一次上传时自动认领
+
+用户 2026-09-30 定。
+
+| 事 | 定案 |
+|---|---|
+| 出厂 | 只烧 bootloader 和校准值，**不写任何根**。公开根和编在 bootloader 里的 `fw_public_key` 一起取消 |
+| 第一次上传 | IAPTool 发现板子没有根，就在本机生成密钥对（已有就复用），把公钥写进板子完成认领，再签名上传。**USB 或网口都可以，不用按 BOOT0** |
+| 之后 | 换根 / 换主照旧用 `setowner`，不限次数，不改也不重写 bootloader |
+| 恢复出厂 | 仍是长按 BOOT0 超过 10 秒，回到「没有根」，下次上传再自动认领 |
+| 私钥放哪 | 本机一个固定的默认位置，不在板卡包目录里；IAPTool 生成时和读取时都把这个路径告诉用户 |
+| 换电脑 | 用户自己把根私钥拷到新电脑的默认位置 |
+| 多人合用 | 用现有的证书机制：根持有者给同事签发叶证书 |
+| 根区放哪 | 并进扇区 15（`0x081E2000` 起 8 KiB），擦扇区 15 时把根区暂存在备份 SRAM（[ROOT-05](../../maps/root-key-without-bootloader-reflash/issues/ROOT-05-where-the-built-in-root-lives-and-how-it-is-updated.md) 的方案 5） |
+| 工装 | 测试走 ST-Link，不经 bootloader，和根、证书无关 |
+
+**理由**：用户拿到板子不用按键、不用 ST-Link，也不用重编 bootloader 就能用上自己的根。
+
+**挡不住的**：在板子认领之前，同一网络里抢先连上它的人可以先认领；用户上传失败后长按 BOOT0 恢复出厂再来。今天没认领的板子信公开根，这个人本来就能往里传固件，所以不比今天弱。
+
+**什么情况下重开**：需要板子开箱就能跑某个固件（比如出厂自带演示程序）。
+
+---
+
 ## 73 · 工装的对端串口由用户选、记在本机；串口列表要显示芯片
 
 用户 2026-09-30 定。
@@ -2668,3 +2692,16 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 | 串口列表 | 每个口除了口名，还显示它是什么芯片 / 设备，Linux 上尤其要有 —— 只有 `ttyUSB0` 谁也认不出 |
 
 **理由**：口名随机器和插入顺序变，方案里写死的 `COM16` 在 Linux 上打不开，换台 Windows 也可能不对（[XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md) 的 Linux 实测）。
+
+---
+
+## 74 · PC 工具用 Go，驱动测试的脚本保持 Python
+
+用户 2026-09-30 定。
+
+| 部分 | 语言 |
+|---|---|
+| 发给用户的 `IAPTool`、`PortTool` | Go |
+| 驱动真板子的测试、静态检查、编译打包的脚本 | Python，不改写 |
+
+**理由**：用户拿到的程序已经不依赖 Python；`host/crypto_ref/` 这类测试要和 Go 代码互相独立，改写成 Go 就失去了裁判作用。
