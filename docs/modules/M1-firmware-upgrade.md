@@ -279,7 +279,7 @@ flowchart TD
 | **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ✅ |
 | **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（根区在扇区 15，`flashboot` 不碰它）；根区在扇区 15 回收时**压缩** | `T1-31` `T1-33` | ✅ |
 | **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
-| **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：用用户配置目录里的密钥（没有根的出厂板在 bootloader 里，第一次上传自动认领，见 [M2 归属与信任](M2-ownership.md)）；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` | ✅ |
+| **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：用用户配置目录里的密钥（没有根的出厂板在 bootloader 里，第一次上传自动认领，见 [M2 归属与信任](M2-ownership.md)）；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` `T1-35` | ✅ |
 
 **共 38 条。其中 30 条有测试用例直接测它，8 条没有。**
 
@@ -383,9 +383,10 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
-| `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领、用户目录里没有密钥 → 退出码 0，输出有 `signing with the PUBLISHED key`；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
+| `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
+| `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `go test . ./internal/...` | 主机侧，进 selfcheck | ✅ |
 
-**共 40 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 
 ✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
 bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，

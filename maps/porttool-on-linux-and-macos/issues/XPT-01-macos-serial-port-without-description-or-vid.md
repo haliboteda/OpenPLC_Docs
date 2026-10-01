@@ -7,7 +7,7 @@ Blocked by: -
 
 ## Question
 
-macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只有名字（`$TOOL/internal/serialx/enum_basic.go:1–13`；上游 `go.bug.st/serial@v1.6.2/enumerator/doc.go:13`）。后果：面板上认不出哪个口是哪个转接器；`porttool answer --usb` 按 ST 的 VID 找板子 USB 口（`$PORTTOOL/cmd/porttool/answer.go:30,91`）在 macOS 上找不到。
+macOS 版为了能从 Windows 一次交叉编译而不开 cgo，串口列表只有名字（`$TOOL/internal/serialx/enum_basic.go:1–13`；上游 `go.bug.st/serial@v1.6.2/enumerator/doc.go:13`）。后果：面板上认不出哪个口是哪个转接器；`ptecho.FindCDC`（原 `porttool answer --usb`，2026-10-01 删） 按 ST 的 VID 找板子 USB 口（`$PORTTOOL/internal/ptecho/cdc.go:29`）在 macOS 上找不到。
 
 | 选项 | 代价 | 风险 |
 |---|---|---|

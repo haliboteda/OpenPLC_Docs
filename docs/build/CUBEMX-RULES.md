@@ -40,7 +40,7 @@ stm32cubeidec.exe … -D PORTTOOL_ENABLE=1 -E PLC_LD_SCRIPT=STM32H743IIKX_FLASH_
 
 **和 `PORTTOOL_ENABLE` 同一个原则**（[DECISIONS.md 第 14 条](../tables/DECISIONS.md)）：**只活在要它的那一次构建里，不写进工程文件**。所以随手编一次、或者在 IDE 里点一下构建，出来的都还是 bootloader。
 
-⚠️ **这不是限制，是用户 2026-09-10 明确要的形状**：原话「用 cubeide 生成就是 bootloader，如果想要工装固件用别的工具」。**在 IDE 里怎么点都编不出工装镜像，这一条是对的，不要去"修"它。** 工装镜像只有一条路：`python $TOOL/TestCase/tools/build_image.py --porttool`。
+⚠️ **这不是限制，是用户 2026-09-10 明确要的形状**：原话「用 cubeide 生成就是 bootloader，如果想要工装固件用别的工具」。**在 IDE 里怎么点都编不出工装镜像，这一条是对的，不要去"修"它。** 工装镜像只有一条路：`$PORTTOOL` 里的 `python TestCase/tools/build_fixture.py`（决策 76）。
 
 ### 2026-09-10 试过一个「治本」办法，**验证之后证明没用**
 

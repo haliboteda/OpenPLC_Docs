@@ -45,7 +45,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Not yet specified
 
-- **帮助文本和面板里写死的 `COM7` / `COM16` 示例**（`$PORTTOOL/cmd/porttool/run.go`、`answer.go`）在 Linux / macOS 上要不要换成本平台的写法：等真机上看过面板和 CLI 才知道还有哪些类似的地方
+- **帮助文本和面板里写死的 `COM7` / `COM16` 示例**（`$PORTTOOL/cmd/porttool/run.go`）在 Linux / macOS 上要不要换成本平台的写法：等真机上看过面板和 CLI 才知道还有哪些类似的地方
 
 ## Out of scope
 

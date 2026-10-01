@@ -39,8 +39,17 @@
 | **3 IAPTool**：上传前发现无根 → 默认位置取或生成私钥并打印路径 → `takeown` → 上传；owner 类命令补 CDC 通道；删公开私钥回落；上传被拒时提示拷私钥或要叶证书；`genkey` / `compile_tool.sh` 去掉公开根 | 假板子上 USB、网口两条首次认领都通 | 决策 72 |
 | **4 core**：删 `OpenPLC_IAP/src/fw_pubkey.*`；`owner_root_ro.*` 读新地址、链空时拒绝；板卡包不带公开私钥 | P2 绿；live 编过 | 决策 72 |
 | **5 测试**：改 `host/owner_revoke` `owner_capacity` `bootloader_unit` `fakeboard` `renode` `crypto_ref`；删改 `check_public_root.py` `run_old_root_image_is_refused.py` `run_five_paths.py` `signature_wrongkey.go` `reset_board_to_factory_state.py` `inject_owner_record.py`；`check_mirror_sync.py` 换常量；新增：USB / 网口自动认领、恢复出厂回到无根、`setowner` 超过 32 次触发回收、回收中途断电从暂存恢复 | selfcheck 全绿 | 决策 72 |
-| **清理等用户定**：删不删三个过时上板脚本 `run_custom_root_has_no_warning.py`（原 `T2-07`）、`run_public_root_warning_is_persistent.py`（原 `T2-08`）、`run_claim_invalidates_existing_app.py`（原 `T2-09`，已由五条路径 ②-b 承担）；删不删 `$BOOT/IAPServer/keys/` 下没进 git 的 `backup/` 和两个 `.bak`，以及 `$BOOT/.gitignore` 里对应规则 | 用户点头后删，P9 绿 | 决策 72 |
+| **清理等用户定**：删不删 `$BOOT/IAPServer/keys/` 下没进 git 的 `backup/` 和两个 `.bak`，以及 `$BOOT/.gitignore` 里对应规则 | 用户点头后删，P9 绿 | 决策 72 |
 | **6 上板与发布**：先用当前 core 重编 `Output/probe-images/` 的两个探针镜像（旧镜像里的 `owner_root_ro.c` 读旧地址）；实验室那块板 ST-Link 烧新 bootloader、擦扇区 15 写回校准值、走一遍自动认领；跑第 5 阶段全部用例含真断电；升版本、发板卡包 | 真板上全过 | 决策 72 |
+
+## PortTool 与 IAPTool 彻底分离（2026-10-01 定）
+
+决策 76 的补充：两个仓不互相调用、不互相读文件，文档各自描述各自的。
+
+| 待办 | 判据 | 出处 |
+|---|---|---|
+| ~~**`$PORTTOOL` 自带本机配置、构建、自检**~~ ✅ **2026-10-01 做完**：自己的 `init_machine.py` / `common.py` / `config/machine.py`、工装镜像构建、`selfcheck.py`；删掉 `tool_repo.py` | `$TOOL` 不在旁边时，`$PORTTOOL` 能编工装固件、编 PortTool、跑自检、打交付包 | 决策 76 |
+| ~~**`$TOOL` 去掉所有 PortTool 痕迹**~~ ✅ **2026-10-01 做完**：`selfcheck` 的 PortTool 步骤、P2 的 `serialx` / `calarea` 跨仓比对、`build_image.py --porttool`、`PORTTOOL_REPO`、代码注释和文档里提到 PortTool 的地方 | `grep -ri porttool $TOOL` 只剩 bootloader 拒烧工装镜像那类与 `$BOOT/Debug/` 有关的检查 | 决策 76 |
 
 ## 优先级最低
 

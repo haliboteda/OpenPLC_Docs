@@ -20,7 +20,7 @@ Paused because: 等硬件工程师用过工装之后的反馈（用户 2026-09-1
 
 反馈回来之前，它们在 `$PROD/waiting/WAITING-ON.md` 的「等硬件工程师用过工装之后的反馈」那一行底下。
 
-**域**：工装测试（PortTool）。固件在 `$BOOT/TestCase/porttool/`，上位机在 `$TOOL/internal/` 下 pt 开头的那几个包，判据在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`。
+**域**：工装测试（PortTool）。固件在 `$BOOT/TestCase/porttool/`，上位机在 `$PORTTOOL/internal/` 下 pt 开头的那几个包，判据在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`。
 
 **⛔ 不在域内**：bootloader / IAP 产品路径（`$BOOT/IAPServer/`、`IAPTool`）、Arduino 板卡包。
 

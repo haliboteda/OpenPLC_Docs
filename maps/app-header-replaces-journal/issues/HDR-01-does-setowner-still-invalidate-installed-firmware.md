@@ -35,7 +35,7 @@ Blocked by: -
 1. 换主之后旧根签的固件**能不能启动**，一句话定论
 2. 如果「不能」（保持今天的行为）：header 里靠什么判定，且**说明它和「撤销只管未来」为什么可以不一致**
 3. 如果「能」（改成只管未来）：**点名哪几条用例要重写判据** —— 至少要核对 `T2-03`（换 owner：现任签名才算数）和
-   [`$TOOL/TestCase/tools/run_claim_invalidates_existing_app.py`](../../../../IAPTranfer_Tool/TestCase/tools/run_claim_invalidates_existing_app.py)
+   `run_claim_invalidates_existing_app.py`（2026-10-01 已删，由五条路径 ②-b 承担）
    这个脚本（它的名字就写着「认领会作废已装 app」）
 
 ## Answer
@@ -54,7 +54,7 @@ Blocked by: -
 `app_size`(4) + `signature`(64) + `cert`(128) = 196 字节不变。
 
 **判据不受影响的**：`T2-03`（换 owner：现任签名才算数）、
-[`run_claim_invalidates_existing_app.py`](../../../../IAPTranfer_Tool/TestCase/tools/run_claim_invalidates_existing_app.py)
+`run_claim_invalidates_existing_app.py`（2026-10-01 已删，由五条路径 ②-b 承担）
 （认领会作废已装 app）—— 今天的行为保留，两条照旧。
 
 ## 引出了什么新的未知

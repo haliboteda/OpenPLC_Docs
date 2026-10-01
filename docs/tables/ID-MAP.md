@@ -21,15 +21,15 @@
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
 | `R3-01`–`R3-09` | 需求（一句可判定的话） | 9 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01`–`R4-03` | 需求（一句可判定的话） | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
-| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-34` | 测试用例 | 40 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-35` | 测试用例 | 41 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-06` | 测试用例 | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| `T4-01`–`T4-03` | 测试用例 | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
+| `T4-01`–`T4-04` | 测试用例 | 4 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `P1`–`P5` `P7`–`P19` | 静态检查（不碰硬件，看源码和文档） | 18 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–76 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 74 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–77 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 75 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |

@@ -54,13 +54,13 @@ H743 最大中断号 WAKEUP_PIN_IRQn = 149          （Drivers/CMSIS/.../stm32h7
 **实验换成读回寄存器，不再链非对齐地址。** 原方案（链到 `0x08020200` 烧进去看跑不跑）测的是
 一条 UNPREDICTABLE 行为 —— 跑通了也只证明这颗片子这次没炸，不构成「512 够用」的证据。
 
-**驱动已经写好**：`$TOOL/TestCase/tools/run_vtor_alignment.py`，探针在 `$TOOL/TestCase/onboard/vtor_probe/`。
+**驱动已经写好**：`run_vtor_alignment.py`（2026-10-01 已删，结论已得，日常由 P15 守），探针 `TestCase/onboard/vtor_probe/` 同日一起删。
 `--build-only` 那一半 2026-09-21 在桌面上跑过（向量表落在 `0x08020000`，664 字节），
 判读逻辑拿三种合成输出验过（符合头文件 / 与头文件矛盾 / 板子不吭声）。**上板那一半没跑过。**
 
 1. **在 app 里量 `SCB->VTOR` 实际实现了哪几位**：写 `0x08020080`（bit[6:0] 非零）→ 读回 →
    打印 → 写回原值。读回值的低位被丢掉多少，就是硬件强制的对齐。
-   **这一步把 `TBLOFF` 从 CMSIS 抄件换成实测。** 代码放 `$TOOL/TestCase/onboard/vtor_probe/`
+   **这一步把 `TBLOFF` 从 CMSIS 抄件换成实测。** 代码放 `TestCase/onboard/vtor_probe/`
 2. **确认 app 侧读到的 `SCB->VTOR` 就是 `0x08020000`** —— 「app 的 VTOR 只由 bootloader 一处设定」
    这个依赖现在成立且没人验过
 3. 写下**最终采用的 header 大小**，以及它哪部分是实测、哪部分仍按架构规则推

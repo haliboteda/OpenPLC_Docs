@@ -204,6 +204,8 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 ## 六、方案页做不到的
 
+- **不合固件的方案拒跑**（决策 77）—— 面板和 CLI 一样：`CheckAgainstCaps` 报出问题就不跑，列出哪一步、为什么
+
 - **`UserConfirm` 步骤在方案页上直接判失败** —— 一次运行是一个同步 HTTP 请求，没有地方安放这个问句。要人回答的方案走 CLI：`porttool run <方案> --port COMx` 在 stdin 上问 `pass? [y/N]`，`--yes` 全部当通过
 
 ## 七、还没定的

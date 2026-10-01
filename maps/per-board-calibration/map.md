@@ -21,7 +21,7 @@ python tools/list_wayfinder_map_frontier.py --all
 ## 全集
 
 ```
-grep -rnil "calib" open_plc_cube_ide/IAPServer open_plc_cube_ide/TestCase/porttool IAPTranfer_Tool/internal IAPTranfer_Tool/cmd open_plc_arduino/cores open_plc_arduino/libraries/OpenPLC_*
+grep -rnil "calib" open_plc_cube_ide/IAPServer open_plc_cube_ide/TestCase/porttool OpenPLC_PortsTestingTool/internal OpenPLC_PortsTestingTool/cmd open_plc_arduino/cores open_plc_arduino/libraries/OpenPLC_*
 ```
 
 要校准的通道以 [HARDWARE-FACTS.md](../../docs/hardware/HARDWARE-FACTS.md) 里 AI / AO 那几节为准。

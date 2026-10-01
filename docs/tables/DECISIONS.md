@@ -679,9 +679,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 **什么情况下重开**：不重开。原来那条「发版检查单要确认日志里没有这条 warning」现在由脚本自动做了。
 
-
-
-
+> **2026-10-01 更正**（决策 76）：工装镜像改由 `$PORTTOOL` 的 `TestCase/tools/build_fixture.py` 编；`$TOOL` 的 `build_image.py` 只编 bootloader，`--porttool` / `--both` 已删。
 
 ## 15 · 面板的推送用 SSE，不用 WebSocket
 
@@ -2729,11 +2727,27 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 
 **理由**：两个工具做的是两件事、给不同的人用；两边唯一共用的是串口层 `internal/serialx`，除此之外没有任何代码复用。
 
-| 东西 | 去哪 |
-|---|---|
-| PortTool 的 Go 代码、`internal/calarea`、它的主机侧测试、`plans/`、交付打包（`delivery.cmd`、`make_delivery.py`）、工装那一半的构建菜单 | `$PORTTOOL` |
-| `internal/serialx` | 两边各一份，P2 逐字节比对（见 [ARCHITECTURE.md](../repo/ARCHITECTURE.md)「跨仓镜像的代码」第 14 条） |
-| `build_image.py`（bootloader 和工装镜像都由它编）、`flash_bootloader.py`、`selfcheck.py`、`config/machine.py` | 留在 `$TOOL`；`$PORTTOOL` 的脚本经 `$TOOL` 的 `common.py` 拿本机路径，自检入口仍只有 `$TOOL` 的 `selfcheck` 一个 |
-| 工装固件（`porttool.c`、`PORTTOOL_ENABLE`） | 不动，仍在 `$BOOT` |
+**2026-10-01 用户补充：两个仓完全彼此分离，代码和文档都各自描述各自的。**（落地中，见 `work/TODO.md`「PortTool 与 IAPTool 彻底分离」）
 
-**什么情况下重开**：两边出现了 `serialx` 以外的真实代码复用。
+| 东西 | 定案 |
+|---|---|
+| 代码 | 两个仓不互相调用、不互相读文件；各自有本机配置、构建、自检 |
+| `internal/serialx` | 两边各一份、各管各的，不做跨仓比对 |
+| 各仓的 `CLAUDE.md`、README、代码注释 | 只描述本仓，不提对方 |
+| 两个仓都依赖的 | 只有 `$BOOT`（工装固件 `porttool.c` / bootloader 源码在那）和 `$PROD`（产品文档） |
+
+**什么情况下重开**：两边出现了真实的代码复用。
+
+## 77 · 面板要体现板子的错误和异常；不合固件的方案拒跑；同一功能只留一份
+
+用户 2026-10-01 定。
+
+| 事 | 定案 |
+|---|---|
+| 板子的错误和异常 | 面板上都要看得见：固件回的 `ERR`、判定失败（同时点故障灯并停掉持续测试，即决策 37 第 3 件）、持续测试中板子复位（毫秒计数往回跳）、连接断开 |
+| 不合固件的方案 | 面板和 CLI 一样，直接拒跑，并说出哪一步、为什么 |
+| 重复实现 | 同一功能只留一份，多出来的删掉。包括：PortTool 的两份链路对端应答、两份控制口回显、两处 `sim` 分支、页面自己解析 `pt.run` 应答（改由 Go 解析）、被方案对端取代的 `porttool answer`；IAPTool 手抄进 `TestCase` 的协议常量和绑网卡拨号、CDC 和以太网各拼一份的 flash 命令、`init_machine.py` 里重写的平台层 |
+
+**理由**：面板是硬件工程师判断板子好坏的唯一窗口，看不见的异常等于没测；两份实现会分叉，判据不一致比没有判据更糟。
+
+**什么情况下重开**：不重开。

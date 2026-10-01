@@ -11,7 +11,7 @@ Blocked by: -
 
 | 选项 | 代价 | 风险 |
 |---|---|---|
-| A. 加进现有的 `porttool_ports.json`（`$PORTTOOL/internal/ptpanel/remember.go:38`），多一个 `lang` 字段 | 少一个文件 | 这个文件名说的是「哪个 COM 是哪个」；而且它刻意不和别的设置混（`remember.go:19–21` 的注释） |
+| A. 加进现有的 `porttool_ports.json`（`$PORTTOOL/internal/portmap/portmap.go`），多一个 `lang` 字段 | 少一个文件 | 这个文件名说的是「哪个 COM 是哪个」；而且它刻意不和别的设置混（`remember.go:19–21` 的注释） |
 | B. 新开一个 `porttool_settings.json`，只放面板偏好 | 多一个文件、多一份读写代码 | 以后别的偏好也往里放，要守住「只放面板偏好」 |
 | C. 其他 | — | — |
 
@@ -19,7 +19,7 @@ Blocked by: -
 
 - 文件里语言怎么写（`zh` / `en` / `de`，还是 `zh-CN` 这种）
 - 文件不在、读不懂、值不认识时：一律回到中文，还是另有做法
-- exe 所在目录写不进去时（`remember.go:83` 今天对写失败是静默忽略）：沿用这个做法，还是面板上说一句
+- exe 所在目录写不进去时（`portmap.go` 的 `save` 今天对写失败是静默忽略）：沿用这个做法，还是面板上说一句
 - 切换控件放在页面哪里
 
 ## 怎么算答完

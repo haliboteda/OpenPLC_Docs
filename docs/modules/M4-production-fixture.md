@@ -42,7 +42,7 @@ flowchart LR
 
 | # | 阶段 | 要做到什么 | 谁证明 | 状态 |
 |---|---|---|---|---|
-| **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` | 🔨 |
+| **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` `T4-04` | 🔨 |
 | **R4-02** | — | 工装（`PortTool`）在 Windows、Linux、macOS 上都能运行，三个平台的可执行文件一条命令一次生成（用户 2026-09-30 定） | `T4-03`（Linux）；macOS 还没有用例，见 [工装在 Linux / macOS 上运行](../../maps/porttool-on-linux-and-macos/map.md) | ❌ |
 | **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | —`T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$PORTTOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
 
@@ -67,12 +67,13 @@ flowchart LR
 | `T4-01` | `R4-01` | 端口工装的**协议契约** | C harness 拿真实固件源码跑，产出能力表并逐项比对 ¹ | `cd host/porttool_caps && python build.py`（要 gcc/clang） | 主机侧 | ✅ |
 | `T4-02` | `R4-01` | 面板在**真浏览器**里点一遍 | 10 组断言，含「改了参数就不给结论」「卡片上不许剩协议词」「看门狗真的在续期」 ² | `cd host/porttool_panel && python run.py --port sim`（模拟板）或 `--port COMx`（真板子），都要 playwright + Chrome | 主机侧 ³ / 真板子 | ✅ |
 | `T4-03` | `R4-02` `R4-03` | **Linux 版**面板在真浏览器里点一遍，接真板子 | 同 `T4-02`，加一条：带 VID 的串口行都写着它是什么（Linux 上是厂商 / 产品名和驱动名）⁴ | 串口先用 `usbipd` 挂进 WSL，再 `python run.py --wsl Debian --port /dev/ttyUSBx` | 真板子 + WSL | ✅ |
+| `T4-04` | `R4-01` | **方案执行器与方案页** | 六个通用字段的语义（`execute_condition` 的门、重试、前后延时、超时）、四种步骤类型、报告每次尝试都留、面板拒跑不合固件的方案（决策 77） | `$PORTTOOL` 里 `go test ./TestCase/host/porttool_plan/`，本仓 selfcheck 的 GO-TEST 一步包含它 | 主机侧（假板子），测不到真板子上的时序 | ✅ |
 
 **共 3 条。**
 
 ¹ 判据贴着代码放在 `$PORTTOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`，**没有搬进文档仓**。
 
-² 完整的十条判据在 `docs/engineering/HOW-TO-RUN-TESTS.md` 的 `T4-02` 行，**这里不抄**。
+² 完整的十条判据在 [HOW-TO-RUN-PORTTOOL-TESTS.md](../engineering/HOW-TO-RUN-PORTTOOL-TESTS.md) 的 `T4-02` 行，**这里不抄**。
 其中第 ⑧ 条是 2026-09-11 用户实测撞出来的：勾 DO3、占空比改成 50，1.4 秒出一个假失败 ——
 **改了参数就不该给结论，要说清哪一项和方案不一样。**
 
