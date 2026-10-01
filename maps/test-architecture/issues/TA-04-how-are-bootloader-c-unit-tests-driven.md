@@ -15,7 +15,7 @@ Blocked by: -
 
 ## Answer
 
-2026-10-02 定（research，待用户确认推荐）
+2026-10-02 定（research；用户同日认可推荐）
 
 **推荐：`$BOOT/tests/` 下放一个独立的 CMake 工程（`cmake -S tests`），用 CTest 跑；不碰顶层 `CMakeLists.txt`。**
 

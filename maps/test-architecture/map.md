@@ -30,14 +30,14 @@ done
 
 ## Decisions so far
 
-- [每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)：330 个文件逐个归位，部件 67、`$TEST` 76、文档检查 8、待定 8，表在 [TA-01-inventory.md](TA-01-inventory.md)
-- [bootloader 的 C 单元测试用什么驱动](issues/TA-04-how-are-bootloader-c-unit-tests-driven.md)：`$BOOT/tests/` 下独立的 CMake 工程，用 CTest 跑，不挂到顶层 `CMakeLists.txt`；三组测试已在临时目录跑通（待用户确认推荐）
-- [IAPTool 测试用的假板子：换成真 bootloader 代码，还是留着手写](issues/TA-06-should-the-fake-board-become-real-bootloader-code.md)：推荐把 `$BOOT/IAPServer` 的真代码编成 PC 替身替掉假板子的 bootloader 那一半；读代码已发现假板子和真 bootloader 有 6 处不一致（待用户确认推荐）
+- [依赖固件源码的 PortTool 测试归哪](issues/TA-10-where-do-porttool-tests-that-build-firmware-go.md)：工装算一个部件、源码跨两个仓，T4-01 到 T4-03 和模拟板留在 `$PORTTOOL`；校准值区核对合进 `$TEST` 契约层，一次比三方
+- [每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)：330 个文件逐个归位，部件 91、`$TEST` 52、文档检查 8、待定 8，表在 [TA-01-inventory.md](TA-01-inventory.md)
+- [bootloader 的 C 单元测试用什么驱动](issues/TA-04-how-are-bootloader-c-unit-tests-driven.md)：`$BOOT/tests/` 下独立的 CMake 工程，用 CTest 跑，不挂到顶层 `CMakeLists.txt`；三组测试已在临时目录跑通
+- [IAPTool 测试用的假板子：换成真 bootloader 代码，还是留着手写](issues/TA-06-should-the-fake-board-become-real-bootloader-code.md)：推荐把 `$BOOT/IAPServer` 的真代码编成 PC 替身替掉假板子的 bootloader 那一半；读代码已发现假板子和真 bootloader 有 6 处不一致
 - [整体测试项目叫什么、放在哪](issues/TA-03-where-does-the-integration-project-live.md)：新仓 `OpenPLC_Test`，路径变量 `$TEST`；`IAPTranfer_Tool` 不改名
 
 ## Not yet specified
 
-- **假板子换成真代码之后的几件事**：老 bootloader 那一例（T1-18c）留不留、IDE 上传里 app 那一侧的重启握手（T1-34 ②③）用什么替身、`$BOOT` 的 `jump_to_app` 要不要加主机测试开关。等用户确认「IAPTool 测试用的假板子」的推荐之后才问得清
 - **搬迁的顺序和 git 历史怎么带**：要等归属表和各仓的跑法定了才说得清
 - **`$BOOT/TestCase/` 里编进固件的板上测试**（ADC、CAN、RS485……）算哪层：它们是固件的一部分，可能不用动
 

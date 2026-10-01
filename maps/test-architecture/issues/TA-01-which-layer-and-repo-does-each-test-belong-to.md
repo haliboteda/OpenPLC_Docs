@@ -19,13 +19,13 @@ Blocked by: -
 
 | 去处 | 文件数 |
 |---|---|
-| 部件测试：`$BOOT` 26、`$TOOL` 12、`$CORE_REPO` 12、`$PORTTOOL` 17 | 67 |
-| `$TEST`：契约 29、整机 28、测试基础设施 19 | 76 |
+| 部件测试：`$BOOT` 26、`$TOOL` 12、`$CORE_REPO` 12、`$PORTTOOL` 41 | 91 |
+| `$TEST`：契约 5、整机 28、测试基础设施 19 | 52 |
 | `$PROD` 文档检查 | 8 |
 | 待定，交给后面的票 | 8 |
 | 不是测试（固件本身、发版工具、产品数据）或上游代码 | 171 |
 
-和原先以为的不一样的两处：`host/owner_revoke/` 编的是板卡包的 `owner_root_ro.c`，归板卡包不归 bootloader；PortTool 的 T4-01、T4-02、校准值区核对都要编 `$BOOT` 的固件源码，按判据归契约层，不是 PortTool 部件测试。
+和原先以为的不一样的两处：`host/owner_revoke/` 编的是板卡包的 `owner_root_ro.c`，归板卡包不归 bootloader；PortTool 的 T4-01、T4-02、校准值区核对都要编或读 `$BOOT` 的文件，按判据会归契约层。后经「依赖固件源码的 PortTool 测试归哪」定：前两项按决策 78 的例外留在 PortTool，校准值区核对归契约层；上表是改后的数字。
 
 ## 引出了什么新的未知
 

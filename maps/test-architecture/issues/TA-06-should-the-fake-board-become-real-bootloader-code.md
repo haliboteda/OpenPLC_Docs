@@ -15,7 +15,7 @@ Blocked by: -
 
 ## Answer
 
-2026-10-02 定（research，待用户确认推荐）
+2026-10-02 定（research；用户同日认可推荐）
 
 **推荐 A：把 `$BOOT/IAPServer` 的真代码编成主机替身，替掉假板子里 BOOTLD 那一半。** 理由：试编已证明整条网口路径（发现、烧写、认证、owner）能在 PC 上编过，缺的只是一层 lwIP→Winsock 的桥和一组 HAL 桩；而读代码已找到假板子和真 bootloader 的 6 处分歧（见下表），B 只能发现分歧，A 让分歧不再存在。
 

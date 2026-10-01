@@ -2768,4 +2768,6 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 
 **落地**：按 [测试按部件、契约、整机三层重新分布](../../maps/test-architecture/map.md) 那张图定完再搬。
 
+**例外（用户 2026-10-02 定）**：一个部件的源码因为构建方式分在两个仓时，算同一个部件，测试跟着 PC 那一半走。目前只有工装：`$BOOT/TestCase/porttool/` 和它编译时用到的 `$BOOT` 头文件算 PortTool 的一部分，所以 T4-01、模拟板、T4-02、T4-03 留在 `$PORTTOOL`。bootloader 本体的文件（如 `IAPServer/calib_area.h`）不在例外里。
+
 **什么情况下重开**：出现一条测试按上面的判据归不了类。
