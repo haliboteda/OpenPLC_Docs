@@ -12,7 +12,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Notes
 
-- **这张图只做决定，不带执行**：票全关之后照迁移清单搬。四个仓一起动，前面的决定会改后面怎么搬
+- **2026-10-02 起带执行**：用户把剩下的票一次定完，照 [MIGRATION.md](MIGRATION.md) 搬
 - 已定的前提：[决策 78](../../docs/tables/DECISIONS.md)（三层与判据）、[决策 76](../../docs/tables/DECISIONS.md)（仓与仓彻底分离）、[决策 77](../../docs/tables/DECISIONS.md)（同一功能只留一份）
 - 术语：部件测试 / 契约测试 / 整机测试，见 [GLOSSARY.md](../../GLOSSARY.md)。不用 `CONTEXT.md` / `docs/adr/`
 - grilling 票要用户在场，AI 不自问自答
@@ -30,6 +30,14 @@ done
 
 ## Decisions so far
 
+- [只需要一个仓、但必须上真板子的测试归哪](issues/TA-02-where-do-single-repo-on-board-tests-go.md)：要真硬件的一律归 `$TEST` 整机层，T4-03 例外留在 `$PORTTOOL`
+- [板卡包仓的测试怎么跑](issues/TA-05-how-are-board-package-tests-run.md)：`open_plc_arduino/tests/`，薄 Python 脚本 + T2-21 用 CMake，不要本机配置
+- [部件仓要不要本机配置](issues/TA-07-do-component-repos-need-machine-config.md)：只有 PortTool 和 `$TEST` 要
+- [文档检查搬进 OpenPLC_Docs 后长什么样](issues/TA-08-what-do-doc-checks-look-like-in-prod.md)：原样搬进 `$PROD/tools/`，入口 `check_docs.py`，编号不改
+- [发版之前要跑什么](issues/TA-09-what-runs-before-a-release.md)：自己仓的自检 + `$TEST` 全部契约 + 相关整机项 + 文档检查
+- [两个仓都要用的测试桩怎么办](issues/TA-11-test-stubs-two-repos-need.md)：替本仓代码的桩归本仓，可以重复
+- [黄金向量由谁更新](issues/TA-12-who-updates-the-golden-vectors.md)：`$TEST` 只比对、不写
+- [真 bootloader 替身覆盖不到的几例怎么办](issues/TA-13-what-the-real-bootloader-stand-in-cannot-cover.md)：T1-18c 在替身外拦一句；app 侧握手把板卡包代码编进替身；`jump_to_app` 加主机开关
 - [依赖固件源码的 PortTool 测试归哪](issues/TA-10-where-do-porttool-tests-that-build-firmware-go.md)：工装算一个部件、源码跨两个仓，T4-01 到 T4-03 和模拟板留在 `$PORTTOOL`；校准值区核对合进 `$TEST` 契约层，一次比三方
 - [每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)：330 个文件逐个归位，部件 91、`$TEST` 52、文档检查 8、待定 8，表在 [TA-01-inventory.md](TA-01-inventory.md)
 - [bootloader 的 C 单元测试用什么驱动](issues/TA-04-how-are-bootloader-c-unit-tests-driven.md)：`$BOOT/tests/` 下独立的 CMake 工程，用 CTest 跑，不挂到顶层 `CMakeLists.txt`；三组测试已在临时目录跑通
@@ -38,8 +46,7 @@ done
 
 ## Not yet specified
 
-- **搬迁的顺序和 git 历史怎么带**：要等归属表和各仓的跑法定了才说得清
-- **`$BOOT/TestCase/` 里编进固件的板上测试**（ADC、CAN、RS485……）算哪层：它们是固件的一部分，可能不用动
+没有了。搬的顺序和 git 历史写在 [MIGRATION.md](MIGRATION.md)。`$BOOT/TestCase/` 里编进固件的板上自测是固件本身，不动（见归属表）。
 
 ## Out of scope
 

@@ -40,7 +40,7 @@ DOCS = "`$PROD` 文档检查"
 FIRMWARE = "不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码）"
 PT_SHIP = "不是测试：`$PORTTOOL` 的产品数据或发版工具"
 TOOL_SHIP = "不是测试：`$TOOL` 的发版工具"
-PT_INFRA = "`$PORTTOOL` 自己的测试基础设施（留不留交给「部件仓要不要本机配置」）"
+PT_INFRA = "`$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」）"
 UPSTREAM = "上游第三方代码自带的，不属于本产品，不动"
 OPEN_TA02 = "待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」）"
 OPEN_TA06 = "待定：部件测试和整机测试共用的替身（交给「IAPTool 测试用的假板子」）"
@@ -59,9 +59,9 @@ RULES = [
     (TC + "signature.go", SYSTEM, "T1-11/12/14：import `$TOOL` 的 `iapcert` 造签名镜像，发给真板子 bootloader"),
     (TC + "signature_wrongkey.go", SYSTEM, "T1-19/20 相关：调 IAPTool.exe，对着真板子"),
     (TC + "tcp_session.go", SYSTEM, "T1-06–T1-10：import `$TOOL` 的 `iapproto`、调 IAPTool.exe，对着真板子"),
-    (TC + "udp_discovery.go", OPEN_TA02, "T1-01–T1-05：只测 bootloader 的发现协议，唯一的第二个仓是为拨号 import 的 `$TOOL/internal/iapproto`"),
-    (TC + "nonce_replay.go", OPEN_TA02, "T1-17：只测 bootloader 的防重放，要真板子"),
-    (TC + "signature_badcrc.go", OPEN_TA02, "T1-24：只测 bootloader 拒收坏 CRC，要真板子"),
+    (TC + "udp_discovery.go", SYSTEM, "T1-01–T1-05：只测 bootloader 的发现协议，唯一的第二个仓是为拨号 import 的 `$TOOL/internal/iapproto`"),
+    (TC + "nonce_replay.go", SYSTEM, "T1-17：只测 bootloader 的防重放，要真板子"),
+    (TC + "signature_badcrc.go", SYSTEM, "T1-24：只测 bootloader 拒收坏 CRC，要真板子"),
     (TC + "watch.go", SYSTEM, "`TestCase.exe` 内部的串口观察，跟着它走"),
     (TC + "requirements.txt", INFRA, "Python 依赖清单"),
     (TC + "acceptance/", SYSTEM, "一轮整机上板验收的记录"),
@@ -74,9 +74,9 @@ RULES = [
     (TC + "host/iapcert/", TOOL_U, "T1-15：只测 `$TOOL` 的 `iapcert`"),
     (TC + "host/crypto_ref/", TOOL_U, "T1-19/T1-20：只拿 IAPTool 的签名对照独立实现"),
     (TC + "host/fakeboard/run_ide_upload.py", SYSTEM, "T1-34：`arduino-cli` + 板卡包的上传配方 + IAPTool，三样东西"),
-    (TC + "host/fakeboard/run_cases.py", TOOL_U, "T1-18a–g：只用 IAPTool 和假板子"),
-    (TC + "host/fakeboard/KEY-MATCH.md", TOOL_U, "T1-18 的判据说明，跟着 run_cases.py 走"),
-    (TC + "host/fakeboard/", OPEN_TA06, "T1-18（`$TOOL` 部件）和 T1-34（整机）都用它"),
+    (TC + "host/fakeboard/run_cases.py", CONTRACT, "T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓"),
+    (TC + "host/fakeboard/KEY-MATCH.md", CONTRACT, "T1-18 的判据说明，跟着 run_cases.py 走"),
+    (TC + "host/fakeboard/", CONTRACT, "T1-18 和 T1-34 共用的替身，跟着它们进 `$TEST`"),
     (TC + "host/renode/", SYSTEM, "T3-05：`$BOOT` 的 bootloader + 板卡包例程 + IAPTool，在 Renode 里"),
     (TC + "host/examples_build/", CORE_U, "P5：只用板卡包和 `arduino-cli`"),
     (TC + "host/variant_check/", CORE_U, "P4：只用板卡包和 `arduino-cli`"),
@@ -98,10 +98,10 @@ RULES = [
     (TC + "tools/check_doc_paths.py", DOCS, "P9：查 `$PROD`，再到各代码仓核对路径"),
     (TC + "tools/check_no_stale_ids.py", DOCS, "P13：查 `$PROD`，再扫各代码仓"),
     (TC + "tools/check_changelist_has_no_orphans.py", DOCS, "P14：查 `$PROD`"),
-    (TC + "tools/check_allow_hygiene.py", OPEN_TA08, "P10：扫各仓的 `.claude/settings*.json`"),
+    (TC + "tools/check_allow_hygiene.py", INFRA, "P10：扫各仓的 `.claude/settings*.json`"),
     # tools: on-board case drivers
-    (TC + "tools/run_au1.py", OPEN_TA02, "T1-17：只用 ST-Link 和真板子 bootloader，不调 IAPTool"),
-    (TC + "tools/run_boot0_upload_mode.py", OPEN_TA02, "T1-27：只看真板子 bootloader 的串口，不调 IAPTool"),
+    (TC + "tools/run_au1.py", SYSTEM, "T1-17：只用 ST-Link 和真板子 bootloader，不调 IAPTool"),
+    (TC + "tools/run_boot0_upload_mode.py", SYSTEM, "T1-27：只看真板子 bootloader 的串口，不调 IAPTool"),
     (TC + "tools/run_case.py", INFRA, "跑 `TestCase.exe` 的用例并判结果"),
     (re.compile(re.escape(TC) + r"tools/run_[^/]+\.py$"), SYSTEM, "调 IAPTool（多数还用 ST-Link / `arduino-cli`）对着真板子跑"),
     # tools: infrastructure

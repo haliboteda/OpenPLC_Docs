@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -12,3 +12,11 @@ Blocked by: -
 ## 怎么算答完
 
 写明谁在什么时候生成、写到哪、不一致时谁报错，以及这和决策 76「不互相读写文件」怎么对得上。
+
+## Answer
+
+2026-10-02 定（用户按推荐定，九件一次定完）。`$TEST` 只比对、不写：用出货的 IAPTool 在临时目录重新生成，和 `$BOOT` 提交的 `golden_vectors.h` 比，不一样就判失败并打出去 `$BOOT` 更新的命令。符合决策 76 不互相写文件。
+
+## 引出了什么新的未知
+
+没有。

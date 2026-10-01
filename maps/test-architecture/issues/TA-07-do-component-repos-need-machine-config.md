@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: TA-04, TA-05
 
 ## Question
@@ -12,3 +12,11 @@ Blocked by: TA-04, TA-05
 ## 怎么算答完
 
 每个部件仓写明：要不要本机配置，要的话记哪几项、为什么离不开；PortTool 仓那套是留、缩还是删。
+
+## Answer
+
+2026-10-02 定（用户按推荐定，九件一次定完）。bootloader 不要（本机 gcc 用 gitignored 的 `CMakeUserPresets.json` 告诉 CMake）；IAPTool 不要（只用 `go`；拷进板卡包时按平台默认位置找 Arduino15）；板卡包不要（见「板卡包仓的测试怎么跑」）；PortTool 保留现有的小配置（`$BOOT`、CubeIDE、gcc、Git Bash 离不开）；`$TEST` 用完整的本机配置，从 `$TOOL` 那套搬过去。
+
+## 引出了什么新的未知
+
+没有。

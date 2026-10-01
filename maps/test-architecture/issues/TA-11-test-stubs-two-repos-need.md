@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -12,3 +12,11 @@ Blocked by: -
 ## 怎么算答完
 
 给出规则，并按规则写出 `iap_keyderive_stub.c` 的去处；归属表里如果还有别的同类文件，一并落位。
+
+## Answer
+
+2026-10-02 定（用户按推荐定，九件一次定完）。两个仓各放一份 `iap_keyderive_stub.c`，不做比对。规则：测试桩替的是本仓的代码，就归本仓，可以重复；决策 77 管产品代码，不管这种桩。bootloader 和板卡包各有自己的 `iap_keyderive.c`，桩替的是各自那份。
+
+## 引出了什么新的未知
+
+没有。

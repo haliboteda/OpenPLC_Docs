@@ -8,17 +8,14 @@
 | 去处 | 文件数 |
 |---|---|
 | `$BOOT` 部件测试 | 26 |
-| `$TOOL` 部件测试 | 12 |
+| `$TOOL` 部件测试 | 10 |
 | `$CORE_REPO` 部件测试 | 12 |
 | `$PORTTOOL` 部件测试 | 41 |
-| `$TEST` 契约测试 | 5 |
-| `$TEST` 整机测试 | 28 |
-| `$TEST` 测试基础设施 | 19 |
+| `$TEST` 契约测试 | 9 |
+| `$TEST` 整机测试 | 33 |
+| `$TEST` 测试基础设施 | 20 |
 | `$PROD` 文档检查 | 8 |
-| 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | 5 |
-| 待定：部件测试和整机测试共用的替身（交给「IAPTool 测试用的假板子」） | 2 |
-| 待定：不测产品，查各仓的 `.claude` 权限文件（交给「文档检查搬进 OpenPLC_Docs 后长什么样」） | 1 |
-| `$PORTTOOL` 自己的测试基础设施（留不留交给「部件仓要不要本机配置」） | 3 |
+| `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 3 |
 | 不是测试：`$TOOL` 的发版工具 | 1 |
 | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 6 |
 | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 93 |
@@ -47,10 +44,10 @@
 | `IAPTranfer_Tool/TestCase/host/crypto_ref/run_checks.py` | `$TOOL` 部件测试 | T1-19/T1-20：只拿 IAPTool 的签名对照独立实现 |
 | `IAPTranfer_Tool/TestCase/host/crypto_ref/sha256_ref.py` | `$TOOL` 部件测试 | T1-19/T1-20：只拿 IAPTool 的签名对照独立实现 |
 | `IAPTranfer_Tool/TestCase/host/examples_build/build.py` | `$CORE_REPO` 部件测试 | P5：只用板卡包和 `arduino-cli` |
-| `IAPTranfer_Tool/TestCase/host/fakeboard/KEY-MATCH.md` | `$TOOL` 部件测试 | T1-18 的判据说明，跟着 run_cases.py 走 |
-| `IAPTranfer_Tool/TestCase/host/fakeboard/_common.py` | 待定：部件测试和整机测试共用的替身（交给「IAPTool 测试用的假板子」） | T1-18（`$TOOL` 部件）和 T1-34（整机）都用它 |
-| `IAPTranfer_Tool/TestCase/host/fakeboard/fake_board.py` | 待定：部件测试和整机测试共用的替身（交给「IAPTool 测试用的假板子」） | T1-18（`$TOOL` 部件）和 T1-34（整机）都用它 |
-| `IAPTranfer_Tool/TestCase/host/fakeboard/run_cases.py` | `$TOOL` 部件测试 | T1-18a–g：只用 IAPTool 和假板子 |
+| `IAPTranfer_Tool/TestCase/host/fakeboard/KEY-MATCH.md` | `$TEST` 契约测试 | T1-18 的判据说明，跟着 run_cases.py 走 |
+| `IAPTranfer_Tool/TestCase/host/fakeboard/_common.py` | `$TEST` 契约测试 | T1-18 和 T1-34 共用的替身，跟着它们进 `$TEST` |
+| `IAPTranfer_Tool/TestCase/host/fakeboard/fake_board.py` | `$TEST` 契约测试 | T1-18 和 T1-34 共用的替身，跟着它们进 `$TEST` |
+| `IAPTranfer_Tool/TestCase/host/fakeboard/run_cases.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓 |
 | `IAPTranfer_Tool/TestCase/host/fakeboard/run_ide_upload.py` | `$TEST` 整机测试 | T1-34：`arduino-cli` + 板卡包的上传配方 + IAPTool，三样东西 |
 | `IAPTranfer_Tool/TestCase/host/iapcert/iapcert_test.go` | `$TOOL` 部件测试 | T1-15：只测 `$TOOL` 的 `iapcert` |
 | `IAPTranfer_Tool/TestCase/host/owner_capacity/build.py` | `$BOOT` 部件测试 | T2-22–T2-33、T1-33、T2-27：只编 `$BOOT` 的源码 |
@@ -76,21 +73,21 @@
 | `IAPTranfer_Tool/TestCase/host/variant_check/uart_routing/uart_routing.ino` | `$CORE_REPO` 部件测试 | P4：只用板卡包和 `arduino-cli` |
 | `IAPTranfer_Tool/TestCase/host/vector_alignment/build.py` | `$CORE_REPO` 部件测试 | P15：只用板卡包和 `arduino-cli` |
 | `IAPTranfer_Tool/TestCase/main.go` | `$TEST` 整机测试 | `TestCase.exe` 的入口；它 import `$TOOL` 的 `iapcert` / `iapproto` 并调 IAPTool.exe，对着真板子跑 |
-| `IAPTranfer_Tool/TestCase/nonce_replay.go` | 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | T1-17：只测 bootloader 的防重放，要真板子 |
+| `IAPTranfer_Tool/TestCase/nonce_replay.go` | `$TEST` 整机测试 | T1-17：只测 bootloader 的防重放，要真板子 |
 | `IAPTranfer_Tool/TestCase/onboard/iap_probe/iap_probe.ino` | `$TEST` 整机测试 | 五条路径用的探针 app，由 `build_probe_image.py` 编、IAPTool 传 |
 | `IAPTranfer_Tool/TestCase/onboard/rs232/M5_SerialConflict/M5_SerialConflict.ino` | `$TEST` 整机测试 | T3-03 / T3-04：由 `run_m5.py` 等用 `arduino-cli` 编、IAPTool 传 |
 | `IAPTranfer_Tool/TestCase/onboard/rs232/SerialPort/SerialPort.ino` | `$TEST` 整机测试 | T3-03 / T3-04：由 `run_m5.py` 等用 `arduino-cli` 编、IAPTool 传 |
 | `IAPTranfer_Tool/TestCase/onboard/sdram/SDRAM_Acceptance/SDRAM_Acceptance.ino` | `$TEST` 整机测试 | T3-02：由 `run_sdram.py` 用 `arduino-cli` 编、IAPTool 传 |
 | `IAPTranfer_Tool/TestCase/requirements.txt` | `$TEST` 测试基础设施 | Python 依赖清单 |
 | `IAPTranfer_Tool/TestCase/signature.go` | `$TEST` 整机测试 | T1-11/12/14：import `$TOOL` 的 `iapcert` 造签名镜像，发给真板子 bootloader |
-| `IAPTranfer_Tool/TestCase/signature_badcrc.go` | 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | T1-24：只测 bootloader 拒收坏 CRC，要真板子 |
+| `IAPTranfer_Tool/TestCase/signature_badcrc.go` | `$TEST` 整机测试 | T1-24：只测 bootloader 拒收坏 CRC，要真板子 |
 | `IAPTranfer_Tool/TestCase/signature_wrongkey.go` | `$TEST` 整机测试 | T1-19/20 相关：调 IAPTool.exe，对着真板子 |
 | `IAPTranfer_Tool/TestCase/tcp_session.go` | `$TEST` 整机测试 | T1-06–T1-10：import `$TOOL` 的 `iapproto`、调 IAPTool.exe，对着真板子 |
 | `IAPTranfer_Tool/TestCase/tools/build_image.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/build_probe_image.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/can_send.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/can_watch.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
-| `IAPTranfer_Tool/TestCase/tools/check_allow_hygiene.py` | 待定：不测产品，查各仓的 `.claude` 权限文件（交给「文档检查搬进 OpenPLC_Docs 后长什么样」） | P10：扫各仓的 `.claude/settings*.json` |
+| `IAPTranfer_Tool/TestCase/tools/check_allow_hygiene.py` | `$TEST` 测试基础设施 | P10：扫各仓的 `.claude/settings*.json` |
 | `IAPTranfer_Tool/TestCase/tools/check_changelist_has_no_orphans.py` | `$PROD` 文档检查 | P14：查 `$PROD` |
 | `IAPTranfer_Tool/TestCase/tools/check_core_sync.py` | `$CORE_REPO` 部件测试 | P3：板卡包的两份（`$CORE_LIVE` 和 `$CORE_REPO`） |
 | `IAPTranfer_Tool/TestCase/tools/check_cproject_ld.py` | `$BOOT` 部件测试 | P17：只扫 `$BOOT` |
@@ -113,8 +110,8 @@
 | `IAPTranfer_Tool/TestCase/tools/platform_info.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/reset_board_to_factory_state.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/rs485_echo.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
-| `IAPTranfer_Tool/TestCase/tools/run_au1.py` | 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | T1-17：只用 ST-Link 和真板子 bootloader，不调 IAPTool |
-| `IAPTranfer_Tool/TestCase/tools/run_boot0_upload_mode.py` | 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | T1-27：只看真板子 bootloader 的串口，不调 IAPTool |
+| `IAPTranfer_Tool/TestCase/tools/run_au1.py` | `$TEST` 整机测试 | T1-17：只用 ST-Link 和真板子 bootloader，不调 IAPTool |
+| `IAPTranfer_Tool/TestCase/tools/run_boot0_upload_mode.py` | `$TEST` 整机测试 | T1-27：只看真板子 bootloader 的串口，不调 IAPTool |
 | `IAPTranfer_Tool/TestCase/tools/run_case.py` | `$TEST` 测试基础设施 | 跑 `TestCase.exe` 的用例并判结果 |
 | `IAPTranfer_Tool/TestCase/tools/run_cdc_does_not_start_ethernet.py` | `$TEST` 整机测试 | 调 IAPTool（多数还用 ST-Link / `arduino-cli`）对着真板子跑 |
 | `IAPTranfer_Tool/TestCase/tools/run_delegated_cert_on_real_board.py` | `$TEST` 整机测试 | 调 IAPTool（多数还用 ST-Link / `arduino-cli`）对着真板子跑 |
@@ -136,7 +133,7 @@
 | `IAPTranfer_Tool/TestCase/tools/serial_watch.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/test_init_machine.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
 | `IAPTranfer_Tool/TestCase/tools/upload_and_watch.py` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具 |
-| `IAPTranfer_Tool/TestCase/udp_discovery.go` | 待定：只用一个仓但要上真板子（交给「只需要一个仓、但必须上真板子的测试归哪」） | T1-01–T1-05：只测 bootloader 的发现协议，唯一的第二个仓是为拨号 import 的 `$TOOL/internal/iapproto` |
+| `IAPTranfer_Tool/TestCase/udp_discovery.go` | `$TEST` 整机测试 | T1-01–T1-05：只测 bootloader 的发现协议，唯一的第二个仓是为拨号 import 的 `$TOOL/internal/iapproto` |
 | `IAPTranfer_Tool/TestCase/watch.go` | `$TEST` 整机测试 | `TestCase.exe` 内部的串口观察，跟着它走 |
 | `IAPTranfer_Tool/internal/iapproto/iapproto_test.go` | `$TOOL` 部件测试 | 只用 `$TOOL`（T1-35） |
 | `IAPTranfer_Tool/internal/serialx/ioreg_test.go` | `$TOOL` 部件测试 | 只用 `$TOOL`（T1-35） |
@@ -181,11 +178,11 @@
 | `OpenPLC_PortsTestingTool/TestCase/tools/build_fixture.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 编工装镜像，交付要用 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/check_calarea.py` | `$TEST` 契约测试 | 和 P2 的校准值区一项合成一道，一次比 `$BOOT`、板卡包、`$PORTTOOL` 三方 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/check_doc_paths.py` | `$PROD` 文档检查 | 查 `$PROD` 里的 `$PORTTOOL/...` 路径 |
-| `OpenPLC_PortsTestingTool/TestCase/tools/common.py` | `$PORTTOOL` 自己的测试基础设施（留不留交给「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
-| `OpenPLC_PortsTestingTool/TestCase/tools/init_machine.py` | `$PORTTOOL` 自己的测试基础设施（留不留交给「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
+| `OpenPLC_PortsTestingTool/TestCase/tools/common.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
+| `OpenPLC_PortsTestingTool/TestCase/tools/init_machine.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
 | `OpenPLC_PortsTestingTool/TestCase/tools/make_delivery.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 打交付包 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/md2html.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 交付包里的说明页 |
-| `OpenPLC_PortsTestingTool/TestCase/tools/selfcheck.py` | `$PORTTOOL` 自己的测试基础设施（留不留交给「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
+| `OpenPLC_PortsTestingTool/TestCase/tools/selfcheck.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` |
 | `OpenPLC_PortsTestingTool/internal/calarea/calarea_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
 | `OpenPLC_PortsTestingTool/internal/ptcal/ptcal_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
 | `OpenPLC_PortsTestingTool/internal/ptecho/ptecho_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |

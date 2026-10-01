@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: TA-01
 
 ## Question
@@ -12,3 +12,11 @@ Blocked by: TA-01
 ## 怎么算答完
 
 一条规则，能对归属表里每一条「单仓但上板」的测试给出唯一去处；按规则落位后归属表里不再有待定项。
+
+## Answer
+
+2026-10-02 定（用户按推荐定，九件一次定完）。要真硬件的测试一律归 `$TEST` 整机层：上板工具（烧录、抓串口、提示拔电）只在 `$TEST` 有一份。`TestCase.exe` 整个搬进 `$TEST`，不拆程序；`run_au1.py`、`run_boot0_upload_mode.py` 同。例外：T4-03 和 T4-02 是同一个脚本换参数，留在 `$PORTTOOL`。
+
+## 引出了什么新的未知
+
+没有。

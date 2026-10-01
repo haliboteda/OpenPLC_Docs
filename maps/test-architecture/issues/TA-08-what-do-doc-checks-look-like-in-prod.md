@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -12,3 +12,11 @@ P7、P8、P9、P12、P13、P14、P18 查的都是 `$PROD`。搬进 `$PROD/tools/
 ## 怎么算答完
 
 一张表：每项检查搬到哪个文件、编号怎么叫、需要读哪些仓、找不到那些仓时是跳过还是失败。
+
+## Answer
+
+2026-10-02 定（用户按推荐定，九件一次定完）。P7、P8、P9、P12、P13、P14、P18 的脚本原样搬进 `$PROD/tools/`，新入口 `python tools/check_docs.py`；编号不改。P9、P13 按「仓库并排放」在旁边找各代码仓，找不到就跳过并说明，不判失败。P10（各仓 `.claude` 权限文件）不测产品也不查文档，进 `$TEST` 的工具。
+
+## 引出了什么新的未知
+
+没有。
