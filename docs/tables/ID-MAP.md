@@ -46,7 +46,7 @@
 | `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `ROOT-01`–`ROOT-06` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 6 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
-| `TA-01`–`TA-09` | wayfinder 的票，属于「测试按部件、契约、整机三层重新分布」 | 9 | [test-architecture/issues/](../../maps/test-architecture/issues) |
+| `TA-01`–`TA-12` | wayfinder 的票，属于「测试按部件、契约、整机三层重新分布」 | 12 | [test-architecture/issues/](../../maps/test-architecture/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
 | `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
 

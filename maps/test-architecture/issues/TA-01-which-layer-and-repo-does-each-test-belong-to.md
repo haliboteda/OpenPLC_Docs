@@ -2,7 +2,7 @@
 
 Type: task
 Opened: 2026-10-02
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -12,3 +12,23 @@ Blocked by: -
 ## 怎么算答完
 
 一张归属表：全集里每个文件一行，写出它归哪、依据是它用到了哪几个仓；全集命令重跑的行数和表的行数一致；判据下归不了类的单独列出，交给下一张票。
+
+## Answer
+
+2026-10-02 定。归属表在 [TA-01-inventory.md](../TA-01-inventory.md)，由 `tools/classify_tests_by_layer.py` 生成：全集 330 个文件、表 330 行，规则全部命中。
+
+| 去处 | 文件数 |
+|---|---|
+| 部件测试：`$BOOT` 26、`$TOOL` 12、`$CORE_REPO` 12、`$PORTTOOL` 17 | 67 |
+| `$TEST`：契约 29、整机 28、测试基础设施 19 | 76 |
+| `$PROD` 文档检查 | 8 |
+| 待定，交给后面的票 | 8 |
+| 不是测试（固件本身、发版工具、产品数据）或上游代码 | 171 |
+
+和原先以为的不一样的两处：`host/owner_revoke/` 编的是板卡包的 `owner_root_ro.c`，归板卡包不归 bootloader；PortTool 的 T4-01、T4-02、校准值区核对都要编 `$BOOT` 的固件源码，按判据归契约层，不是 PortTool 部件测试。
+
+## 引出了什么新的未知
+
+- 依赖固件源码的 PortTool 测试是不是应该算 PortTool 自己的：立票「依赖固件源码的 PortTool 测试归哪」
+- 8 个待定项已经各有去处：5 个交「只需要一个仓、但必须上真板子的测试归哪」，2 个交「IAPTool 测试用的假板子」，1 个交「文档检查搬进 OpenPLC_Docs 后长什么样」
+- `TestCase.exe` 是一个 Go 程序，待定的三个文件在它里面，单独搬要拆程序：留给「只需要一个仓、但必须上真板子的测试归哪」一起定
