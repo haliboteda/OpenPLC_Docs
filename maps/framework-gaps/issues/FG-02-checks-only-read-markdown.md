@@ -25,7 +25,7 @@ P8 和 P9 只扫 `.md`。这次发现文档路径同时写在 **43 个源文件*
 
 2026-09-16 定。**P9 扩到源码注释**，但收得很窄。
 
-`$TOOL/TestCase/tools/check_doc_paths.py` 加了两样：
+`$PROD/tools/check_doc_paths.py` 加了两样：
 
 | | |
 |---|---|
@@ -43,9 +43,9 @@ P8 和 P9 只扫 `.md`。这次发现文档路径同时写在 **43 个源文件*
 
 | 在哪 | 错在哪 |
 |---|---|
-| `$TOOL/TestCase/tools/common.py` | 写的是 PROD/docs/STATUS.md —— 少了 tables/ 这一层 |
-| `$TOOL/TestCase/tools/selfcheck.py` | `STATUS_DOC` 还指着 open_plc_cube_ide/docs/STATUS.md（已删的位置） |
-| `$TOOL/TestCase/tools/run_s4.py` | 打印里写着 docs/STATUS.md（已删的位置） |
+| `$TEST/tools/common.py` | 写的是 PROD/docs/STATUS.md —— 少了 tables/ 这一层 |
+| `$TEST/tools/selfcheck.py` | `STATUS_DOC` 还指着 open_plc_cube_ide/docs/STATUS.md（已删的位置） |
+| `$TEST/tools/run_s4.py` | 打印里写着 docs/STATUS.md（已删的位置） |
 | `$BOOT/IAPServer/owner_slot.c` | 指着 `check-public-root.ps1` —— **`.ps1` 那批 2026-09-01 就归档了**，现在是 `check_public_root.py` |
 
 另外 4 个是示意写法，改用了本来就有的 `path/to/` 约定（检查器认这个），不是给检查开后门。

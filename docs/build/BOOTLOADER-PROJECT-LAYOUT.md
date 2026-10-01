@@ -38,7 +38,7 @@
 
 **板卡包给 app 的链接上限就是 `upload.maximum_size`（1,835,008 B，等于 bootloader 的 `IAP_APP_MAX_SIZE`）**：`variants/STM32H7xx/H743/ldscript.ld` 的 `FLASH` 长度直接用 `LD_MAX_SIZE`，不再减 `LD_FLASH_OFFSET`，因为 `platform.txt` 传进来的已经是 app 上限。2026-09-30 之前多减了一次，只给了 1,703,936 B，用户同日定改正。
 
-**扇区 15 只有 bootloader 能写**：app 擦它就会带走校准值和 metadata。core 里有代码写它时 `P19` 报错（`$TOOL/TestCase/tools/check_no_sector15_writes.py`）。
+**扇区 15 只有 bootloader 能写**：app 擦它就会带走校准值和 metadata。core 里有代码写它时 `P19` 报错（`$CORE_REPO/tests/check_no_sector15_writes.py`）。
 
 **本板不提供模拟 EEPROM**：板上没有 EEPROM 芯片（`$HW/Production/Bridge/1436_01_SCHAE-BR.xlsx`），上游 `EEPROM` 库用内部 flash 模拟、默认落在扇区 15，所以整库删除（[EXB-09](../../maps/core-examples-on-board/issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)）。要存用户数据用 SD 卡。 从上游同步 core 时不要把这个库带回来，`P19` 会报红。
 
@@ -48,7 +48,7 @@
 
 **必须装进扇区 0 的 128K**（131,072 B；根区在扇区 15，扇区 0 只放代码）。这是需求 **ENG-01**，构建时的尺寸门禁。
 
-**当前大小和余量哪份文档都不记** —— 这个数每次构建都在变。要数字跑 `$TOOL:TestCase/tools/build_image.py`，它每次构建都打印，超了当场 Fail；或者自己看 `Debug/` 下那个 `.bin` 的大小。
+**当前大小和余量哪份文档都不记** —— 这个数每次构建都在变。要数字跑 `$TEST/tools/build_image.py`，它每次构建都打印，超了当场 Fail；或者自己看 `Debug/` 下那个 `.bin` 的大小。
 
 ## 4. 功能模块清单
 

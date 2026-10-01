@@ -7,7 +7,7 @@ Blocked by: DR-02
 
 ## Question
 
-13 个用例号写死在 `IAPTranfer_Tool/TestCase/*.go` 的 `register(testCase{id: "…"})` 里：
+13 个用例号写死在 `$TEST/*.go` 的 `register(testCase{id: "…"})` 里：
 
 ```
 T1  T1b  T2  T3  T4      tcp_session.go
@@ -32,7 +32,7 @@ AU1                       nonce_replay.go
 
 ## 怎么算答完
 
-`grep -rn 'id:[ ]*"' IAPTranfer_Tool/TestCase/*.go` 输出的每个 id 都是新格式，
+`grep -rn 'id:[ ]*"' $TEST/*.go` 输出的每个 id 都是新格式，
 `python tools/selfcheck.py --quick` 全过（**P7 是关键那条**：它专门查总表和用例名单对不对得上），
 且用新 id 跑一次 `run_case.py` 能真的跑起来 —— **不是只改字符串就算完**。
 

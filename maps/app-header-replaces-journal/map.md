@@ -82,7 +82,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 |---|---|
 | **`$BOOT` 自己的两份链接脚本**（`STM32H743IIKX_FLASH.ld` 和 `STM32H743IIKX_FLASH_PORTTOOL.ld`） | bootloader 侧也有 flash 布局常量，改 app 起点时要一起核对 |
 | **`$CORE_REPO/tools/platformio/platformio-build.py`** | PlatformIO 那条构建路径**不读 `platform.txt`**，`build.flash_offset` 改了它不会跟着变 |
-| **`$TOOL/TestCase/host/bootloader_unit/stubs/bootloader_state_stub.c`** | `T1-16` 拿真实 bootloader 源码在 PC 上跑，删掉 journal 之后这个桩整个失效 |
+| **`$BOOT/tests/bootloader_unit/stubs/bootloader_state_stub.c`** | `T1-16` 拿真实 bootloader 源码在 PC 上跑，删掉 journal 之后这个桩整个失效 |
 | **`ref/Hello_World_OpenPLC/Core/Src/system_stm32h7xx.c`** | 是对照不是权威，**不改** —— 但它是「app 侧 VTOR 怎么设」的现成参照，验 `HDR-04` 时用得上 |
 
 ⚠️ 输出里有一处误命中：`$CORE_REPO/libraries/STM32duino_LwIP/src/netif/ppp/polarssl/des.c`，与本图无关。

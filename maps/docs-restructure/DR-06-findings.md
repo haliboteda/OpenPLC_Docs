@@ -12,11 +12,11 @@
 
 **这十条里没有一条卡在「驱动不了硬件」。** 真板子该做的事，现有脚本几乎都做得了：
 烧写走出货的 `IAPTool`、串口日志有 12 个脚本会读（`open_log_ports` / `read_log_ports`，
-定义在 `$TOOL:TestCase/tools/common.py`）。
+定义在 `$TEST/tools/common.py`）。
 
 **卡住的是最后一步：判定结果没有变成退出码。**
 
-最典型的是 `$TOOL:TestCase/tools/upload_and_watch.py` —— 它已经跑完整的真实上传、抓串口、
+最典型的是 `$TEST/tools/upload_and_watch.py` —— 它已经跑完整的真实上传、抓串口、
 逐条核对 SDRAM 暂存该有的行为（`verdict()` 函数，第 23–50 行），**然后 `main()` 无条件 `return 0`**。
 因为 `common.py:124` 的 `Fail()` 只是把字符染成红色打印出来，**不改变任何状态**。
 
@@ -73,7 +73,7 @@
 | | |
 |---|---|
 | **判据** | 发一个**故意错的 CRC**，板子必须打 `Checksum FAIL. Expected: ... , Got: ...` 并回 `Checksum Failed`（`IAP_server.c:395-397`） |
-| **现有覆盖** | **发得出来**：`$TOOL:TestCase/signature.go:129-130` 自己用 `crc32.ChecksumIEEE` 算校验和、自己拼 `flash <size> <crc32hex> <sig>` 命令。出货的 `IAPTool` 做不出坏 CRC，但这个 Go 用例是原始 TCP，能 |
+| **现有覆盖** | **发得出来**：`$TEST/signature.go:129-130` 自己用 `crc32.ChecksumIEEE` 算校验和、自己拼 `flash <size> <crc32hex> <sig>` 命令。出货的 `IAPTool` 做不出坏 CRC，但这个 Go 用例是原始 TCP，能 |
 | **差什么** | 照 `signature.go` 复制一份，把 checksum 改成错值，判板子的回复。约 30 行 |
 | **要人吗** | 不要 |
 

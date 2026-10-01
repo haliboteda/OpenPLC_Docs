@@ -7,7 +7,7 @@ Blocked by: MIG-03
 
 ## Question
 
-文档检查脚本住在 `$TOOL/TestCase/tools/`，扫描根**写死在代码里**
+文档检查脚本住在 `$TEST/tools/`，扫描根**写死在代码里**
 （`check_doc_paths.py` 的第 96–100 行列着 boot / tool / core / skills 四个仓）。
 
 要定：`OpenPLC_Docs` 怎么加进扫描范围；脚本本身留在 `TestCase` 还是也搬；
@@ -36,7 +36,7 @@ Blocked by: MIG-03
 本仓根下就有 `docs/`，所以 `$PROD/docs/...` 这种写法一个字都不用改。
 ⚠️ **这一步必须和搬文件在同一个 commit 里** —— 提前改，所有现存引用当场指空。
 
-**二、脚本各留各家。** P1–P11 留在 `$TOOL/TestCase/tools/`，它们是 `selfcheck` 的一部分；
+**二、脚本各留各家。** P1–P11 留在 `$TEST/tools/`，它们是 `selfcheck` 的一部分；
 本仓自己的两个检查留在本仓，它们查的是本仓的约定。
 
 **三、新增 P12，进 `selfcheck`。** 它调用本仓的两个检查。

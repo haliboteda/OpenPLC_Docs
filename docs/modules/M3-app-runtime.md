@@ -83,12 +83,14 @@ flowchart TD
 
 **编号按需求顺序排** —— `T3-01` 证明 `R3-01`，往下顺推，跳过没有用例的那两条。
 
+下表的 `tools/`、`host/` 都是 `$TEST` 里的路径。
+
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
 | `T3-01` | `R3-01` | 启动时 SDRAM 自检 | 日志出现 `SDRAM staging buffer OK (2 MiB at C0000000)`；坏了则出 `** SDRAM SELF-TEST FAILED at offset ... **` 并点名偏移 ¹ | `python tools/flash_bootloader.py` 自动判 | 真板子 | ✅ |
 | `T3-02` | `R3-03` | `OpenPLC_SDRAM` 封装 | 19 条断言全过，并测出清零速率 ² | `python tools/run_sdram.py` | 真板子 | ✅ |
 | `T3-03` | `R3-05` | 诊断串口不被 sketch 掐掉 | `Serial4.begin()` 之后 `Serial_Test` 仍然收得到，5/5 回显 ³ | `python tools/run_m5.py`（自己编译、烧写、发字节、验回显） | 真板子 | ✅ |
-| `T3-04` | `R3-06` | RS232 端子收发 | 往端子 C05/C06 发字符，每个字节原样回显 | `$TOOL:TestCase/onboard/rs232/SerialPort` | 真板子 | ✅ |
+| `T3-04` | `R3-06` | RS232 端子收发 | 往端子 C05/C06 发字符，每个字节原样回显 | `$TEST/onboard/rs232/SerialPort` | 真板子 | ✅ |
 | `T3-05` | `R3-08` | 13 个例程经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
 | `T3-06` | `R3-09` | 自有库例程在真板上逐个测通 | 每个例程：经 USB CDC 上传后，脚本按表里那一行发输入、等输出，用正则认例程自己的人读输出；要人配合的步骤由脚本提示 ⁵ | `python tools/run_examples.py [--only NAME]` | 真板子 | ⬜ |
 

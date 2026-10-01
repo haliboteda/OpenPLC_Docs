@@ -24,9 +24,12 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ```
 for r in IAPTranfer_Tool OpenPLC_PortsTestingTool open_plc_cube_ide open_plc_arduino OpenPLC_Docs; do
-  git -C $r ls-files | grep -iE '(^|/)(TestCase|tests?|host|onboard)/|_test\.(go|c|py)$|(^|/)(check_|run_|selfcheck)[^/]*\.py$' | sed "s#^#$r/#"
+  git -C $r ls-files -co --exclude-standard | grep -iE '(^|/)(TestCase|tests?|host|onboard)/|_test\.(go|c|py)$|(^|/)(check_|run_|selfcheck)[^/]*\.py$' | sed "s#^#$r/#"
 done
+git -C OpenPLC_Test ls-files -co --exclude-standard | sed "s#^#OpenPLC_Test/#"   # 这个仓里全是测试
 ```
+
+逐个文件的归属由 `python tools/classify_tests_by_layer.py` 重新生成进 [TA-01-inventory.md](TA-01-inventory.md)。
 
 ## Decisions so far
 

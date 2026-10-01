@@ -40,7 +40,7 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 落回默认内存图，SRAM 在那里不是 XN。
 
 ⚙️ **链接时会多一条 `LOAD segment with RWX permissions`** —— `.RamFunc` 进了 `.data`，
-那个段就同时可写可执行。这是要的效果，已在 `$TOOL/TestCase/tools/build_image.py`
+那个段就同时可写可执行。这是要的效果，已在 `$TEST/tools/build_image.py`
 的 `KNOWN_WARNINGS` 里按原文匹配放行。
 
 

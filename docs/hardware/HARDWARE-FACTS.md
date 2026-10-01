@@ -67,7 +67,7 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 USART3 TX，那是 **PB10 —— 本板的 RS232 使能脚**。
 
 两个宏定义在 `core:variants/STM32H7xx/H743/variant_PLC_H743.h`，由用例 `P4`（变体断言，
-`$TOOL/TestCase/host/variant_check/uart_routing/`）钉住，改错编译就不过。
+`$CORE_REPO/tests/variant_check/uart_routing/`）钉住，改错编译就不过。
 
 ⚠️ **bootloader 侧不受这条影响** —— 它有自己的 `_write`，`printf` 一直走 UART4 / PC10。
 

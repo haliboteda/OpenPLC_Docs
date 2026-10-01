@@ -71,7 +71,7 @@ stdout 也已 `setvbuf(..., _IONBF, 0)`。
 
 **bootloader 不受影响**：它有自己的 `_write`，`printf` 一直走 UART4/PC10。
 
-固定住的办法：用例 `P4`（变体断言）新增 sketch `$TOOL/TestCase/host/variant_check/uart_routing/`，
+固定住的办法：用例 `P4`（变体断言）新增 sketch `$CORE_REPO/tests/variant_check/uart_routing/`，
 对两条通道各断一次，改错编译就不过。路由表记在
 [HARDWARE-FACTS.md](../../../docs/hardware/HARDWARE-FACTS.md) 的「UART4 与 USART3」一节。
 

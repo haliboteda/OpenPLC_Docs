@@ -7,7 +7,7 @@ Blocked by: -
 
 ## Question
 
-要在模拟台上走通「Tools → Port 里出现板子 → Upload」，假板子要回应哪些东西：网络发现、app 状态下的重启握手、bootloader 状态下的挑战和 `flash`、上传完成后的「重新上线」。现有 `$TOOL/TestCase/host/fakeboard/fake_board.py` 已经会哪些、缺哪些。
+要在模拟台上走通「Tools → Port 里出现板子 → Upload」，假板子要回应哪些东西：网络发现、app 状态下的重启握手、bootloader 状态下的挑战和 `flash`、上传完成后的「重新上线」。现有 `$TEST/host/fakeboard/fake_board.py` 已经会哪些、缺哪些。
 
 ## 怎么算答完
 

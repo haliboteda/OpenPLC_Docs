@@ -34,7 +34,7 @@ Blocked by: -
 
 **证据**（Windows，本机 MinGW-w64 gcc 16.1.0，只读引用真实的 `$BOOT/IAPServer/*.c`）：
 
-- 位置：[E:\tmp\ta04-cmake-poc](file:///E:/tmp/ta04-cmake-poc)，`tests/CMakeLists.txt` + `tests/run_steps.cmake`，测试源和 stubs 从 `IAPTranfer_Tool/TestCase/host/` 复制，编译参数照抄各 `build.py`
+- 位置：[E:\tmp\ta04-cmake-poc](file:///E:/tmp/ta04-cmake-poc)，`tests/CMakeLists.txt` + `tests/run_steps.cmake`，测试源和 stubs 从 `$TEST/host/` 复制，编译参数照抄各 `build.py`
 - 覆盖：`bootloader_unit`（T1-16：证书/认证核心）、`owner_capacity`（T2-22/23 段满告警与拒写、T1-33 compact、T2-24 wipe、T2-31/32/33，7 个阶段组）、`sector15_reclaim`（T2-34：七步回收每步断电 × 三种下次启动，24 个场景）；用例定义见 [HOW-TO-RUN-TESTS.md](../../../docs/engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../../../docs/modules/M1-firmware-upgrade.md)、[M2-ownership.md](../../../docs/modules/M2-ownership.md)
 - `cmake -S tests -B build -G Ninja -DBOOT_ROOT=E:/WorkSpace/Schaeffer-AG/open_plc_cube_ide && cmake --build build && ctest --test-dir build -j8` → `100% tests passed out of 32`，5.3 秒；换 `-G "MinGW Makefiles"` 同样 32/32
 - 反例：手工跑一个预期错的场景（`cut 3 | battery-dead | boot 1 1`）→ 测试程序打 `[FAIL]`，`run_steps.cmake` 退出码 1，CTest 会判失败
@@ -46,4 +46,4 @@ Blocked by: -
 - **共用的 `iap_keyderive_stub.c` 怎么分**：它现在住在 `owner_revoke/stubs/`，被 `owner_capacity`、`sector15_reclaim` 共用；`owner_revoke` 回板卡包仓之后，`$BOOT` 和板卡包仓各要一份，和[决策 77](../../../docs/tables/DECISIONS.md)（同一功能只留一份）、[决策 76](../../../docs/tables/DECISIONS.md)（仓与仓彻底分离）怎么取舍要定
 - **`gen_vectors.py` 搬去 `$TEST` 之后怎么更新 `$BOOT` 里的 `golden_vectors.h`**：是跨仓写文件，还是只比对、不一致就报错，要定
 - **本机编译器路径从哪来**：`build.py` 读 `config/machine.py` 的 `HOST_CC`（刻意不在 PATH 上）；换成 CMake 后是用 gitignored 的 `CMakeUserPresets.json` 还是命令行传 `-DCMAKE_C_COMPILER`，要定。顺带：`$BOOT/.gitignore` 没忽略 `build/`，搬的时候要加
-- **`selfcheck.py` 现在按阶段组调 `build.py`**（`IAPTranfer_Tool/TestCase/tools/selfcheck.py:254-304`），搬完后谁来调 `ctest`、用什么名字，要和[每一项现有测试归哪一层、哪个仓](TA-01-which-layer-and-repo-does-each-test-belong-to.md)的结果对齐
+- **`selfcheck.py` 现在按阶段组调 `build.py`**（`$TEST/tools/selfcheck.py:254-304`），搬完后谁来调 `ctest`、用什么名字，要和[每一项现有测试归哪一层、哪个仓](TA-01-which-layer-and-repo-does-each-test-belong-to.md)的结果对齐

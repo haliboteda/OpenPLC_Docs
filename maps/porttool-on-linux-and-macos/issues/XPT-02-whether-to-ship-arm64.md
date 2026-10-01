@@ -32,7 +32,7 @@ Blocked by: -
 | `Output/darwin/` | `IAPTool`、`PortTool`、`plans/`、`keys/`（amd64，Intel Mac 与 Rosetta） |
 | `Output/darwin-arm64/` | `PortTool`、`plans/`（Apple Silicon） |
 
-`Output/darwin` 不改成 arm64：`$TOOL/TestCase/tools/install_tool.py:27` 拿它的 IAPTool 装进板卡包的 `macosx/`。不做通用二进制：要 `lipo`，Windows 上没有，违反「一次生成」。
+`Output/darwin` 不改成 arm64：`$TOOL/tools/install_tool.py:27` 拿它的 IAPTool 装进板卡包的 `macosx/`。不做通用二进制：要 `lipo`，Windows 上没有，违反「一次生成」。
 
 ## 引出了什么新的未知
 

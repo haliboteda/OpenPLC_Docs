@@ -38,7 +38,7 @@
 
 ```bash
 # 1. 还写着旧编号的文件 —— 以 DR-02-id-mapping.md 为唯一输入，零硬编码
-python IAPTranfer_Tool/TestCase/tools/check_no_stale_ids.py
+python $PROD/tools/check_no_stale_ids.py
 
 # 2. docs/ 下的每一个文件 —— 每一份都要有去处
 find OpenPLC_Docs/docs -type f

@@ -37,10 +37,18 @@ python tools/list_wayfinder_map_frontier.py --all    # 连被挡的和已关的�
 
 看 [work/TODO.md](work/TODO.md) 和 [waiting/WAITING-ON.md](waiting/WAITING-ON.md)。
 
+## 改完文档跑这个
+
+```
+python tools/check_docs.py
+```
+
+P7、P8、P9、P12、P13、P14、P18 一次跑完（决策 78）。P9、P13 还会到旁边的代码仓核对，没 clone 的仓跳过并说明。
+
 ## 两道提交门禁
 
 `core.hooksPath = .githooks`，提交时跑两条检查：票关得诚不诚实、占位符有没有人认领。
-它们也在 `selfcheck` 里（用例 **P12**），因为 `--no-verify` 跳得过钩子。
+它们也在 `check_docs.py` 里（用例 **P12**），因为 `--no-verify` 跳得过钩子。
 
 ## Agent skills
 

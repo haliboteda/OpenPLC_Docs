@@ -45,7 +45,7 @@ python tools/reset_board_to_factory_state.py              擦除 + 烧 bootloade
 python tools/reset_board_to_factory_state.py --check-only 只验证，绝不写
 ```
 
-脚本在 `$TOOL/TestCase/tools/reset_board_to_factory_state.py`。四步：
+脚本在 `$TEST/tools/reset_board_to_factory_state.py`。四步：
 读出**清除前**的三个区域 → `STM32_Programmer_CLI -e all` 整片擦除 →
 **擦完先单独验一次**（还没烧 bootloader 时）→ 烧 bootloader → 复位抓日志 → 判定。
 

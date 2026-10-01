@@ -25,7 +25,7 @@
 | `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-06` | 测试用例 | 6 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-04` | 测试用例 | 4 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
-| `P1`–`P5` `P7`–`P19` | 静态检查（不碰硬件，看源码和文档） | 18 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
+| `P1`–`P5` `P7`–`P20` | 静态检查（不碰硬件，看源码和文档） | 19 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |

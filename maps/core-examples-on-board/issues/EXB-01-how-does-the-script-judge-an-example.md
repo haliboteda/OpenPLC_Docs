@@ -22,7 +22,7 @@ PC 侧脚本判例程时：例程的串口输出要不要加机器能读的行�
 | 输出格式 | 例程不加机器行，脚本用正则认例程现有的人读输出 | 例程是给用户看的；文案一改用例就断，正好逼文件头和实际输出一致 |
 | 判据位置 | 写在 Python 脚本里的一张表，一个例程一行（发什么、等哪行、正则、要人做什么） | `ptcheck` 为的是面板和产线不分歧，这里没有面板；自动化一律用 Python |
 | 上传路径 | USB CDC（`cdcMethod`，`IAPTool cdc`），例程的 `Serial` 输出也在这个口 | 一根线同时管上传和判定 |
-| 编号和文档 | 需求 `R3-09`、用例 `T3-06`（一个编号管全部例程，`--only NAME` 跑单个），写在 [M3 应用运行环境](../../../docs/modules/M3-app-runtime.md)；脚本 `$TOOL/TestCase/tools/run_examples.py` | 与 `T3-05` 一个编号管 13 个例程同一个做法 |
+| 编号和文档 | 需求 `R3-09`、用例 `T3-06`（一个编号管全部例程，`--only NAME` 跑单个），写在 [M3 应用运行环境](../../../docs/modules/M3-app-runtime.md)；脚本 `$TEST/tools/run_examples.py` | 与 `T3-05` 一个编号管 13 个例程同一个做法 |
 
 第一条用例（`RS485_Echo`）：编译 → 经 CDC 上传 → 开 CDC 口和 RS485 转接器 → 等到 `RS485_Echo: send a line over RS485.` → 从转接器发 `EXB-PING-1\n` → 2 s 内转接器收回同样的字节，**且** CDC 口出现 `RS485 echoed: EXB-PING-1`，判过。
 

@@ -79,7 +79,7 @@ xpack gcc / openocd / CMSIS 是第三方 release，**没有逐个下载校验**�
 | `open_plc_arduino` tag | `v0.1.3-pre` | `v0.1.3`。⚠️ 仓里**已有一个叫 `v0.1.3` 的分支**（`origin/v0.1.3` → `5127758`，2026-04-07），再打同名 tag 会像现在 `v0.1.3-pre` 一样出现 `refname is ambiguous`。GitHub 的 `refs/tags/` URL 不受影响 | 手工，对外 |
 | `package_index_json` tag / release 附件 | `v0.1.3-pre` | `v0.1.3`；客户地址随之变成 `.../releases/download/v0.1.3/...` | 手工，对外 |
 | 已装目录 | `$A15/packages/OpenPLC_Alpha/hardware/stm32/0.1.3-pre` | Board Manager 升级后变成 `.../stm32/0.1.3` | IDE |
-| `CORE_LIVE`（`IAPTranfer_Tool/TestCase/config/machine.py:52`） | 写死 `...\stm32\0.1.3-pre` | 改成 `...\stm32\0.1.3`，或重跑 `init_machine.py` | 手工 / 脚本 |
+| `CORE_LIVE`（`$TEST/config/machine.py:52`） | 写死 `...\stm32\0.1.3-pre` | 改成 `...\stm32\0.1.3`，或重跑 `init_machine.py` | 手工 / 脚本 |
 | `init_machine.py` 自动探测（`TestCase/tools/init_machine.py:103-106,152`） | 取 `stm32/*` 字符串排序的最后一个 | ⚠️ `0.1.3-pre` 排在 `0.1.3` **后面**。两个目录同时存在时它会选中旧的 `-pre` | 要么删掉旧目录，要么改排序 |
 | `init_machine.py` 模板示例（`:483,502,524`） | `0.1.3-pre` | 只是示例文本，不影响探测 | 可顺手改 |
 | `IAPTool` 查找（`TestCase/tools/common.py:281`） | `STM32Tools/*` 通配 | 不用改 | — |

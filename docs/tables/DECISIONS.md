@@ -629,7 +629,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-**做法**：`$TOOL/TestCase/tools/build_image.py`。不带参数编 bootloader，`--porttool` 编工装，`--both` 两个都编且**bootloader 放最后** —— 因为 `Debug/` 里留下的那个才是随手一烧会烧进去的东西。脚本还交叉验证了两件事：编工装时构建日志里**必须**有那条 `#warning`（没有就说明符号没到编译器，编出来的其实是 bootloader），编 bootloader 时**必须没有**。
+**做法**：`$TEST/tools/build_image.py`。不带参数编 bootloader，`--porttool` 编工装，`--both` 两个都编且**bootloader 放最后** —— 因为 `Debug/` 里留下的那个才是随手一烧会烧进去的东西。脚本还交叉验证了两件事：编工装时构建日志里**必须**有那条 `#warning`（没有就说明符号没到编译器，编出来的其实是 bootloader），编 bootloader 时**必须没有**。
 
 
 
@@ -977,7 +977,7 @@ stm32cubeidec.exe … -application org.eclipse.cdt.managedbuilder.core.headlessb
 
 
 
-⚠️ **也不管 `$TOOL/TestCase/onboard/` 的 Arduino sketch。** 那个 sketch 吐 `RESULT <name> PASS|FAIL` 给 `run_sdram.py` 汇总，但它测的是**给用户 sketch 用的 SDRAM 库**（需求 R3-03 / 用例 T3-02），和产线端口测试无关。**2026-09-07 本条初稿曾把它误当成「唯一违反本条的地方」，核实后撤回。**
+⚠️ **也不管 `$TEST/onboard/` 的 Arduino sketch。** 那个 sketch 吐 `RESULT <name> PASS|FAIL` 给 `run_sdram.py` 汇总，但它测的是**给用户 sketch 用的 SDRAM 库**（需求 R3-03 / 用例 T3-02），和产线端口测试无关。**2026-09-07 本条初稿曾把它误当成「唯一违反本条的地方」，核实后撤回。**
 
 
 
@@ -2262,7 +2262,7 @@ bootloader 自己的 502 字节一个坏字节都没有。
 | 哪个 | 现状 |
 |---|---|
 | `$TOOL/IAP_Ether.go` 的 `getDirectedBroadcastAddrs()` | 只排 down 和回环，**虚拟网卡照用** |
-| `$TOOL/TestCase/udp_discovery.go` | **一点筛选都没有** |
+| `$TEST/udp_discovery.go` | **一点筛选都没有** |
 
 代价当场付过：这台机器上 `tun0`（VPN）带一条 metric 0 的默认路由，`T1-01` 因此全部超时，
 **看起来像板子不应答**。
@@ -2288,7 +2288,7 @@ bootloader 自己的 502 字节一个坏字节都没有。
 
 **2026-09-18 再补充**：Python 那三个直接开 socket 的测试脚本
 （`run_au1.py` `run_s4.py` `run_cdc_does_not_start_ethernet.py`）也补了同样的绑定。
-**选的是复用，不是第三份实现**：新增 `$TOOL/TestCase/tools/netifquery/`
+**选的是复用，不是第三份实现**：新增 `$TEST/tools/netifquery/`
 （一个几行的 Go 小程序，`go run` 调用，直接复用 `netiface.LocalIPFor()`），
 `common.py` 新增 `local_ip_for()` 去 `subprocess` 调它。三个脚本改动到位后用真板子逐条验证过。
 
@@ -2379,7 +2379,7 @@ KNX Data Security 的序列号防重放绑在共享对称密钥上——`securit
 **理由**：改 `RCC_BDCR.RTCSEL` 会强制复位整个备份域（HAL 的 `__HAL_RCC_BACKUPRESET_FORCE()`），
 两边选不同的源就会在每次 bootloader ↔ app 切换时清空 `DR0`–`DR31`，
 `DR1` 的 nonce 计数器一起没。实测证据在
-`$TOOL/TestCase/acceptance/2026-09-18-boot-iap-full-run.md`。
+`$TEST/acceptance/2026-09-18-boot-iap-full-run.md`。
 
 **什么情况下重开**：出现一条不经过 bootloader 就能启动的 app 路径时 ——
 LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:463-466`），app 侧不自己开，

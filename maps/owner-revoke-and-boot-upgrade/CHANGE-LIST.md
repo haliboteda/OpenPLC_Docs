@@ -79,10 +79,10 @@
 
 | # | 改哪 | 改什么 | 谁拍板 |
 |---|---|---|---|
-| **X1** | `$TOOL/TestCase/tools/inject_owner_record.py` | ⚠️ **它手工拼 owner 记录字节**（`T2-04` 靠它造「无签名的高 generation 记录」）。删了 `slots`、`format_ver` 升 3 之后**必须跟着改，否则那条用例造出来的是无效记录、测不到东西** | 🤖 已定，⏳ 跟 A16/A21 |
-| **X2** | `$TOOL/TestCase/host/bootloader_unit/`（`owner_slot_stub.{c,h}`、`test_main.c`、`build.py`、`HOST-C-TESTS.md`） | ⚠️ **`T1-16` 拿真实 bootloader 源码在 PC 上跑**，包含 `owner_slot.c`。记录格式变了，桩和用例全要跟 | 🤖 已定，⏳ 跟 A1–A6 |
-| **X3** | `$TOOL/TestCase/tools/check_mirror_sync.py` | 跨仓镜像清单要加 `iap_cert` / `iap_auth`（见 C3/C4），否则 `P2` 看不见它们分叉 | ✅ **本来就在查**（`check_mirror_sync.py:280-287,316-317`），这条写清单时没核实 |
-| **X6** | `$TOOL/TestCase/tools/run_delegated_cert_on_real_board.py`、`run_rotate_root_revokes_old_leaf.py` | ⚠️ **2026-09-20 写新脚本时发现**：两个驱动都在标准输出里找 **264 个** hex 字符的证书（132 字节）。证书现在是 128 字节 = **256** 字符，**`T2-11` 和 `T2-12`–`T2-14` 的驱动本来会全部失败** | ✅ **2026-09-20 改完** |
+| **X1** | `$TEST/tools/inject_owner_record.py` | ⚠️ **它手工拼 owner 记录字节**（`T2-04` 靠它造「无签名的高 generation 记录」）。删了 `slots`、`format_ver` 升 3 之后**必须跟着改，否则那条用例造出来的是无效记录、测不到东西** | 🤖 已定，⏳ 跟 A16/A21 |
+| **X2** | `$BOOT/tests/bootloader_unit/`（`owner_slot_stub.{c,h}`、`test_main.c`、`build.py`、`HOST-C-TESTS.md`） | ⚠️ **`T1-16` 拿真实 bootloader 源码在 PC 上跑**，包含 `owner_slot.c`。记录格式变了，桩和用例全要跟 | 🤖 已定，⏳ 跟 A1–A6 |
+| **X3** | `$TEST/tools/check_mirror_sync.py` | 跨仓镜像清单要加 `iap_cert` / `iap_auth`（见 C3/C4），否则 `P2` 看不见它们分叉 | ✅ **本来就在查**（`check_mirror_sync.py:280-287,316-317`），这条写清单时没核实 |
+| **X6** | `$TEST/tools/run_delegated_cert_on_real_board.py`、`run_rotate_root_revokes_old_leaf.py` | ⚠️ **2026-09-20 写新脚本时发现**：两个驱动都在标准输出里找 **264 个** hex 字符的证书（132 字节）。证书现在是 128 字节 = **256** 字符，**`T2-11` 和 `T2-12`–`T2-14` 的驱动本来会全部失败** | ✅ **2026-09-20 改完** |
 | **X4** | `$PROD/docs/modules/M1/CHALLENGE-AUTH.md` | 讲会话认证怎么用证书。证书结构变了要跟 | 🤖 |
 | **X5** | `$BOOT/IAPServer/SECURITY.md` | 同上 | 🤖 |
 
@@ -116,7 +116,7 @@
 | F12 | `$BOOT/RELEASE-NOTES.md` | 见 D8。⚠️ **这份文件是英文的**，草稿见下 |
 | F13 | `GLOSSARY.md` | ✅ **2026-09-20 已加**：根/叶、认领、`'O'`/`'R'` 记录、原地升级、压缩 —— 未实现的都标了 ⚠️ |
 
-## G · 测试用例（`$TOOL/TestCase`）
+## G · 测试用例（`$TEST`）
 
 | # | 测什么 | 台子 | 测不到什么 |
 |---|---|---|---|
@@ -189,8 +189,8 @@ live in the bootloader's own flash sector. Use `flashboot` to keep it.
 | I7 | `$CORE_REPO/libraries/OpenPLC_IAP/src/owner_root_ro.{c,h}` | 跨仓镜像，常量和两段扫描要完全一致 | ✅ **2026-09-22 已实现**（live 编译验过再拷进仓） |
 | I8 | `$TOOL/owner.go` · `RunRevoke()` | 不再算 generation、不再发送它；签名改成覆盖新的 32 字节（整条记录） | ✅ **2026-09-22 已实现** |
 | I9 | 主机侧 C 用例 | ⚠️ **原描述有误**：`T1-16` 的 owner 槽一直是**桩**，不是真实 `owner_slot.c`。真正跑真实代码的是 `host/owner_revoke/`（core 镜像）—— 已按两段布局改完并跑过；写入路径的主机覆盖由新增的 `host/owner_capacity/` 补上（见 I13） | ✅ **2026-09-22 已实现** |
-| I10 | `$TOOL/TestCase/tools/inject_owner_record.py` | `T2-04` 靠它手工拼记录字节，布局变了必须跟 | ✅ **2026-09-22 已实现**（`format_ver` 4、`'O'` 段寻址不变；脚本本来就没有 `'R'` 路径） |
-| I11 | `$TOOL/TestCase/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | ✅ **2026-09-22 已实现**，新增 5 个锚点，`P2` 全绿 |
+| I10 | `$TEST/tools/inject_owner_record.py` | `T2-04` 靠它手工拼记录字节，布局变了必须跟 | ✅ **2026-09-22 已实现**（`format_ver` 4、`'O'` 段寻址不变；脚本本来就没有 `'R'` 路径） |
+| I11 | `$TEST/tools/check_mirror_sync.py` | 两段的基址与条数加进镜像锚点，否则 `P2` 看不见它们分叉 | ✅ **2026-09-22 已实现**，新增 5 个锚点，`P2` 全绿 |
 | I12 | `$PROD/docs/modules/M2-ownership.md` | 新布局的字节表、两段的划分理由、`'R'` 读取不验签这条 | ✅ **2026-09-22 已实现**（顺带修好了那节停在 v2 的旧字节表） |
 | I13 | 用例 | **新增两条**：① 剩 8 条时启动日志出现提醒；② 第 97 个被拒且一个字节未写 | ✅ **2026-09-22 已实现** `T2-22`/`T2-23`，新建 `host/owner_capacity/` 在主机上跑真实 `owner_slot.c` 的写入路径（上板会永久烧掉全部 96 个名额） |
 

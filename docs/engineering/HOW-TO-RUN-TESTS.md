@@ -1,60 +1,25 @@
-# TestCase
+# 测试怎么跑
 
-**这个产品的测试与验收总入口。** 和 IAPTool 分开：**IAPTool 只负责上传烧写**，所有为了验证设备行为而存在的东西放在这里。
+**每条用例的判据、前置条件、怎么跑都在这里。** 需求和最近结果在 [STATUS.md](../tables/STATUS.md)。
 
-需要"传输进行中"的用例不会自己实现传输，而是**把 IAPTool 当子进程拉起来**跑真实烧写 —— 被测的始终是出货代码路径，不是测试代码里的仿制品。
+测试按部件、契约、整机三层分在各仓（[决策 78](../tables/DECISIONS.md)）。每个仓有自己的自检入口，不靠别的仓：
 
-## 目录结构
+| 仓 | 测什么 | 入口（在那个仓的根目录跑） |
+|---|---|---|
+| `$BOOT` | bootloader 的主机 C 测试（T1-16、T1-33、T2-22–T2-34 中归 bootloader 的）、P16、P17 | `cd tests && cmake --preset local && cmake --build --preset local && ctest --preset local` |
+| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
+| `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
+| `$PORTTOOL` | T4-01 到 T4-04 | `cd TestCase && python tools/selfcheck.py`（`--quick` 跳过浏览器那步） |
+| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
+| `$PROD` | 文档检查 P7、P8、P9、P12、P13、P14、P18 | `python tools/check_docs.py` |
 
-```
-TestCase/
-├── *.go                  ← 设备行为用例（T/S/N 系列），package main
-├── config/
-│   └── machine.py        ← 本机路径（gitignore）。**生成的，不要手抄**
-├── requirements.txt      ← 唯一的 pip 依赖：pyserial
-├── tools/                ← 自动化工具，本身不是测试
-│   ├── init_machine.py   ← ★ 本机路径生成器。先探测，搜不到才问你。`CORE_LIVE` 每次发版要重跑
-│   ├── test_init_machine.py ← init_machine 提问逻辑的单元测试
-│   ├── common.py         ← ★ 共用件：读 config、找工具链、开串口、跑子进程时排空串口、动手提示。`--probe` = ENV
-│   ├── selfcheck.py      ← ★ 所有不需要板子的检查，一条命令
-│   ├── check_version_sync.py  ← P1  版本号三处一致
-│   ├── check_mirror_sync.py   ← P2  跨仓镜像 12 锚点 + 备份寄存器占用
-│   ├── check_core_sync.py     ← P3  core live vs git 仓库
-│   ├── check_status_sync.py    ← P7  总表和用例名单不得漂
-│   ├── check_doc_dupes.py      ← P8  同一句话不得出现在两个文件
-│   ├── check_doc_paths.py      ← P9  文档里提到的路径必须存在
-│   ├── check_allow_hygiene.py  ← P10 本机 allow 列表不许攒字面命令（建议性，不进 selfcheck）
-│   ├── flash_bootloader.py     ← 无头编译 + ST-Link 烧写 + T3-01 判定
-│   ├── enter_bootloader.py     ← 把板子请进 bootloader，不用碰板子
-│   ├── serial_watch.py
-│   ├── run_case.py             ← 跑一条 TestCase 用例，`--then-reset` 变成 T1-14
-│   ├── run_s3.py  run_s4.py    ← T1-13 启动期验签 / T1-21 T1-22 掉电中断
-│   ├── run_au1.py              ← T1-17 nonce 唯一性，绕一次真实掉电
-│   ├── run_m5.py  run_sdram.py ← T3-03 串口冲突 / T3-02 SDRAM 封装
-│   ├── run_examples.py         ← T3-06 自有库例程逐个上真板，判据在脚本的表里
-│   ├── run_takeown.py  run_setowner.py  inject_owner_record.py  ← 所有权 T2-01/T2-03
-│   ├── upload_and_watch.py     ← 走真实 IAPTool 上传并判 SDRAM 暂存行为
-│   └── can_send.py  can_watch.py  rs485_echo.py  ← 板级端口
-├── host/                 ← 不需要板子，纯主机跑
-│   ├── iapcert/          ← T1-15  证书签发、serial 计数器、挑战签名的 Go 单元测试
-│   ├── bootloader_unit/  ← T1-16  用 stub 编译真实 bootloader 源码的 C 单元测试
-│   ├── owner_revoke/     ← T2-21  喂假 owner 记录区，跑真实 core 侧 owner_root_ro.c
-│   ├── fakeboard/        ← T1-18a–T1-18g  IAPTool 传输前的密钥/证书匹配决策，七种情况
-│   │                        T1-34  IDE 那条上传命令在假板子上走通（run_ide_upload.py）
-│   └── crypto_ref/       ← T1-19/T1-20  SHA-256 与 ECDSA 的独立实现交叉验证
-├── onboard/              ← 需要烧到板子上跑
-│   └── rs232/SerialPort/ ← T3-04  UART + CDC 回显 sketch
-└── acceptance/
-    （验收单已搬走：`$PROD/docs/tables/ACCEPTANCE-CHECKLIST.md`）
-```
+**下文的 `tools/...`、`host/...`、`onboard/...` 不加前缀时都在 `$TEST` 根目录跑。** 其他仓的命令写明仓名。
 
-> **需求、覆盖矩阵和最近结果在一张表里：[STATUS.md](../tables/STATUS.md)** —— 要做到什么、每条用例覆盖哪条需求、跑出什么结果、还欠哪些用例。
-> **本文件只管判据和运行方法。**
->
-> ⚠️ **2026-09-16 改**：原来这里写着「贴着代码走，跨仓不搬」—— **本文件当天就搬进了 `OpenPLC_Docs`**，那句话自己作废了。
-> 真正贴着代码走的只剩四份主机侧测试的 README（见下面 `host/` 那张表），理由是它们描述的就是所在目录。
+需要「传输进行中」的用例不会自己实现传输，而是**把 IAPTool 当子进程拉起来**跑真实烧写 —— 被测的始终是出货代码路径，不是测试代码里的仿制品。
 
-⚠️ **机器相关的路径只允许出现在 `config/machine.py`。** 脚本里写死绝对路径、或用 `..\..\..\` 数上去，换台电脑或挪个目录就废 —— 这两种都犯过。
+## `$TEST` 的本机配置
+
+⚠️ **机器相关的路径只允许出现在 `$TEST/config/machine.py`**（PortTool 另有自己的一份）。它是 `tools/init_machine.py` 生成的，不要手写、也没有模板可抄；需要新的本机路径时，把它连同探测方式加进那个脚本的 `SETTINGS` 表。
 
 ⚠️ **`init_machine.py` 有单元测试**：`python tools/test_init_machine.py`（**32 个用例**，四组）。
 
@@ -67,41 +32,23 @@ TestCase/
 
 退出码：0 全过，1 有失败，2 全过但 ask_for 那组因这台机器没有真 CubeIDE / Arduino IDE 而跳过 —— **不假装通过**。
 
-⚠️ **那两个文件是 `tools/init_machine.py` 生成的，不要手写、也没有模板可抄。** 需要一个新的本机路径时，把它连同探测方式加进那个脚本的 `SETTINGS` 表 —— 那里是"这台机器有什么"的唯一记录。以前的 `machine.example.*` 已删除：它和 `SETTINGS` 是同一份清单的两个出处，留着必然漂移。
-
-## 快速开始
-
 ```
-# 手工的话：
-
-# 一次性：探测本机路径，生成 config/machine.py
-python tools\init_machine.py      # Linux 上是 python3
-
-# 让一个仓库里的 Claude 会话读得到兄弟仓库，不必一路批权限
-python tools\init_machine.py --write-claude-dirs
-
-# 所有不需要板子的检查。改完代码先跑这个，全绿了再考虑上板
-python tools\selfcheck.py         # 15 项；--list 先看它跑哪几步；--quick 跳过慢的那 5 项
-
-# 构建 bootloader、烧写、抓启动日志、给判定（CubeIDE 必须关闭）
-python tools/flash_bootloader.py
-
-# 只看串口，不碰板子
-python tools/serial_watch.py
+python tools/init_machine.py      # 一次性：探测本机路径，生成 config/machine.py（Linux 上是 python3）
+python tools/selfcheck.py         # 不需要板子的检查；--list 先看它跑哪几步
+python tools/flash_bootloader.py  # 命令行编 bootloader、ST-Link 烧写、抓启动日志（CubeIDE 必须关闭）
+python tools/serial_watch.py      # 只看串口，不碰板子
 ```
 
-⚠️ **测试脚本一律用 Python**（2026-09-01 定）。
+⚠️ **测试脚本一律用 Python**（2026-09-01 定）。缺什么会报 `SKIP` 并说清缺什么，**不会静默跳过**。
 
-缺什么会报 `SKIP` 并说清缺什么，**不会静默跳过** —— 一个被悄悄跳过的检查会被读成通过，那比没有这个检查更糟。
-
-## 编译
+## 编译 `TestCase.exe`
 
 ```sh
-# 在 IAPTranfer_Tool/ 下
-go build -o Output/windows/TestCase.exe ./TestCase
+# 在 $TEST 下
+go build -o Output/windows/TestCase.exe .
 ```
 
-和 IAPTool 共用一个 Go module，不引入额外依赖，也不会让 `IAPTool.exe` 变大。
+`go.mod` 用 `replace IAPTool => ../IAPTranfer_Tool` 引用 IAPTool 的公开包（`iapcert`、`iapproto`、`netiface`），所以 IAPTranfer_Tool 要放在旁边。
 
 ## 运行
 
@@ -226,25 +173,26 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 2. **按住 BOOT0 复位** —— 日志出现 `** UPLOAD Mod ... (BOOT0 held)`
 3. 让 app 收到认证过的 UDP reboot（`IAPTool ether` 的第一步就是这个），但它随后会真的上传
 
-## 主机侧测试（`host/`，不需要板子）
+## 主机侧测试（不需要板子）
 
 跑得快、随时能跑，**改完代码先过这一层再上板**。
 
 | 目录 | 怎么跑 | 覆盖什么 |
 |---|---|---|
-| `host/iapcert/` | 在 `IAPTranfer_Tool/` 下 `go test ./TestCase/...` | 证书布局与根签名覆盖的字节范围（换个范围就验错东西）；serial 计数器从 1 开始、递增、落文件；serial 小端落在偏移 64；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
-| 根目录、`internal/` | 在 `IAPTranfer_Tool/` 下 `go test . ./internal/...` | **T1-35** IAPTool 自己的单元测试：密钥查找顺序（`--key` → `local_config.json` → 用户配置目录 → exe 旁边）、串口层、`internal/iapproto` 的协议常量与绑物理网卡拨号。进 selfcheck |
-| `host/bootloader_unit/` | `python build.py`，需要 gcc/clang | 用 stub 在主机上编译**真实的** `sha256.c` / `iap_cert.c` / `fw_verify.c` / `iap_auth.c` 并跑断言。金标证书由出货工具生成，所以过了就等于 C 和 Go 对同一套线格式达成一致。细节见 `$TOOL:TestCase/host/bootloader_unit/HOST-C-TESTS.md`（贴着代码放） |
-| `host/owner_revoke/` | `python build.py`，需要 gcc/clang | **T2-21** 当前生效的根撤不掉自己（`R4`）。喂一块 RAM 里的假 owner 记录区（按 `owner_slot.h` 的字节布局手搓），在主机上编译并跑**真实的** `owner_root_ro.c`。判据见 [M2 归属与信任](../modules/M2-ownership.md) 的「测试怎么跑」节 |
-| `host/sector15_reclaim/` | `python build.py`，需要 gcc/clang | **T2-34** 扇区 15 回收中途断电。在主机上编译**真实的** `bootloader_state.c` / `bkp_stash.c` / `owner_slot.c`，flash 和备份 SRAM 用 RAM 代替，在每次 flash 操作之前逐个断电。判据见 [M2 归属与信任](../modules/M2-ownership.md) |
-| `host/fakeboard/` | `python run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
-| `host/fakeboard/` | `python run_ide_upload.py [--keep]`，需要 arduino-cli | **T1-34** 从 `arduino-cli upload`（IDE 那条命令）烧一块跑 app 的假板子：未认领 / 已认领 / 密钥不对。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **几分钟，不进 selfcheck** |
-| `host/crypto_ref/` | `python run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL:TestCase/host/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
-| `host/variant_check/` | `python build.py`，需要 arduino-cli | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
-| `host/examples_build/` | `python build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
-| `host/renode/` | `python run.py [--only NAME]`，需要 arduino-cli 和 Renode（`$RENODE`） | **T3-05** `OpenPLC_Ports` 的 13 个例程在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），不进 selfcheck** |
+| `$TOOL/tests/iapcert/` | 在 `$TOOL` 下 `go test ./tests/...` | 证书布局与根签名覆盖的字节范围（换个范围就验错东西）；serial 计数器从 1 开始、递增、落文件；serial 小端落在偏移 64；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
+| `$TOOL` 根目录、`internal/`、`iapproto/`、`netiface/` | 在 `$TOOL` 下 `go test . ./internal/... ./iapproto/... ./netiface/...` | **T1-35** IAPTool 自己的单元测试：密钥查找顺序（`--key` → `local_config.json` → 用户配置目录 → exe 旁边）、串口层、`internal/iapproto` 的协议常量与绑物理网卡拨号。进 selfcheck |
+| `$BOOT/tests/bootloader_unit/` | `$BOOT/tests` 下 `ctest --preset local -R T1-16`，需要 gcc/clang 和 CMake | 用 stub 在主机上编译**真实的** `sha256.c` / `iap_cert.c` / `fw_verify.c` / `iap_auth.c` 并跑断言。金标证书由出货工具生成，所以过了就等于 C 和 Go 对同一套线格式达成一致。细节见 `$BOOT/tests/bootloader_unit/HOST-C-TESTS.md`（贴着代码放） |
+| `$CORE_REPO/tests/owner_revoke/` | `$CORE_REPO/tests` 下 `ctest --preset local`，需要 gcc/clang 和 CMake | **T2-21** 当前生效的根撤不掉自己（`R4`）。喂一块 RAM 里的假 owner 记录区（按 `owner_slot.h` 的字节布局手搓），在主机上编译并跑**真实的** `owner_root_ro.c`。判据见 [M2 归属与信任](../modules/M2-ownership.md) 的「测试怎么跑」节 |
+| `$BOOT/tests/owner_capacity/` | `$BOOT/tests` 下 `ctest --preset local -R "T2-2|T2-3|T1-33"`，需要 gcc/clang 和 CMake | owner 区容量、压缩、`--wipe`、自撤、出厂无根、恢复出厂、连续 40 次换主（T2-22–T2-33、T1-33、T2-27）。判据见 [M2 归属与信任](../modules/M2-ownership.md) |
+| `$BOOT/tests/sector15_reclaim/` | `$BOOT/tests` 下 `ctest --preset local -R T2-34`，需要 gcc/clang 和 CMake | **T2-34** 扇区 15 回收中途断电。在主机上编译**真实的** `bootloader_state.c` / `bkp_stash.c` / `owner_slot.c`，flash 和备份 SRAM 用 RAM 代替，在每次 flash 操作之前逐个断电。判据见 [M2 归属与信任](../modules/M2-ownership.md) |
+| `host/fakeboard/` | `python host/fakeboard/run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，七种情况：自签的三种 + 委托证书的三种 + 一把密钥都没有。**每种在真板子上都要换一把 bootloader 密钥才能构造**。七种情况的判据见 `$TEST/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
+| `host/fakeboard/` | `python host/fakeboard/run_ide_upload.py [--keep]`，需要 arduino-cli | **T1-34** 从 `arduino-cli upload`（IDE 那条命令）烧一块跑 app 的假板子：未认领 / 已认领 / 密钥不对。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **几分钟，不进 selfcheck** |
+| `$TOOL/tests/crypto_ref/` | 在 `$TOOL` 下 `python tests/crypto_ref/run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL/tests/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
+| `$CORE_REPO/tests/variant_check/` | `python tests/variant_check/build.py`，需要 arduino-cli（环境变量 `ARDUINO_CLI` / `ARDUINO_CLI_CONFIG`） | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
+| `$CORE_REPO/tests/examples_build/` | `python tests/examples_build/build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
+| `host/renode/` | `python host/renode/run.py [--only NAME]`，需要 arduino-cli 和 Renode（`$RENODE`）。⚠️ `$BOOT/Debug/` 里必须是 bootloader，是工装镜像时跳过 | **T3-05** `OpenPLC_Ports` 的 13 个例程在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），不进 selfcheck** |
 
-⚠️ **假板子的上传通道用 61865，不用产品端口 56865**（`host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。T1-34 的发现走的是板卡包写死的 56865/UDP，假板子在那里也应答。
+⚠️ **假板子的上传通道用 61865，不用产品端口 56865**（`$TEST/host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。T1-34 的发现走的是板卡包写死的 56865/UDP，假板子在那里也应答。
 
 ### P5 · example 不能腐烂
 
@@ -253,8 +201,8 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 **什么时候跑**：改了 `open_plc_arduino` 的任何库之后，以及发版前。**不在 `selfcheck` 里** —— selfcheck 是"改完代码就跑"的东西，往里加 45 分钟只会让人不跑它。
 
 ```
-python host/examples_build/build.py              # 全部
-python host/examples_build/build.py --only SDRAM  # 只挑一个库
+python tests/examples_build/build.py              # 在 $CORE_REPO 下；全部
+python tests/examples_build/build.py --only SDRAM  # 只挑一个库
 ```
 
 ### 静态检查一览（`P` 系列）
@@ -262,28 +210,29 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 **不碰任何代码执行，看的是源码和文档本身。** `P1`/`P2`/`P3` 对应发版检查单的
 `CHK-B1` / `CHK-B2` / `CHK-B3`，以前是人工核对。
 
-| 编号 | 跑什么 | 查什么 | 在 selfcheck 里 |
+| 编号 | 跑什么 | 查什么 | 在哪个自检里 |
 |---|---|---|---|
-| `P1` | `tools/check_version_sync.py` | 固件版本号三处一致 | ✅ |
-| `P2` | `tools/check_mirror_sync.py` | 跨仓镜像（清单见 ARCHITECTURE.md「跨仓镜像的代码」） + RTC 备份寄存器占用 | ✅ |
-| `P3` | `tools/check_core_sync.py` | `$CORE_LIVE` 与 git 仓库一致 | ✅ |
-| `P4` | `host/variant_check/build.py` | Arduino 变体头的编译期断言 | ✅ |
-| `P5` | `host/examples_build/build.py` | 板卡包里每个能在这块板上编的 example 都编得过 | ⛔ 约 45 分钟，故意不进 |
-| `P7` | `tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ |
-| `P8` | `tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ |
-| `P9` | `tools/check_doc_paths.py` | 文档里点名的每条路径都存在，链接的锚点和路径型链接文字也对得上 | ✅ |
-| `P10` | `tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
-| `P11` | `tools/check_tool_sync.py` | 板卡包里的 `IAPTool` 不落后于仓库 | ✅ |
-| `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ |
-| `P13` | `tools/check_no_stale_ids.py` | 改过名的编号没有残留引用 | ✅ |
-| `P14` | `tools/check_changelist_has_no_orphans.py` | **没做完的活不许只活在某张图的 `CHANGE-LIST` 里** —— 每份 `CHANGE-LIST` 要有横幅说明未完成的块搬去了哪，且 `work/TODO.md` 里找得到 | ✅ |
-| `P15` | `host/vector_alignment/build.py` | **app 的起始地址必须是 1024 的倍数**。正：当前 `build.flash_offset` 编得过；**反：传 `0x20200` 必须链接失败**，且错误里点名对齐。需要 arduino-cli | ✅ |
-| `P16` | `tools/check_icache_is_restored.py` | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ |
-| `P17` | `tools/check_cproject_ld.py` | **`.cproject` 的链接脚本必须是 `${PLC_LD_SCRIPT}` 变量，不是写死的文件名** —— CubeMX 每次生成都会写死它，写死之后工装镜像编不出来。生成后的自动修在 `$BOOT/tools/restore_ld_script.bat`，这道检查兜它失效的情况。见 [../build/CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | ✅ |
-| `P18` | `$PROD/tools/gen_id_map.py --check` | **`ID-MAP.md` 的现行编号表和各文档里真正定义的编号一致** —— 那张表由这个脚本扫出来写进去（决议 69），手改或者新增编号忘了重新生成，都会报红。修法：`python tools/gen_id_map.py --write` | ✅ |
-| `P19` | `tools/check_no_sector15_writes.py` | **core 里没有代码写扇区 15** —— 扫 `$CORE_REPO` 的 `cores/`、`libraries/`、`variants/`，见到 `0x081E0000`、`FLASH_SECTOR_7` 与 `FLASH_BANK_2` 同文件、或 `FLASH_SECTOR_TOTAL - 1` 就报红。扇区 15 只有 bootloader 能写，见 [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md)「Flash 分区」 | ✅ |
+| `P1` | `$TEST/tools/check_version_sync.py` | 固件版本号三处一致 | ✅ `$TEST` |
+| `P2` | `$TEST/tools/check_mirror_sync.py` | 跨仓镜像（清单见 ARCHITECTURE.md「跨仓镜像的代码」） + RTC 备份寄存器占用 | ✅ `$TEST` |
+| `P3` | `$CORE_REPO/tests/check_core_sync.py` | `$CORE_LIVE` 与 git 仓库一致 | ✅ `$CORE_REPO` |
+| `P4` | `$CORE_REPO/tests/variant_check/build.py` | Arduino 变体头的编译期断言 | ✅ `$CORE_REPO` |
+| `P5` | `$CORE_REPO/tests/examples_build/build.py` | 板卡包里每个能在这块板上编的 example 都编得过 | ⛔ 约 45 分钟，故意不进 |
+| `P7` | `$PROD/tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ `$PROD` |
+| `P8` | `$PROD/tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ `$PROD` |
+| `P9` | `$PROD/tools/check_doc_paths.py` | 文档里点名的每条路径都存在，链接的锚点和路径型链接文字也对得上 | ✅ `$PROD` |
+| `P10` | `$TEST/tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
+| `P11` | `$TEST/tools/check_tool_sync.py` | 板卡包里的 `IAPTool` 不落后于仓库 | ✅ `$TEST` |
+| `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ `$PROD` |
+| `P13` | `$PROD/tools/check_no_stale_ids.py` | 改过名的编号没有残留引用 | ✅ `$PROD` |
+| `P14` | `$PROD/tools/check_changelist_has_no_orphans.py` | **没做完的活不许只活在某张图的 `CHANGE-LIST` 里** —— 每份 `CHANGE-LIST` 要有横幅说明未完成的块搬去了哪，且 `work/TODO.md` 里找得到 | ✅ `$PROD` |
+| `P15` | `$CORE_REPO/tests/vector_alignment/build.py` | **app 的起始地址必须是 1024 的倍数**。正：当前 `build.flash_offset` 编得过；**反：传 `0x20200` 必须链接失败**，且错误里点名对齐。需要 arduino-cli | ✅ `$CORE_REPO` |
+| `P16` | `$BOOT/tests/checks/check_icache_is_restored.py`（`ctest -R P16`） | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ `$BOOT` |
+| `P17` | `$BOOT/tests/checks/check_cproject_ld.py`（`ctest -R P17`） | **`.cproject` 的链接脚本必须是 `${PLC_LD_SCRIPT}` 变量，不是写死的文件名** —— CubeMX 每次生成都会写死它，写死之后工装镜像编不出来。生成后的自动修在 `$BOOT/tools/restore_ld_script.bat`，这道检查兜它失效的情况。见 [../build/CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | ✅ `$BOOT` |
+| `P18` | `$PROD/tools/gen_id_map.py --check` | **`ID-MAP.md` 的现行编号表和各文档里真正定义的编号一致** —— 那张表由这个脚本扫出来写进去（决议 69），手改或者新增编号忘了重新生成，都会报红。修法：`python tools/gen_id_map.py --write` | ✅ `$PROD` |
+| `P19` | `$CORE_REPO/tests/check_no_sector15_writes.py` | **core 里没有代码写扇区 15** —— 扫 `$CORE_REPO` 的 `cores/`、`libraries/`、`variants/`，见到 `0x081E0000`、`FLASH_SECTOR_7` 与 `FLASH_BANK_2` 同文件、或 `FLASH_SECTOR_TOTAL - 1` 就报红。扇区 15 只有 bootloader 能写，见 [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md)「Flash 分区」 | ✅ `$CORE_REPO` |
+| `P20` | `$TEST/tools/check_golden_vectors.py` | `$BOOT` 提交的 `golden_vectors.h` 和出货 IAPTool 现在生成的同一结构 | ✅ `$TEST` |
 
-⚠️ **这张表和 `selfcheck.py` 的 `CATALOG` 现在由 `P7` 对账**（2026-09-21 补的第三头）。
+⚠️ **这张表和 `$TOOL`、`$TEST` 两个 `selfcheck.py` 的 `CATALOG` 由 `P7` 对账**（2026-09-21 补的第三头）。
 `P14` 曾经从这个缝里漏过去：它进了 `CATALOG`、每次都在跑，文档里却一个字都没有。
 **新加一个步骤要同时动三处** —— `CATALOG`、这张表、以及模块文档里引用它的那条需求；
 少一处 `P7` 就红。
@@ -295,7 +244,7 @@ python host/examples_build/build.py --only SDRAM  # 只挑一个库
 ### P1 · 版本号三处一致
 
 ```
-python tools/check_version_sync.py       # 或 python tools/check_version_sync.py
+python tools/check_version_sync.py       # 在 $TEST 下
 ```
 
 比对 bootloader（`Core/Inc/IAP_config.h` 的 `OPENPLC_FW_VERSION`）、Arduino core（`boards.txt` 的 `build.fw_version`）、`RELEASE-NOTES.md` 最新的版本标题——三处本来毫无关联，各改各的。对应发版检查单 **CHK-B1**。退出码：0 三处一致，1 有分叉，2 缺文件。
@@ -303,7 +252,7 @@ python tools/check_version_sync.py       # 或 python tools/check_version_sync.p
 ### P2 · 跨仓镜像没分叉
 
 ```
-python tools/check_mirror_sync.py        # 或 python tools/check_mirror_sync.py
+python tools/check_mirror_sync.py        # 在 $TEST 下
 ```
 
 `$PROD/docs/repo/ARCHITECTURE.md` 列出的跨仓镜像代码，三个仓库没有共享构建系统，一侧改了另一侧不会报错，只会在运行时表现成不相关的症状。比的不是整份文件（C++ 侧有 `extern "C"`，两边 API 也不一样），是**每一项一个语义锚点**——只要求锚点一致。**没被检查覆盖的锚点会在输出末尾点名列出**，全绿不代表全覆盖。对应 **CHK-B2**。退出码：0 全部锚点一致，1 至少一处分叉，2 缺文件。
@@ -311,7 +260,7 @@ python tools/check_mirror_sync.py        # 或 python tools/check_mirror_sync.py
 ### P3 · core live 与 git 仓库一致
 
 ```
-python tools/check_core_sync.py          # 或 python tools/check_core_sync.py
+python tests/check_core_sync.py          # 在 $CORE_REPO 下
 ```
 
 比对 Arduino IDE **真正加载**的那份（`$CORE_LIVE`）和板卡包的 git 版（`$CORE_REPO`）。方向天生单向：改动在 `$CORE_LIVE` 里做、验证、再拷回仓库提交——`$CORE_LIVE` 不进版本控制，验证过忘了拷回来，那段代码就只活在这台机器上，重装一次 IDE 就没了。六类刻意排除在比对之外：IDE 自己的安装元数据、Go 构建产物、编辑器备份、`.claude/`、`.vscode/`。**CRLF 与 LF 视为相同**：从网上装的包是 LF，仓库在 `core.autocrlf=true` 下检出是 CRLF，只差换行符不算差异。对应 **CHK-B3**。退出码：0 一致，1 有差异，2 仓库路径不对。
@@ -319,7 +268,7 @@ python tools/check_core_sync.py          # 或 python tools/check_core_sync.py
 ### P7 · 总表和用例名单不得漂
 
 ```
-python tools/check_status_sync.py        # 或加 --list 只打印解析结果
+python tools/check_status_sync.py        # 在 $PROD 下；加 --list 只打印解析结果
 ```
 
 `$PROD/docs/tables/STATUS.md` 和 `TEST-CASES.md` 里的用例编号必须是同一个集合。抓三类漏洞：STATUS.md 拿某条用例当证据、但 TEST-CASES.md 没定义它（需求指着一条谁都跑不了的用例）；TEST-CASES.md 定义了某条用例、但没有需求在引用它（一条跑出来的结果没人记录，烂了也没人发现）；某条用例引用的需求号 STATUS.md 里不存在。退出码：0 两边一致，1 有漂移，2 缺文件。
@@ -327,7 +276,7 @@ python tools/check_status_sync.py        # 或加 --list 只打印解析结果
 ### P8 · 一个事实只能写在一个文件里
 
 ```
-python tools/check_doc_dupes.py          # 加 --min 40 只看更长的断言；--code 连代码块也列
+python tools/check_doc_dupes.py          # 在 $PROD 下；加 --min 40 只看更长的断言；--code 连代码块也列
 ```
 
 把每份文档切成句子，去掉 markdown 加粗之类的强调符号（这样加粗过的一份能跟没加粗的一份对上），任何长到能算"断言"的句子出现在两个以上文件里就判失败。**指针（"见 X"）不算**——指针短且泛化，这正是修复重复的手段本身。**代码块单独报告、不计入失败**：抓下来的日志、命令这类东西合理地要在多处原样出现（发布说明要给客户看到他会看到的确切字符串，验收记录要写板子实际打了什么）——它们引的是那份 `.c` 文件，不是互相抄。退出码：0 没有断言重复，1 至少一处，2 环境问题。
@@ -352,7 +301,7 @@ python tools/check_doc_dupes.py          # 加 --min 40 只看更长的断言；
 ### P9 · 文档里提到的路径必须存在
 
 ```
-python tools/check_doc_paths.py          # 加 --list 打印它 resolve 出的每条路径
+python tools/check_doc_paths.py          # 在 $PROD 下；加 --list 打印它 resolve 出的每条路径
 ```
 
 只检查三种能明确判断"相对谁"的写法：markdown 链接（相对当前文档）、`$BOOT`/`$TOOL`/`$CORE` 这类仓库变量路径、反引号包住的 `docs/`开头的路径（相对某个仓库根）。**故意不检查其余所有反引号路径**——一条不带仓库变量的裸路径意思是"相对这段话在讲哪个仓库"，检查脚本猜不出来。想让某条裸路径也被查到，就给它加上仓库变量前缀。路径里的行号（如 `fmc.c` 后面跟的行号范围）在检查前会被去掉——文件必须存在，行号只是提示，本来就会漂。另外两条（2026-09-24 起）：**链接带 `#锚点` 的，锚点必须是目标文件里某个标题按 GitHub 规则生成的锚点**；**链接文字本身写成一个路径的，文字里的文件名必须和链接目标一致**（防止目标改对了、文字还是旧路径）。链接文字是一句话的不查。
@@ -362,12 +311,20 @@ python tools/check_doc_paths.py          # 加 --list 打印它 resolve 出的�
 ### P11 · 包里的 IAPTool 不能落后于仓库
 
 ```
-python tools/check_tool_sync.py           # 加 --list 连两份 usage 一起打
+python tools/check_tool_sync.py           # 在 $TEST 下；加 --list 连两份 usage 一起打
 ```
 
-修法一条命令：`python tools/install_tool.py`（`compile_tool.sh` 末尾会自动跑它，所以正常情况下不用手动敲）。
+修法一条命令：在 `$TOOL` 下 `python tools/install_tool.py`（`compile_tool.sh` 末尾会自动跑它，所以正常情况下不用手动敲）。
 
 **IDE 的 Upload 按钮跑的不是我们构建的那份 IAPTool**，而是板卡包里的副本（`$A15/packages/OpenPLC_Alpha/tools/STM32Tools/<版本>/<平台>/IAPTool`，`keys/` 也在它旁边）。所以客户手上那个二进制可以比这里所有用例测的那个落后几周，而没有任何东西会说话。比的不是哈希（同一份源码两次构建逐字节都不同，一个哭喊的检查等于没有检查），是**两个二进制自己报出来的子命令集合**：仓库有、包里没有的动词就是缺陷 —— 菜单到不了那个功能。退出码：0 包里能做到仓库能做的全部，1 落后了，2 有一份二进制不存在。
+
+### P20 · 黄金向量和出货的 IAPTool 对得上
+
+```
+python tools/check_golden_vectors.py      # 在 $TEST 下
+```
+
+用出货的 IAPTool 在临时目录重新生成一份黄金向量，和 `$BOOT/tests/bootloader_unit/golden_vectors.h` 比；不一样就失败，并打出去 `$BOOT` 更新的命令，**不写 `$BOOT`**（「黄金向量由谁更新」那张票）。**只比结构**（12 个数组的长度和 5 个固定输入）：每次生成的密钥和签名都是随机的，没法逐字节比，所以证书长度变了抓得到、长度不变的格式变化抓不到。
 
 ### P10 · allow 列表不许攒字面命令
 
@@ -381,7 +338,7 @@ python tools/check_allow_hygiene.py --fail-over 400   # 超过这个数才算失
 
 **这条不是发版门禁**——`settings.local.json` 本机专属、不进 git，不同机器天然不同，没法当"必须全绿"的检查。默认只打印、退出码 0；只有 `--fail-over` 指定阈值且真的超了才返回 1。**判据只看"像不像一次性"**（是否带绝对路径、是否带 `-First N` 这种烤进去的输出切片），会把一些合理的本机安装路径也点出来。
 
-## 板上测试（`onboard/`）
+## 板上测试（`$TEST/onboard/`）
 
 | 目录 | 是什么 | 怎么用 |
 |---|---|---|

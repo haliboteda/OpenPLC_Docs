@@ -484,7 +484,7 @@ flowchart TD
 
 ¹ **这三条用例跨两个模块。** `T1-18d`–`T1-18f`（委托证书由本板的根签发 / 签发根不对 / 证书覆盖别人的密钥）
 属于一族七种情况，**另外四种在 [M1 固件升级](M1-firmware-upgrade.md) 的 `T1-18a`–`T1-18c` `T1-18g`**，
-一起注册在 `$TOOL:TestCase/host/fakeboard/run_cases.py` 里。
+一起注册在 `$TEST/host/fakeboard/run_cases.py` 里。
 `T1-16`（拿真实 bootloader 源码跑板子侧的判断逻辑）同样两边都用。
 **一个测试只有一个编号** —— 这里引用 M1 的编号，不另起一套。
 
@@ -516,6 +516,8 @@ flowchart TD
 
 **按需求顺序排** —— `R2-02` 的六条占满 `T2-01`–`T2-06`，因为另外三条需求没有本模块自己的用例。
 
+这张表里命令前没写仓名的，都是 `$TEST` 的命令。
+
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
 | `T2-01` | `R2-02` | 认领把没有根的板子绑到一把新密钥上 | 无根板子上 `takeown` 不按键回 `OK`；`getpubkey` 返回新密钥；复位后仍然认得；**跑完那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_takeown.py --key <new.pem>` | 真板子 | 🟡 决策 72 后未上板 |
@@ -540,20 +542,20 @@ flowchart TD
 | `T2-18` | `R2-04` | 坏签名的撤销**记不进去** | 板子回 `revoke refused: signature does not verify against the current owner`，且 generation 不变、`owner_slot_is_revoked` 仍答否 | 同上 ⁴（`--bad-signature`） | 真板子 | ✅ |
 | `T2-19` | `R2-04` | **连续作废两个不同的叶，两个都生效** | 启动日志 `2 leaf(s) revoked`；两个叶各自上传都被拒；**第三张未被作废的叶照常传起** | `python tools/run_revoke_leaf.py --second-leaf` ⁷ | 真板子 | ✅ |
 | `T2-20` | `R2-04` | 重复作废同一个叶是**幂等**的 | 第二次回 `OK already revoked`，且 `N/96 revoke slot(s) free` **一个槽都没少** | 同上 ⁷ | 真板子 | ✅ |
-| `T2-21` | `R2-04` | **当前生效的根撤不掉自己**（代码里叫 `R4`） | 喂一块假 owner 记录区、跑**真实**的 core 侧 `owner_root_ro.c`：第一条 `'R'` 记录点名当任根 → **根没被撤**；**紧跟其后的两条照常生效**（R4 跳过那一条，不中断整段扫描）；没被点名的叶不算被撤 ⁸ | `python host/owner_revoke/build.py` | 主机侧（要 gcc/clang） | ✅ |
-| `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里点名 `setowner --wipe`（只有它腾空名额）¹¹ | `python host/owner_capacity/build.py capacity` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-21` | `R2-04` | **当前生效的根撤不掉自己**（代码里叫 `R4`） | 喂一块假 owner 记录区、跑**真实**的 core 侧 `owner_root_ro.c`：第一条 `'R'` 记录点名当任根 → **根没被撤**；**紧跟其后的两条照常生效**（R4 跳过那一条，不中断整段扫描）；没被点名的叶不算被撤 ⁸ | `$CORE_REPO/tests`：`ctest --preset local` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里点名 `setowner --wipe`（只有它腾空名额）¹¹ | `$BOOT/tests`：`ctest --preset local -R T2-22-T2-23` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-23` | `R2-04` | **第 97 条作废被拒，且一个字节没写** | 96 条全部写入且逐条读回都是「已撤销」；第 97 条 `owner_slot_revoke()` 返回 false，**假 flash 的写入字节计数不变**，`'R'` 段 3072 字节逐字节和拒绝前相同，当任根也没变 ¹¹ | 同上 ¹¹ | 主机侧（要 gcc/clang） | ✅ |
 | `T2-26` | `R2-04` | **板子报得出「我这个 app 的签名者被撤了」** —— 第 60 条让它照常启动之后，这是现场唯一的信号 | 三支都判，前两支**同一段代码判**：撤销装机固件那张叶 → 答 `REVOKED`；`T2-17` 装上没被撤的叶签的镜像 → 答不是 `REVOKED`；板上无可运行固件 → 答「没有」 ¹⁶ | 随 `python tools/run_revoke_leaf.py` 一起跑；第三支手工 ¹⁶ | 真板子 | ✅ |
-| `T2-27` | `R2-04` | **撤销点名当任根时被忽略** —— `R4` 的 bootloader 侧那份实现，即「永不能撤到一个有效根都不剩」 | 造一条点名当任根的 `'R'` 记录 → `owner_slot_is_revoked(当任根)` 答否、当任根不变；**同时**点名别的键那条照常生效 ¹⁵ | `python host/owner_capacity/build.py self-revoke` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-27` | `R2-04` | **撤销点名当任根时被忽略** —— `R4` 的 bootloader 侧那份实现，即「永不能撤到一个有效根都不剩」 | 造一条点名当任根的 `'R'` 记录 → `owner_slot_is_revoked(当任根)` 答否、当任根不变；**同时**点名别的键那条照常生效 ¹⁵ | `$BOOT/tests`：`ctest --preset local -R T2-27` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-25` | `R2-04` | **`setowner --wipe` 在真板子上回收名额** | 一块已认领、有 6 个叶被撤销的板子：`--wipe` 换根 → 板子回收扇区 15（不碰扇区 0） → 复位后 `getowner` 报 generation 2、新根，启动日志 `96/96 revoke slot(s) free, 0 leaf(s) revoked` ¹² | `IAPTool setowner <ip> --current-key=<a.pem> --new-key=<b.pem> --wipe` | 真板子 | 🟡 决策 72 后未上板 |
-| `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 回收要写回的内容里只有那一条记录（**签名被剥掉**）、没有作废记录；写进擦过的区再重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `python host/owner_capacity/build.py wipe` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-24` | `R2-04` | **`setowner --wipe` 擦之前先判，擦之后名额全回来** | generation 不对 / 签名不对 → 拒绝且**输出缓冲一个字节没动**；正确的那次 → 回收要写回的内容里只有那一条记录（**签名被剥掉**）、没有作废记录；写进擦过的区再重扫 → 根是新主人、generation 延续、**`96/96 revoke slot(s) free`**、清空前那条作废不再生效 ¹¹ | `$BOOT/tests`：`ctest --preset local -R T2-24` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-28` | `R2-01` | **出厂板第一次上传就被认领**，本机一把密钥都没有 | 假板子 `getpubkey` 答 `none`：工具在默认位置生成私钥并打印路径，`takeown` 那把公钥，再照常上传；假板子日志里认领的公钥 = 生成的那把，且收到整个镜像 | `python host/fakeboard/run_cases.py`（`claim-new-key`；selfcheck 的 `T1-18a`–`T1-18g` 那一步一起跑） | 假板子（经网口；USB 那条的认领逻辑由主机 Go 单测覆盖，真串口没跑） | ✅ |
 | `T2-29` | `R2-01` | **默认位置已有私钥时复用，不重新生成** | 认领的公钥 = 那把已有的，文件逐字节不变，随后照常上传 | 同上（`claim-reuse-key`） | 假板子 | ✅ |
 | `T2-30` | `R2-01` | **板子属于别人的根时，提示两条出路** | 输出里有本机私钥路径、`IAPTool pubkey`、`IAPTool cert`：拷根私钥过来，或向根持有者要叶证书 | 同上（`other-owner`） | 假板子 | ✅ |
-| `T2-31` | `R2-01` | **没有根的板子谁都不信，`takeown` 不设门** | 空区 → `owner_slot_root()` 为空、启动行说 `no root`；`setowner` 和 `revoke` 被拒且**一个字节没写**；`takeown` 被接受、根就是那把、generation 1；第二次 `takeown` 被拒、根不变 | `python host/owner_capacity/build.py no-root` | 主机侧（要 gcc/clang） | ✅ |
-| `T2-32` | `R2-01` | **恢复出厂回到没有根，可以再认领** | 恢复出厂后 `owner_slot_root()` 为空；随后 `takeown` 被接受，generation 接在恢复出厂那条之后 | `python host/owner_capacity/build.py reset` | 主机侧（要 gcc/clang） | ✅ |
-| `T2-33` | `R2-02` | **连续换根不限次数** | 连续 40 次 `setowner`：`'O'` 段写满时触发回收，最后生效的是第 40 把、generation 41，换根前记下的作废仍然生效 | `python host/owner_capacity/build.py rotate` | 主机侧（回收用桩代替，只清根区；真回收见 `T2-34`） | ✅ |
-| `T2-34` | `R2-02` | **扇区 15 回收中途断电** | 在回收的 7 次 flash 操作之前逐个断电：暂存完好 → 下次启动做完回收，根、作废、固件 metadata 都回来；电池没电或暂存被改一位 → 擦除之前断的不受影响，擦除之后断的一律**没有根**、没有 metadata，绝不会信一把原来没有的根。另验出厂扇区（只有校准值）不擦只打标记、旧布局扇区保校准值重建。擦除后、写回校准值前断电时校准值丢失，靠工装副本 | `python host/sector15_reclaim/build.py` | 主机侧，跑**真实**的 `bootloader_state.c` `bkp_stash.c` `owner_slot.c`（flash 和备份 SRAM 用 RAM 代替；备份 SRAM 在 VBAT 下保持要上板验） | ✅ |
+| `T2-31` | `R2-01` | **没有根的板子谁都不信，`takeown` 不设门** | 空区 → `owner_slot_root()` 为空、启动行说 `no root`；`setowner` 和 `revoke` 被拒且**一个字节没写**；`takeown` 被接受、根就是那把、generation 1；第二次 `takeown` 被拒、根不变 | `$BOOT/tests`：`ctest --preset local -R T2-31` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-32` | `R2-01` | **恢复出厂回到没有根，可以再认领** | 恢复出厂后 `owner_slot_root()` 为空；随后 `takeown` 被接受，generation 接在恢复出厂那条之后 | `$BOOT/tests`：`ctest --preset local -R T2-32` | 主机侧（要 gcc/clang） | ✅ |
+| `T2-33` | `R2-02` | **连续换根不限次数** | 连续 40 次 `setowner`：`'O'` 段写满时触发回收，最后生效的是第 40 把、generation 41，换根前记下的作废仍然生效 | `$BOOT/tests`：`ctest --preset local -R T2-33` | 主机侧（回收用桩代替，只清根区；真回收见 `T2-34`） | ✅ |
+| `T2-34` | `R2-02` | **扇区 15 回收中途断电** | 在回收的 7 次 flash 操作之前逐个断电：暂存完好 → 下次启动做完回收，根、作废、固件 metadata 都回来；电池没电或暂存被改一位 → 擦除之前断的不受影响，擦除之后断的一律**没有根**、没有 metadata，绝不会信一把原来没有的根。另验出厂扇区（只有校准值）不擦只打标记、旧布局扇区保校准值重建。擦除后、写回校准值前断电时校准值丢失，靠工装副本 | `$BOOT/tests`：`ctest --preset local -R T2-34` | 主机侧，跑**真实**的 `bootloader_state.c` `bkp_stash.c` `owner_slot.c`（flash 和备份 SRAM 用 RAM 代替；备份 SRAM 在 VBAT 下保持要上板验） | ✅ |
 | `T2-35` | `R2-01` | **出厂板经 USB 第一次上传就被认领**（真板子） | IAPTool 输出 `This board has no root yet` 和 `Claimed.`，私钥生成在它打印的默认位置且文件存在；随后 v1 装上并启动 | `python tools/run_five_paths.py --only 1 --cdc <COM>`（先跑路径 0） | 真板子 + USB 线 | 🟡 决策 72 后未上板 |
 | `T2-36` | `R2-01` | **恢复出厂后经网口上传再次被认领**，用的是另一把新生成的私钥 | 同 `T2-35`，经以太网；认领的私钥和路径 1 那把不同 | `python tools/run_five_paths.py --only 2`（路径 2-c） | 真板子 + 人按住 BOOT0 十秒 | 🟡 决策 72 后未上板 |
 

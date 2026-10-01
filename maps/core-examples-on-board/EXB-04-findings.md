@@ -88,13 +88,13 @@
 
 | 受影响的东西 | 影响 | 出处 |
 |---|---|---|
-| **P5**（编译板卡包里所有例程） | 例程是动态扫出来的，删掉就少编几个，不会报错。只有**一个例程都扫不到**时才失败。`EXCLUDED` 里 Keyboard / Mouse / SubGhz 三条删掉例程后变成死条目，应一起去掉。P5 扫的是**已安装的板卡包**（`CORE_LIVE`），所以要下次发版装上后才生效 | `IAPTranfer_Tool/TestCase/host/examples_build/build.py:38-42、84-112` |
+| **P5**（编译板卡包里所有例程） | 例程是动态扫出来的，删掉就少编几个，不会报错。只有**一个例程都扫不到**时才失败。`EXCLUDED` 里 Keyboard / Mouse / SubGhz 三条删掉例程后变成死条目，应一起去掉。P5 扫的是**已安装的板卡包**（`CORE_LIVE`），所以要下次发版装上后才生效 | `$CORE_REPO/tests/examples_build/build.py:38-42、84-112` |
 | P5 的说明文档 | 只描述范围（「别的芯片的外设、这块板没有的 USB 功能」），没有逐个列例程，删掉 EXCLUDED 后这句可以不改 | [HOW-TO-RUN-TESTS.md](../../docs/engineering/HOW-TO-RUN-TESTS.md):298-323 |
 | 决议 68（上游例程要编得过、同步时保住版本号那一行） | 删了之后要多一条同步规则：**上游同步时不要把删掉的例程或库带回来**，需要记进 DECISIONS | [DECISIONS.md](../../docs/tables/DECISIONS.md):2602-2613 |
 | 本图的全集计数 | map 写「上游 32」，但它给的 `find open_plc_arduino/libraries` 只扫出 31 个上游例程；第 32 个是 `CI/build` 下的 BareMinimum | [map.md](map.md)「全集」 |
 | 自有库 / core | 12 个上游库里**只有 `SrcWrapper` 被 core 用到**（`cores/arduino/Arduino.h:33`、`platform.txt:117`），自有库 `OpenPLC_*` 一个都不 include；`OpenPLC_Net` 依赖的是 `STM32duino_LwIP`（不在本票范围，也没有例程） | 在 `libraries/OpenPLC_*`、`cores`、`variants` 下 grep `#include` 和 `library.properties` 的 `depends=` |
 | 删整库时 | 要改 `libraries/CMakeLists.txt:3-13` 的 `add_subdirectory`；`CI/build/examples/BareMinimum` include 了 EEPROM / IWatchdog / Servo / SPI / SoftwareSerial / Wire / CMSIS_DSP，删其中任何一个库它就编不过（它本来就缺版本号那一行，现在也编不过） | 同左 |
-| 其他测试 / 检查脚本 | 没有别的地方引用这些例程或库 | 在 `IAPTranfer_Tool/TestCase`、`OpenPLC_Docs/tools`、`OpenPLC_Docs/docs`、`package_index_json` 下 grep |
+| 其他测试 / 检查脚本 | 没有别的地方引用这些例程或库 | 在 `$TEST`、`OpenPLC_Docs/tools`、`OpenPLC_Docs/docs`、`package_index_json` 下 grep |
 
 **按库归纳**（只有删例程和删整库两种做法）：
 

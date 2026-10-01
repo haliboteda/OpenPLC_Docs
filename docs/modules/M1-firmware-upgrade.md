@@ -261,7 +261,7 @@ flowchart TD
 | **R1-17** | 会话 | 50s 内的空闲客户端**不**被踢 | `T1-08` | ✅ |
 | **R1-18** | 会话 | 传输进行中闯入的第二个连接不打断传输 | `T1-09` | ✅ |
 | **R1-19** | 会话 | 第一个连接正常关闭后能再连 | `T1-10` | ✅ |
-| **R1-20** | 认证 | 会话认证：签名挑战应答，nonce 跨掉电不重复 | `T1-15` `T1-16` `T1-17` | ✅ |
+| **R1-20** | 认证 | 会话认证：签名挑战应答，nonce 跨掉电不重复 | `T1-15` `T1-16` `T1-17` `P20` | ✅ |
 | **R1-21** | 认证 | 工具在传输前就能判断「这块板收不收我的签名」 | `T1-18a`–`T1-18g` | ✅ |
 | **R1-22** | 传输与校验 | 镜像先过 CRC32 | `T1-24` | ✅ |
 | **R1-23** | 传输与校验 | 镜像的 SHA-256 + ECDSA 签名在**上传时**被校验 | `T1-11` `T1-12` | ✅ |
@@ -325,7 +325,7 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 ⚠️ **其中两条 2026-09-18 在真板子上重新做过一遍，步骤留在了别处但还没进用例表**：
 `R1-13`（定位靠 UID 不依赖 MAC）的复现配方写在
-`$TOOL/TestCase/onboard/iap_probe/iap_probe.ino` 的文件头注释里；
+`$TEST/onboard/iap_probe/iap_probe.ino` 的文件头注释里；
 `R1-30`（复位原因）的三个取值分别靠认证重启、ST-Link 的 `-rst`、真断电触发。
 **它们仍算「复现不了」，因为没有脚本把判定接到退出码上。**
 
@@ -342,24 +342,26 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 
 ## 5 · 测试怎么跑
 
+M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写了仓名（决策 78）。
+
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
-| `T1-01` | `R1-08` | 四个发现关键词都应答 | 四个关键词逐个发，都要有应答 | `$TOOL:TestCase/udp_discovery.go` | 真板子 | ✅ |
+| `T1-01` | `R1-08` | 四个发现关键词都应答 | 四个关键词逐个发，都要有应答 | `$TEST/udp_discovery.go` | 真板子 | ✅ |
 | `T1-02` | `R1-09` | 连续多轮发现 | 连发多轮不丢 | 同上 | 真板子 | ✅ |
 | `T1-03` | `R1-10` | 发现回复够快 | 回复落在工具的 2s 超时之内 | 同上 | 真板子 | ✅ |
 | `T1-04` | `R1-11` | 发现长时间浸泡 | 10 分钟连续发现，0 失败 | 同上 | 真板子 | ✅ |
 | `T1-05` | `R1-12` | 发现泛洪限流 | 限流生效，**且正常发现仍然答得出** | 同上 | 真板子 | ✅ |
-| `T1-06` | `R1-15` | 一次只服务一个客户端 | 第二条连接被拒 | `$TOOL:TestCase/tcp_session.go` | 真板子 | ✅ |
+| `T1-06` | `R1-15` | 一次只服务一个客户端 | 第二条连接被拒 | `$TEST/tcp_session.go` | 真板子 | ✅ |
 | `T1-07` | `R1-16` | 空闲连接被踢 | 约 60s 后断开 ¹ | 同上 | 真板子 | ✅ |
 | `T1-08` | `R1-17` | 空闲连接不被误踢 | 50s 时仍然连着（反向用例） | 同上 | 真板子 | ✅ |
 | `T1-09` | `R1-02` `R1-18` | 传输中闯入不打断 | 第二条连接被 RST 拒，传输照走完 | 同上 | 真板子 | ✅ |
 | `T1-10` | `R1-19` | 拒绝状态不卡死 | 第一条正常关闭后能再连（反向用例） | 同上 | 真板子 | ✅ |
-| `T1-11` | `R1-23` | 无效签名被拒 | 「没有任何密钥能产生的签名」上传被拒 | `$TOOL:TestCase/signature.go` | 真板子 | ✅ |
-| `T1-12` | `R1-23` | 签方不对被拒 | 「格式完全正确但签方不对」被拒 ² | `$TOOL:TestCase/signature_wrongkey.go` | 真板子 | ✅ |
+| `T1-11` | `R1-23` | 无效签名被拒 | 「没有任何密钥能产生的签名」上传被拒 | `$TEST/signature.go` | 真板子 | ✅ |
+| `T1-12` | `R1-23` | 签方不对被拒 | 「格式完全正确但签方不对」被拒 ² | `$TEST/signature_wrongkey.go` | 真板子 | ✅ |
 | `T1-13` | `R1-26` | 启动时重新验签 | 直接改坏已装好的 app，下次启动必须拒绝启动它 ² | `python tools/run_s3.py` | 真板子 | ✅ |
 | `T1-14` | `R1-25` | 失败上传不伤 app | 上传失败后 app 区**一字节没动** | `python tools/run_case.py --case T1-11 --then-reset` | 真板子 | ✅ |
-| `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `go test ./TestCase/...` | 主机侧 | ✅ |
-| `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `host/bootloader_unit/build.py` | 主机侧 | ✅ |
+| `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `$TOOL`：`go test ./tests/...` | 主机侧 | ✅ |
+| `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `$BOOT/tests`：`ctest --preset local -R T1-16` | 主机侧 | ✅ |
 | `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电后计数器不归零，本轮 nonce 全不同 | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
 | `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | 假板子 | ✅ |
 | `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | 假板子 | ✅ |
@@ -368,7 +370,7 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | 假板子 | ✅ |
 | `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | 假板子 | ✅ |
 | `T1-18g` | `R1-21` | 一把密钥都没有 | 工具拒并说 `no signing key found` | 同上 | 假板子 | ✅ |
-| `T1-19` | `R1-24` | SHA-256 编码交叉验证 | 独立第三实现逐向量比对 | `host/crypto_ref/run_checks.py` | 主机侧 | ✅ |
+| `T1-19` | `R1-24` | SHA-256 编码交叉验证 | 独立第三实现逐向量比对 | `$TOOL`：`python tests/crypto_ref/run_checks.py` | 主机侧 | ✅ |
 | `T1-20` | `R1-24` | ECDSA 编码交叉验证 | 同上 | 同上 | 主机侧 | ✅ |
 | `T1-21` | `R1-27` | 掉电落在传输期 | 断电后重新上电，**旧 app 照常启动** | `python tools/run_s4.py` ⁴ | **真板子 + 人工断电** | ✅ |
 | `T1-22` | `R1-27` | 掉电落在擦写窗口 | 报 `App signature invalid or absent`，重传能救回 | 同上 ⁴ | **真板子 + 人工断电** | ✅ |
@@ -382,9 +384,9 @@ verification`，`IAPTool exit 0`，板子重启后正常起了 app（`[NET] ip=1
 | `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ✅ |
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
-| `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `python host/owner_capacity/build.py compact` | 主机侧（要 gcc/clang） | ✅ |
+| `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `$BOOT/tests`：`ctest --preset local -R T1-33` | 主机侧（要 gcc/clang） | ✅ |
 | `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
-| `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `go test . ./internal/...` | 主机侧，进 selfcheck | ✅ |
+| `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |
 
 **共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
 
@@ -409,7 +411,7 @@ generation 1 同一把根。当天一共换了五次 bootloader，五次都成�
 ² `T1-11`（无效签名被拒）**证明不了** `T1-13`（启动时重新验签）。SDRAM 暂存做完之后，失败的上传根本不碰 app 区，所以它碰不到「启动时验签」这条路径。`T1-13` 是直接改坏已装好的 app 来测的。
 
 ³ **这一族七种情况（旧编号 `T1-18a`–`T1-18g`）全部服务 `R1-21`**，判据出处是
-`$TOOL:TestCase/host/fakeboard/KEY-MATCH.md`（贴着代码放的那份）。
+`$TEST/host/fakeboard/KEY-MATCH.md`（贴着代码放的那份）。
 标 ³ 的三条（`T1-18d` `T1-18e` `T1-18f`）**同时**是 [M2 归属与信任](M2-ownership.md) 证书链需求的证据 ——
 它们验的是「这块板信的根有没有为这张证书背书」。**一族测试同时服务两个模块怎么归，还没定** ——
 已记进地图的迷雾。

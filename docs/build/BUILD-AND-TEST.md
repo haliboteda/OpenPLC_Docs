@@ -1,19 +1,19 @@
 # 构建与测试
 
-路径变量（`$IDE`、`$CORE_LIVE`、`$TOOL` 等）的定义见 [../repo/ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的「路径变量」。本机路径由 `$TOOL/TestCase/tools/init_machine.py` 探测生成。
+路径变量（`$IDE`、`$CORE_LIVE`、`$TOOL` 等）的定义见 [../repo/ARCHITECTURE.md](../repo/ARCHITECTURE.md) 的「路径变量」。测试要的本机路径由 `$TEST/tools/init_machine.py` 探测生成（PortTool 另有自己的一份）；bootloader、板卡包、IAPTool 的部件测试不要本机配置（决策 78）。
 
-> **写路径一律用 `/`。** Windows 的 .NET 路径 API 全都接受正斜杠，Linux 不接受反斜杠 —— `/` 是唯一两边都对的写法。可执行文件后缀（`.exe` 或空）不要写死，脚本里用 `common.py` 的 `$EXE`。
+> **写路径一律用 `/`。** Windows 的 .NET 路径 API 全都接受正斜杠，Linux 不接受反斜杠 —— `/` 是唯一两边都对的写法。可执行文件后缀（`.exe` 或空）不要写死，`$TEST` 的脚本里用 `common.py` 的 `EXE`。
 
 ## 命令行重编 app（不用开 Arduino IDE）
 
-IDE 自带的 CLI 在 `$IDE/resources/app/lib/backend/resources/arduino-cli`（Windows 上带 `.exe`）—— **不在 PATH 上**，配置在 `$TOOL/TestCase/config/machine.py` 的 `ARDUINO_CLI`。
+IDE 自带的 CLI 在 `$IDE/resources/app/lib/backend/resources/arduino-cli`（Windows 上带 `.exe`）—— **不在 PATH 上**，`$TEST` 的脚本从 `$TEST/config/machine.py` 的 `ARDUINO_CLI` 拿，板卡包的测试从环境变量 `ARDUINO_CLI` 拿。
 
 ```
 & $ARDUINO_CLI compile --warnings all `
   --config-file $ARDUINO_CLI_CONFIG `
   --fqbn "OpenPLC_Alpha:stm32:OPEN-PLC:pnum=PLC_H743,usb=CDCgen,xusb=FS,upload_method=cdcMethod,knxrole=dual_device" `
   --build-path "<IDE 的 sketch 缓存目录>/<hash>" `
-  "$TOOL/TestCase/onboard/rs232/SerialPort"
+  "$TEST/onboard/rs232/SerialPort"
 ```
 
 `$ARDUINO_CLI_CONFIG` 默认是 `$HOME/.arduinoIDE/arduino-cli.yaml`，两个平台同名。
@@ -33,9 +33,9 @@ IDE 自带的 CLI 在 `$IDE/resources/app/lib/backend/resources/arduino-cli`（W
 | 目标 | 命令 |
 |---|---|
 | IAPTool（三平台） | `$TOOL/compile_tool.sh` —— 别手搓 `go build`，输出布局是约定好的 |
-| TestCase（本机） | `cd $TOOL && go build -o Output/<GOOS>/TestCase ./TestCase`。脚本里用 `common.py` 的 `Get-GoBin "TestCase"` 找它，别自己拼路径 |
+| TestCase（本机） | `cd $TEST && go build -o Output/<GOOS>/TestCase .`。`$TEST/tools/run_case.py` 找它，别自己拼路径 |
 | network_discovery（四平台） | `$CORE_LIVE/tools/discovery/build.sh`—— **Arduino IDE 开着会因文件占用失败** |
-| bootloader | STM32CubeIDE。（cmake 路径存在，但 cmake/ninja 通常不在 PATH 上） |
+| bootloader | STM32CubeIDE；测试要的命令行编译是 `$TEST/tools/build_image.py` |
 
 单文件语法检查 bootloader 的改动，不必开 CubeIDE：用 core 包里的
 `$A15/packages/OpenPLC_Alpha/tools/xpack-arm-none-eabi-gcc/*/bin/arm-none-eabi-gcc`（Windows 上带 `.exe`），加上 `-fsyntax-only`、
@@ -44,9 +44,7 @@ IDE 自带的 CLI 在 `$IDE/resources/app/lib/backend/resources/arduino-cli`（W
 
 ## 测试分工
 
-**IAPTool 与 TestCase 的分工写在 `$TOOL/CLAUDE.md` 的「边界」一节。**
-
-所有为验证设备行为而存在的东西放 `$TOOL/TestCase/`（同一个 Go module 的子目录），按用例编号分文件，`README.md` 维护用例表 / 前置条件 / 判据 / 未覆盖清单。
+每个仓的自检入口、每条用例怎么跑、判据是什么，都在 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)。
 
 ### 用例总览 → 不在这里
 

@@ -18,16 +18,16 @@
 
 | # | 做什么 | 判据 | 命令 |
 |---|---|---|---|
-| CHK-A1 | 主机侧 Go 测试（用例 **T1-15**） | 全过 | 见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 的 host 层表 |
-| CHK-A2 | 主机侧 C 测试（用例 **T1-16**） | 全过 | `host/bootloader_unit/build.py` —— 编译器路径填 `config/machine.py` 的 `HOST_CC` |
-| CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `go vet ./...` |
-| CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **122,880 B** | `tools/build_image.py`（自己按链接脚本判尺寸），或 `tools/flash_bootloader.py` 的构建阶段 |
+| CHK-A1 | 主机侧 Go 测试（用例 **T1-15**） | 全过 | `$TOOL`：`python tests/selfcheck.py` |
+| CHK-A2 | 主机侧 C 测试（用例 **T1-16**） | 全过 | `$BOOT/tests`：`ctest --preset local -R T1-16`（编译器写在 gitignored 的 `CMakeUserPresets.json`） |
+| CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `$TOOL` 和 `$TEST` 各自：`go vet ./...`（都在各自的 selfcheck 里） |
+| CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **122,880 B** | `$TEST`：`python tools/build_image.py`（自己按链接脚本判尺寸），或 `python tools/flash_bootloader.py` 的构建阶段 |
 | CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，链接用的是 `STM32H743IIKX_FLASH_PORTTOOL.ld`。不设大小上限：工装镜像由 ST-Link 整片写入，不走 IAP | `$PORTTOOL` 里 `python TestCase/tools/build_fixture.py`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
-| CHK-A5 | 烧写 + 启动日志 | 见 [T3-01](#t3-01--启动门禁) | `tools/flash_bootloader.py` |
-| CHK-A6 | 设备行为用例 | 全过 | `TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
-| CHK-A7 | 变体断言（用例 **P4**） | 全过 | 在 `tools/selfcheck.py` 里 |
+| CHK-A5 | 烧写 + 启动日志 | 见 [T3-01](#t3-01--启动门禁) | `$TEST`：`python tools/flash_bootloader.py` |
+| CHK-A6 | 设备行为用例 | 全过 | `$TEST`：`TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
+| CHK-A7 | 变体断言（用例 **P4**） | 全过 | `$CORE_REPO`：`python tests/selfcheck.py` |
 
-**CHK-A1–A3、CHK-A7 一条命令跑完：`tools/selfcheck.py`**（`--list` 先看它会跑哪些）。
+**每个仓有自己的自检入口**，一览在 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) 开头（决策 78）。
 
 ⚠️ **CHK-A4 的上限是 131,072**，整个扇区 0：根区 2026-09-30 起在扇区 15（决策 72）。超了链接器会报 `region FLASH overflowed`。
 
@@ -39,17 +39,26 @@
 
 先跑完 A，再跑这里。
 
-| # | 做什么 | 判据 |
-|---|---|---|
-| CHK-B1 | 版本号三处一致（用例 **P1**） | `$BOOT/Core/Inc/IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明。⚠️ **这三处都是「卡包版本」**；sketch 的 **app 版本不在其中**，它每个 sketch 都不同，不是跨仓镜像 |
-| CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 |
-| CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） |
-| CHK-B4 | **出厂板第一次上传就被认领**（用例 **T2-35**） | 一块刚造好出厂态的板子，本机没有私钥：经 USB 上传 → IAPTool 打印生成的私钥路径并认领 → app 起来；之后 `getpubkey` 返回那把公钥。见 [M2 归属与信任](../modules/M2-ownership.md) |
-| CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的格式**相符。⚠️ 格式已定要改（校准值 8 KiB + metadata），改完这条判据要一起更新 |
-| CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传（没有根时自动认领）→ 正常启动 |
-| CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。板子回收的是扇区 15，不碰扇区 0 |
-| CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 |
-| CHK-B9 | **五条用户路径各走一遍** | 从出厂态开始跑 `python3 tools/run_five_paths.py --elf <boot.elf> --cdc <COM口>`，步骤和判据见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)「五条用户路径 · 从出厂态跑一整轮」（按[决策 72](DECISIONS.md) 写）；每步都达到它自己的判据。要真板子、USB 线，人按一次 BOOT0 十秒（[决议 69](DECISIONS.md)） |
+**每次发版跑四样**（「发版之前要跑什么」那张票）：被发的那个仓自己的自检、`$TEST` 的全部契约测试（`python tools/selfcheck.py`）、`$TEST` 里和它有关的整机项、`$PROD` 的文档检查（`python tools/check_docs.py`）。
+
+| 发什么 | 整机项 |
+|---|---|
+| 板卡包 | 例程逐个上板（`$TEST`：`python tools/run_examples.py`）、T1-34（`$TEST`：`python host/fakeboard/run_ide_upload.py`） |
+| IAPTool | T1-34、五条用户路径（CHK-B9） |
+| bootloader | 五条用户路径、掉电（T1-21 / T1-22）、按住 BOOT0（T1-27） |
+| PortTool | 只跑它自己的自检 |
+
+| # | 做什么 | 判据 | 哪个仓、哪条命令 |
+|---|---|---|---|
+| CHK-B1 | 版本号三处一致（用例 **P1**） | `$BOOT/Core/Inc/IAP_config.h` 的 `OPENPLC_FW_VERSION` == core `boards.txt` 的 `build.fw_version` == 发布说明。⚠️ **这三处都是「卡包版本」**；sketch 的 **app 版本不在其中**，它每个 sketch 都不同，不是跨仓镜像 | `$TEST`：`python tools/check_version_sync.py` |
+| CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 | `$TEST`：`python tools/check_mirror_sync.py` |
+| CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） | `$CORE_REPO`：`python tests/check_core_sync.py` |
+| CHK-B4 | **出厂板第一次上传就被认领**（用例 **T2-35**） | 一块刚造好出厂态的板子，本机没有私钥：经 USB 上传 → IAPTool 打印生成的私钥路径并认领 → app 起来；之后 `getpubkey` 返回那把公钥。见 [M2 归属与信任](../modules/M2-ownership.md) | 上板，人在场 |
+| CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的格式**相符。⚠️ 格式已定要改（校准值 8 KiB + metadata），改完这条判据要一起更新 | 人工对照 `$BOOT/RELEASE-NOTES.md` |
+| CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传（没有根时自动认领）→ 正常启动 | 上板，人在场 |
+| CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。板子回收的是扇区 15，不碰扇区 0 | `$TOOL` 编出的 IAPTool，命令见左 |
+| CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 | 上板，人在场 |
+| CHK-B9 | **五条用户路径各走一遍** | 从出厂态开始跑 `python3 tools/run_five_paths.py --elf <boot.elf> --cdc <COM口>`，步骤和判据见 [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)「五条用户路径 · 从出厂态跑一整轮」（按[决策 72](DECISIONS.md) 写）；每步都达到它自己的判据。要真板子、USB 线，人按一次 BOOT0 十秒（[决议 69](DECISIONS.md)） | `$TEST`：`python3 tools/run_five_paths.py`，见左 |
 
 ⚠️ **CHK-B7 是唯一能抓住捆绑升级风险的用例。** 只测 CHK-B6 永远发现不了"新 bootloader 读不懂旧 journal"。
 
@@ -66,7 +75,7 @@
 | CHK-C3 | **MAC 唯一** | 记录本板 MAC，**和已出货记录比对不重复** |
 | CHK-C4 | 以太网 | 拿到 IP，UDP 发现有应答 |
 | CHK-C5 | USB CDC | 枚举出串口，`ping` 答 `OK` |
-| CHK-C6 | RS232 | `onboard/rs232/SerialPort` 回显正常 |
+| CHK-C6 | RS232 | `$TEST/onboard/rs232/SerialPort` 回显正常 |
 | CHK-C7 | 烧 app | 上传成功并正常启动 |
 
 ### CHK-C1–C7 第一次完整跑过：2026-09-28，第二块板

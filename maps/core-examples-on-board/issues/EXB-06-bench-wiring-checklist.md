@@ -11,4 +11,4 @@ Blocked by: -
 
 ## 怎么算答完
 
-每个对端对应到一个确定的 COM 口或 IP，写进 `$TOOL/TestCase/config/machine.py` 能用的形式；板子能被 PC 发现。
+每个对端对应到一个确定的 COM 口或 IP，写进 `$TEST/config/machine.py` 能用的形式；板子能被 PC 发现。

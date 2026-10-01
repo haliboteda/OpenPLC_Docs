@@ -18,22 +18,22 @@
 | 2 | `IAPTranfer_Tool/./owner.go` | 30 | 1 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 3–5 | `IAPTranfer_Tool/./sign.go` | 47 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `IAPTranfer_Tool/./uploadlock.go` | 16 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/gen_vectors.py` | 3 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/golden_vectors.h` | 18 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/bootloader_state_stub.c` | 6 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/hal_stub.h` | 11 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/main.h` | 9 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 2 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/owner_slot_stub.c` | 5 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 2 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/owner_slot_stub.h` | 4 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/stubs/rtc.h` | 14 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/bootloader_unit/test_main.c` | 47 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 2 | `IAPTranfer_Tool/TestCase/host/crypto_ref/ecdsa_verify.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 2 | `IAPTranfer_Tool/TestCase/host/crypto_ref/run_checks.py` | 2 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 2 | `IAPTranfer_Tool/TestCase/host/crypto_ref/sha256_ref.py` | 5 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/examples_build/build.py` | 13 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 2 | `IAPTranfer_Tool/TestCase/host/fakeboard/fake_board.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 2 | `IAPTranfer_Tool/TestCase/host/fakeboard/run_cases.py` | 16 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
-| 2 | `IAPTranfer_Tool/TestCase/host/iapcert/iapcert_test.go` | 38 | 1 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 3–5 | `$TEST/tools/check_golden_vectors.py` | 3 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$BOOT/tests/bootloader_unit/golden_vectors.h` | 18 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$BOOT/tests/bootloader_unit/stubs/bootloader_state_stub.c` | 6 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$BOOT/tests/bootloader_unit/stubs/hal_stub.h` | 11 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$BOOT/tests/bootloader_unit/stubs/main.h` | 9 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 2 | `$BOOT/tests/bootloader_unit/stubs/owner_slot_stub.c` | 5 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `$BOOT/tests/bootloader_unit/stubs/owner_slot_stub.h` | 4 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 3–5 | `$BOOT/tests/bootloader_unit/stubs/rtc.h` | 14 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$BOOT/tests/bootloader_unit/test_main.c` | 47 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 2 | `$TOOL/tests/crypto_ref/ecdsa_verify.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `$TOOL/tests/crypto_ref/run_checks.py` | 2 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `$TOOL/tests/crypto_ref/sha256_ref.py` | 5 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 3–5 | `$CORE_REPO/tests/examples_build/build.py` | 13 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 2 | `$TEST/host/fakeboard/fake_board.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `$TEST/host/fakeboard/run_cases.py` | 16 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `$TOOL/tests/iapcert/iapcert_test.go` | 38 | 1 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/build.py` | 239 | 20 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/sim_main.c` | 85 | 8 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/analog_stub.c` | 33 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
@@ -59,37 +59,37 @@
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/fake_board_test.go` | 15 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/panel_plan_test.go` | 35 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/plan_test.go` | 124 | 13 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/host/variant_check/build.py` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/build_image.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/can_watch.py` | 1 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_allow_hygiene.py` | 4 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_core_sync.py` | 22 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_doc_dupes.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_doc_paths.py` | 32 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_mirror_sync.py` | 55 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_public_root.py` | 20 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_status_sync.py` | 18 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/check_version_sync.py` | 5 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/common.py` | 47 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/enter_bootloader.py` | 4 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/flash_bootloader.py` | 14 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/init_machine.py` | 76 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/inject_owner_record.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/install_tool.py` | 1 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$CORE_REPO/tests/variant_check/build.py` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/build_image.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/can_watch.py` | 1 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/check_allow_hygiene.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$CORE_REPO/tests/check_core_sync.py` | 22 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$PROD/tools/check_doc_dupes.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$PROD/tools/check_doc_paths.py` | 32 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/check_mirror_sync.py` | 55 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `check_public_root.py`（已删） | 20 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$PROD/tools/check_status_sync.py` | 18 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/check_version_sync.py` | 5 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/common.py` | 47 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/enter_bootloader.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/flash_bootloader.py` | 14 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/init_machine.py` | 76 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/inject_owner_record.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TOOL/tools/install_tool.py` | 1 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/tools/make_delivery.py` | 13 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/tools/md2html.py` | 4 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/rs485_echo.py` | 4 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_au1.py` | 21 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_m5.py` | 8 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_s3.py` | 10 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_s4.py` | 21 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_sdram.py` | 3 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_setowner.py` | 5 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/run_takeown.py` | 5 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/selfcheck.py` | 25 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/serial_watch.py` | 2 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/test_init_machine.py` | 17 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 3–5 | `IAPTranfer_Tool/TestCase/tools/upload_and_watch.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/rs485_echo.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/run_au1.py` | 21 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/run_m5.py` | 8 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/run_s3.py` | 10 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/run_s4.py` | 21 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/run_sdram.py` | 3 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/run_setowner.py` | 5 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/run_takeown.py` | 5 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/selfcheck.py` | 25 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/serial_watch.py` | 2 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `$TEST/tools/test_init_machine.py` | 17 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
+| 3–5 | `$TEST/tools/upload_and_watch.py` | 4 | 0 | **0 段，查过没有可搬的** |
 | 2 | `IAPTranfer_Tool/iapcert/iapcert.go` | 66 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 3–5 | `OpenPLC_PortsTestingTool/internal/ptboard/board.go` | 75 | 5 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `OpenPLC_PortsTestingTool/internal/ptcal/ptcal.go` | 58 | 6 | `docs/engineering/TEST-DESIGN.md`（汇总） |
