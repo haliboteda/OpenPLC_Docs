@@ -4,7 +4,7 @@
 调查日期：2026-09-24。本机实验，没碰真板子（实验期间局域网上没有真板子应答）。
 
 路径缩写：`$TOOL` = `IAPTranfer_Tool`，`$CORE_REPO` = `open_plc_arduino`，
-`FB` = [`$TEST/host/fakeboard/fake_board.py`](../../../OpenPLC_Test/host/fakeboard/fake_board.py)。
+`FB` = `fake_board.py`（2026-10-02 已删，由 bootloader 替身 `$TEST/host/bootstand` 取代）。
 
 ## 结论
 
@@ -25,7 +25,7 @@
 | # | 步骤 | 线上是什么 | 代码 | FB 现状 |
 |---|---|---|---|---|
 | 0 | arduino-cli 把端口地址交给 IAPTool | `IAPTool ether <build>/<name>.bin <serial.port> [--force]`，地址原样放进 `{serial.port}` | [platform.txt:249](../../../open_plc_arduino/platform.txt)；`--force` 来自 [boards.txt:97-99](../../../open_plc_arduino/boards.txt)；入口 [app.go:246-251](../../../IAPTranfer_Tool/app.go)（先写上传锁） | 不涉及 |
-| 1 | IDE 端口菜单 / `-l network` 的端口查找 | discovery 从每块物理网卡的 IP 往子网广播地址发 `openplc_server_where_r_y`，按回包源 IP 列端口 | [network_discovery.go:187-223, 348-360, 228-275](../../../open_plc_arduino/tools/discovery/network_discovery.go) | ✅ 已有（[FB:53-69](../../../OpenPLC_Test/host/fakeboard/fake_board.py) 绑 `0.0.0.0`，对四个关键字都回） |
+| 1 | IDE 端口菜单 / `-l network` 的端口查找 | discovery 从每块物理网卡的 IP 往子网广播地址发 `openplc_server_where_r_y`，按回包源 IP 列端口 | [network_discovery.go:187-223, 348-360, 228-275](../../../open_plc_arduino/tools/discovery/network_discovery.go) | ✅ 已有（FB:53-69 绑 `0.0.0.0`，对四个关键字都回） |
 | 2 | 单播 identify，最多 3 次、间隔 2.5 s | UDP 发 `openplc_server_where_r_y` 到给定 IP，回包要以 `STM32H743` 开头 | IAPTool:74, 299-330；解析 241-271（≥4 段即可，第五段是 app 版本） | ✅ 已有，但只回四段 `…_BOOTLD_0.1.3`，没有第五段 `-` |
 | 3 | 版本门 | 只在角色是 `CUSAPP` 且有第五段时比较：镜像版本（`<name>.version`，postbuild 生成）比板上老就拒 | IAPTool:95-97；[version_gate.go:123-178](../../../IAPTranfer_Tool/version_gate.go) | ⚠️ 要补：角色 `CUSAPP` + 第五段版本号 |
 | 4 | 取身份（私钥 + 证书，自签或委托） | 纯本地；IDE 不传 `--key`，用 IAPTool 旁边 `keys/` 里的默认钥 | IAPTool:103；[auth.go:36-89](../../../IAPTranfer_Tool/auth.go)；[sign.go:45-59](../../../IAPTranfer_Tool/sign.go) | 不涉及 |
@@ -37,7 +37,7 @@
 | 10 | 公钥核对 | `getpubkey\n` → 128 位 hex；不是 128 位就警告跳过 | IAPTool:511-515；[auth.go:122-157](../../../IAPTranfer_Tool/auth.go) | ✅ 已有（T1-18a–g 的全部七种结果都在测，见 [KEY-MATCH.md](../../../OpenPLC_Test/host/fakeboard/KEY-MATCH.md)） |
 | 11 | TCP 挑战 | `authchallenge\n` → nonce | IAPTool:570-573 | ✅ 已有（固定 nonce） |
 | 12 | `flash` 命令 | `flash <size> <crc32> <镜像签名> <证书> <nonce签名>\n` → `OK` | IAPTool:568, 574-583 | ✅ 已有（只读 size，其余不验） |
-| 13 | 分块发数据 | 8 KiB 一块，裸字节，每块等 `OK` | IAPTool:588-595；[common.go:18](../../../IAPTranfer_Tool/common.go) | ✅ 已有（[FB:86-92](../../../OpenPLC_Test/host/fakeboard/fake_board.py)） |
+| 13 | 分块发数据 | 8 KiB 一块，裸字节，每块等 `OK` | IAPTool:588-595；[common.go:18](../../../IAPTranfer_Tool/common.go) | ✅ 已有（FB:86-92） |
 | 14 | 最终判决 | 90 s 窗口内：每 2 s 先听 TCP，有字且不是 `OK` 就是拒绝；没字就广播找同 UID 设备（任意角色），找到即成功 | IAPTool:627-676 | ⚠️ 要补：收齐后沉默几秒再以 `CUSAPP` 回来；现在一直在应答，判据恒为真。可选：按参数回 `Signature Failed` 等拒绝串，测 IAPTool 的拒绝路径 |
 
 判决失败的文案和成功时「无回答、复位后重新上线」的约定见 [IAP-PROTOCOL.md「一次 flash 的往返」](../../docs/modules/M1/IAP-PROTOCOL.md)。
@@ -68,7 +68,7 @@
 
 | 测不到 | 为什么 |
 |---|---|
-| 板子这一侧的任何校验：镜像签名、证书链、nonce 签名、叶撤销、CRC、重启冷却 | FB 不验任何东西（[FB:9-11](../../../OpenPLC_Test/host/fakeboard/fake_board.py)）；这些在真板子上由 T1-11 / S1 覆盖 |
+| 板子这一侧的任何校验：镜像签名、证书链、nonce 签名、叶撤销、CRC、重启冷却 | FB 不验任何东西（FB:9-11）；这些在真板子上由 T1-11 / S1 覆盖 |
 | 固件真的被写进去、新 sketch 真的跑起来 | FB 只数字节 |
 | 真实的复位时序、MAC 掉线、发现限流（同一源 2 s 内只回一次）、UDP 丢包 | FB 没有限流、不丢包；IAPTool 的重试间隔（IAPTool:49-52）和上传锁要防的碰撞都靠这些才会被触发 |
 | 真的局域网：板子在另一台机器上、多网卡、VPN 抢路由、源地址钉在物理网卡上（IAPTool:391-440） | 本机回环时「对端」就是本机网卡 IP，`LocalIPFor` 永远命中自己的网卡 |

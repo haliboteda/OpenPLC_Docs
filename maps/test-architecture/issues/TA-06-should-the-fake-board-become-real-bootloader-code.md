@@ -35,7 +35,7 @@ Blocked by: -
 | 都覆盖不到 | 真 lwIP / MAC / PHY、复位把 MAC 一起拉掉（所以烧写成功没有 `OK`）、时序 | 同左，外加所有状态逻辑 |
 | 按决策 78 住哪 | 跑它要 `$TOOL` + `$BOOT`，归契约层，住 `$TEST` | 同左 |
 
-**读代码找到的分歧**（假板子 `$TEST/host/fakeboard/fake_board.py` vs 真 `$BOOT/IAPServer/IAP_server.c`）
+**读代码找到的分歧**（假板子 `fake_board.py`（2026-10-02 已删，由 bootloader 替身 `$TEST/host/bootstand` 取代） vs 真 `$BOOT/IAPServer/IAP_server.c`）
 
 | 命令 / 行为 | 假板子 | 真 bootloader |
 |---|---|---|

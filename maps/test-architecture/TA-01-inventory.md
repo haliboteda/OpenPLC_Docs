@@ -1,6 +1,6 @@
 # 每一项现有测试归哪一层、哪个仓 —— 归属表
 
-「[每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)」那张票的产物。范围是 [map.md](map.md)「全集」那条命令的输出，由 [`tools/classify_tests_by_layer.py`](../../tools/classify_tests_by_layer.py) 生成，2026-10-02 跑出 **342** 个文件，下表也是 342 行。
+「[每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)」那张票的产物。范围是 [map.md](map.md)「全集」那条命令的输出，由 [`tools/classify_tests_by_layer.py`](../../tools/classify_tests_by_layer.py) 生成，2026-10-02 跑出 **371** 个文件，下表也是 371 行。
 判据：[决策 78](../../docs/tables/DECISIONS.md)，跑它需要几个仓。
 
 ## 汇总
@@ -11,7 +11,7 @@
 | `$TOOL` 部件测试 | 11 |
 | `$CORE_REPO` 部件测试 | 16 |
 | `$PORTTOOL` 部件测试 | 41 |
-| `$TEST` 契约测试 | 8 |
+| `$TEST` 契约测试 | 37 |
 | `$TEST` 整机测试 | 34 |
 | `$TEST` 测试基础设施 | 25 |
 | `$PROD` 文档检查 | 8 |
@@ -24,7 +24,6 @@
 
 | 文件 | 去处 | 依据 |
 |---|---|---|
-| `IAPTranfer_Tool/tests/selfcheck.py` | `$TOOL` 部件测试 | T1-15、T1-19/T1-20：只用 `$TOOL` |
 | `IAPTranfer_Tool/iapproto/iapproto_test.go` | `$TOOL` 部件测试 | T1-35：只用 `$TOOL` |
 | `IAPTranfer_Tool/internal/serialx/ioreg_test.go` | `$TOOL` 部件测试 | T1-35：只用 `$TOOL` |
 | `IAPTranfer_Tool/internal/serialx/steady_test.go` | `$TOOL` 部件测试 | T1-35：只用 `$TOOL` |
@@ -35,6 +34,7 @@
 | `IAPTranfer_Tool/tests/crypto_ref/run_checks.py` | `$TOOL` 部件测试 | T1-15、T1-19/T1-20：只用 `$TOOL` |
 | `IAPTranfer_Tool/tests/crypto_ref/sha256_ref.py` | `$TOOL` 部件测试 | T1-15、T1-19/T1-20：只用 `$TOOL` |
 | `IAPTranfer_Tool/tests/iapcert/iapcert_test.go` | `$TOOL` 部件测试 | T1-15、T1-19/T1-20：只用 `$TOOL` |
+| `IAPTranfer_Tool/tests/selfcheck.py` | `$TOOL` 部件测试 | T1-15、T1-19/T1-20：只用 `$TOOL` |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/build.py` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/caps_golden.txt` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
@@ -85,35 +85,6 @@
 | `OpenPLC_PortsTestingTool/internal/serialx/steady_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
 | `OpenPLC_PortsTestingTool/internal/serialx/sysfs_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
 | `OpenPLC_PortsTestingTool/internal/simboard/simboard_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `open_plc_cube_ide/tests/CMakeLists.txt` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/CMakePresets.json` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/README.md` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/HOST-C-TESTS.md` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/golden_vectors.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/bootloader_state_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/hal_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/hal_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/main.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/owner_slot_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/owner_slot_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/rng.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/stubs/rtc.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/bootloader_unit/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/checks/check_cproject_ld.py` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/checks/check_icache_is_restored.py` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/common_stubs/iap_keyderive_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/common_stubs/iap_keyderive_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/owner_capacity/stubs/fake_owner_flash.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/owner_capacity/stubs/fake_owner_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/owner_capacity/stubs/reclaim_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/owner_capacity/stubs/usbd_cdc_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/owner_capacity/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/run_steps.cmake` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/sector15_reclaim/stubs/fake_flash.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/sector15_reclaim/stubs/host_s15.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/sector15_reclaim/stubs/stm32h7xx_hal.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/sector15_reclaim/stubs/usbd_cdc_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
-| `open_plc_cube_ide/tests/sector15_reclaim/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
 | `open_plc_cube_ide/TestCase/ADC/adc_test.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/ADC/adc_test.h` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/CAN/can_test.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
@@ -207,22 +178,35 @@
 | `open_plc_cube_ide/TestCase/porttool/porttool_sdram.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/porttool/porttool_temp.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/porttool/porttool_usb.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
-| `open_plc_arduino/tests/CMakeLists.txt` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/CMakePresets.json` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/_common.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/check_core_sync.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/check_no_sector15_writes.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/examples_build/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/owner_revoke/stubs/fake_owner_area.h` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/owner_revoke/stubs/iap_keyderive_stub.c` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/owner_revoke/stubs/iap_keyderive_stub.h` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/owner_revoke/test_main.c` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/selfcheck.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/variant_check/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/variant_check/m4_fmc_pins/m4_fmc_pins.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/variant_check/uart_routing/uart_routing.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/vector_alignment/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
-| `open_plc_arduino/tests/vector_alignment/minimal/minimal.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_cube_ide/tests/CMakeLists.txt` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/CMakePresets.json` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/README.md` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/HOST-C-TESTS.md` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/golden_vectors.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/bootloader_state_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/hal_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/hal_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/main.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/owner_slot_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/owner_slot_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/rng.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/stubs/rtc.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/bootloader_unit/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/checks/check_cproject_ld.py` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/checks/check_icache_is_restored.py` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/common_stubs/iap_keyderive_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/common_stubs/iap_keyderive_stub.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/owner_capacity/stubs/fake_owner_flash.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/owner_capacity/stubs/fake_owner_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/owner_capacity/stubs/reclaim_stub.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/owner_capacity/stubs/usbd_cdc_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/owner_capacity/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/run_steps.cmake` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/sector15_reclaim/stubs/fake_flash.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/sector15_reclaim/stubs/host_s15.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/sector15_reclaim/stubs/stm32h7xx_hal.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/sector15_reclaim/stubs/usbd_cdc_flash.h` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
+| `open_plc_cube_ide/tests/sector15_reclaim/test_main.c` | `$BOOT` 部件测试 | T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT` |
 | `open_plc_arduino/system/Middlewares/OpenAMP/libmetal/scripts/ci/check_compliance.py` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
 | `open_plc_arduino/system/Middlewares/OpenAMP/libmetal/test/CMakeLists.txt` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
 | `open_plc_arduino/system/Middlewares/OpenAMP/libmetal/test/metal-header-template.c` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
@@ -291,14 +275,60 @@
 | `open_plc_arduino/system/Middlewares/OpenAMP/open-amp/apps/tests/msg/rpmsg-ping.h` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
 | `open_plc_arduino/system/Middlewares/OpenAMP/open-amp/apps/tests/msg/rpmsg-update.c` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
 | `open_plc_arduino/system/Middlewares/OpenAMP/open-amp/scripts/ci/check_compliance.py` | 上游第三方代码自带的，不属于本产品，不动 | OpenAMP 自带 |
+| `open_plc_arduino/tests/CMakeLists.txt` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/CMakePresets.json` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/_common.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/check_core_sync.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/check_no_sector15_writes.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/examples_build/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/owner_revoke/stubs/fake_owner_area.h` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/owner_revoke/stubs/iap_keyderive_stub.c` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/owner_revoke/stubs/iap_keyderive_stub.h` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/owner_revoke/test_main.c` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/selfcheck.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/variant_check/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/variant_check/m4_fmc_pins/m4_fmc_pins.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/variant_check/uart_routing/uart_routing.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/vector_alignment/build.py` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
+| `open_plc_arduino/tests/vector_alignment/minimal/minimal.ino` | `$CORE_REPO` 部件测试 | P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`） |
 | `OpenPLC_Docs/tools/check_changelist_has_no_orphans.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_doc_dupes.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_doc_paths.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_docs.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
+| `OpenPLC_Docs/tools/check_no_orphan_placeholders.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_no_stale_ids.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_status_sync.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
-| `OpenPLC_Docs/tools/check_no_orphan_placeholders.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
 | `OpenPLC_Docs/tools/check_wayfinder_ticket_hygiene.py` | `$PROD` 文档检查 | P7、P8、P9、P12、P13、P14、P18：查 `$PROD` |
+| `OpenPLC_Test/host/bootstand/CMakeLists.txt` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/app/main_app.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/app/stubs/Arduino.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/app/stubs/stm32_def.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/boot_glue.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/main_boot.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/crc.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/fmc.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/rng.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/rtc.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/stm32h7xx_hal.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/stm32h7xx_hal_conf.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/usart.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/usbd_cdc.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/boot/stubs/usbd_cdc_if.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/bootstand.py` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/hal_host.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/hostctl.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/hostctl.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/hostmem.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/hostmem.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/ip4_addr.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/ip_addr.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/netif.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/pbuf.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/tcp.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip/udp.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/lwip_host.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/include/main.h` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
+| `OpenPLC_Test/host/bootstand/host/lwip_bridge.c` | `$TEST` 契约测试 | bootloader 替身：`$BOOT` 的真 bootloader 代码 + 板卡包 app 一侧的重启握手，给 T1-18、T1-34 用 |
 | `OpenPLC_Test/.claude/settings.json` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明 |
 | `OpenPLC_Test/.gitignore` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明 |
 | `OpenPLC_Test/CLAUDE.md` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明 |
@@ -306,10 +336,9 @@
 | `OpenPLC_Test/README.zh-CN.md` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明 |
 | `OpenPLC_Test/acceptance/2026-09-18-boot-iap-full-run.md` | `$TEST` 整机测试 | 一轮整机上板验收的记录 |
 | `OpenPLC_Test/go.mod` | `$TEST` 测试基础设施 | 本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明 |
-| `OpenPLC_Test/host/fakeboard/KEY-MATCH.md` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓 |
-| `OpenPLC_Test/host/fakeboard/_common.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓 |
-| `OpenPLC_Test/host/fakeboard/fake_board.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓 |
-| `OpenPLC_Test/host/fakeboard/run_cases.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对 bootloader 协议；替身改用 `$BOOT` 真代码后要两个仓 |
+| `OpenPLC_Test/host/fakeboard/KEY-MATCH.md` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对着 bootloader 替身（`$BOOT` 真代码）跑，要两个仓 |
+| `OpenPLC_Test/host/fakeboard/_common.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对着 bootloader 替身（`$BOOT` 真代码）跑，要两个仓 |
+| `OpenPLC_Test/host/fakeboard/run_cases.py` | `$TEST` 契约测试 | T1-18a–g：IAPTool 对着 bootloader 替身（`$BOOT` 真代码）跑，要两个仓 |
 | `OpenPLC_Test/host/fakeboard/run_ide_upload.py` | `$TEST` 整机测试 | T1-34：`arduino-cli` + 板卡包的上传配方 + IAPTool |
 | `OpenPLC_Test/host/renode/run.py` | `$TEST` 整机测试 | T3-05：`$BOOT` 的 bootloader + 板卡包例程 + IAPTool，在 Renode 里 |
 | `OpenPLC_Test/main.go` | `$TEST` 整机测试 | `TestCase.exe`：import `$TOOL` 的公开包、调 IAPTool，对着真板子跑 |

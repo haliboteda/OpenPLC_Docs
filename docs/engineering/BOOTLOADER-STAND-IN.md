@@ -29,8 +29,25 @@
 | T1-18c：老 bootloader 不认识 `getpubkey` | 替身带一个开关，开着时在进入真代码之前拦下 `getpubkey`，回 `Unknown command` | 打过标签的 v0.1.0–v0.1.2 bootloader 都没有这条命令，现行代码造不出这一例 |
 | `jump_to_app` 是 ARM 汇编 | `$BOOT/IAPServer/IAP_server.c` 加主机测试开关，开关打开时不编那段汇编 | 照 `bootloader_state.c` 的 `BOOTLOADER_STATE_HOST_TEST` 先例；固件编出来不变 |
 
+## 怎么跑
+
+| 做什么 | 命令（在 `$TEST` 下） |
+|---|---|
+| T1-18a–g 和它里面的 T2-28–T2-30 | `python host/fakeboard/run_cases.py`，selfcheck 的 `T1-18a-T1-18g` 一步就是它 |
+| T1-34 | `python host/fakeboard/run_ide_upload.py`，要 arduino-cli，几分钟，不进 selfcheck |
+| 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--old-bootloader] [--discovery-port 56865] [--uid <24 位十六进制>]` |
+
+两个驱动脚本每次都先编替身（`host/bootstand/build/`，gitignored），要 `HOST_CC` 和 CMake（在 PATH 上或 `HOST_CC` 旁边）。替身往 stdout 打 `[stand-in] root <公钥>`（根变了就打）、`[stand-in] reset`、`[stand-in] jump to app`、`[stand-in] ... serving on <端口>`，脚本读这几行和真代码自己的 `printf` 判结果。
+
+落地时和上文写法不一样的两处（2026-10-02，待用户确认）：
+
+| 上文 | 实际 | 为什么 |
+|---|---|---|
+| 编成一个 PC 程序 | 两个程序 `bootstand_boot`、`bootstand_app`，由 `bootstand.py` 按复位轮流启动 | bootloader 和板卡包各有一份同名函数（`iap_auth`、`iap_cert`、`sha256`、`uECC`），一次链接放不下两份；分成两个进程也正好对应复位后整块内存重来 |
+| PC 在固定地址上分配内存 | 同上，另外整个进程（镜像、栈、堆）链接在 4 GiB 以下 | 固件是 32 位的，真的 flash 驱动把缓冲区地址当 `uint32_t` 传给 `HAL_FLASH_Program`；64 位地址会被截断 |
+
 ## 测不到什么
 
-真 lwIP、MAC、PHY 和时序；复位时 MAC 一起被拉掉（所以真板子烧写成功收不到 `OK`）；Linux 上固定地址分配没验证过。
+真 lwIP、MAC、PHY 和时序；复位时 MAC 一起被拉掉（所以真板子烧写成功收不到 `OK`）；`flashboot`（替身直接拒绝，T1-18 / T1-34 不发它）；USB CDC 通道；Linux 上固定地址分配没验证过。替身不跑 `MX_RTC_Init()`，所以每次启动都会打一行 `Backup domain was lost`，只是日志，不影响判定。
 
 ⚠️ 换成真代码后，原来在假板子上过的用例如果失败，**先当成 IAPTool 或用例判据的问题去查**，不改替身去迁就用例：那正是要找的不一致。

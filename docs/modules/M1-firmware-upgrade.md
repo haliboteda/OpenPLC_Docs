@@ -285,7 +285,7 @@ flowchart TD
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T1-xx` 用例直接测 | **30** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-38`（`R1-34`–`R1-37` 2026-09-22 在真板子上跑过；`R1-38` 只在假板子上，见 ¹⁰） |
+| 有 `T1-xx` 用例直接测 | **30** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-38`（`R1-34`–`R1-37` 2026-09-22 在真板子上跑过；`R1-38` 只在 bootloader 替身上（真代码，跑在 PC 上），见 ¹⁰） |
 | 纯手工 | **3** | `R1-13` `R1-30` `R1-31` |
 | 只有静态检查 P2 | **1** | `R1-06` |
 | 静态检查 P2 + 两块板实测 | **1** | `R1-14` |
@@ -363,13 +363,13 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `$TOOL`：`go test ./tests/...` | 主机侧 | ✅ |
 | `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `$BOOT/tests`：`ctest --preset local -R T1-16` | 主机侧 | ✅ |
 | `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电后计数器不归零，本轮 nonce 全不同 | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
-| `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | 假板子 | ✅ |
-| `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | 假板子 | ✅ |
-| `T1-18c` | `R1-21` | 老 bootloader 不认这条命令时不卡住 | 板子答 `Unknown command`，工具照走并说 `skipping key match check` | 同上 | 假板子 | ✅ |
-| `T1-18d` | `R1-21` ³ | 委托证书由这块板的根签发 | 板子答签发根，工具报 `Certificate was issued by this board's root` | 同上 | 假板子 | ✅ |
-| `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | 假板子 | ✅ |
-| `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | 假板子 | ✅ |
-| `T1-18g` | `R1-21` | 一把密钥都没有 | 工具拒并说 `no signing key found` | 同上 | 假板子 | ✅ |
+| `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | bootloader 替身（主机） | ✅ |
+| `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18c` | `R1-21` | 老 bootloader 不认这条命令时不卡住 | 板子答 `Unknown command`，工具照走并说 `skipping key match check` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18d` | `R1-21` ³ | 委托证书由这块板的根签发 | 板子答签发根，工具报 `Certificate was issued by this board's root` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18g` | `R1-21` | 一把密钥都没有 | 工具拒并说 `no signing key found` | 同上 | bootloader 替身（主机） | ✅ |
 | `T1-19` | `R1-24` | SHA-256 编码交叉验证 | 独立第三实现逐向量比对 | `$TOOL`：`python tests/crypto_ref/run_checks.py` | 主机侧 | ✅ |
 | `T1-20` | `R1-24` | ECDSA 编码交叉验证 | 同上 | 同上 | 主机侧 | ✅ |
 | `T1-21` | `R1-27` | 掉电落在传输期 | 断电后重新上电，**旧 app 照常启动** | `python tools/run_s4.py` ⁴ | **真板子 + 人工断电** | ✅ |
@@ -385,7 +385,7 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
 | `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `$BOOT/tests`：`ctest --preset local -R T1-33` | 主机侧（要 gcc/clang） | ✅ |
-| `T1-34` | `R1-38` | IDE 那条上传命令在假板子上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 假板子不理重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**假板子那边收齐整个镜像**，且「重启」后和收完镜像后都**真的静默过再回来** ¹⁰ | `python host/fakeboard/run_ide_upload.py` | 假板子（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
+| `T1-34` | `R1-38` | IDE 那条上传命令在 bootloader 替身上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 替身里 app 一侧拒绝重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**替身那边验过整个镜像**（`Checksum and signature OK`），且收完镜像后真的复位、回到 app ¹⁰ | `python host/fakeboard/run_ide_upload.py` | bootloader 替身（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 | `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |
 
 **共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
@@ -447,7 +447,7 @@ metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值
 以及这次改动有没有把烧写本身弄坏 —— 那两条归 `T1-23` / `T1-24` 的上板回归。
 
 ¹⁰ **`T1-34` 测的是 PC 这一侧**：arduino-cli → discovery → 板卡包里那份 IAPTool → 找密钥 → 重启握手 → 传输 → 判决。脚本把 IAPTool 拷到临时目录再用（`--upload-property path=`），因为包里 `keys\` 可能已有 `fw_signing_key.pem`，会挡住要测的那条查找路径；`APPDATA` / `TEMP` 也指到临时目录，真实的用户密钥和上传锁都不碰。**不进 selfcheck**：一遍要几分钟（密钥不对那种要等 IAPTool 问满三次重启），超出 selfcheck 一分钟的预算。
-**测不到**：板子侧的任何校验（镜像签名、证书链、nonce、CRC）、固件真的写进去、真实复位时序和发现限流、板子在另一台机器上的真实局域网、IDE 图形界面（只走 arduino-cli）、Linux / macOS。假板子只比对证书里叶公钥的字节，所以委托证书在它那里一律被拒。板子侧归 `T1-23`、`T1-11` 这些真板子用例。详见 [IDE-04-findings.md](../../maps/arduino-examples-and-ide-flow/IDE-04-findings.md)「这条模拟测不到什么」。
+**测不到**：真 lwIP / MAC / PHY 和时序、复位时 MAC 一起被拉掉（真板子烧写成功收不到 `OK`）、板子在另一台机器上的真实局域网、IDE 图形界面（只走 arduino-cli）、Linux / macOS。板子侧的校验（镜像签名、证书链、nonce、CRC）在替身里是真代码跑的，但跑在 PC 上；同一段在真板子上仍归 `T1-23`、`T1-11`。替身见 [BOOTLOADER-STAND-IN.md](../engineering/BOOTLOADER-STAND-IN.md)。详见 [IDE-04-findings.md](../../maps/arduino-examples-and-ide-flow/IDE-04-findings.md)「这条模拟测不到什么」。
 
 ⁷ **`P15` 守的是一个链接期不变式，不是一次运行。** app 的向量表就在 FLASH 起点，
 所以 VTOR 的对齐要求落在 `LD_FLASH_OFFSET` 上；而 `ldscript.ld` 对 `.isr_vector`

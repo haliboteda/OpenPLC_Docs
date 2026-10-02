@@ -31,7 +31,7 @@
 | 2 | `$TOOL/tests/crypto_ref/run_checks.py` | 2 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `$TOOL/tests/crypto_ref/sha256_ref.py` | 5 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 3–5 | `$CORE_REPO/tests/examples_build/build.py` | 13 | 3 | `docs/engineering/TEST-DESIGN.md`（汇总） |
-| 2 | `$TEST/host/fakeboard/fake_board.py` | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
+| 2 | `fake_board.py`（2026-10-02 已删，由 bootloader 替身 `$TEST/host/bootstand` 取代） | 3 | 0 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `$TEST/host/fakeboard/run_cases.py` | 16 | 3 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 2 | `$TOOL/tests/iapcert/iapcert_test.go` | 38 | 1 | `docs/security/`，逐条见 BATCH-LEDGER |
 | 3–5 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/build.py` | 239 | 20 | `docs/engineering/TEST-DESIGN.md`（汇总） |

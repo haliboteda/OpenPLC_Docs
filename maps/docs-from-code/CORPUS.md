@@ -224,7 +224,7 @@
 | 3 | `open_plc_arduino/libraries/OpenPLC_Net/src/OpenPLC_Net_Autostart.h` |
 | 3 | `$TEST/tools/run_sdram.py` |
 | 3 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usbd_cdc_if.h` |
-| 3 | `$TEST/host/fakeboard/fake_board.py` |
+| 3 | `fake_board.py`（2026-10-02 已删，由 bootloader 替身 `$TEST/host/bootstand` 取代） |
 | 3 | `$TOOL/tests/crypto_ref/ecdsa_verify.py` |
 | 3 | `$TEST/tools/check_golden_vectors.py` |
 | 2 | `open_plc_cube_ide/TestCase/common/port_led.c` |
