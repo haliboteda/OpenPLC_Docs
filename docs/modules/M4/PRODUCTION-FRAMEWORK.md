@@ -102,6 +102,32 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 **运行时从哪读**：PortTool 找 exe 旁边的 `plans/`，找不到才退回当前目录下的 `TestCase/plans`（从仓库根跑的情况）。`compile_tool.sh` 每次构建把 `$PORTTOOL/TestCase/plans/*.json` 拷进 `Output/<平台>/plans/` —— **仓库那份是源头，`Output/` 那份是产物，会被下次构建覆盖**；产线自己新写的方案文件留在原地不动。方案页的「保存」写的也是这个目录，且**先验后写**：不通过校验的方案根本到不了磁盘，因为一份读不进来的方案迟早有人拿去跑。
 
+### 精度指标（`calibration`）
+
+方案顶层可以带一个 `calibration` 块，写每块板校准后要达到的精度（[决策 70](../../tables/DECISIONS.md)、[AI / AO 的精度指标定多少](../../../maps/per-board-calibration/issues/CAL-02-what-accuracy-do-we-promise.md)）。换一份方案文件就换了指标（决策 30）。
+
+```json
+"calibration": {
+  "temperature_c": 25,
+  "channels": [
+    { "channel": "AI1", "unit": "mV", "full_scale": 10000, "max_residual_pct_fs": 0.1 },
+    { "channel": "AI2", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.1 },
+    { "channel": "AO1", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.3 },
+    { "channel": "AO2", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.3 }
+  ]
+}
+```
+
+| 字段 | 意思 |
+|---|---|
+| `channel` | `AI1`、`AI2`、`AO1`、`AO2` 之一，和校准值区的四路一致；不许重复 |
+| `unit` | 拟合用的单位，必须和校准值区那一路的单位一样（AI1 是 mV，其余是 mA） |
+| `full_scale` | 满量程，判据按它算百分比：AI1 0–10 V，AI2、AO 0–20 mA |
+| `max_residual_pct_fs` | 拟合后最大残差占满量程的百分比上限，超了这一路判不过 |
+| `temperature_c` | 指标对应的温度，只记录不判：全温指标还没定 |
+
+判定在 `ptcheck` 里：`|最大残差| / full_scale × 100 ≤ max_residual_pct_fs`。方案里没有这个块，拟合照算、照存档，但不判过不过，也不出扇区 15 镜像。
+
 ### 六个通用字段的语义
 
 | 字段 | 语义 |
@@ -212,4 +238,4 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 - **报告推给谁、什么格式**（`PushResult` 的 `sink`）—— 等产线那边的系统确定
 - **仪器与工装板的调用形态** —— `Tool` 类型起进程是兜底方案；工装板若走串口协议，可能值得一个 `Fixture` 类型。等 [FIXTURE-INTERFACE.md](../../outbound/FIXTURE-INTERFACE.md) 第三节那几个问题有回音
-- **AI / AO 逐板校准** —— 整块挂起，见 `$PROD/maps/production-test-gap/GAP-AS-OF-2026-09-16.md` 的 Q2
+- **AI 的多点测量**：面板上只有模拟输出（AO）的多点测量卡，模拟输入（AI1、AI2）还没有，所以四路凑不齐，出不了扇区 15 镜像。存档和判定已经认四路（见 [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) C.3.2）

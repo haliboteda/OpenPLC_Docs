@@ -659,8 +659,24 @@ flowchart LR
 | 持续测试中板子复位 | 某个端口的毫秒计数往回跳（`ptproto.TickUnwrapper`），或者它的帧停了超过三个自身周期加 5 秒 | 同上，原因写「板子复位了」或「某口多少秒没数据」 |
 | 控制口断了（适配器拔了、板子掉电） | 串口读循环结束 | 状态栏变红写「控制口断了」，停掉持续测试 |
 | 方案和固件对不上 | `CheckAgainstCaps` 报出问题 | 拒跑，列出哪一步、为什么（和 CLI 一样） |
+| 模拟板进程退出了 | 连上时 `pt.caps` 没回答、或控制口断了，而模拟板进程已退出 | 提示写「模拟板退出了」和退出码，并给出模拟板程序的路径；不说固件、波特率、接线 |
 
 单次测试的「不过」不点灯：结果就摆在卡片上，人就在跟前。
+
+### C.3.2 校准存档和扇区 15 镜像
+
+多点测量卡拟合完一路，PortTool 把结果按板子 UID 存到 PC 上；四路都齐、都过了，再生成扇区 15 校准值区的镜像，给工站 10 用 JLINK 写进板子（[修正值怎么写进板子](../../../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md)）。**PortTool 不往板子写 flash**：工站 6 的测试固件只测。
+
+| 项 | 定案 |
+|---|---|
+| UID 从哪来 | 存档时现发一次 `pt.id`，取 `uid=` 那 24 位十六进制，就是芯片 UID 的 w0 w1 w2 |
+| 模拟板 | 照样拟合、照样判，**不存档**：读数是假的，存在一个 UID 底下就像是真板子的结果 |
+| 目录 | exe 旁边的 `calibration/<UID>/`，和 `runlogs/` 同样的放法 |
+| 存档 | `calibration.json`：每路一项，记单位、5 点原始读数（`want` 是板子的标称值，`got` 是仪表读数）、增益、偏移、最大残差及所在点、均方残差、判据和过没过、测量时间，以及 PortTool 版本、方案名和 `limit_version` |
+| 重测 | 写之前若已有 `calibration.json`，先改名成 `calibration.<YYYYMMDD-HHMMSS>.json` 留着，再写新的；新的那份带上没重测的那几路 |
+| 镜像 | `calarea.bin`，8 KiB：前 56 字节是校准值区记录（格式归 `$BOOT/IAPServer/calib_area.h`，见 [SECTOR-15.md](../M1/SECTOR-15.md)「校准值区的格式」），其余 `0xFF`。只在四路都有、都过了的时候写 |
+| 镜像作废 | 一次存档之后四路不齐或有一路不过：已有的 `calarea.bin` 改名成 `calarea.<YYYYMMDD-HHMMSS>.bin` 留着，不留一份和存档对不上的镜像 |
+| 系数方向 | `实测 ≈ gain × 标称 + offset`，和校准值区同一个方向：AO 的标称是板子要出的值、实测是表读到的；AI 的标称是板子读到的值、实测是信号源给的 |
 
 ## C.4 上位机怎么分发、怎么起来
 

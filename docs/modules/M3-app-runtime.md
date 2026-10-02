@@ -60,12 +60,13 @@ flowchart TD
 | **R3-07** | 网络不被 sketch 卡住 | sketch 在 `delay()` 里等待时，板子照样应答网络、能经网口上传 | 手工 | ✅ |
 | **R3-08** | 例程起得来 | `OpenPLC_Ports` 的每个例程经 bootloader 启动后，`setup()` 走完、`loop()` 一直在转、不进 fault | `T3-05` | ✅ |
 | **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` | ⬜ |
+| **R3-10** | 模拟量带单位 | `OpenPLC_Ports` 给 mV / mA 的 AI、AO 读写，并套用这块板的校准值；校准值无效时退回标称换算并打一行日志（[CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md)） | `T3-07` | 🟡 |
 
-**共 9 条。其中 6 条有测试用例直接测它，3 条没有。**
+**共 10 条。其中 7 条有测试用例直接测它，3 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T3-xx` 用例直接测 | **6** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` `R3-09` |
+| 有 `T3-xx` 用例直接测 | **7** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` `R3-09` `R3-10` |
 | 纯手工 | **2** | `R3-02` `R3-07` |
 | 只有静态检查 | **1** | `R3-04` |
 
@@ -93,6 +94,7 @@ flowchart TD
 | `T3-04` | `R3-06` | RS232 端子收发 | 往端子 C05/C06 发字符，每个字节原样回显 | `$TEST/onboard/rs232/SerialPort` | 真板子 | ✅ |
 | `T3-05` | `R3-08` | 13 个例程经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
 | `T3-06` | `R3-09` | 自有库例程在真板上逐个测通 | 每个例程：经 USB CDC 上传后，脚本按表里那一行发输入、等输出，用正则认例程自己的人读输出；要人配合的步骤由脚本提示 ⁵ | `python tools/run_examples.py [--only NAME]` | 真板子 | ⬜ |
+| `T3-07` | `R3-10` | 带单位 AI / AO 套用校准值 | 写入已知系数后换算结果按系数变；魔数错、CRC 错、UID 不符三种都退回标称，日志只打一次 | `$CORE_REPO` 里 `python tests/selfcheck.py`（CTest 的 `T3-07`） | 主机侧，测不到真板子上的读数精度 | ✅ |
 
 **共 6 条。`T3-05` 在 Renode 里跑，其余要真板子。**
 
@@ -146,3 +148,4 @@ flowchart TD
 | 文档 | 讲什么 |
 |---|---|
 | [CONSTRAINTS.md](M3/CONSTRAINTS.md) | 一条总原则：不论用户在 app 里怎么用这颗芯片，设计都必须依然正确 |
+| [CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md) | 带单位、套校准值的 AI / AO API：函数、换算步骤、校准值无效时怎么办 |

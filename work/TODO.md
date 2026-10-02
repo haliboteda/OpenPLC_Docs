@@ -15,7 +15,7 @@
 | **拆仓后的面板浏览器测试 T4-02 上真板子** —— 2026-10-01 PortTool 拆仓（决策 76）后主机侧全过，T4-02 接模拟板（`--port sim`）也全过；真板子那一遍没跑 | 板子跑工装固件，在 `$PORTTOOL/TestCase/host/porttool_panel` 里跑 `python run.py --port <RS232 控制口>`，全部检查通过 | [DECISIONS.md 第 76 条](../docs/tables/DECISIONS.md) |
 | **`HARDWARE-FACTS.md` 的 PG11 那一格等用户定**：记的是「心跳指示」，原理图上心跳灯是 LED3 / PE2，PG11（`KNX_Prog_LED`）这根线上没有 LED | 用户认可后改那一格，并同步变体头 `variant_PLC_H743.h:233-234` | [KNX 和 SDRAM 例程写死的引脚和本板对得上吗](../maps/core-examples-on-board/issues/EXB-07-do-knx-and-sdram-examples-use-this-boards-pins.md)，证据见 [EXB-07-findings.md](../maps/core-examples-on-board/EXB-07-findings.md) 表 3 |
 | **上游例程删除清单等用户逐个确认**：建议删 19 个。`EEPROM` 8 个已随整库删掉（2026-09-30，本板不提供模拟 EEPROM，见 EXB-09），剩 11 个：`Servo` 3、`SoftwareSerial` 2、`SPI` 2、`Keyboard`、`Mouse`、`SubGhz`、`RGB_LED_TLC59731`） | 用户逐个点头后删；P5 `EXCLUDED` 去掉死条目；P5 重跑全绿 | [上游例程哪些和本板有关](../maps/core-examples-on-board/issues/EXB-04-which-upstream-examples-relate-to-this-board.md) |
-| **面板连 sim 失败时的提示说错了对象**：模拟板进程退出时仍提示「检查 PORTTOOL_ENABLE、波特率、接线」（`$PORTTOOL/internal/ptpanel/panel.go:439`），应说模拟板退出了及退出码 | sim 进程起不来时，面板提示里出现「模拟板」和它的退出码 | 2026-09-29 模拟板加载到 32 位 DLL 那次，见 [HOW-TO-RUN-TESTS.md](../docs/engineering/HOW-TO-RUN-TESTS.md)「模拟板」 |
+| ~~**面板连 sim 失败时的提示说错了对象**：模拟板进程退出时仍提示「检查 PORTTOOL_ENABLE、波特率、接线」（`$PORTTOOL/internal/ptpanel/panel.go:439`），应说模拟板退出了及退出码~~ ✅ **2026-10-03 已修**：模拟板退出时提示「模拟板退出了（退出码 N）」，测试 `internal/ptpanel/simexit_test.go` | sim 进程起不来时，面板提示里出现「模拟板」和它的退出码 | 2026-09-29 模拟板加载到 32 位 DLL 那次，见 [HOW-TO-RUN-TESTS.md](../docs/engineering/HOW-TO-RUN-TESTS.md)「模拟板」 |
 | 五个通信口做「异常可恢复」：上位机从帧里看出断了（`conn` 掉 0、`miss` 连增），自己计时到恢复 | 产测文档 3.10 的判定栏能填出「误码 / 恢复时间」，人只要动手拔线、不用回来汇报 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 `ISS-D1`）。⚠️ 2026-09-16 起**等工装的使用反馈**再动 |
 | 上位机面板左边按九个配置项分类分段 | 九类各自成段；**端口本身仍按板子分组**（Bridge / Upper / Lower / 整板），那条已定不要重开 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 `ISS-D2`）。⚠️ 同样等反馈 |
 | 每个端口逐个打通到真板子上过 | 每个端口在真板子上跑过一轮并记下结果 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 PORT-BRINGUP-PLAN.md 整份，该文件已删） |
@@ -108,10 +108,10 @@
 
 | 待办 | 怎么算做完 | 来自哪张票 |
 |---|---|---|
-| **工装：5 点测量 → 拟合 → 按 UID 存档 → 生成扇区 15 的镜像** | 四路各 5 点，残差进报告；同一 UID 重测覆盖前留旧档 | [校准哪些通道](../maps/per-board-calibration/issues/CAL-03-which-channels-and-what-correction-model.md)、[修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
+| **工装：5 点测量 → 拟合 → 按 UID 存档 → 生成扇区 15 的镜像** —— 🔶 2026-10-03：存档和镜像生成做完（`internal/calstore`，格式见 `M4/PORTTOOL-FLOW.md` C.3.2），AO 两路能从面板走完；**还差 AI1、AI2 的多点测量卡**，四路齐了才出 `calarea.bin` | 四路各 5 点，残差进报告；同一 UID 重测覆盖前留旧档 | [校准哪些通道](../maps/per-board-calibration/issues/CAL-03-which-channels-and-what-correction-model.md)、[修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
 | **工站 10：JLINK 只擦扇区 0–14 重烧，再写扇区 15** | 真板子上走完后扇区 15 逐字节等于存档；bootloader 和 app 正常启动 | [修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
-| **方案文件加精度字段**：AI ±0.1 % FS、AO ±0.3 % FS（25 °C，校准后残差） | 换一份方案文件就能改指标；残差超了判失败 | [AI / AO 的精度指标定多少](../maps/per-board-calibration/issues/CAL-02-what-accuracy-do-we-promise.md) |
-| **`OpenPLC_Ports` 带单位的 AI / AO API**，套用修正值；没有有效校准值时退回标称换算并打日志；AI / AO 例程改用它 | 写入已知系数后读数按系数变；擦掉校准值区后退回标称并打日志 | [app 里怎么套用修正值](../maps/per-board-calibration/issues/CAL-06-how-does-the-app-apply-the-correction.md) |
+| ~~**方案文件加精度字段**：AI ±0.1 % FS、AO ±0.3 % FS（25 °C，校准后残差）~~ ✅ **2026-10-03 做完**：方案顶层的 `calibration` 块，`ptcheck.ResidualWithin` 判残差，两份 station6 方案已加 | 换一份方案文件就能改指标；残差超了判失败 | [AI / AO 的精度指标定多少](../maps/per-board-calibration/issues/CAL-02-what-accuracy-do-we-promise.md) |
+| **`OpenPLC_Ports` 带单位的 AI / AO API** —— 🔶 2026-10-03 主机侧做完（T3-07，见 `M3/CALIBRATED-ANALOG.md`；AO 只有 mA，硬件没有电压输出）；**真板子上「写入已知系数后读数按系数变」还没验**，套用修正值；没有有效校准值时退回标称换算并打日志；AI / AO 例程改用它 | 写入已知系数后读数按系数变；擦掉校准值区后退回标称并打日志 | [app 里怎么套用修正值](../maps/per-board-calibration/issues/CAL-06-how-does-the-app-apply-the-correction.md) |
 
 ## 开机提示改用指示灯（2026-09-28 定）
 
