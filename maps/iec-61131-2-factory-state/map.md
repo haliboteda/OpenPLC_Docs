@@ -33,6 +33,7 @@ grep -rnE "Relay_On|Relay_Off|HAL_GPIO_WritePin|IWDG|HAL_DAC" open_plc_cube_ide/
 
 ## Decisions so far
 
+- [用户程序卡死时谁发现、输出怎么办](issues/IEC-03-watchdog-for-the-user-program.md)：板卡包默认开 IWDG、每次 `loop()` 喂；默认 2 s；连续 3 次被看门狗复位就停在 bootloader，指示灯慢闪
 - [开机窗口改用什么提示](issues/IEC-01-what-replaces-the-relay-click.md)：系统指示灯 PE2 + 串口日志：窗口快闪、恢复出厂就绪常亮；开机不动任何输出
 - [每个输出在上电、掉电、没有 app、app 刚起来时处于什么状态](issues/IEC-02-what-state-is-each-output-in.md)：DO / 继电器都落在断开；AO 上电和掉电时没定义；无看门狗、欠压检测、报警输出；RUN / STOP 不强制
 

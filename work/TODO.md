@@ -51,6 +51,16 @@
 | ~~**`$PORTTOOL` 自带本机配置、构建、自检**~~ ✅ **2026-10-01 做完**：自己的 `init_machine.py` / `common.py` / `config/machine.py`、工装镜像构建、`selfcheck.py`；删掉 `tool_repo.py` | `$TOOL` 不在旁边时，`$PORTTOOL` 能编工装固件、编 PortTool、跑自检、打交付包 | 决策 76 |
 | ~~**`$TOOL` 去掉所有 PortTool 痕迹**~~ ✅ **2026-10-01 做完**：`selfcheck` 的 PortTool 步骤、P2 的 `serialx` / `calarea` 跨仓比对、`build_image.py --porttool`、`PORTTOOL_REPO`、代码注释和文档里提到 PortTool 的地方 | `grep -ri porttool $TOOL` 只剩 bootloader 拒烧工装镜像那类与 `$BOOT/Debug/` 有关的检查 | 决策 76 |
 
+## 看门狗（2026-10-03 定）
+
+**[用户程序卡死时谁发现、输出怎么办](../maps/iec-61131-2-factory-state/issues/IEC-03-watchdog-for-the-user-program.md) 产生的实施项。**
+
+| 待办 | 怎么算做完 | 来自哪张票 |
+|---|---|---|
+| **板卡包**：进 `setup()` 前按 32 s 开 IWDG，返回后改 2 s；每次 `loop()` 喂；可调超时的接口；连续正常跑满 60 s 清 DR5 | 主机侧能测的部分有用例；`setup()` 里调超时生效 | 同上 |
+| **bootloader**：开机读到 IWDG 复位就 DR5 加一，上电复位清零；满 3 次停在 bootloader，指示灯慢闪、串口打原因、照常应答发现和上传 | `$BOOT/tests` 里有覆盖计数和判定的用例 | 同上 |
+| **上板验收**：故意卡死的 sketch 被发现、DO 和继电器落在断开、连续 3 次后停住且指示灯慢闪；重新上传修好的程序后恢复 | 真板子上走一遍 | 同上 |
+
 ## 优先级最低
 
 | 待办 | 怎么算做完 | 来自哪 |
