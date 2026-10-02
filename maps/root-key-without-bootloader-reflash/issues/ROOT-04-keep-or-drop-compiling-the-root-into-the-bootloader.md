@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: ROOT-02, ROOT-03
 
 ## Question
@@ -16,3 +16,11 @@ Blocked by: ROOT-02, ROOT-03
 ## 怎么算答完
 
 定下留或不留；留的话写出它服务的那种用户，不留的话写出已编进自己根的板子的去向。
+
+## Answer
+
+2026-10-03 定（用户选 A）。「把根编进 bootloader」这条路不留，`rotate_keys.sh` 已随决策 72 删掉。已经把自己的根编进旧 bootloader 的板子不做迁移：发出去过的 v0.1.0–v0.1.2 都没有 `flashboot`，只能用 ST-Link 重烧，重烧后回到无根，第一次上传重新认领，和恢复出厂一样。理由：旧根编在代码里，重烧就没了，迁移读不到；而且测试阶段不做向后兼容（[决策 79](../../../docs/tables/DECISIONS.md)）。
+
+## 引出了什么新的未知
+
+没有。

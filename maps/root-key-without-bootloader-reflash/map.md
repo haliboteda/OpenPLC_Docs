@@ -28,6 +28,7 @@ grep -rln "fw_public_key\|fw_pubkey" open_plc_cube_ide/IAPServer IAPTranfer_Tool
 
 ## Decisions so far
 
+- [「把根编进 bootloader」这条路还留不留](issues/ROOT-04-keep-or-drop-compiling-the-root-into-the-bootloader.md)：不留；旧板子不迁移，ST-Link 重烧后回到无根、重新认领
 - [core 里那份内置根怎么跟着改](issues/ROOT-06-the-cores-copy-of-the-built-in-root.md)：删掉；app 读扇区 15 的根区，链为空时拒绝
 - [恢复出厂之后板子信任哪把根](issues/ROOT-03-which-root-does-a-factory-reset-return-to.md)：回到没有根，下次上传自动重新认领
 - [根区放在哪、写满怎么回收](issues/ROOT-05-where-the-built-in-root-lives-and-how-it-is-updated.md)：扇区 15 `0x081E2000` 起 8 KiB，回收时暂存备份 SRAM（方案 5）
@@ -40,9 +41,7 @@ grep -rln "fw_public_key\|fw_pubkey" open_plc_cube_ide/IAPServer IAPTranfer_Tool
 
 ## Not yet specified
 
-- **私钥默认位置的具体路径**：用户定了「板卡包目录之外的一个固定位置，生成和读取时都提示路径」，具体路径写进 M2 时定
-
-- **给用户的文档怎么改**：`keys/README.md` 现在写的是「自己的根要重编 bootloader」，要等前面几张票定了才知道改成什么
+没有了：私钥默认位置随决策 72 定为 `<用户配置目录>/openplc/keys/fw_signing_key.pem`（IAPTool 的 `app.go` 用法说明）；`keys/README.md` 随 `keys/` 目录一起删了（`$BOOT` 提交 `fe653a7`）。全集命令 2026-10-03 重跑：仓库里已没有文件引用 `fw_public_key` / `fw_pubkey`。
 
 ## Out of scope
 
