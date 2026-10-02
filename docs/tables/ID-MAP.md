@@ -29,7 +29,7 @@
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–79 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 77 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–80 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 78 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
