@@ -87,3 +87,5 @@
 
 [HOW-TO-RUN-TESTS.md](HOW-TO-RUN-TESTS.md) —— 跨用例的操作说明：怎么让设备停在 bootloader、
 手上没板子时怎么用模拟板联调、各静态检查怎么跑。**单条用例的判据和跑法在各模块文档的测试表里**，这份只装跨用例的部分。
+
+[BOOTLOADER-STAND-IN.md](BOOTLOADER-STAND-IN.md) —— IAPTool 契约测试用的 bootloader 替身：哪些是真代码、哪些是桩、测不到什么。

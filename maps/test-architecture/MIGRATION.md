@@ -22,4 +22,4 @@
 | 2c | ✅ 2026-10-02：公开包 `iapproto/`、`netiface/`；T1-15、T1-19/T1-20 进 `tests/`，入口 `tests/selfcheck.py`；`install_tool.py` 进 `tools/`，按平台默认位置找 Arduino15 |
 | 3 | ✅ 2026-10-02：`$TEST` 自检 7 过 1 跳（T3-05：`$BOOT/Debug/` 现在是工装镜像）。`Output/` 90 个文件 sha256 一致，那把密钥在新位置签名成功，旧的未删 |
 | 4 | ✅ 2026-10-02：`$TOOL/TestCase/` 已删（105 个文件逐个在新位置核过；`gen_vectors.py` 改写成 `$TEST` 的 P20）；`Output/` 里 90 个测试资产再核 sha256 后删除，那把密钥在新位置签名通过；文档路径全部改到新位置，`ACCEPTANCE-CHECKLIST.md` 每项写明哪个仓的哪条命令；PortTool 的 CALAREA、DOCS 两步删掉（已被 `$TEST` 的 P2、`$PROD` 的 P9 取代） |
-| 5 | 未开始 |
+| 5 | 进行中（2026-10-02 开始）：设计在 [BOOTLOADER-STAND-IN.md](../../docs/engineering/BOOTLOADER-STAND-IN.md) |
