@@ -30,6 +30,7 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)：不提供模拟 EEPROM；KNX 两块数据放扇区 14；P19 盯住
 - [测试脚本怎么判一个例程过没过](issues/EXB-01-how-does-the-script-judge-an-example.md)：认例程现有输出、判据在 Python 表里、经 USB CDC 上传、用例 `T3-06`
 
 - [上游例程哪些和本板有关](issues/EXB-04-which-upstream-examples-relate-to-this-board.md)：测 2、留着不测 11、建议删 19；删前逐个问用户；`EEPROM` 和 KNX 会擦扇区 15

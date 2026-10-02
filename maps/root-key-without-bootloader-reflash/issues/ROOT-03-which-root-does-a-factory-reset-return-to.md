@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: ROOT-01, ROOT-05
 
 ## Question
@@ -14,3 +14,11 @@ Blocked by: ROOT-01, ROOT-05
 ## 怎么算答完
 
 定下恢复出厂之后信任哪把根，以及丢了私钥时的救法。
+
+## Answer
+
+2026-09-30 定（随决策 72；2026-10-03 补记关票）。恢复出厂（复位后按住 BOOT0 十秒）回到「没有根」，下次经 USB 或网口上传时 IAPTool 自动重新认领。丢了私钥的用户就这样救回板子：恢复出厂后重新认领。
+
+## 引出了什么新的未知
+
+没有。

@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: ROOT-05
 
 ## Question
@@ -14,3 +14,11 @@ Arduino core 也编了一份 `fw_public_key`（`OpenPLC_IAP/src/fw_pubkey.c`，2
 ## 怎么算答完
 
 定下 core 那份怎么改；要改 core 的话把 `$CORE_REPO` 加进这张图的范围和 `## 全集` 命令。
+
+## Answer
+
+2026-10-03 关（按决策 72 已实施的做法补记，`$CORE_REPO` 提交 `7881480`）。core 里那份编死的 `fw_public_key` 删掉；app 侧的 `owner_root_ro.c` 改读扇区 15 的根区（`0x081E2000`）；链为空（板子还没有根）时不认任何签名，拒绝重启请求，用户要先认领。范围扩到 core 已经发生，板卡包随下一版发布。
+
+## 引出了什么新的未知
+
+没有。

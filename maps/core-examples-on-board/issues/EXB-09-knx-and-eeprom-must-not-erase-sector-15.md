@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-29
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -16,3 +16,11 @@ Blocked by: -
 ## 怎么算答完
 
 定下 KNX 应用 NVM 和 `EEPROM` 各自的去处，以及一道能自动发现「有代码往扇区 15 写」的检查；改完后在真板上跑 `KNX_SelfTest`，扇区 15 逐字节不变。
+
+## Answer
+
+2026-09-30 定（用户；2026-10-03 补记关票）。本板不提供模拟 EEPROM：板上没有 EEPROM 芯片，`EEPROM` 库连同 8 个例程删掉。KNX 两块数据按方案 B+ 放扇区 14（`0x081C0000`，仍属 app 区），保存时两块一起读改写；板卡包给 app 的上限改回 1,835,008 B，构建检查才真正起作用（见 [BOOTLOADER-PROJECT-LAYOUT.md](../../../docs/build/BOOTLOADER-PROJECT-LAYOUT.md)）。P19 盯住板卡包里没有代码写扇区 15。
+
+## 引出了什么新的未知
+
+没有。
