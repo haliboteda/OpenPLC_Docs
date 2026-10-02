@@ -238,4 +238,3 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 - **报告推给谁、什么格式**（`PushResult` 的 `sink`）—— 等产线那边的系统确定
 - **仪器与工装板的调用形态** —— `Tool` 类型起进程是兜底方案；工装板若走串口协议，可能值得一个 `Fixture` 类型。等 [FIXTURE-INTERFACE.md](../../outbound/FIXTURE-INTERFACE.md) 第三节那几个问题有回音
-- **AI 的多点测量**：面板上只有模拟输出（AO）的多点测量卡，模拟输入（AI1、AI2）还没有，所以四路凑不齐，出不了扇区 15 镜像。存档和判定已经认四路（见 [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) C.3.2）

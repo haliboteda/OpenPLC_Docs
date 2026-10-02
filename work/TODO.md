@@ -108,7 +108,7 @@
 
 | 待办 | 怎么算做完 | 来自哪张票 |
 |---|---|---|
-| **工装：5 点测量 → 拟合 → 按 UID 存档 → 生成扇区 15 的镜像** —— 🔶 2026-10-03：存档和镜像生成做完（`internal/calstore`，格式见 `M4/PORTTOOL-FLOW.md` C.3.2），AO 两路能从面板走完；**还差 AI1、AI2 的多点测量卡**，四路齐了才出 `calarea.bin` | 四路各 5 点，残差进报告；同一 UID 重测覆盖前留旧档 | [校准哪些通道](../maps/per-board-calibration/issues/CAL-03-which-channels-and-what-correction-model.md)、[修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
+| **工装：5 点测量 → 拟合 → 按 UID 存档 → 生成扇区 15 的镜像** —— 🔶 2026-10-03：存档和镜像生成做完（`internal/calstore`，格式见 `M4/PORTTOOL-FLOW.md` C.3.2），四路都能从面板走完（AI 卡 2026-10-03 补上）；**剩真板子上走一遍、确认生成 `calarea.bin`** | 四路各 5 点，残差进报告；同一 UID 重测覆盖前留旧档 | [校准哪些通道](../maps/per-board-calibration/issues/CAL-03-which-channels-and-what-correction-model.md)、[修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
 | **工站 10：JLINK 只擦扇区 0–14 重烧，再写扇区 15** | 真板子上走完后扇区 15 逐字节等于存档；bootloader 和 app 正常启动 | [修正值怎么写进板子](../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md) |
 | ~~**方案文件加精度字段**：AI ±0.1 % FS、AO ±0.3 % FS（25 °C，校准后残差）~~ ✅ **2026-10-03 做完**：方案顶层的 `calibration` 块，`ptcheck.ResidualWithin` 判残差，两份 station6 方案已加 | 换一份方案文件就能改指标；残差超了判失败 | [AI / AO 的精度指标定多少](../maps/per-board-calibration/issues/CAL-02-what-accuracy-do-we-promise.md) |
 | **`OpenPLC_Ports` 带单位的 AI / AO API** —— 🔶 2026-10-03 主机侧做完（T3-07，见 `M3/CALIBRATED-ANALOG.md`；AO 只有 mA，硬件没有电压输出）；**真板子上「写入已知系数后读数按系数变」还没验**，套用修正值；没有有效校准值时退回标称换算并打日志；AI / AO 例程改用它 | 写入已知系数后读数按系数变；擦掉校准值区后退回标称并打日志 | [app 里怎么套用修正值](../maps/per-board-calibration/issues/CAL-06-how-does-the-app-apply-the-correction.md) |

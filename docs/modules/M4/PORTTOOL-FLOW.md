@@ -677,6 +677,8 @@ flowchart LR
 | 镜像 | `calarea.bin`，8 KiB：前 56 字节是校准值区记录（格式归 `$BOOT/IAPServer/calib_area.h`，见 [SECTOR-15.md](../M1/SECTOR-15.md)「校准值区的格式」），其余 `0xFF`。只在四路都有、都过了的时候写 |
 | 镜像作废 | 一次存档之后四路不齐或有一路不过：已有的 `calarea.bin` 改名成 `calarea.<YYYYMMDD-HHMMSS>.bin` 留着，不留一份和存档对不上的镜像 |
 | 系数方向 | `实测 ≈ gain × 标称 + offset`，和校准值区同一个方向：AO 的标称是板子要出的值、实测是表读到的；AI 的标称是板子读到的值、实测是信号源给的 |
+| AI 的走查 | AI1（mV）、AI2（mA）各一张多点测量卡，和 AO 卡同一套：每一点人用信号源给出标称值，面板取板子在那一点的若干帧求平均，填 `got` 的是信号源那个值 |
+| AI 的标称怎么算 | **照 app 的算法从原始读数算**，不用帧里的毫伏：引脚 mV = raw × 2500 / 65535（固定 2.5 V 基准；工装是 16 位、app 是 12 位，比例相同），AI1 = 引脚 mV × 90.6 / 22.6，AI2 = 引脚 mV / 124。理由：app 套系数时用的是这个标称（`$CORE_REPO/libraries/OpenPLC_Ports/src/openplc_analog.c`）；帧里的毫伏是按实测基准换算的，拿它拟合，系数里会混进基准误差 |
 
 ## C.4 上位机怎么分发、怎么起来
 

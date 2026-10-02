@@ -96,9 +96,10 @@
 | 11 | **`sha256.c` 和 `iap_cert.c` 整个文件** —— 两边本来就一模一样，原先只有头注释不同 | bootloader `IAPServer/`<br>core `libraries/OpenPLC_IAP/src/` | P2 **逐字节**。⚠️ 差一个字节就红，所以改完一边必须同步另一边。<br>**`sha256.h` 不在内** —— 两边的 include guard 名字是刻意不同的；API 真变了 `.c` 必然跟着变，一样抓得到 |
 | 12 | **`iap_auth.c`**：`iap_auth_issue_challenge` 整个函数；外加 `iap_auth_verify_and_consume` 里**签名覆盖哪些字节**（`nonce || msg`，顺序和长度） | 同上 | P2 比**规范化正文**（去注释、去空白）。⚠️ **不比整个文件、不比 `verify_and_consume`、也不比 `rng_words`** —— core 那份是刻意的子集（没有 `iap_auth_report_backup_domain`），`verify_and_consume` 两边取当任根的 API 和诊断输出本来就不同，`rng_words` 两边够到的 RNG 句柄不同（core 那份转调 `OpenPLC_Net` 的 `openplc_rng_words()`，决议 67） |
 | 13 | **校准值区格式**（魔数、版本、通道数、布局、CRC-32）。格式见 [SECTOR-15.md](../modules/M1/SECTOR-15.md)「校准值区的格式」 | bootloader `IAPServer/calib_area.h`<br>core `libraries/OpenPLC_Ports/src/openplc_calib.h`<br>porttool `internal/calarea/calarea.go` | P2 一次比三方（决策 78，「依赖固件源码的 PortTool 测试归哪」那张票）。**2026-09-28 新增** |
+| 14 | **AI 换算常数**：AI1 分压 90.6k / 22.6k、AI2 分流 124 Ω、ADC 满量程 2500 mV（硬件出处 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md)「模拟量」）。工装按它算校准的标称值，app 按它套用，两边不一样系数就错 | core `libraries/OpenPLC_Ports/src/openplc_analog.c`<br>porttool `internal/ptpanel/web/index.html` 的 `AICAL` / `aicalPinMv` | P2。**2026-10-03 新增** |
 | 10 | **物理网卡判定** —— 排掉没 up 的、回环、点对点（VPN tun）、无 MAC 的，再按操作系统分类虚拟网卡 | core `tools/discovery/network_discovery.go` 的 `isPhysicalInterface()` + `iface_{windows,linux,darwin}.go`<br>tool `netiface/` | P2。**2026-09-18 新增** —— 决定见 `$PROD/docs/tables/DECISIONS.md` 第 51 条 |
 
-> ✅ **13 条里 12 条 P2 真的在查，第 9 条只查一半。**
+> ✅ **14 条里 13 条 P2 真的在查，第 9 条只查一半。**
 > 所以「只能靠注释约束」这个旧说法已经不成立 —— **只剩第 9 条的另一半（core 的 `backup.h`
 > 和 HID indices）仍然只靠人。**
 

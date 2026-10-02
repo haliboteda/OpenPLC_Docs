@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-28
-Status: open
+Status: claimed
 Blocked by: IEC-02
 
 ## Question
@@ -12,3 +12,9 @@ Blocked by: IEC-02
 ## 怎么算答完
 
 定下开不开、谁喂、超时行为；一个故意卡死的 sketch 在真板子上被发现，输出落到规定状态。
+
+## 讨论中已定
+
+2026-10-03（用户按推荐定）：
+- 板卡包默认开 IWDG，每跑完一次 `loop()` 喂一次；超时时间留接口，`setup()` 里可调长
+- 连续 3 次被看门狗复位就停在 bootloader 不跑 app，指示灯和串口报出来；正常上电或跑稳一段时间清零
