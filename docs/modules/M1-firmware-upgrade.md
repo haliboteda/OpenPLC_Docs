@@ -365,7 +365,7 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电后计数器不归零，本轮 nonce 全不同 | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
 | `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | bootloader 替身（主机） | ✅ |
 | `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | bootloader 替身（主机） | ✅ |
-| `T1-18c` | `R1-21` | 老 bootloader 不认这条命令时不卡住 | 板子答 `Unknown command`，工具照走并说 `skipping key match check` | 同上 | bootloader 替身（主机） | ✅ |
+| `T1-18c` | `R1-21` | ~~老 bootloader 不认这条命令时不卡住~~ | 决策 79（测试阶段不做向后兼容）取消：IAPTool 遇到不认识 `getpubkey` 的 bootloader 改为报错，替身里假扮老 bootloader 的开关已删 | — | — | ⛔ 已作废 |
 | `T1-18d` | `R1-21` ³ | 委托证书由这块板的根签发 | 板子答签发根，工具报 `Certificate was issued by this board's root` | 同上 | bootloader 替身（主机） | ✅ |
 | `T1-18e` | `R1-21` ³ | 证书的签发根不是这块板的根 | 工具拒并说 `was not issued by this board's root` | 同上 | bootloader 替身（主机） | ✅ |
 | `T1-18f` | `R1-21` ³ | 证书覆盖的是别人的密钥 | 工具拒并说 `was issued for a different key` | 同上 | bootloader 替身（主机） | ✅ |
@@ -388,7 +388,7 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-34` | `R1-38` | IDE 那条上传命令在 bootloader 替身上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 替身里 app 一侧拒绝重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**替身那边验过整个镜像**（`Checksum and signature OK`），且收完镜像后真的复位、回到 app ¹⁰ | `python host/fakeboard/run_ide_upload.py` | bootloader 替身（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 | `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |
 
-**共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`）。
+**共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`；`T1-18c` 2026-10-03 作废）。
 
 ✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
 bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，

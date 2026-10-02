@@ -40,7 +40,7 @@ git -C OpenPLC_Test ls-files -co --exclude-standard | sed "s#^#OpenPLC_Test/#"  
 - [发版之前要跑什么](issues/TA-09-what-runs-before-a-release.md)：自己仓的自检 + `$TEST` 全部契约 + 相关整机项 + 文档检查
 - [两个仓都要用的测试桩怎么办](issues/TA-11-test-stubs-two-repos-need.md)：替本仓代码的桩归本仓，可以重复
 - [黄金向量由谁更新](issues/TA-12-who-updates-the-golden-vectors.md)：`$TEST` 只比对、不写
-- [真 bootloader 替身覆盖不到的几例怎么办](issues/TA-13-what-the-real-bootloader-stand-in-cannot-cover.md)：T1-18c 在替身外拦一句；app 侧握手把板卡包代码编进替身；`jump_to_app` 加主机开关
+- [真 bootloader 替身覆盖不到的几例怎么办](issues/TA-13-what-the-real-bootloader-stand-in-cannot-cover.md)：T1-18c 原定在替身外拦一句，2026-10-03 按决策 79 作废；app 侧握手把板卡包代码编进替身；`jump_to_app` 加主机开关
 - [依赖固件源码的 PortTool 测试归哪](issues/TA-10-where-do-porttool-tests-that-build-firmware-go.md)：工装算一个部件、源码跨两个仓，T4-01 到 T4-03 和模拟板留在 `$PORTTOOL`；校准值区核对合进 `$TEST` 契约层，一次比三方
 - [每一项现有测试归哪一层、哪个仓](issues/TA-01-which-layer-and-repo-does-each-test-belong-to.md)：330 个文件逐个归位，部件 91、`$TEST` 52、文档检查 8、待定 8，表在 [TA-01-inventory.md](TA-01-inventory.md)
 - [bootloader 的 C 单元测试用什么驱动](issues/TA-04-how-are-bootloader-c-unit-tests-driven.md)：`$BOOT/tests/` 下独立的 CMake 工程，用 CTest 跑，不挂到顶层 `CMakeLists.txt`；三组测试已在临时目录跑通

@@ -26,7 +26,6 @@
 
 | 情况 | 怎么做 | 为什么 |
 |---|---|---|
-| T1-18c：老 bootloader 不认识 `getpubkey` | 替身带一个开关，开着时在进入真代码之前拦下 `getpubkey`，回 `Unknown command` | 打过标签的 v0.1.0–v0.1.2 bootloader 都没有这条命令，现行代码造不出这一例 |
 | `jump_to_app` 是 ARM 汇编 | `$BOOT/IAPServer/IAP_server.c` 加主机测试开关，开关打开时不编那段汇编 | 照 `bootloader_state.c` 的 `BOOTLOADER_STATE_HOST_TEST` 先例；固件编出来不变 |
 
 ## 怎么跑
@@ -35,7 +34,7 @@
 |---|---|
 | T1-18a–g 和它里面的 T2-28–T2-30 | `python host/fakeboard/run_cases.py`，selfcheck 的 `T1-18a-T1-18g` 一步就是它 |
 | T1-34 | `python host/fakeboard/run_ide_upload.py`，要 arduino-cli，几分钟，不进 selfcheck |
-| 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--old-bootloader] [--discovery-port 56865] [--uid <24 位十六进制>]` |
+| 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--discovery-port 56865] [--uid <24 位十六进制>]` |
 
 两个驱动脚本每次都先编替身（`host/bootstand/build/`，gitignored），要 `HOST_CC` 和 CMake（在 PATH 上或 `HOST_CC` 旁边）。替身往 stdout 打 `[stand-in] root <公钥>`（根变了就打）、`[stand-in] reset`、`[stand-in] jump to app`、`[stand-in] ... serving on <端口>`，脚本读这几行和真代码自己的 `printf` 判结果。
 
