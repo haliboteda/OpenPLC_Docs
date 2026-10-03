@@ -72,6 +72,15 @@
 | **上板验收**：开机到 sketch 接管前，AO 量到 0 mA、DO 和继电器全断开 | 真板子上量 | 决策 81 |
 | **BOR 约 2.7 V** —— 🔶 2026-10-03 bootloader 开机检查（`IAPServer/bor_check.c`）和产线命令（`BOOT-SEQUENCE.md`）做完；3.3 V 由 LMR50410 从 24 V 降压、使能直连输入（HARDWARE-FACTS），掉压点未核实；补写实验室的板子、上板慢降压还没做（[欠压和掉电时进入什么预定状态](../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md)）：产线工站用 ST-Link 写选项字节；bootloader 开机检查、没设对在串口报警；从原理图核实 3.3 V 那级降压在 24 V 掉到多少时才跟着掉；实验室已有的板子补写一次 | 写了的板子上，把供电慢慢调低，低于阈值时复位、输出全 0，回升后正常重启 | IEC-06 |
 
+## KNX TP 收发改成定时器驱动（2026-10-03 定）
+
+来自 [KNX 库的 TP 收发怎么在本板上发出合法帧](../maps/core-examples-on-board/issues/EXB-08-how-does-the-knx-library-drive-stknx.md)。
+
+| 待办 | 怎么算做完 | 出处 |
+|---|---|---|
+| **`OpenPLC_KNX`：新写 STKNX 数据链路层**，替换 `TpUartDataLinkLayer`；定时器收发 TP1 位（照搬 `$BOOT/TestCase/porttool/porttool_knx.c`），组字节 / 帧 / 应答 / 冲突；PB14 空闲为低 | 编码、解码、帧和应答时序有主机测试；例程编得过 | EXB-08 |
+| **上板验收**：总线只接电源和 ETS，ETS 里看得到板子发的组报文，板子能打印 ETS 发来的报文；空闲时板子不占总线 | 真板子 + ETS | EXB-08 |
+
 ## 优先级最低
 
 | 待办 | 怎么算做完 | 来自哪 |
