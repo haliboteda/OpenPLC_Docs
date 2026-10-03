@@ -37,3 +37,15 @@ git 里的修法已知：`Arduino_Tools` 里 `git update-index --chmod=+x linux/
 ## 引出了什么新的未知
 
 没验到：macOS（没有机器）；在真的 Linux IDE 里从网上完整装一遍、点 Upload。
+
+## 后来补的
+
+2026-10-03 同日，在 WSL Debian 里删掉重装后编译，发现 0.1.3 在 Linux 上**连编译都不行**：板卡包的 `system/extras/prebuild.sh`、`postbuild.sh` 和网口发现 `network_discovery`（Linux、macOS 各一份）、`macos-launcher.sh` 也没有可执行权限；STM32Tools 的 `stm32CubeProg.sh` 同样。根因是板卡包用 GitHub 按 tag 自动生成的 zip 发布，它把每个文件标成 DOS 创建的，arduino-cli 解压时丢掉 Unix 权限。
+
+用户定：只修 0.1.3，tag 可以删了重建，先保证程序没问题再建 tag。做法：
+- 板卡包：在原 tag 提交上只改这 6 个文件权限（`d179678`），打成 tar.gz（和原 zip 比，2130 个文件内容一致、只有这 6 个权限不同），作为 `open_plc_arduino` release `0.1.3` 的附件；tag `0.1.3` 重建到 `d179678`
+- STM32Tools：附件再换一次，加上 `stm32CubeProg.sh`；`Arduino_Tools` 的 tag `0.1.3` 重建到只差这 3 个权限的提交
+- 索引 `package_index_json` `80ba4f1`：板卡包改指 release 附件；`CLAUDE.md` 写明以后都发 tar.gz（`0537c6f`）
+- 开发分支 `v0.1.3-dev` 和 `Arduino_Tools` 的 git 也记成 `100755`
+
+先用本地索引在 WSL 里装、测通，再发布；发布后从线上索引删掉重装再测一遍：权限全是 `-rwxr-xr-x`，`DO_Outputs` 编过，`IAPTool` 能运行，网口发现能运行。没测到：上传（要接板子）、macOS。WSL 里 IDE 的配置顺带改了：板卡包索引从 0.1.2 时期的旧地址换成固定地址，没在运行的代理 `127.0.0.1:5780` 清掉了。
