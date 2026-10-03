@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-29
-Status: open
+Status: resolved
 Blocked by: EXB-01, EXB-08
 
 ## Question
@@ -12,3 +12,11 @@ Blocked by: EXB-01, EXB-08
 ## 怎么算答完
 
 定下新增还是改、发什么、打印格式、判据（哪一步要用户在 ETS 里确认）；现有 5 个 KNX 例程各自是留、改还是删。
+
+## Answer
+
+2026-10-03 范围外：用户把 KNX 例程整体改成按正规用法重写，移到 [KNX 例程按正规用法重写](../../knx-examples/map.md)。这张票问的「发什么、打印什么、怎么判」由那边的「例程清单：每个演示什么」「用例怎么判、人做哪几步」回答。
+
+## 引出了什么新的未知
+
+无：问题原样搬到新图。

@@ -30,6 +30,7 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [要人配合的步骤脚本怎么问](issues/EXB-05-how-does-the-script-ask-for-a-human-step.md)：固定提示框；看得出来的自动等、看不出来的按 y/n；不录数值；DI 逐路；要人的放最前
 - [KNX 库的 TP 收发怎么在本板上发出合法帧](issues/EXB-08-how-does-the-knx-library-drive-stknx.md)：现有 USART 路径不可能对；新写 STKNX 数据链路层用定时器收发 TP1，位时序照搬工装固件
 - [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)：不提供模拟 EEPROM；KNX 两块数据放扇区 14；P19 盯住
 - [测试脚本怎么判一个例程过没过](issues/EXB-01-how-does-the-script-judge-an-example.md)：认例程现有输出、判据在 Python 表里、经 USB CDC 上传、用例 `T3-06`
@@ -44,5 +45,6 @@ find open_plc_arduino -name "*.ino"
 
 ## Out of scope
 
+- **`OpenPLC_KNX` 的 5 个例程**：用户 2026-10-03 改成按正规用法重写，移到 [KNX 例程按正规用法重写](../knx-examples/map.md)；[KNX 回显例程长什么样](issues/EXB-02-what-does-the-knx-echo-example-look-like.md) 随之关掉
 - **AI_Inputs 这一轮不测**：用户 2026-09-29 定（跳线没焊，读数悬空）
 - **AO、DO 的自动回读**：板上没有回读通道，用户自己量（2026-09-29 定）

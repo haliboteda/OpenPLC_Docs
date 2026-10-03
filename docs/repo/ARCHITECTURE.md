@@ -13,6 +13,7 @@
 | `$CORE_LIVE` | Arduino IDE **真正加载**的那份板卡包（`$A15/packages/.../stm32/<版本>`），**不在版本控制下** |
 | `$TOOL` | `IAPTranfer_Tool` 的 clone —— IAPTool 和它自己的单元测试 |
 | `$PORTTOOL` | `OpenPLC_PortsTestingTool` 的 clone —— PortTool（给硬件工程师的端口测试面板）和它的测试、交付打包（决策 76） |
+| `$ETSPROD` | `OpenPLC_ETS_Prod` 的 clone —— ETS 产品文件（`.knxprod`）、它的源 XML，以及 KNX 模块的使用说明（用户 2026-10-03 定） |
 | `$TEST` | `OpenPLC_Test` 的 clone —— 整体测试：契约测试和整机测试（决策 78）。2026-10-02 新建，照 [测试按部件、契约、整机三层重新分布](../../maps/test-architecture/map.md) 那张图搬入 |
 | `$HW` | `Hardware` 的 clone —— 原理图、netlist、生产文件 |
 | `$REF` | `Hello_World_OpenPLC` 的 clone —— 同一块板子的参考工程 |

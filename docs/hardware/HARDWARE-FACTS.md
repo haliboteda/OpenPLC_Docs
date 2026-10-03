@@ -347,7 +347,7 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | `KNX_RX` | **PA10** | TIM1_CH3 / AF1 | ⚠️ **低 = 有源脉冲，高 = 空闲**（低有效，2026-09-09 实测，见下） |
 | `KNX_OK` | **PD7** | GPIO | STKNX pin 21，总线电源正常。⚠️ **这块板子上恒为 LOW，不跟总线走**，见下 |
 | `KNX_VCC_OK` | **PH12** | GPIO | STKNX pin 19，VCCCORE 正常 |
-| `KNX_Prog_LED` | **PG11** | GPIO | 心跳指示 |
+| `KNX_Prog_LED` | **PG11** | GPIO | ⚠️ **这根线上没有 LED**：只经板间连接器到 Upper Deck J8-10，不接任何器件（Bridge 原理图 p5；`Production/UpperDeck/netlist.ipc` 的 `/KNX_PROG_LED`）。板上心跳灯是 LED3 `HBEAT`，经 R63 330R 接 **PE2** |
 | `KNX_Prog_KEY` | **PG9** | — | ⚠️ **和 BOOT0 同一条网**，KNX 代码从不驱动它 |
 
 **TP1 位时序**（STKNX datasheet DocID031327 Rev 1 §5.1 p17）：位周期 **104 µs**（9600 bit/s）；逻辑 1 / 空闲 = `KNX_TX` 全程低；逻辑 0 = `KNX_TX` 高 35 µs 再低 69 µs。

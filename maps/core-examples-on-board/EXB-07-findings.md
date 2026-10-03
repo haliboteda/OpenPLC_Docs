@@ -16,7 +16,7 @@
 | # | 是什么 | 影响 | 出处 |
 |---|---|---|---|
 | 1 | `OpenPLC_KNX` 用 USART1 19200 8E1 驱动 STKNX；STKNX 是裸模拟 TP1 收发器，位时序要 MCU 用定时器产生 | 三个走 TP 的例程（KNX_Basic 的 TP 侧、KNX_TP_PingPong、KNX_TP_TxTest）在这块板上发不出合法 TP 帧；UART 空闲电平为高，按 FACTS 即 PB14 高 = 持续有源脉冲（未上板核实） | `KNXLIB/stm32h743_openplc_platform.cpp:118-139`；FACTS「KNX 接口」:342-357 |
-| 2 | 4 个 KNX 例程用 `Serial_Test` 输出，但不拉高 `RS232_EN_Pin`（PB10） | RS232 收发器默认关断，端子上一个字节都没有（启动后几毫秒的电荷泵余电除外） | FACTS「PB10 拉低 = 整片关断」「默认是关的」:19-36 |
+| 2 | 3 个 KNX 例程（IP_Test、TP_PingPong、TP_TxTest）用 `Serial_Test` 输出，但不拉高 `RS232_EN_Pin`（PB10） | RS232 收发器默认关断，端子上一个字节都没有（启动后几毫秒的电荷泵余电除外） | FACTS「PB10 拉低 = 整片关断」「默认是关的」:19-36 |
 | 3 | SDRAM_DataLogger 用 `analogRead(AIN_1)` | JP5 出厂开路 → PC3_C 悬空；core 也不使能 VREFBUF / PC3SO → 录下来的不是端子信号 | FACTS「模拟输入前端」:242-259、「VREFBUF」:216-240；`grep VREFBUF` 在 `$CORE/cores`、`variants` 下无结果 |
 
 ## 表 1：逐引脚 / 串口对照
@@ -69,12 +69,12 @@ SDRAM_Basic、SDRAM_DataLogger 的头注释与代码一致（DataLogger 头写 1
 
 | 抄件 | 位置 | 写的 | Hardware 实际 |
 |---|---|---|---|
-| 变体头 | `$CORE/variants/STM32H7xx/H743/variant_PLC_H743.h:233` | `KNX_PROG_KEY` active-low | 高有效（Bridge p5：SW2 接 3V3，R58 下拉） |
-| 变体头 | 同上 `:234` | `KNX_PROG_LED` 是编程 LED | 该网络上无 LED |
-| 变体头 | 同上 `:231-232` | 编程接口在 Upper Deck；"KNX TP UART (USART1)" | SW2 在 Bridge；STKNX 非 UART |
-| 库注释 | `KNXLIB/knx_profiles.cpp:8-9` | 通道 0 / 1 → PE6 / PE5 | 同文件代码用 PI8 / PI10，与 xlsx 一致 |
-| 库配置 | `KNXLIB/knx_config.h:16-38, 50-58` | STKNX 走 USART1；编程键 active-low | STKNX 为裸收发器；编程键高有效 |
-| FACTS | `OpenPLC_Docs/docs/hardware/HARDWARE-FACTS.md:350` | `KNX_Prog_LED` PG11 "心跳指示" | 板上 HBEAT 灯是 LED3，接 PE2；PG11 这根线无 LED。**FACTS 这一格需更正** |
+| 变体头 | `$CORE/variants/STM32H7xx/H743/variant_PLC_H743.h:233` | `KNX_PROG_KEY` active-low | 高有效（Bridge p5：SW2 接 3V3，R58 下拉）。✅ 2026-10-03 已改 |
+| 变体头 | 同上 `:234` | `KNX_PROG_LED` 是编程 LED | 该网络上无 LED。✅ 2026-10-03 已改 |
+| 变体头 | 同上 `:231-232` | 编程接口在 Upper Deck；"KNX TP UART (USART1)" | SW2 在 Bridge；STKNX 非 UART。✅ 2026-10-03 已改 |
+| 库注释 | `KNXLIB/knx_profiles.cpp:8-9` | 通道 0 / 1 → PE6 / PE5 | 同文件代码用 PI8 / PI10，与 xlsx 一致。✅ 2026-10-03 已改 |
+| 库配置 | `KNXLIB/knx_config.h:16-38, 50-58` | STKNX 走 USART1；编程键 active-low | STKNX 为裸收发器；编程键高有效。✅ 2026-10-03 已改 |
+| FACTS | `OpenPLC_Docs/docs/hardware/HARDWARE-FACTS.md:350` | `KNX_Prog_LED` PG11 "心跳指示" | 板上 HBEAT 灯是 LED3，接 PE2；PG11 这根线无 LED。✅ 2026-10-03 已更正 |
 | xlsx（权威文件本身的描述文字） | 行 142-143 | KNX_TX / KNX_RX = "UART 转 KNX 数据收发" | 引脚对；但 STKNX 数据手册与 FACTS 均说明它不是 TP-UART。描述文字与器件不符，报给用户 |
 
 ## 未核实

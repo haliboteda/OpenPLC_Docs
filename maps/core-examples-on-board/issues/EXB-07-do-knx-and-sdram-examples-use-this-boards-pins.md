@@ -15,10 +15,10 @@ Blocked by: -
 
 ## Answer
 
-2026-09-29 定（只读核实，未上板）。引脚号基本都对；错在 KNX 例程的头注释（继电器写成 PE6 / PE5，实为 PI8 / PI10；PG9 实为高有效；PG11 上没有 LED）、4 个 KNX 例程不拉高 RS232 使能 PB10 所以端子上无输出、以及 `OpenPLC_KNX` 用 USART1 驱动 STKNX 而 STKNX 要定时器产生位时序。头注释与代码不一致共 19 处，SDRAM 两个例程一致。逐条见 [EXB-07-findings.md](../EXB-07-findings.md)。
+2026-09-29 定（只读核实，未上板）。引脚号基本都对；错在 KNX 例程的头注释（继电器写成 PE6 / PE5，实为 PI8 / PI10；PG9 实为高有效；PG11 上没有 LED）、3 个 KNX 例程不拉高 RS232 使能 PB10 所以端子上无输出、以及 `OpenPLC_KNX` 用 USART1 驱动 STKNX 而 STKNX 要定时器产生位时序。头注释与代码不一致共 19 处，SDRAM 两个例程一致。逐条见 [EXB-07-findings.md](../EXB-07-findings.md)。
 
 ## 引出了什么新的未知
 
 - `OpenPLC_KNX` 的 TP 物理层能不能在本板上发出合法帧 → 升格为票 [KNX 库的 TP 收发怎么在本板上发出合法帧](EXB-08-how-does-the-knx-library-drive-stknx.md)
-- `HARDWARE-FACTS.md` 把 PG11 记成「心跳指示」，原理图上心跳灯是 LED3 / PE2 → 记进 [work/TODO.md](../../../work/TODO.md)，等用户定
-- 19 处头注释的修正随 [KNX 回显例程长什么样](EXB-02-what-does-the-knx-echo-example-look-like.md) 定下各例程去留后一起做
+- `HARDWARE-FACTS.md` 把 PG11 记成「心跳指示」，原理图上心跳灯是 LED3 / PE2 → 记进 [work/TODO.md](../../../work/TODO.md)；2026-10-03 已改
+- 19 处头注释的修正随 [KNX 回显例程长什么样](EXB-02-what-does-the-knx-echo-example-look-like.md) 定下各例程去留后一起做；2026-10-03 已先按「有错误直接改」改完，连同 3 个例程拉高 PB10

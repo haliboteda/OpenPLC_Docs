@@ -47,7 +47,7 @@ Phase 1 里先在开机窗口（系统指示灯快闪那 2 秒）内反复轮询
 ## 输出一开机就置 0，一直保持到 sketch 接管（决策 81）
 
 `main()` 的第一批语句：先锁存复位原因，紧接着 `safe_outputs_init()`（`$BOOT/IAPServer/safe_outputs.c`）把
-DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）。继电器 RY1–RY6 由 `MX_GPIO_Init()` 置 0，开机不再动（决策 71）。
+DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）、KNX 发送脚 PB14 拉低（悬空时 STKNX 一直从总线抽流，见 [HARDWARE-FACTS.md](../../hardware/HARDWARE-FACTS.md)「KNX 接口」）。继电器 RY1–RY6 由 `MX_GPIO_Init()` 置 0，开机不再动（决策 71）。
 
 | 选这个位置的理由 | |
 |---|---|
@@ -55,7 +55,7 @@ DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）。继电器 RY1–RY6 由
 | 不依赖任何初始化 | 只写 RCC 的 GPIO 时钟使能位和 GPIO 寄存器，不用 HAL、不用时钟树 |
 
 **交权时再做一遍**：`server_jump_to_app()` 里的 `HAL_DeInit()` 会复位全部 GPIO 端口，引脚回到高阻；
-所以它之后、跳转之前再调一次 `safe_outputs_init()`。这是决策 4「冷板子」的一个例外，范围只到这 10 个脚。
+所以它之后、跳转之前再调一次 `safe_outputs_init()`。这是决策 4「冷板子」的一个例外，范围只到这 11 个脚。
 板卡包从启动到 sketch 第一次写之前不碰这些脚（`initVariant()` 是空的弱函数，`analogWrite` / `pinMode` 都是第一次调用时才配置）。
 
 引脚出处：`$HW/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx` 第 92–93 行（AOUT1 / AOUT2）、

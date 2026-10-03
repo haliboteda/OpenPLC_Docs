@@ -13,7 +13,7 @@
 | **开机日志自相矛盾**：先打 `Ethernet link is DOWN - this board will not answer discovery`，随后 DHCP 拿到 IP、服务可达（`$BOOT/IAPServer/IAP_server.c` 的 `IAP_servers_start()`）。疑为 PHY 自协商未完成就判了，**未核实** | 上板核实原因；之后 link 真断时才打这句，协商中不打 | [出厂态怎么造，怎么证明它真的是出厂态](../maps/five-paths-e2e-test/issues/E2E-01-how-to-make-and-prove-factory-state.md) |
 | **端口例程逐个上板验：剩 5 个半** —— 2026-09-28 第二块板上已过 7 个：DO、继电器、系统 LED、板载温度、RS232、USB 串口、以太网；AO 只过了 AO1（470 Ω 上 9.32 V = 19.83 mA，0 码残余约 0.17 mA）。剩 AO2、DI、AI、RS485、CAN、SD；另把 `T1-34`（IDE 那条上传命令）对着真板子走一遍 | 每个例程上传后，串口监视器里的输出和端子上看到的与它文件头写的一致；IDE 的 Tools → Port 里选中真板子能 Upload，未认领和已认领各一次。⚠️ CAN 要第二个节点，SD 要一张卡，AI 要先焊跳线 | [一个例程长什么样](../maps/arduino-examples-and-ide-flow/issues/IDE-05-what-does-one-example-look-like.md) |
 | **拆仓后的面板浏览器测试 T4-02 上真板子** —— 2026-10-01 PortTool 拆仓（决策 76）后主机侧全过，T4-02 接模拟板（`--port sim`）也全过；真板子那一遍没跑 | 板子跑工装固件，在 `$PORTTOOL/TestCase/host/porttool_panel` 里跑 `python run.py --port <RS232 控制口>`，全部检查通过 | [DECISIONS.md 第 76 条](../docs/tables/DECISIONS.md) |
-| **`HARDWARE-FACTS.md` 的 PG11 那一格等用户定**：记的是「心跳指示」，原理图上心跳灯是 LED3 / PE2，PG11（`KNX_Prog_LED`）这根线上没有 LED | 用户认可后改那一格，并同步变体头 `variant_PLC_H743.h:233-234` | [KNX 和 SDRAM 例程写死的引脚和本板对得上吗](../maps/core-examples-on-board/issues/EXB-07-do-knx-and-sdram-examples-use-this-boards-pins.md)，证据见 [EXB-07-findings.md](../maps/core-examples-on-board/EXB-07-findings.md) 表 3 |
+| ~~**`HARDWARE-FACTS.md` 的 PG11 那一格**：记的是「心跳指示」，原理图上心跳灯是 LED3 / PE2，PG11（`KNX_Prog_LED`）这根线上没有 LED~~ ✅ **2026-10-03 已改**（用户：「有错误直接改」）：FACTS 那一格、变体头 `KNX_PROG_KEY` / `KNX_PROG_LED` 的注释、`OpenPLC_KNX` 例程头注释一起改 | 用户认可后改那一格，并同步变体头 `variant_PLC_H743.h:233-234` | [KNX 和 SDRAM 例程写死的引脚和本板对得上吗](../maps/core-examples-on-board/issues/EXB-07-do-knx-and-sdram-examples-use-this-boards-pins.md)，证据见 [EXB-07-findings.md](../maps/core-examples-on-board/EXB-07-findings.md) 表 3 |
 | **上游例程删除清单等用户逐个确认**：建议删 19 个。`EEPROM` 8 个已随整库删掉（2026-09-30，本板不提供模拟 EEPROM，见 EXB-09），剩 11 个：`Servo` 3、`SoftwareSerial` 2、`SPI` 2、`Keyboard`、`Mouse`、`SubGhz`、`RGB_LED_TLC59731`） | 用户逐个点头后删；P5 `EXCLUDED` 去掉死条目；P5 重跑全绿 | [上游例程哪些和本板有关](../maps/core-examples-on-board/issues/EXB-04-which-upstream-examples-relate-to-this-board.md) |
 | ~~**面板连 sim 失败时的提示说错了对象**：模拟板进程退出时仍提示「检查 PORTTOOL_ENABLE、波特率、接线」（`$PORTTOOL/internal/ptpanel/panel.go:439`），应说模拟板退出了及退出码~~ ✅ **2026-10-03 已修**：模拟板退出时提示「模拟板退出了（退出码 N）」，测试 `internal/ptpanel/simexit_test.go` | sim 进程起不来时，面板提示里出现「模拟板」和它的退出码 | 2026-09-29 模拟板加载到 32 位 DLL 那次，见 [HOW-TO-RUN-TESTS.md](../docs/engineering/HOW-TO-RUN-TESTS.md)「模拟板」 |
 | 五个通信口做「异常可恢复」：上位机从帧里看出断了（`conn` 掉 0、`miss` 连增），自己计时到恢复 | 产测文档 3.10 的判定栏能填出「误码 / 恢复时间」，人只要动手拔线、不用回来汇报 | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 `ISS-D1`）。⚠️ 2026-09-16 起**等工装的使用反馈**再动 |
@@ -32,12 +32,12 @@
 
 | 待办 | 怎么算做完 | 来自哪张票 |
 |---|---|---|
-| **0.1 前置：KNX / EEPROM 不再擦扇区 15** —— 用户 2026-09-30 定：删 `EEPROM` 库和 8 个例程；KNX 两块数据并进扇区 14，保存时一起读擦写；用 KNX 的程序编译时限 1664 KiB；selfcheck 扫 core 里写扇区 15 的代码 | 见 [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](../maps/core-examples-on-board/issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md) 的判据 | EXB-09（未关，这一行等它关） |
-| **0.2 前置：核实备份 SRAM 只靠 VBAT 时保持内容、扇区擦除时间** | 出处写进 `maps/root-key-without-bootloader-reflash/ROOT-05-findings.md`（RM0433 / DS12110 章节号）；备份 SRAM 另在真板上断主电后读回 | 决策 72 · 方案 5 |
-| **1 文档**：M2（信任根的一生、四条规则、出厂默认根、告警、住在哪、keys 目录）、`M1/SECTOR-15.md`（新布局、三种回收、六步、开机判断、掉电后果）、`M1/FLASHBOOT.md`、`M1/IAP-PROTOCOL.md`（`takeown` 无门禁、`getpubkey` 无根时的回答）、`repo/ARCHITECTURE.md`（备份 SRAM 登记、镜像表）、bootloader 的 `keys/README.md`（2026-09-30 随 `keys/` 目录删除）和发布说明 | 文档里不再有「公开根」「按 BOOT0 认领」「`rotate_keys.sh`」当现状讲；P8 / P9 绿 | 决策 72 |
-| **2 bootloader**：删 `fw_pubkey.*` / `keys/`；owner 区搬到 `0x081E2000`；无根时只收 `takeown`；`takeown` 去 BOOT0 门禁；扇区 15 新布局 + 完整标记；三种回收；备份 SRAM 暂存与恢复；`flashboot` 不再保 S0 尾部；链接脚本可回 128K | 主机用例全绿；编过 | 决策 72 |
-| **3 IAPTool**：上传前发现无根 → 默认位置取或生成私钥并打印路径 → `takeown` → 上传；owner 类命令补 CDC 通道；删公开私钥回落；上传被拒时提示拷私钥或要叶证书；`genkey` / `compile_tool.sh` 去掉公开根 | 假板子上 USB、网口两条首次认领都通 | 决策 72 |
-| **4 core**：删 `OpenPLC_IAP/src/fw_pubkey.*`；`owner_root_ro.*` 读新地址、链空时拒绝；板卡包不带公开私钥 | P2 绿；live 编过 | 决策 72 |
+| ✅ 2026-09-30 做完：`EEPROM` 库已删，KNX 两块数据在扇区 14（`knx_config.h`），P19 扫描在 core selfcheck 里 —— **0.1 前置：KNX / EEPROM 不再擦扇区 15** —— 用户 2026-09-30 定：删 `EEPROM` 库和 8 个例程；KNX 两块数据并进扇区 14，保存时一起读擦写；用 KNX 的程序编译时限 1664 KiB；selfcheck 扫 core 里写扇区 15 的代码 | 见 [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](../maps/core-examples-on-board/issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md) 的判据 | EXB-09（未关，这一行等它关） |
+| 🔶 出处已写进 `ROOT-05-findings.md`（RM0433 Rev 8 / DS12110 Rev 11）；真板上断主电后读回还没做 —— **0.2 前置：核实备份 SRAM 只靠 VBAT 时保持内容、扇区擦除时间** | 出处写进 `maps/root-key-without-bootloader-reflash/ROOT-05-findings.md`（RM0433 / DS12110 章节号）；备份 SRAM 另在真板上断主电后读回 | 决策 72 · 方案 5 |
+| ✅ 做完（`OpenPLC_Docs` `17ad71e`、`421d60e`）—— **1 文档**：M2（信任根的一生、四条规则、出厂默认根、告警、住在哪、keys 目录）、`M1/SECTOR-15.md`（新布局、三种回收、六步、开机判断、掉电后果）、`M1/FLASHBOOT.md`、`M1/IAP-PROTOCOL.md`（`takeown` 无门禁、`getpubkey` 无根时的回答）、`repo/ARCHITECTURE.md`（备份 SRAM 登记、镜像表）、bootloader 的 `keys/README.md`（2026-09-30 随 `keys/` 目录删除）和发布说明 | 文档里不再有「公开根」「按 BOOT0 认领」「`rotate_keys.sh`」当现状讲；P8 / P9 绿 | 决策 72 |
+| ✅ 做完（`$BOOT` `fe653a7`）—— **2 bootloader**：删 `fw_pubkey.*` / `keys/`；owner 区搬到 `0x081E2000`；无根时只收 `takeown`；`takeown` 去 BOOT0 门禁；扇区 15 新布局 + 完整标记；三种回收；备份 SRAM 暂存与恢复；`flashboot` 不再保 S0 尾部；链接脚本可回 128K | 主机用例全绿；编过 | 决策 72 |
+| ✅ 做完（`$TOOL` `1038846`）—— **3 IAPTool**：上传前发现无根 → 默认位置取或生成私钥并打印路径 → `takeown` → 上传；owner 类命令补 CDC 通道；删公开私钥回落；上传被拒时提示拷私钥或要叶证书；`genkey` / `compile_tool.sh` 去掉公开根 | 假板子上 USB、网口两条首次认领都通 | 决策 72 |
+| ✅ 做完（core `7881480`）—— **4 core**：删 `OpenPLC_IAP/src/fw_pubkey.*`；`owner_root_ro.*` 读新地址、链空时拒绝；板卡包不带公开私钥 | P2 绿；live 编过 | 决策 72 |
 | **5 测试**：改 `host/owner_revoke` `owner_capacity` `bootloader_unit` `fakeboard` `renode` `crypto_ref`；删改 `check_public_root.py` `run_old_root_image_is_refused.py` `run_five_paths.py` `signature_wrongkey.go` `reset_board_to_factory_state.py` `inject_owner_record.py`；`check_mirror_sync.py` 换常量；新增：USB / 网口自动认领、恢复出厂回到无根、`setowner` 超过 32 次触发回收、回收中途断电从暂存恢复 | selfcheck 全绿 | 决策 72 |
 | **清理等用户定**：删不删 `$BOOT/IAPServer/keys/` 下没进 git 的 `backup/` 和两个 `.bak`，以及 `$BOOT/.gitignore` 里对应规则 | 用户点头后删，P9 绿 | 决策 72 |
 | **6 上板与发布**：先用当前 core 重编 `Output/probe-images/` 的两个探针镜像（旧镜像里的 `owner_root_ro.c` 读旧地址）；实验室那块板 ST-Link 烧新 bootloader、擦扇区 15 写回校准值、走一遍自动认领；跑第 5 阶段全部用例含真断电；升版本、发板卡包 | 真板上全过 | 决策 72 |
@@ -78,8 +78,11 @@
 
 | 待办 | 怎么算做完 | 出处 |
 |---|---|---|
-| **`OpenPLC_KNX`：新写 STKNX 数据链路层**，替换 `TpUartDataLinkLayer`；定时器收发 TP1 位（照搬 `$BOOT/TestCase/porttool/porttool_knx.c`），组字节 / 帧 / 应答 / 冲突；PB14 空闲为低 | 编码、解码、帧和应答时序有主机测试；例程编得过 | EXB-08 |
+| **`OpenPLC_KNX`：新写 STKNX 数据链路层**，替换 `TpUartDataLinkLayer`；定时器收发 TP1 位（照搬 `$BOOT/TestCase/porttool/porttool_knx.c`），组字节 / 帧 / 应答 / 冲突；PB14 空闲为低 —— 🔶 **2026-10-03 代码做完**，设计见 [KNX-TP-DATA-LINK.md](../docs/modules/M3/KNX-TP-DATA-LINK.md)，主机侧 `T3-09`；等上板 | 编码、解码、帧和应答时序有主机测试；例程编得过 | EXB-08 |
 | **上板验收**：总线只接电源和 ETS，ETS 里看得到板子发的组报文，板子能打印 ETS 发来的报文；空闲时板子不占总线 | 真板子 + ETS | EXB-08 |
+| **bootloader 开机把 PB14 拉低** —— ✅ 2026-10-03 代码做完（`IAPServer/safe_outputs.c`，T1-36 主机侧通过）：不用 KNX 库的 sketch 里 PB14 原本一直悬空，STKNX 会从总线抽流（HARDWARE-FACTS「KNX 接口」）；固件没重编（`$BOOT/Debug/` 里现在是工装镜像） | 新 bootloader 上板后，不用 KNX 的 sketch 跑着时 PB14 为低 | 决策 81 |
+| **清理等用户定**：`tpuart_data_link_layer.{h,cpp}` 只剩 `ITpUartCallBacks` 一个接口还在被引用，平台的 USART1 方法和 `KNX_USART_*` 宏已无人调用 | 用户点头后删；KNX 例程仍编得过 | EXB-08 |
+| **KNX Role 菜单的「IP/TP Coupler（0x091A）」编译不过**：`knx_facade.h:362` 调用了 `Bau091A::getInterfaceObject`，而它是 `protected`；最小 sketch 也编不过，改数据链路层之前就是这样 | 选这个角色的最小 sketch 编得过 | 2026-10-03 实现 STKNX 时发现 |
 
 ## 优先级最低
 
