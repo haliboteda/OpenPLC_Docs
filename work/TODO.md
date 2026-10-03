@@ -40,7 +40,8 @@
 | ✅ 做完（core `7881480`）—— **4 core**：删 `OpenPLC_IAP/src/fw_pubkey.*`；`owner_root_ro.*` 读新地址、链空时拒绝；板卡包不带公开私钥 | P2 绿；live 编过 | 决策 72 |
 | **5 测试**：改 `host/owner_revoke` `owner_capacity` `bootloader_unit` `fakeboard` `renode` `crypto_ref`；删改 `check_public_root.py` `run_old_root_image_is_refused.py` `run_five_paths.py` `signature_wrongkey.go` `reset_board_to_factory_state.py` `inject_owner_record.py`；`check_mirror_sync.py` 换常量；新增：USB / 网口自动认领、恢复出厂回到无根、`setowner` 超过 32 次触发回收、回收中途断电从暂存恢复 | selfcheck 全绿 | 决策 72 |
 | **清理等用户定**：删不删 `$BOOT/IAPServer/keys/` 下没进 git 的 `backup/` 和两个 `.bak`，以及 `$BOOT/.gitignore` 里对应规则 | 用户点头后删，P9 绿 | 决策 72 |
-| **6 上板与发布**：先用当前 core 重编 `Output/probe-images/` 的两个探针镜像（旧镜像里的 `owner_root_ro.c` 读旧地址）；实验室那块板 ST-Link 烧新 bootloader、擦扇区 15 写回校准值、走一遍自动认领；跑第 5 阶段全部用例含真断电；升版本、发板卡包 | 真板上全过 | 决策 72 |
+| **6 上板与发布**：先用当前 core 重编 `Output/probe-images/` 的两个探针镜像（旧镜像里的 `owner_root_ro.c` 读旧地址）；实验室那块板 ST-Link 烧新 bootloader、擦扇区 15 写回校准值、走一遍自动认领；跑第 5 阶段全部用例含真断电；测完重建 0.1.3 的 release、tag 和索引（决策 83，不升版本号） | 真板上全过 | 决策 72 |
+| **0.1.3 重发前：已出厂的板子怎么换新 bootloader** —— 决策 72、81 和复位原因都要新 bootloader；用户手上的板子是 ST-Link 重烧还是经 `flashboot` 原地升级，先核实再写进发布说明 | 发布说明写明步骤，在一块装旧 bootloader 的板子上照着走通 | 决策 83 |
 
 ## PortTool 与 IAPTool 彻底分离（2026-10-01 定）
 
