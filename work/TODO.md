@@ -42,6 +42,7 @@
 | **清理等用户定**：删不删 `$BOOT/IAPServer/keys/` 下没进 git 的 `backup/` 和两个 `.bak`，以及 `$BOOT/.gitignore` 里对应规则 | 用户点头后删，P9 绿 | 决策 72 |
 | **6 上板与发布**：先用当前 core 重编 `Output/probe-images/` 的两个探针镜像（旧镜像里的 `owner_root_ro.c` 读旧地址）；实验室那块板 ST-Link 烧新 bootloader、擦扇区 15 写回校准值、走一遍自动认领；跑第 5 阶段全部用例含真断电；测完重建 0.1.3 的 release、tag 和索引（决策 83，不升版本号） | 真板上全过 | 决策 72 |
 | **0.1.3 重发前：已出厂的板子怎么换新 bootloader** —— 决策 72、81 和复位原因都要新 bootloader；用户手上的板子是 ST-Link 重烧还是经 `flashboot` 原地升级，先核实再写进发布说明 | 发布说明写明步骤，在一块装旧 bootloader 的板子上照着走通 | 决策 83 |
+| **0.1.3 重发的产物清单**：板卡包 tar.gz（`v0.1.3-dev`）；STM32Tools 里三个平台的 IAPTool 用 `$TOOL` `v0.1.3` 重编（决策 72 的自动认领在新 IAPTool 里）；索引里两处校验值和大小；旧的 5 个 KNX 例程在新例程上板通过后删掉（[KNX 例程按正规用法重写](../maps/knx-examples/map.md)） | 照 IDE-15 的做法原地替换，WSL 和 Windows 各从网上装一遍、编译、上传 | 决策 83 |
 
 ## PortTool 与 IAPTool 彻底分离（2026-10-01 定）
 
