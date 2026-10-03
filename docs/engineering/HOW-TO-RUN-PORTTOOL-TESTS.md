@@ -5,7 +5,7 @@ PortTool 仓的测试都在 `$PORTTOOL/TestCase/` 下，入口是本仓自己的
 ```
 cd TestCase
 python tools/init_machine.py   # 第一次：生成 config/machine.py
-python tools/selfcheck.py      # ENV / GO-TEST / GO-VET / T4-01 / CALAREA / DOCS / T4-02（接模拟板）；--quick 跳过 T4-02
+python tools/selfcheck.py      # ENV / GO-TEST / GO-VET / STRINGS（面板词典）/ T4-01 / T4-02（接模拟板）；--quick 跳过 T4-02
 ```
 
 用例定义在 [M4 产线工装](../modules/M4-production-fixture.md)。

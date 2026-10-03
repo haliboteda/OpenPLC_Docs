@@ -688,7 +688,17 @@ flowchart LR
 >
 > 这不和上面那句冲突 —— 「一个 exe 两种模式」说的是 **PortTool 自己**既是面板又是 CLI，不是说这两个工具要合成一个。受众不同：硬件工程师的工具里不该出现固件签名和 `takeown`。
 >
-> **面板上的文字是中文、大白话；固件 printf、`OK`/`ERR` 应答、两个 exe 的 stdout 仍然是英文**（[DECISIONS.md 第 11 条](../../tables/DECISIONS.md)）。
+> **面板上的文字默认中文、可选 English / Deutsch，三种都说大白话；固件 printf、`OK`/`ERR` 应答、两个 exe 的 stdout、日志和导出的文件仍然是英文**（[DECISIONS.md 第 11、82 条](../../tables/DECISIONS.md)）。
+
+### C.4.1 面板的三种语言怎么做（决策 82）
+
+| 是什么 | 为什么 |
+|---|---|
+| 面板上每一句话都在一张词典 `$PORTTOOL/internal/ptpanel/web/strings.json` 里，随页面嵌进 exe；页面和 Go 都只写键 | 一处出处，「三种语言齐全」只查一张表 |
+| Go 不回句子，回 `{"$t": 键, "args": …}`，页面按选的语言拼；写进文件的取词典英文列 | 屏幕跟语言走，文件照决策 11 保持英文 |
+| 语言选择存在 exe 旁边的 `porttool_settings.json`（`{"lang": "zh"}`，取 `zh` / `en` / `de`），读不到按中文；换语言 = 刷新页面，会丢结果时先问 | 面板端口每次随机，浏览器存不住；只在页面里的结果刷新就没了 |
+| 每条译文记着它译的那一版中文的哈希；`de_reviewed` 为 false 时菜单里不给 Deutsch | 中文改了而译文没跟，自检报错；德文审过才上线（[WAITING-ON.md](../../../waiting/WAITING-ON.md)） |
+| 自检 `strings` 一步：键三种语言都有、不空，哈希对得上，页面和 Go 里没有词典以外的中文（明确不译的列在 `strings.json` 的 `not_translated`） | [LANG-07](../../../maps/porttool-panel-languages/issues/LANG-07-how-the-panel-browser-tests-stay-valid.md)、[LANG-08](../../../maps/porttool-panel-languages/issues/LANG-08-order-against-the-paused-wording-audit.md) |
 
 ```mermaid
 flowchart TD
