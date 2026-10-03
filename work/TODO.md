@@ -82,7 +82,7 @@
 | **上板验收**：总线只接电源和 ETS，ETS 里看得到板子发的组报文，板子能打印 ETS 发来的报文；空闲时板子不占总线 | 真板子 + ETS | EXB-08 |
 | **bootloader 开机把 PB14 拉低** —— ✅ 2026-10-03 代码做完（`IAPServer/safe_outputs.c`，T1-36 主机侧通过）：不用 KNX 库的 sketch 里 PB14 原本一直悬空，STKNX 会从总线抽流（HARDWARE-FACTS「KNX 接口」）；固件没重编（`$BOOT/Debug/` 里现在是工装镜像） | 新 bootloader 上板后，不用 KNX 的 sketch 跑着时 PB14 为低 | 决策 81 |
 | **清理等用户定**：`tpuart_data_link_layer.{h,cpp}` 只剩 `ITpUartCallBacks` 一个接口还在被引用，平台的 USART1 方法和 `KNX_USART_*` 宏已无人调用 | 用户点头后删；KNX 例程仍编得过 | EXB-08 |
-| **KNX Role 菜单的「IP/TP Coupler（0x091A）」编译不过**：`knx_facade.h:362` 调用了 `Bau091A::getInterfaceObject`，而它是 `protected`；最小 sketch 也编不过，改数据链路层之前就是这样 | 选这个角色的最小 sketch 编得过 | 2026-10-03 实现 STKNX 时发现 |
+| ~~**KNX Role 菜单的「IP/TP Coupler（0x091A）」编译不过**：`knx_facade.h:362` 调用了 `Bau091A::getInterfaceObject`，而它是 `protected`；最小 sketch 也编不过，改数据链路层之前就是这样~~ ✅ 2026-10-03 已修：`Bau091A::getInterfaceObject` 改为 public，和 `Bau07B0`、`Bau57B0` 一致；最小 sketch 用这个角色编得过 | 选这个角色的最小 sketch 编得过 | 2026-10-03 实现 STKNX 时发现 |
 
 ## 优先级最低
 
