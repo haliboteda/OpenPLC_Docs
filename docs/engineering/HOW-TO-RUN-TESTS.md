@@ -10,7 +10,7 @@
 | `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
 | `$PORTTOOL` | T4-01 到 T4-04 | `cd TestCase && python tools/selfcheck.py`（`--quick` 跳过浏览器那步） |
-| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
+| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
 | `$PROD` | 文档检查 P7、P8、P9、P12、P13、P14、P18 | `python tools/check_docs.py` |
 
 **下文的 `tools/...`、`host/...`、`onboard/...` 不加前缀时都在 `$TEST` 根目录跑。** 其他仓的命令写明仓名。
@@ -187,10 +187,12 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 | `$BOOT/tests/sector15_reclaim/` | `$BOOT/tests` 下 `ctest --preset local -R T2-34`，需要 gcc/clang 和 CMake | **T2-34** 扇区 15 回收中途断电。在主机上编译**真实的** `bootloader_state.c` / `bkp_stash.c` / `owner_slot.c`，flash 和备份 SRAM 用 RAM 代替，在每次 flash 操作之前逐个断电。判据见 [M2 归属与信任](../modules/M2-ownership.md) |
 | `host/fakeboard/` | `python host/fakeboard/run_cases.py` | **T1-18a–T1-18g** IAPTool 在传输开始前的密钥/证书匹配决策，六种情况：自签的两种 + 委托证书的三种 + 一把密钥都没有（`T1-18c` 老 bootloader 那种按决策 79 作废）。对着 bootloader 替身跑（`$TEST/host/bootstand`：真 bootloader 代码编成的 PC 程序，见 [BOOTLOADER-STAND-IN.md](BOOTLOADER-STAND-IN.md)），过了工具这一关的几例会真的上传、被替身验签。七种情况的判据见 `$TEST/host/fakeboard/KEY-MATCH.md`（贴着代码放） |
 | `host/fakeboard/` | `python host/fakeboard/run_ide_upload.py [--keep]`，需要 arduino-cli | **T1-34** 从 `arduino-cli upload`（IDE 那条命令）烧 bootloader 替身（真 bootloader 代码 + 板卡包 app 一侧的重启握手）：未认领 / 已认领 / 密钥不对。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **几分钟，不进 selfcheck** |
+| `host/fakeboard/` | `python host/fakeboard/run_lifecycle.py [--only ID] [--keep]`，selfcheck 的 `T1-22` `T1-38` `T2-05` `T2-19` 四步就是它 | **T1-22 T1-38 T2-05 T2-09 T2-19 T2-20 T2-36** 在 bootloader 替身上：掉电落在擦写窗口、比版本、恢复出厂（`--gesture factory`）及其后果、连续撤销和重复撤销。判的是真 bootloader 代码的决定；按键、真 flash 擦写窗口、CDC 那支仍要真板子 |
 | `$TOOL/tests/crypto_ref/` | 在 `$TOOL` 下 `python tests/crypto_ref/run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL/tests/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
 | `$CORE_REPO/tests/variant_check/` | `python tests/variant_check/build.py`，需要 arduino-cli（环境变量 `ARDUINO_CLI` / `ARDUINO_CLI_CONFIG`） | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `$CORE_REPO/tests/examples_build/` | `python tests/examples_build/build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
-| `host/renode/` | `python host/renode/run.py [--only NAME]`，需要 arduino-cli 和 Renode（`$RENODE`）。⚠️ `$BOOT/Debug/` 里必须是 bootloader，是工装镜像时跳过 | **T3-05** `OpenPLC_Ports` 的 13 个例程在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），不进 selfcheck** |
+| `host/renode/` | `python host/renode/run.py [--only NAME]`，需要 arduino-cli 和 Renode（`$RENODE`）。⚠️ `$BOOT/Debug/` 里必须是 bootloader，是工装镜像时跳过 | **T3-05** `OpenPLC_Ports` 的 13 个例程在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），进 selfcheck，`--quick` 跳过** |
+| `host/renode/` | `python host/renode/boot_outputs.py`，需要 arduino-cli、Renode 和 CubeIDE（把 `$BOOT` 工作区拷进临时目录编，不碰 `$BOOT/Debug/`） | **T1-37** 开机输出置 0：真 bootloader 跳进 `SystemLED`，DO1–DO8、PA4、PA5、PB14 在五个时刻都是推挽输出、电平为低；BOR 档位不是 3 时串口警告、是 3 时不警告。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **约 11 分钟（编 bootloader 和例程占大头）**，进 selfcheck，`--quick` 跳过 |
 
 ⚠️ **bootloader 替身的上传通道用 61865，不用产品端口 56865**（`$TEST/host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。T1-34 的发现走的是板卡包写死的 56865/UDP，替身在那里也应答。替身每次跑都会先编一遍，要 `HOST_CC` 和 CMake。
 
@@ -418,8 +420,8 @@ python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
 
 | | |
 |---|---|
-| **判据** | 灌满后板子报 `N/3840 metadata slots used`；一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`；**且板子照常启动 app**。⚠️ **校准值区那 8 KiB 必须原样还在** —— reclaim 擦的是整个扇区 |
-| **为什么不能靠反复上传灌满** | 一次上传只占 7 槽，3840 槽要 548 次上传、大半天 |
+| **判据** | 灌满后板子报 `** Metadata area full - the next successful update reclaims sector 15. **`；一次上传后日志出现 `Reclaiming sector 15 (<n> metadata slots, root area compacted)`；**且板子照常启动 app**。⚠️ **校准值区那 8 KiB 必须原样还在** —— reclaim 擦的是整个扇区 |
+| **为什么不能靠反复上传灌满** | 一次上传只占 7 槽，3583 槽要 511 次上传、大半天 |
 | **为什么必须整片读回来再整片写回去** | 扇区里存着当前 app 的 metadata（签名和证书**伪造不了**）**以及校准值**，而 `STM32_Programmer_CLI` 写之前会擦整个扇区 |
 | **留的空槽必须少于 7** | 回收只发生在写 metadata 的那一刻，而一条 metadata 占 7 槽 |
 

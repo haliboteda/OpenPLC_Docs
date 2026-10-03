@@ -116,7 +116,7 @@ flowchart TD
 ³ **修之前的后果比「静默掐掉接收」严重得多**：`Serial4.begin()` 会直接**挂死 app、
 板子失联、只能 ST-Link 救**。修法是把 `Serial_Test` 挪到 USART3（同样两个引脚，AF7 而非 AF8）。
 
-⁴ **测不到端口行为**：只证明启动链和主循环没坏。各端口的寄存器读写 2026-09-28 查过一次，结论在 [REN-03](../../maps/renode-simulation/issues/REN-03-run-both-layers-on-all-examples.md)，不自动复查；真实电平、时序和 `Serial` 输出只能上真板。metadata 记录由脚本按 `$BOOT/IAPServer/bootloader_state.c` 的格式拼出，bootloader 每次启动都重新校验它，所以格式对不上会表现为「没跳进 app」。
+⁴ **测不到端口行为**：只证明启动链和主循环没坏。各端口的寄存器读写 2026-09-28 查过一次，结论在 [REN-03](../../maps/renode-simulation/issues/REN-03-run-both-layers-on-all-examples.md)，不自动复查；真实电平、时序和 `Serial` 输出只能上真板。metadata 记录由脚本按 `$BOOT/IAPServer/bootloader_state.c` 的格式拼出，bootloader 每次启动都重新校验它，所以格式对不上会表现为「没跳进 app」。平台是 `$TEST/host/renode/plc_h743.repl`：Renode 自带的 `stm32h743.repl` 加上 `PWR_CR2` 读回 `0x10001`（BREN + BRRDY），否则 bootloader 每次启动在 `bkp_stash_enable()` 里等备份稳压器约 1 s。
 
 ⁵ **判据住在脚本的表里，例程不加机器行**：文案一改用例就断，逼着文件头和实际输出一致。范围和优先级见 [core 里的例程在真板上逐个测通](../../maps/core-examples-on-board/map.md)；要人配合的步骤（先跑、看得出来的自动等、看不出来的按 y/n）见 [要人配合的步骤脚本怎么问](../../maps/core-examples-on-board/issues/EXB-05-how-does-the-script-ask-for-a-human-step.md)。
 

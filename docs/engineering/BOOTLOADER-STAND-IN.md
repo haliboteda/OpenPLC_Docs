@@ -34,7 +34,10 @@
 |---|---|
 | T1-18a–g 和它里面的 T2-28–T2-30 | `python host/fakeboard/run_cases.py`，selfcheck 的 `T1-18a-T1-18g` 一步就是它 |
 | T1-34 | `python host/fakeboard/run_ide_upload.py`，要 arduino-cli，几分钟，不进 selfcheck |
-| 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--discovery-port 56865] [--uid <24 位十六进制>]` |
+| T1-22、T1-38、T2-05、T2-09、T2-19、T2-20、T2-36 | `python host/fakeboard/run_lifecycle.py [--only ID]`，selfcheck 的 `T1-22` `T1-38` `T2-05` `T2-19` 四步就是它 |
+| 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--discovery-port 56865] [--uid <24 位十六进制>] [--gesture none\|upload\|factory] [--fail-after-erase N] [--fail-after-program N]` |
+| 按 BOOT0 过开机窗口 | `--gesture`：只作用于这次起电后的第一次启动，照 `$BOOT/Core/Src/main.c` 开机窗口那段：`upload` 留在上传模式，`factory` 先恢复出厂再留在上传模式 |
+| 掉电 | `--fail-after-erase N` / `--fail-after-program N`：一次启动里第 N 次擦 / 写做完后进程立即结束（flash 是映射文件，已写的留着），监管进程随后冷启动，故障不再注入 |
 
 两个驱动脚本每次都先编替身（`host/bootstand/build/`，gitignored），要 `HOST_CC` 和 CMake（在 PATH 上或 `HOST_CC` 旁边）。替身往 stdout 打 `[stand-in] root <公钥>`（根变了就打）、`[stand-in] reset`、`[stand-in] jump to app`、`[stand-in] ... serving on <端口>`，脚本读这几行和真代码自己的 `printf` 判结果。
 

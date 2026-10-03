@@ -270,7 +270,7 @@ flowchart TD
 | **R1-26** | 启动切换 | app 的签名在**每次启动时**被重新校验 | `T1-13` | ✅ |
 | **R1-27** | 启动切换 | 掉电中断升级后板子仍可恢复 | `T1-21` `T1-22` | ✅ |
 | **R1-28** | 记录与诊断 | metadata 记在扇区 15 的 metadata 区，**一次成功升级 = 7 槽** ⁵ | `T1-26` | ✅ |
-| **R1-29** | 记录与诊断 | 扇区满了能 reclaim 并恢复。⚠️ **已定重写** ⁵ —— **reclaim 不会消失**：metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回 | `T1-28` | ✅ |
+| **R1-29** | 记录与诊断 | 扇区满了能 reclaim 并恢复。⚠️ **已定重写** ⁵ —— **reclaim 不会消失**：metadata 区 511 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回 | `T1-28` | ✅ |
 | **R1-30** | 记录与诊断 | 复位原因能正确报出（PIN / SOFT / POR） | 手工 | ✅ |
 | **R1-31** | 记录与诊断 | RTC 备份域失效（VBAT 没电）时能被发现 | 手工 | ✅ |
 | **R1-32** | 记录与诊断 | 任何丢包 / 拒绝路径都能说出自己为什么 | 代码审查 | ✅ |
@@ -278,15 +278,16 @@ flowchart TD
 | **R1-34** | bootloader 自升级 | `flashboot` 能把新 bootloader 写进扇区 0，板子重启后跑新的 | `T1-29` | ✅ |
 | **R1-35** | bootloader 自升级 | `flashboot` 的镜像签名**只接受 owner 根**，叶证书签的被拒 | `T1-30` | ✅ |
 | **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（根区在扇区 15，`flashboot` 不碰它）；根区在扇区 15 回收时**压缩** | `T1-31` `T1-33` | ✅ |
-| **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
+| **R1-37** | bootloader 自升级 | **没有根**的板子拒绝 `flashboot`，按不按 BOOT0 都一样（决策 72：没有根就没有人能签这个镜像，`IAP_server.c:465-468`） | `T1-32` | 🟡 |
 | **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：用用户配置目录里的密钥（没有根的出厂板在 bootloader 里，第一次上传自动认领，见 [M2 归属与信任](M2-ownership.md)）；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` `T1-35` | ✅ |
-| **R1-39** | 启动切换 | 从 bootloader 第一批语句到 sketch 第一次写之前，DO 全断开、AO 0 mA、继电器断开（决策 81），KNX 发送脚 PB14 为低、不占总线 | `T1-36`（上板待验） | 🟡 |
+| **R1-39** | 启动切换 | 从 bootloader 第一批语句到 sketch 第一次写之前，DO 全断开、AO 0 mA、继电器断开（决策 81），KNX 发送脚 PB14 为低、不占总线 | `T1-36` `T1-37`（上板待验） | 🟡 |
+| **R1-40** | 入口通道 | 烧录前比版本：要烧的 sketch 比板上正在跑的旧就拒绝；`--force` 只放行一次，烧成功后再用被拒（见「版本闸门」） | `T1-38` | ✅ |
 
-**共 38 条。其中 30 条有测试用例直接测它，8 条没有。**
+**共 40 条。其中 32 条有测试用例直接测它，8 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T1-xx` 用例直接测 | **30** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-38`（`R1-34`–`R1-37` 2026-09-22 在真板子上跑过；`R1-38` 只在 bootloader 替身上（真代码，跑在 PC 上），见 ¹⁰） |
+| 有 `T1-xx` 用例直接测 | **32** | `R1-01`–`R1-05` `R1-08`–`R1-12` `R1-15`–`R1-29` `R1-34`–`R1-40`（`R1-40` 在 bootloader 替身上跑；`R1-34`–`R1-36` 2026-09-22 在真板子上跑过，`R1-37` 按决策 72 改了判据、要重跑；`R1-38` 只在 bootloader 替身上（真代码，跑在 PC 上），见 ¹⁰） |
 | 纯手工 | **3** | `R1-13` `R1-30` `R1-31` |
 | 只有静态检查 P2 | **1** | `R1-06` |
 | 静态检查 P2 + 两块板实测 | **1** | `R1-14` |
@@ -363,7 +364,7 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-14` | `R1-25` | 失败上传不伤 app | 上传失败后 app 区**一字节没动** | `python tools/run_case.py --case T1-11 --then-reset` | 真板子 | ✅ |
 | `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `$TOOL`：`go test ./tests/...` | 主机侧 | ✅ |
 | `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `$BOOT/tests`：`ctest --preset local -R T1-16` | 主机侧 | ✅ |
-| `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电后计数器不归零，本轮 nonce 全不同 | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
+| `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电前后各取一批 nonce，全部互不相同（nonce 来自 TRNG，决策 66） | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
 | `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | bootloader 替身（主机） | ✅ |
 | `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | bootloader 替身（主机） | ✅ |
 | `T1-18c` | `R1-21` | ~~老 bootloader 不认这条命令时不卡住~~ | 决策 79（测试阶段不做向后兼容）取消：IAPTool 遇到不认识 `getpubkey` 的 bootloader 改为报错，替身里假扮老 bootloader 的开关已删 | — | — | ⛔ 已作废 |
@@ -374,25 +375,31 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-19` | `R1-24` | SHA-256 编码交叉验证 | 独立第三实现逐向量比对 | `$TOOL`：`python tests/crypto_ref/run_checks.py` | 主机侧 | ✅ |
 | `T1-20` | `R1-24` | ECDSA 编码交叉验证 | 同上 | 同上 | 主机侧 | ✅ |
 | `T1-21` | `R1-27` | 掉电落在传输期 | 断电后重新上电，**旧 app 照常启动** | `python tools/run_s4.py` ⁴ | **真板子 + 人工断电** | ✅ |
-| `T1-22` | `R1-27` | 掉电落在擦写窗口 | 报 `App signature invalid or absent`，重传能救回 | 同上 ⁴ | **真板子 + 人工断电** | ✅ |
+| `T1-22` | `R1-27` | 掉电落在擦写窗口 | 报 `App signature invalid or absent`，重传能救回 | 同上 ⁴ | **真板子 + 人工断电**；替身（`python host/fakeboard/run_lifecycle.py --only T1-22`，第 1 次擦除后掐断）证明判定和重传，真 flash 的擦写窗口仍要真板子 | ✅ |
 | `T1-23` | `R1-01` `R1-03` | 一次真实上传走完，且擦除在验证之后 | 日志出现 `Staging in SDRAM`，且 `Erasing application region` 在 `Transfer complete, verifying` **之后** | `python tools/upload_and_watch.py --bin <app.bin> --ip <IP>`（或 `--cdc <COM>`） | 真板子 | ✅ |
 | `T1-24` | `R1-22` | 坏 CRC 必须在验签之前被拒 | 板子回 `Checksum Failed` 而**不是** `Signature Failed` —— 「先」过 CRC32 这半句正是它证明的 | `python tools/run_case.py --case T1-24 --bin <app.bin>` | 真板子 | ✅ |
 | `T1-25` | `R1-05` | CDC 上传模式下以太网栈不起来 | 板子进 CDC 模式后不应答 UDP 发现，**且同一轮的正向对照答得出** ¹ | `python tools/run_cdc_does_not_start_ethernet.py --cdc <COM> --ip <IP> --ports <日志口>` | 真板子 | ✅ |
 | `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
-| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复，**且校准值那 8 KiB 原样搬过去** ⁹ | 灌满后板子报 `** Metadata area full - the next successful update reclaims it. **`，一次上传后日志出现 `Reclaiming metadata area (<n> slots discarded)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复，**且校准值那 8 KiB 原样搬过去** ⁹ | 灌满后板子报 `** Metadata area full - the next successful update reclaims sector 15. **`，一次上传后日志出现 `Reclaiming sector 15 (<n> metadata slots, root area compacted)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
 | `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子 | ✅ |
 | `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ✅ |
 | `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
-| `T1-32` | `R1-37` | 未认领的板子上 `flashboot` 要按 BOOT0 | 恢复出厂后不按 BOOT0 发 `flashboot` → `Refused`；按住再来 → 成功 | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| **真板子 + 人按 BOOT0** | ✅ |
+| `T1-32` | `R1-37` | 没有根的板子拒绝 `flashboot` | 恢复出厂后发 `flashboot` → `Refused`，扇区 0 不变，板子照旧启动原 bootloader | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| 真板子 | ⬜ 要按新判据重跑 ¹¹ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `$BOOT/tests`：`ctest --preset local -R T1-33` | 主机侧（要 gcc/clang） | ✅ |
 | `T1-34` | `R1-38` | IDE 那条上传命令在 bootloader 替身上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 替身里 app 一侧拒绝重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**替身那边验过整个镜像**（`Checksum and signature OK`），且收完镜像后真的复位、回到 app ¹⁰ | `python host/fakeboard/run_ide_upload.py` | bootloader 替身（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 | `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |
 | `T1-36` | `R1-39` | 开机输出置 0 | `safe_outputs_init()` 之后 11 个脚（DO1–DO8、PA4、PA5、PB14）都是推挽输出、电平为低，同端口其他脚不变，对应 GPIO 时钟已开 | `$BOOT/tests`：`ctest --preset local -R T1-36` | 主机侧（假 GPIO 寄存器），测不到真引脚电平和时序 | ✅ |
+| `T1-37` | `R1-39` | 开机输出置 0，经真 bootloader 跳进 app 之后仍是 0；BOR 检查 | 当前 `$BOOT` 工作区编出的 bootloader + 不碰这些脚的 `SystemLED`：`HAL_Init()` 入口（`safe_outputs_init()` 刚做完）、`server_jump_to_app()` 入口、app 的 `Reset_Handler` 入口（`HAL_DeInit()` 后又置了一次）、`setup()` 入口、app 跑满 20 s 时各读一次 GPIO，11 个脚（DO1–DO8、PA4、PA5、PB14）都是推挽输出、`ODR` 为 0。BOR：选项字节 `BOR_LEV` 为 0 时串口有那行警告，用选项字节编程序列改成 3 后没有 ¹² | `python host/renode/boot_outputs.py` | Renode，进 selfcheck（`--quick` 跳过） | ✅ |
+| `T1-38` | `R1-40` | 烧录前比版本 | 板上 app 报 `9.9.9` 时传 `1.0.0`：IAPTool 拒绝，板子一个字节没收；加 `--force` 放行并烧成；紧接着再 `--force` 被拒（`force flash has already been used once`） | `python host/fakeboard/run_lifecycle.py --only T1-38` | 替身（真 bootloader 代码 + 真 IAPTool，经网口）；CDC 那支本来挡不住（见「版本闸门」），IDE 菜单那条走真板子 | ✅ |
 
-**共 42 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`；`T1-18c` 2026-10-03 作废）。
+**共 44 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`；`T1-18c` 2026-10-03 作废）。
 
-✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
+¹¹ **`T1-32` 2026-09-22 的通过不算数了**：那天测的是「没有根时按住 BOOT0 就放行」，决策 72 之后没有根一律拒绝（`$BOOT/IAPServer/IAP_server.c:465-468`），`tools/run_flashboot.py --unclaimed` 已按新行为写。
+
+¹² **`T1-37` 只在几个时刻采样，不连续监视。** 测不到：复位到 `main()` 第一行之前那几毫秒、`HAL_DeInit()` 到再次置 0 之间的空档、真引脚电平和 AO 电流、掉电和真欠压复位、GPIO 时钟是否已开（归 `T1-36`）、继电器。BOR 能判，是因为 Renode 1.17 的 `STM32H7_FlashController` 建了 `OPTSR_CUR` 和选项字节编程（解锁 `OPTKEYR` → 写 `OPTSR_PRG` → 置 `OPTCR.OPTSTART`），复位值 `0x0406AAF0`（`BOR_LEV` = 0）。bootloader 编进临时目录（`tools/build_image.py` 的 `build_copy()`），不碰 `$BOOT/Debug/`。
+
+✅ **`T1-29`–`T1-31` 2026-09-22 在真板子上全部通过**（`T1-32` 当天也过，测的是决策 72 之前「按住 BOOT0 放行」的行为，见 ¹¹） —— `flashboot` 第一次真的换掉了一次
 bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，
 所有权和已装的 app 都在。关键证据：
 `** owner area compacted: 1 of 1 owner record(s) and 6 of 6 revocation(s) kept **`、
@@ -439,8 +446,8 @@ reclaim 再怎么正确也看不出来。脚本已改成整扇区读写。
 
 ⁵ ⚠️ **2026-09-21 改定，推翻了 2026-09-20 那一版**：**metadata 留在扇区 15**（不搬进 header）、八种事件日志全部删除、扇区**最前 8 KiB 划给校准值**。见 `DECISIONS.md` 第 61 条和[烧录前比版本 + 校准值住进扇区 15](../../maps/version-gate-and-calibration/map.md)。
 `R1-28` 因此重写（槽仍然有，一次升级从 8 槽变 7 槽），**`R1-29` 保留** —— reclaim 没有消失，
-metadata 区 548 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回。
-✅ **代码已改并上板验收**：实测 `21/3840` → `28/3840`。
+metadata 区 511 条满时仍要擦整扇区，只是擦之前要先把校准值那 8 KiB 读出来再写回。
+✅ **代码已改并上板验收**：实测 `21/3840` → `28/3840`（决策 72 之前的布局；现在根区占去 8 KiB，共 3583 格，`$BOOT/IAPServer/bootloader_state.c:33-41`）。
 
 ⁶ **`P16` 证的是结构，不是某一次运行。** flash 写入中途失败时，若从循环里直接 return，
 `HAL_FLASH_Lock()` 和 `SCB_EnableICache()` 都会被跳过 —— **flash 就一直开着锁**，

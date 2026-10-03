@@ -524,12 +524,12 @@ flowchart TD
 | `T2-02` | `R2-02` | 已有根的板子拒绝第二次认领（反向用例） | 回 `Refused`，`getpubkey` **一字节不变** | `python tools/run_takeown.py --key <另一把.pem> --expect-refused`；整轮里是路径 3-a | 真板子 | 🟡 决策 72 后未上板 |
 | `T2-03` | `R2-02` | 换 owner：现任签名才算数 | 正确签名 → `OK` 且 generation +1；坏签名 → `Refused` 且什么都没变；**跑完新主人那把 `.pem` 仍然存在，且不在系统临时目录下** ⁹ | `python tools/run_setowner.py --current-key a.pem`（加 `--bad-signature` 跑负向） | 真板子 | ✅ |
 | `T2-04` | `R2-02` | 无签名的高 generation 记录**夺不走**板子 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 | `python tools/inject_owner_record.py --key <hex> --also-unsigned 9` | 真板子 | ✅ |
-| `T2-05` | `R2-02` | 恢复出厂回到没有根 | 复位后按住 BOOT0 超过 10 秒 → 板子打 `FACTORY RESET DONE`；之后 `getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（接在路径 1 之后） | **真板子 + 人按住 BOOT0 十秒** | 🟡 决策 72 后未上板 |
+| `T2-05` | `R2-02` | 恢复出厂回到没有根 | 复位后按住 BOOT0 超过 10 秒 → 板子打 `FACTORY RESET DONE`；之后 `getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（接在路径 1 之后） | **真板子 + 人按住 BOOT0 十秒**；替身（`python host/fakeboard/run_lifecycle.py --only T2-05`，`--gesture factory`）证明恢复出厂之后的判定，按键本身仍要真板子 | 🟡 决策 72 后未上板 |
 | `T2-06` | `R2-02` | ~~「信任公开根」的告警不能失灵~~ | 决策 72 取消公开根和这条告警，检查脚本已删 | — | — | ⛔ 已作废 |
 | `T2-07` | `R2-01` | ~~换成自己的根之后，公开根告警不再出现~~ | 决策 72 取消公开根和编进 bootloader 的根，这条告警不再存在 | — | — | ⛔ 已作废 |
 
 | `T2-08` | `R2-02` | ~~公开根告警是常驻的~~ | 同 `T2-07` | — | — | ⛔ 已作废 |
-| `T2-09` | `R2-02` | 恢复出厂会让板上**原有的 app 失效** | 恢复出厂后普通复位，日志出现 `App signature invalid or absent`，且**不出现** `APP Mod`；`getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（路径 2-b） | **真板子 + 人按住 BOOT0 十秒** | 🟡 决策 72 后未上板 |
+| `T2-09` | `R2-02` | 恢复出厂会让板上**原有的 app 失效** | 恢复出厂后普通复位，日志出现 `App signature invalid or absent`，且**不出现** `APP Mod`；`getpubkey` 回 `none` | `python tools/run_five_paths.py --only 2`（路径 2-b） | **真板子 + 人按住 BOOT0 十秒**；替身（`python host/fakeboard/run_lifecycle.py --only T2-09`，`--gesture factory`）证明恢复出厂之后的判定，按键本身仍要真板子 | 🟡 决策 72 后未上板 |
 | `T2-10` | `R2-02` | `setowner` 换根之后**旧根签的固件装不进去** | 上传被拒，**且 app 区一字节未动**（读 flash 比对，不看日志） | `python tools/run_old_root_image_is_refused.py --old-key <旧根.pem> --current-key <新根.pem>`；整轮里是路径 4-c | 真板子 + ST-Link | 🟡 决策 72 后未上板 |
 | `T2-11` | `R2-03` | **真板子**收下一张委托证书并据此执行固件 | 同事用叶私钥 + 根签发的证书上传 → 成功 + 复位后正常启动 | `python tools/run_delegated_cert_on_real_board.py` | 真板子 | ✅ |
 | `T2-12` | `R2-02` | 换根之后**旧叶签的 app 下次启动被拒** | `setowner` 换根 → 复位 → `App signature invalid or absent`，停在 bootloader | 见下 ³ | 真板子（**不需要按 BOOT0** —— `setowner` 靠现任签名授权，见下） | ✅ |
@@ -540,8 +540,8 @@ flowchart TD
 | `T2-16` | `R2-04` | 被撤的叶**再上传也被拒** | 上传失败，**且 app 区一字节未动**（读 flash 比对，不看日志） | 同上 ⁴ | 真板子 + ST-Link | ✅ |
 | `T2-17` | `R2-04` | **撤销不连坐**：没被撤的叶照常上传并启动 | 同一个根签发的另一张叶上传成功 + 复位后正常启动。**这是 `T2-15`/`T2-16` 的正向对照，不可省** ⁵ | 同上 ⁴ | 真板子 | ✅ |
 | `T2-18` | `R2-04` | 坏签名的撤销**记不进去** | 板子回 `revoke refused: signature does not verify against the current owner`，且 generation 不变、`owner_slot_is_revoked` 仍答否 | 同上 ⁴（`--bad-signature`） | 真板子 | ✅ |
-| `T2-19` | `R2-04` | **连续作废两个不同的叶，两个都生效** | 启动日志 `2 leaf(s) revoked`；两个叶各自上传都被拒；**第三张未被作废的叶照常传起** | `python tools/run_revoke_leaf.py --second-leaf` ⁷ | 真板子 | ✅ |
-| `T2-20` | `R2-04` | 重复作废同一个叶是**幂等**的 | 第二次回 `OK already revoked`，且 `N/96 revoke slot(s) free` **一个槽都没少** | 同上 ⁷ | 真板子 | ✅ |
+| `T2-19` | `R2-04` | **连续作废两个不同的叶，两个都生效** | 启动日志 `2 leaf(s) revoked`；两个叶各自上传都被拒；**第三张未被作废的叶照常传起** | `python tools/run_revoke_leaf.py --second-leaf` ⁷ | 真板子；替身（`python host/fakeboard/run_lifecycle.py --only T2-19`）跑真 `owner_slot.c` + `iap_cert.c` | ✅ |
+| `T2-20` | `R2-04` | 重复作废同一个叶是**幂等**的 | 第二次回 `OK already revoked`，且 `N/96 revoke slot(s) free` **一个槽都没少** | 同上 ⁷ | 真板子；替身（`python host/fakeboard/run_lifecycle.py --only T2-20`）跑真 `owner_slot.c` + `iap_cert.c` | ✅ |
 | `T2-21` | `R2-04` | **当前生效的根撤不掉自己**（代码里叫 `R4`） | 喂一块假 owner 记录区、跑**真实**的 core 侧 `owner_root_ro.c`：第一条 `'R'` 记录点名当任根 → **根没被撤**；**紧跟其后的两条照常生效**（R4 跳过那一条，不中断整段扫描）；没被点名的叶不算被撤 ⁸ | `$CORE_REPO/tests`：`ctest --preset local` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-22` | `R2-04` | **`'R'` 段快满时启动日志要提醒** | 剩 9 条时**不出现**任何提醒；写到剩 8 条时出现 `Only 8 revocation slot(s) left`，且文案里点名 `setowner --wipe`（只有它腾空名额）¹¹ | `$BOOT/tests`：`ctest --preset local -R T2-22-T2-23` | 主机侧（要 gcc/clang） | ✅ |
 | `T2-23` | `R2-04` | **第 97 条作废被拒，且一个字节没写** | 96 条全部写入且逐条读回都是「已撤销」；第 97 条 `owner_slot_revoke()` 返回 false，**假 flash 的写入字节计数不变**，`'R'` 段 3072 字节逐字节和拒绝前相同，当任根也没变 ¹¹ | 同上 ¹¹ | 主机侧（要 gcc/clang） | ✅ |
@@ -557,7 +557,7 @@ flowchart TD
 | `T2-33` | `R2-02` | **连续换根不限次数** | 连续 40 次 `setowner`：`'O'` 段写满时触发回收，最后生效的是第 40 把、generation 41，换根前记下的作废仍然生效 | `$BOOT/tests`：`ctest --preset local -R T2-33` | 主机侧（回收用桩代替，只清根区；真回收见 `T2-34`） | ✅ |
 | `T2-34` | `R2-02` | **扇区 15 回收中途断电** | 在回收的 7 次 flash 操作之前逐个断电：暂存完好 → 下次启动做完回收，根、作废、固件 metadata 都回来；电池没电或暂存被改一位 → 擦除之前断的不受影响，擦除之后断的一律**没有根**、没有 metadata，绝不会信一把原来没有的根。另验出厂扇区（只有校准值）不擦只打标记、旧布局扇区保校准值重建。擦除后、写回校准值前断电时校准值丢失，靠工装副本 | `$BOOT/tests`：`ctest --preset local -R T2-34` | 主机侧，跑**真实**的 `bootloader_state.c` `bkp_stash.c` `owner_slot.c`（flash 和备份 SRAM 用 RAM 代替；备份 SRAM 在 VBAT 下保持要上板验） | ✅ |
 | `T2-35` | `R2-01` | **出厂板经 USB 第一次上传就被认领**（真板子） | IAPTool 输出 `This board has no root yet` 和 `Claimed.`，私钥生成在它打印的默认位置且文件存在；随后 v1 装上并启动 | `python tools/run_five_paths.py --only 1 --cdc <COM>`（先跑路径 0） | 真板子 + USB 线 | 🟡 决策 72 后未上板 |
-| `T2-36` | `R2-01` | **恢复出厂后经网口上传再次被认领**，用的是另一把新生成的私钥 | 同 `T2-35`，经以太网；认领的私钥和路径 1 那把不同 | `python tools/run_five_paths.py --only 2`（路径 2-c） | 真板子 + 人按住 BOOT0 十秒 | 🟡 决策 72 后未上板 |
+| `T2-36` | `R2-01` | **恢复出厂后经网口上传再次被认领**，用的是另一把新生成的私钥 | 同 `T2-35`，经以太网；认领的私钥和路径 1 那把不同 | `python tools/run_five_paths.py --only 2`（路径 2-c） | 真板子 + 人按住 BOOT0 十秒；替身（`python host/fakeboard/run_lifecycle.py --only T2-36`）证明恢复出厂后再认领、两把私钥不同 | 🟡 决策 72 后未上板 |
 
 **共 36 条，其中 `T2-06` `T2-07` `T2-08` 已作废（公开根和它的告警随决策 72 取消）。** `T2-01` `T2-02` `T2-05` `T2-09` `T2-10` `T2-25` 的判据已按决策 72 改写，`T2-35` `T2-36` 是新增的真板子用例；这 8 条都还没在新固件上跑过。
 
@@ -604,8 +604,7 @@ app 区 256 KiB 的 SHA-256 前后一致；未被撤的叶照常传起。
 ⁷ **`T2-19` 是这次缺陷漏网的直接原因** —— `T2-15`–`T2-18` 四条全绿，
 却没有任何一条作废**第二次**，而一块板当时只能作废一次（见
 [第二次撤销写得进去但不生效](../../maps/owner-revoke-and-boot-upgrade/issues/OWN-06-second-revocation-is-written-but-never-takes-effect.md)）。
-⚠️ **bootloader 侧 `resolve_chain()` 的改动在主机侧零覆盖** —— `T1-16` 的 owner 槽是桩，
-`T2-21` 跑的是 core 侧那份镜像，所以这两条**只能真板子验**。
+bootloader 侧 `resolve_chain()` 2026-10-04 起由替身覆盖：`run_lifecycle.py` 的 `T2-19` `T2-20` 编的是真 `owner_slot.c` + `iap_cert.c`；真 flash 上仍要真板子验。
 
 ⁶ **`R2-04` 的后半句由 `T2-21`（core 侧镜像）和 `T2-27`（bootloader 侧）两份实现各自证明**，见 ⁸。
 2026-09-22 转 ✅ —— 反转后的 `T2-15` 和新增的 `T2-26` 当天都在真板子上跑过。

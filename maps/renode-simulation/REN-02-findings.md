@@ -29,3 +29,4 @@
 | 平台没有 PHY | 每个例程启动都会初始化网络（`main.cpp:181-198`） | 照 `nucleo_h753zi.repl:19-29` 补一个 LAN8742 |
 | VREF、DAC1 只是 Tag | AI、温度、AO | 写 Python 桩 |
 | 没有 DHCP 对端、没有 Windows 上的 CAN 桥 | 以太网、CAN | 第二台模拟机，或 Python 注帧 |
+| `pwr` 是 Python 桩，`PWR_CR2` 的 BRRDY 不置位（2026-10-03 发现） | bootloader 每次启动在 `bkp_stash_enable()` 里多等约 1 s，报 `Backup SRAM regulator not ready` | `$TEST/host/renode/plc_h743.repl` 里让 `CR2` 读回 `0x10001` |

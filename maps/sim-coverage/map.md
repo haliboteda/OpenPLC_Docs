@@ -28,6 +28,13 @@ grep -ohE "\*\*R[1-3]-[0-9]+\*\*" OpenPLC_Docs/docs/modules/M[1-3]-*.md | sort -
 
 ## Decisions so far
 
+- [替身补齐：驱动、手势、故障注入、撤销、比版本](issues/SIM-07-stand-in-additions.md)：`run_lifecycle.py` 在替身上跑掉电、比版本（`T1-38`）、恢复出厂、撤销，七条全过
+- [例程行为检查放进哪条用例、每个例程判什么](issues/SIM-06-which-case-holds-the-example-behaviour-checks.md)：新用例 `T3-11`，`usb=CDC` 读 UART4；有模型的例程都判；不装 TAP
+- [SD 卡在 Renode 里能不能读写](issues/SIM-03-does-sd-work-in-renode.md)：SD 读写和 YMODEM 收文件在 Renode 里都通；插拔只模拟到检测脚
+- [例程的网口在 Renode 里通不通](issues/SIM-02-does-ethernet-work-in-renode.md)：补 PHY 后网口、DHCP、发现都通；完整上传要 TAP 驱动
+- [例程的 `Serial` 在 Renode 里怎么看得到](issues/SIM-01-how-to-see-serial-in-renode.md)：`usb=CDC` 另编一版，`Serial` 走 UART4；USB 上传只能上板
+- [标着「真板子」的用例里，哪些替身或 Renode 能跑](issues/SIM-05-which-real-board-cases-the-stand-in-can-run.md)：53 条里替身已跑通 19、补驱动能跑 20、替身或 Renode 2、Renode 4、只能上板 8
+- [bootloader 开机把输出置 0，在 Renode 里判](issues/SIM-04-bootloader-outputs-in-renode.md)：用例 `T1-37` 通过，BOR 检查在 Renode 里也能判
 ## Not yet specified
 
 - **KNX 的 IP 那一半**：网口在 Renode 里通了之后（看「例程的网口在 Renode 里通不通」），能不能用 xknx 对着模拟板收发 KNXnet/IP 组报文

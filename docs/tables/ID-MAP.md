@@ -17,11 +17,11 @@
 
 | 编号 | 是什么 | 条数 | 定义在哪 |
 |---|---|---|---|
-| `R1-01`–`R1-39` | 需求（一句可判定的话） | 39 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `R1-01`–`R1-40` | 需求（一句可判定的话） | 40 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
 | `R3-01`–`R3-13` | 需求（一句可判定的话） | 13 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01`–`R4-03` | 需求（一句可判定的话） | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
-| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-36` | 测试用例 | 42 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-38` | 测试用例 | 44 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
 | `T3-01`–`T3-10` | 测试用例 | 10 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `T4-01`–`T4-04` | 测试用例 | 4 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
@@ -47,7 +47,7 @@
 | `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `ROOT-01`–`ROOT-06` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 6 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
-| `SIM-01`–`SIM-06` | wayfinder 的票，属于「0.1.3 在模拟环境里能测的都测掉」 | 6 | [sim-coverage/issues/](../../maps/sim-coverage/issues) |
+| `SIM-01`–`SIM-07` | wayfinder 的票，属于「0.1.3 在模拟环境里能测的都测掉」 | 7 | [sim-coverage/issues/](../../maps/sim-coverage/issues) |
 | `TA-01`–`TA-13` | wayfinder 的票，属于「测试按部件、契约、整机三层重新分布」 | 13 | [test-architecture/issues/](../../maps/test-architecture/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
 | `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
