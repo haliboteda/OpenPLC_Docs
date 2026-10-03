@@ -87,7 +87,7 @@
 | 1 | MAC 从 UID 派生的算法 | bootloader `LWIP/Target/ethernetif.c`（USER CODE MACADDRESS 块）<br>core `libraries/OpenPLC_Net/src/ethernetif.c` | P2 |
 | 2 | 发现回复限流 `discovery_reply_allowed()` | bootloader `IAPServer/udp_server.c`<br>core `libraries/OpenPLC_IAP/src/udp_server.c` | P2（上限 + 窗口两项）。⚠️ **只比数值，不比注释** —— 两边的解释 2026-09-16 已经分叉（core 那份丢了「at 115200 baud」） |
 | 3 | 身份字符串格式 `name_uid_role_<卡包版本>_<app版本>`（五段，`_` 分隔，任何字段都不能含 `_`）。bootloader 那一份第 5 段固定填 `-`（它不知道装的是哪一版 sketch） | bootloader `IAPServer/IAP_server.c` 的 `iap_identity_string()`<br>core `libraries/OpenPLC_IAP/src/udp_server.c`<br>tool `IAP_Ether.go` 的 `parseBoardInfoFromReply`、`IAP_CDC.go` | P2 |
-| 4 | SRAM4 交接记录 `boot_handoff_t` | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
+| 4 | SRAM4 交接记录 `boot_handoff_t`，以及第 16–23 字节 bootloader 发布给 app 的复位原因（决策 80） | bootloader `IAPServer/IAP_boot_handoff.{c,h}`<br>core `cores/arduino/stm32/IAP_boot_handoff.{c,h}` | P2 |
 | 5 | 上传锁的文件名和过期时间 | tool `uploadlock.go`<br>core `tools/discovery/network_discovery.go` | P2（两项） |
 | 6 | 机器 ID（UID）的字节序与十六进制格式 | bootloader `IAPServer/iap_keyderive.c`<br>core `libraries/OpenPLC_IAP/src/iap_keyderive.c` | P2 比两个函数的**规范化正文**（2026-09-22 补上，此前完全没查）。⚠️ 不比整个文件 —— `#include` 两边本来就不同（`main.h` / `Arduino.h`） |
 | 7 | 证书线格式（128 字节，签名覆盖前 64） | bootloader `IAPServer/iap_cert.h`<br>core `libraries/OpenPLC_IAP/src/iap_cert.h`<br>tool `iapcert/iapcert.go` | P2（长度 + 签名前缀两项） |

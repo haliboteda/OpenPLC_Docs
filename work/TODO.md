@@ -57,9 +57,9 @@
 
 | 待办 | 怎么算做完 | 出处 |
 |---|---|---|
-| **sketch 能知道上次是不是被看门狗复位的**：bootloader 每次开机先读走并清掉 `RCC->RSR`（`$CORE_REPO/cores/arduino/stm32/IAP_boot_handoff.h:96`），上游 `IWatchdog::isReset()` 读的正是它，在 app 里多半永远是 false（**未核实**） | 真板子上：开看门狗、故意卡死，复位后 sketch 读得出「看门狗复位」 | 决策 80 |
-| **`IWatchdog` 库在本板上能用**：开、喂、超时复位 | 真板子上走一遍；例程跑通 | 决策 80 |
-| **手册**：看门狗和报警输出要由用户程序实现（标准 2003 5.8），建议报警输出正常时吸合、断开即报警 | 板卡包 README 中英两份写明 | 决策 80、决策 75 |
+| **sketch 能知道上次是不是被看门狗复位的** —— 🔶 2026-10-03 代码做完：复位原因经 SRAM4 交接区传给 app，接口 `openplcResetCause()`，主机侧 T3-08 通过；等上板：bootloader 每次开机先读走并清掉 `RCC->RSR`（`$CORE_REPO/cores/arduino/stm32/IAP_boot_handoff.h:96`），上游 `IWatchdog::isReset()` 读的正是它，在 app 里多半永远是 false（**未核实**） | 真板子上：开看门狗、故意卡死，复位后 sketch 读得出「看门狗复位」 | 决策 80 |
+| **`IWatchdog` 库在本板上能用** —— 🔶 2026-10-03 读代码确认 H7 上开、喂的流程对，用它的 sketch 编得过；等上板：开、喂、超时复位 | 真板子上走一遍；例程跑通 | 决策 80 |
+| **手册**：看门狗和报警输出要由用户程序实现 —— ✅ 2026-10-03 `OpenPLC_Ports` README 中英两版（标准 2003 5.8），建议报警输出正常时吸合、断开即报警 | 板卡包 README 中英两份写明 | 决策 80、决策 75 |
 
 ## 开机输出置 0（2026-10-03 定，决策 81）
 
@@ -67,10 +67,10 @@
 
 | 待办 | 怎么算做完 | 出处 |
 |---|---|---|
-| **bootloader**：一开始把 AO 的 PA4 / PA5 拉低、DO 的 8 个脚置 0（继电器已经是），保持到 sketch 第一次写；板卡包启动时不去动这些脚 | 代码改完，bootloader 编过；`$BOOT/tests` 能覆盖的有用例 | 决策 81 |
-| **手册**：每个输出在上电、复位、掉电各时段的状态；AO 那两个几毫秒窗口如实写「不确定」 | 板卡包 README 中英两份 | 决策 81、决策 75 |
+| **bootloader**：一开始把 AO 的 PA4 / PA5 拉低 —— ✅ 2026-10-03 代码做完（`IAPServer/safe_outputs.c`，T1-36）；交权时 `HAL_DeInit()` 会复位 GPIO，所以跳转前再置一次、DO 的 8 个脚置 0（继电器已经是），保持到 sketch 第一次写；板卡包启动时不去动这些脚 | 代码改完，bootloader 编过；`$BOOT/tests` 能覆盖的有用例 | 决策 81 |
+| **手册**：每个输出在上电、复位、掉电各时段的状态 —— ✅ 2026-10-03 `OpenPLC_Ports` README 中英两版；AO 那两个几毫秒窗口如实写「不确定」 | 板卡包 README 中英两份 | 决策 81、决策 75 |
 | **上板验收**：开机到 sketch 接管前，AO 量到 0 mA、DO 和继电器全断开 | 真板子上量 | 决策 81 |
-| **BOR 约 2.7 V**（[欠压和掉电时进入什么预定状态](../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md)）：产线工站用 ST-Link 写选项字节；bootloader 开机检查、没设对在串口报警；从原理图核实 3.3 V 那级降压在 24 V 掉到多少时才跟着掉；实验室已有的板子补写一次 | 写了的板子上，把供电慢慢调低，低于阈值时复位、输出全 0，回升后正常重启 | IEC-06 |
+| **BOR 约 2.7 V** —— 🔶 2026-10-03 bootloader 开机检查（`IAPServer/bor_check.c`）和产线命令（`BOOT-SEQUENCE.md`）做完；3.3 V 由 LMR50410 从 24 V 降压、使能直连输入（HARDWARE-FACTS），掉压点未核实；补写实验室的板子、上板慢降压还没做（[欠压和掉电时进入什么预定状态](../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md)）：产线工站用 ST-Link 写选项字节；bootloader 开机检查、没设对在串口报警；从原理图核实 3.3 V 那级降压在 24 V 掉到多少时才跟着掉；实验室已有的板子补写一次 | 写了的板子上，把供电慢慢调低，低于阈值时复位、输出全 0，回升后正常重启 | IEC-06 |
 
 ## 优先级最低
 

@@ -455,3 +455,16 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | U2 | LM50BIM3/NOPB | `5V0` | `TEMP_HSSW` → PA3 | `GNDD` |
 
 输出 500 mV + 10 mV/°C（LM50 数据手册），`BoardTemperature` 例程按此换算，是对的。⚠️ 与两处抄件不符，以网表为准：`$CORE_REPO/variants/STM32H7xx/H743/variant_PLC_H743.h:228-229` 写作 NTC；`$HW/LowerDeck_overview.txt:32,85` 写作 5V 线性稳压器。
+
+## 3.3 V 从哪来、24 V 掉到多少时它才跟着掉
+
+2026-10-03 读 `$HW/Production/JunctionLink/netlist.ipc` 和 `bom.csv` 核实：
+
+| 事 | 结论 | 怎么核实的 |
+|---|---|---|
+| 3.3 V 由谁产生 | Junction Link 上的 IC1，LMR50410 降压（`bom.csv`：IC1/IC2/IC3 都是 LMR50410XDBVR，三路分别出 3.3 V、5 V、5 V_EXT） | BOM + 网表 |
+| 它的输入 | 直接接 `24V0`（netlist 第 202–203 行：IC1 的第 4、5 脚都在 `24V0` 上）；第 3 脚 `/3V3FB`、第 6 脚 `/3V3SW` | 网表 |
+| 有没有外部欠压门限 | **没有**：第 4、5 脚同接 `24V0`，也就是使能脚直接接输入，没有分压电阻设门限 | 网表（第 4、5 脚谁是 EN 不影响这个结论，两脚同网） |
+| 24 V 掉到多少 3.3 V 才开始掉 | **未核实**。没有外部门限，所以只看 LMR50410 自己：输入低到接近 3.3 V 加上压差、或低于芯片自带的欠压锁定时，3.3 V 才会掉。具体电压要查 LMR50410 数据手册（本机没有），并上板慢慢降压实测 | — |
+
+含义：24 V 从额定值往下掉的大部分区间里 3.3 V 还在，MCU 照常跑；3.3 V 真正掉到芯片的欠压复位（BOR，[IEC-06](../../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md) 定在 2.7 V）时，24 V 已经接近没电。

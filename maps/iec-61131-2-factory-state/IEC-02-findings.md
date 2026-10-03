@@ -2,13 +2,15 @@
 
 2026-09-28 读原理图、网表、代码得出，**没有一条是实测**。bootloader 按决策 71 改过之后的版本。
 
+⚠️ **2026-10-03 按决策 81 改了代码（未上板验证）**：bootloader 一开机就把 DO1–DO8 置 0、AO 的 PA4 / PA5 拉低，交权时再做一遍，保持到 sketch 第一次写。下表 DO、AO 两行是改后的预期。
+
 ## 输出 × 时刻
 
 | 输出 | 上电、代码未跑 | bootloader 在跑 | 交权 → `setup()` 前 | 掉电 |
 |---|---|---|---|---|
-| DO1–DO8（VNQ5160K-E） | 大概率断开：MCU 脚高阻，板上无上下拉，靠 VNQ 输入脚内部下拉（**未核实**） | 同左，bootloader 不配这 8 个脚（`$BOOT/Core/Src/gpio.c`） | 同左，`HAL_DeInit()` 复位全部 GPIO（`$BOOT/IAPServer/IAP_server.c:822`），core 不碰 | VCC 是 +24 V，24 V 没了输出跟着没 |
+| DO1–DO8（VNQ5160K-E） | 大概率断开：MCU 脚高阻，靠 VNQ 输入脚内部下拉（**未核实**），只到 bootloader 第一批语句为止 | 断开：`safe_outputs_init()` 置 0（`$BOOT/IAPServer/safe_outputs.c`，决策 81） | 断开：`HAL_DeInit()` 之后再置 0 一次，core 不碰，直到 sketch 写 | 断开（同上电） |
 | RY1–RY6 | 断开：栅极 33k 下拉（LowerDeck 网表 R3–R8） | 断开：`MX_GPIO_Init` 先写低再切输出，开机不再动（决策 71） | 断开 | 断开：线圈接 5V0，单线圈低边驱动，无自锁 |
-| AO1–AO2（XTR111） | **不确定**：OD 脚 10k 接地，输出恒使能；VIN 经 10k 接 PA4/PA5，脚高阻时悬空（UpperDeck 网表） | 同左，bootloader 不开 DAC | 同左，直到 sketch 开 DAC | **不确定**：MCU 已复位而 24 V 还在时 VIN 悬空 |
+| AO1–AO2（XTR111） | **不确定**：OD 脚 10k 接地，输出恒使能；VIN 经 10k 接 PA4/PA5，脚高阻时悬空，只到 bootloader 第一批语句为止（几毫秒，待示波器实测） | 0 mA：`safe_outputs_init()` 把 PA4 / PA5 拉低（决策 81） | 0 mA：`HAL_DeInit()` 之后再拉低一次，直到 sketch 开 DAC | **不确定**：MCU 已复位而 24 V 还在时 VIN 悬空（待示波器实测） |
 | 系统灯 PE2 | 灭 | 窗口快闪，恢复出厂就绪常亮，之后灭 | 灭（`HAL_DeInit`），变体未定义 `LED_BUILTIN` | 灭 |
 
 ## 看门狗与电源监视

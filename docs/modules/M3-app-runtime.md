@@ -61,8 +61,9 @@ flowchart TD
 | **R3-08** | 例程起得来 | `OpenPLC_Ports` 的每个例程经 bootloader 启动后，`setup()` 走完、`loop()` 一直在转、不进 fault | `T3-05` | ✅ |
 | **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` | ⬜ |
 | **R3-10** | 模拟量带单位 | `OpenPLC_Ports` 给 mV / mA 的 AI、AO 读写，并套用这块板的校准值；校准值无效时退回标称换算并打一行日志（[CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md)） | `T3-07` | 🟡 |
+| **R3-11** | 复位原因 | sketch 能知道上次复位的原因（看门狗、上电、复位键、软件复位），用来自己决定看门狗复位之后怎么办（决策 80） | `T3-08`（上板待验） | 🟡 |
 
-**共 10 条。其中 7 条有测试用例直接测它，3 条没有。**
+**共 11 条。其中 8 条有测试用例直接测它，3 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
@@ -95,8 +96,9 @@ flowchart TD
 | `T3-05` | `R3-08` | 13 个例程经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
 | `T3-06` | `R3-09` | 自有库例程在真板上逐个测通 | 每个例程：经 USB CDC 上传后，脚本按表里那一行发输入、等输出，用正则认例程自己的人读输出；要人配合的步骤由脚本提示 ⁵ | `python tools/run_examples.py [--only NAME]` | 真板子 | ⬜ |
 | `T3-07` | `R3-10` | 带单位 AI / AO 套用校准值 | 写入已知系数后换算结果按系数变；魔数错、CRC 错、UID 不符三种都退回标称，日志只打一次 | `$CORE_REPO` 里 `python tests/selfcheck.py`（CTest 的 `T3-07`） | 主机侧，测不到真板子上的读数精度 | ✅ |
+| `T3-08` | `R3-11` | 复位原因交给 app | bootloader 一侧发布的原值，app 一侧读回并译对：看门狗（带复位键标志也算看门狗）、上电、软件复位；校验不对或没写过时返回「未知」 | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（core 那份交接代码 + 假 SRAM4），测不到真芯片的 `RCC->RSR` | ✅ |
 
-**共 6 条。`T3-05` 在 Renode 里跑，其余要真板子。**
+**共 8 条。`T3-05` 在 Renode 里跑，`T3-07` `T3-08` 在主机上跑，其余要真板子。**
 
 ¹ **自检失败不改变任何控制流。** 板子仍然安全 —— 上传会在 CRC 那步失败、app 区不受影响。
 这行日志的作用只是**把根因直接说出来**，否则 SDRAM 坏掉的症状会表现成

@@ -280,6 +280,7 @@ flowchart TD
 | **R1-36** | bootloader 自升级 | 换完 bootloader 后**所有权还在**（根区在扇区 15，`flashboot` 不碰它）；根区在扇区 15 回收时**压缩** | `T1-31` `T1-33` | ✅ |
 | **R1-37** | bootloader 自升级 | **未认领**的板子上 `flashboot` 要按住 BOOT0，否则被拒 | `T1-32` | ✅ |
 | **R1-38** | 入口通道 | 从 Arduino IDE 的 Upload（`upload_method=ethMethod`，不传任何参数）烧**正在跑 app** 的板子：用用户配置目录里的密钥（没有根的出厂板在 bootloader 里，第一次上传自动认领，见 [M2 归属与信任](M2-ownership.md)）；密钥不是板子信的那把时报「板子拒绝了重启请求」（找密钥的顺序见 [IDE-13](../../maps/arduino-examples-and-ide-flow/issues/IDE-13-where-does-the-ide-upload-key-live.md)） | `T1-34` `T1-35` | ✅ |
+| **R1-39** | 启动切换 | 从 bootloader 第一批语句到 sketch 第一次写之前，DO 全断开、AO 0 mA、继电器断开（决策 81） | `T1-36`（上板待验） | 🟡 |
 
 **共 38 条。其中 30 条有测试用例直接测它，8 条没有。**
 
@@ -387,8 +388,9 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `$BOOT/tests`：`ctest --preset local -R T1-33` | 主机侧（要 gcc/clang） | ✅ |
 | `T1-34` | `R1-38` | IDE 那条上传命令在 bootloader 替身上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 替身里 app 一侧拒绝重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**替身那边验过整个镜像**（`Checksum and signature OK`），且收完镜像后真的复位、回到 app ¹⁰ | `python host/fakeboard/run_ide_upload.py` | bootloader 替身（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 | `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |
+| `T1-36` | `R1-39` | 开机输出置 0 | `safe_outputs_init()` 之后 10 个脚（DO1–DO8、PA4、PA5）都是推挽输出、电平为低，同端口其他脚不变，对应 GPIO 时钟已开 | `$BOOT/tests`：`ctest --preset local -R T1-36` | 主机侧（假 GPIO 寄存器），测不到真引脚电平和时序 | ✅ |
 
-**共 41 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`；`T1-18c` 2026-10-03 作废）。
+**共 42 条**（`T1-18a`–`T1-18g` 是一族七种情况，原先压成一个 `T1-18`；`T1-18c` 2026-10-03 作废）。
 
 ✅ **`T1-29`–`T1-32` 2026-09-22 在真板子上全部通过** —— `flashboot` 第一次真的换掉了一次
 bootloader：`.RamFunc` 里那段「擦掉自己所在的扇区再写回来」的例程执行了，板子复位后起来，

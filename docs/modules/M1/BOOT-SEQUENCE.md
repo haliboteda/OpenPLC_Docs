@@ -44,6 +44,51 @@ Phase 1 里先在开机窗口（系统指示灯快闪那 2 秒）内反复轮询
 - `boot_handoff_take()` 是消费请求记录的唯一动作 —— 不读，那条请求会把**下一次**启动也钉在这里
 - 签名结果要喂给开机蜂鸣和 UDP 服务名，这两件事都不参与这次决定
 
+## 输出一开机就置 0，一直保持到 sketch 接管（决策 81）
+
+`main()` 的第一批语句：先锁存复位原因，紧接着 `safe_outputs_init()`（`$BOOT/IAPServer/safe_outputs.c`）把
+DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）。继电器 RY1–RY6 由 `MX_GPIO_Init()` 置 0，开机不再动（决策 71）。
+
+| 选这个位置的理由 | |
+|---|---|
+| 越早越好 | 它前面只有锁存 `RCC->RSR`（必须第一个读）；MPU、cache、`HAL_Init()`、`SystemClock_Config()`（等 PLL 锁定）都在它后面，省下的是这些步骤的时间 |
+| 不依赖任何初始化 | 只写 RCC 的 GPIO 时钟使能位和 GPIO 寄存器，不用 HAL、不用时钟树 |
+
+**交权时再做一遍**：`server_jump_to_app()` 里的 `HAL_DeInit()` 会复位全部 GPIO 端口，引脚回到高阻；
+所以它之后、跳转之前再调一次 `safe_outputs_init()`。这是决策 4「冷板子」的一个例外，范围只到这 10 个脚。
+板卡包从启动到 sketch 第一次写之前不碰这些脚（`initVariant()` 是空的弱函数，`analogWrite` / `pinMode` 都是第一次调用时才配置）。
+
+引脚出处：`$HW/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx` 第 92–93 行（AOUT1 / AOUT2）、
+第 99–106 行（HSFET_1–8）。复位到这一行之前的几毫秒、以及掉电时，AO 仍不确定（等示波器实测，见 `waiting/WAITING-ON.md`）。
+
+## 开机检查欠压复位（BOR）档位
+
+3.3 V 掉到 BOR 门限以下时芯片由硬件直接复位，复位后输出全为 0（[IEC-06](../../../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md)）。
+门限存在选项字节里，**bootloader 只读不写**：`MX_UART4_Init()` 之后 `bor_level_report()`（`$BOOT/IAPServer/bor_check.c`）读
+`FLASH->OPTSR_CUR` 的 `BOR_LEV`（第 3:2 位），不是 3 档（2.7 V）就在串口打一行警告。
+
+| `BOR_LEV` | 门限（`stm32h7xx_hal_flash_ex.h` 里 `OB_BOR_LEVELx` 的注释） |
+|---|---|
+| 0 | 1.6 V（相当于关掉） |
+| 1 | 2.1 V |
+| 2 | 2.4 V |
+| 3 | **2.7 V，本板要的** |
+
+产线工站（以及实验室已有的板子）用 ST-Link 写一次：
+
+```
+STM32_Programmer_CLI -c port=SWD -ob BOR_LEV=3
+```
+
+⚠️ 这条命令的写法照 STM32CubeProgrammer 的选项字节语法，**还没在本板上跑过**；写完后板子上电，串口不再打那行警告就算写对了。
+
+## 复位原因交给 app（决策 80）
+
+bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所以 `boot_handoff_take()` 把这次锁存的原值
+写进 SRAM4 交接区第 16–23 字节（原值 + 校验），app 用 `boot_handoff_published_reset_rsr()` 读，
+板卡包 `OpenPLC_Ports` 的 `openplcResetCause()` 把它译成「看门狗 / 上电 / 复位键 / 软件复位……」。
+上游 `IWatchdog::isReset()` 读的是 `RCC->RSR`，在本板上永远是 false，不要用它。
+
 ## 交接记录为什么放 SRAM4，不放 RTC 备份寄存器
 
 **一个正在跑的镜像要求「下次复位后留在上传模式」，只有这一条通道** ——
