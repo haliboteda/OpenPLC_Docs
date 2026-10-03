@@ -30,6 +30,7 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [KNX 库的 TP 收发怎么在本板上发出合法帧](issues/EXB-08-how-does-the-knx-library-drive-stknx.md)：现有 USART 路径不可能对；新写 STKNX 数据链路层用定时器收发 TP1，位时序照搬工装固件
 - [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)：不提供模拟 EEPROM；KNX 两块数据放扇区 14；P19 盯住
 - [测试脚本怎么判一个例程过没过](issues/EXB-01-how-does-the-script-judge-an-example.md)：认例程现有输出、判据在 Python 表里、经 USB CDC 上传、用例 `T3-06`
 
