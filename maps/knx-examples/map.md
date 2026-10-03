@@ -29,6 +29,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Decisions so far
 
+- [例程清单：每个演示什么](issues/KEX-05-which-examples-and-what-each-shows.md)：`KNX_Switch`（继电器）、`KNX_Inputs`（DI）；开机打印地址，收发各打一行；角色不是 TP 编译报错
 - [编程模式怎么进、怎么让人看到](issues/KEX-03-how-to-enter-and-show-programming-mode.md)：运行中短按 BOOT0 键切换；系统灯常亮 + USB 串口一行；脚本不代按
 - [ETS 能导入的产品文件怎么做出来](issues/KEX-01-how-to-make-an-ets-importable-product.md)：OpenKNXproducer 4.3.12 + 本机 ETS 5.7 签名；ETS5 导入成功；厂家显示为 KNX Association
 - [所有例程共用一个产品，还是一个例程一个](issues/KEX-02-one-product-for-all-examples-or-one-each.md)：共用一个产品；继电器开关 + 状态占 1–12、DI 占 13–20，已有编号永不改
@@ -40,6 +41,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **板卡包菜单 KNX Role 的默认值**现在是 IP+TP（0x5780），这张图只做 TP：默认值要不要跟着改
 - **旧 5 个例程删掉时**要同步的地方：P5 编译清单、`run_examples.py` 的表、README；库里那份导不进 ETS 的 `OpenPLC_Bridge.knxprod` 怎么处理
 - **厂商号**：产品现在用开源 KNX 项目共用的测试厂商号 `M-00FA`；正式以 Schaeffer 名义发布要换成自己登记的厂商号
+- **库里两路继电器配置**（`initRelayProfile2CH`、`selfProgram2CH`）：旧例程删掉后还要不要留
 
 ## Out of scope
 
