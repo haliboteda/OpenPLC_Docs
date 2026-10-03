@@ -30,6 +30,7 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [文件怎么经 RS232 传到板子上写进 SD 卡](issues/EXB-03-how-does-a-file-get-from-rs232-onto-the-sd-card.md)：YMODEM（接收端在 `OpenPLC_Ports`，T3-10）；新增 `SD_FileReceive`；读回算 CRC32 比对；PE6 检测插拔；日志走 USB
 - [要人配合的步骤脚本怎么问](issues/EXB-05-how-does-the-script-ask-for-a-human-step.md)：固定提示框；看得出来的自动等、看不出来的按 y/n；不录数值；DI 逐路；要人的放最前
 - [KNX 库的 TP 收发怎么在本板上发出合法帧](issues/EXB-08-how-does-the-knx-library-drive-stknx.md)：现有 USART 路径不可能对；新写 STKNX 数据链路层用定时器收发 TP1，位时序照搬工装固件
 - [KNX 和 EEPROM 往 flash 存数据时不能擦扇区 15](issues/EXB-09-knx-and-eeprom-must-not-erase-sector-15.md)：不提供模拟 EEPROM；KNX 两块数据放扇区 14；P19 盯住
