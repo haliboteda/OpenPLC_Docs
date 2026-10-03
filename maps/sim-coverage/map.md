@@ -15,6 +15,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **带执行**（用户 2026-10-03：「按你推荐做必要的事」）：票定完就写文档、用例和必要的模拟件；先文档再代码，只做必要的
 - 模拟手段三套：Renode（真 bootloader + 真 app 二进制，`$TEST/host/renode/`，用例 `T3-05`）、bootloader 替身（`$TEST/host/bootstand/`）、工装模拟板（`sim`）
 - Renode 每个外设有没有模型，2026-09-27 查过：[REN-02-findings.md](../renode-simulation/REN-02-findings.md)。**模拟做不到的不硬做**，归到「只能上板」
+- **`T3-11` 2026-10-04 实现**（`$TEST/host/renode/behaviour.py`）：15 个例程（`OpenPLC_Ports` 13 个 + `OpenPLC_SDRAM` 2 个，不含 KNX 和 `AI_Inputs`）都判得了，没有整个例程归「只能上板」；每个例程仍只能上板的部分列在 M3 脚注 ⁶
 - 用到的 skill：`research`（research 票）、`grilling`（grilling 票）
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 

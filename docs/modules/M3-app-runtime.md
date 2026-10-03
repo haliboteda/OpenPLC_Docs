@@ -59,7 +59,7 @@ flowchart TD
 | **R3-06** | 串口对外 | RS232 端子 C05/C06 收发正常 | `T3-04` | ✅ |
 | **R3-07** | 网络不被 sketch 卡住 | sketch 在 `delay()` 里等待时，板子照样应答网络、能经网口上传 | 手工 | ✅ |
 | **R3-08** | 例程起得来 | `OpenPLC_Ports` 的每个例程经 bootloader 启动后，`setup()` 走完、`loop()` 一直在转、不进 fault | `T3-05` | ✅ |
-| **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` | ⬜ |
+| **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` `T3-11`（`T3-11` 只在 Renode 里，见 ⁶） | ⬜ |
 | **R3-10** | 模拟量带单位 | `OpenPLC_Ports` 给 mV / mA 的 AI、AO 读写，并套用这块板的校准值；校准值无效时退回标称换算并打一行日志（[CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md)） | `T3-07` | 🟡 |
 | **R3-11** | 复位原因 | sketch 能知道上次复位的原因（看门狗、上电、复位键、软件复位），用来自己决定看门狗复位之后怎么办（决策 80） | `T3-08`（上板待验） | 🟡 |
 | **R3-12** | KNX TP 收发 | `OpenPLC_KNX` 在 TP 总线上按 STKNX 的位时序收发帧、应答、重发，空闲时不占总线（[KNX-TP-DATA-LINK.md](M3/KNX-TP-DATA-LINK.md)） | `T3-09`（上板待验） | 🟡 |
@@ -95,7 +95,7 @@ flowchart TD
 | `T3-02` | `R3-03` | `OpenPLC_SDRAM` 封装 | 19 条断言全过，并测出清零速率 ² | `python tools/run_sdram.py` | 真板子 | ✅ |
 | `T3-03` | `R3-05` | 诊断串口不被 sketch 掐掉 | `Serial4.begin()` 之后 `Serial_Test` 仍然收得到，5/5 回显 ³ | `python tools/run_m5.py`（自己编译、烧写、发字节、验回显） | 真板子 | ✅ |
 | `T3-04` | `R3-06` | RS232 端子收发 | 往端子 C05/C06 发字符，每个字节原样回显 | `$TEST/onboard/rs232/SerialPort` | 真板子 | ✅ |
-| `T3-05` | `R3-08` | 13 个例程经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
+| `T3-05` | `R3-08` | `OpenPLC_Ports` 的每个例程（2026-10-04 是 14 个）经 bootloader 启动 | 每个例程：bootloader 跳进 app、`setup()` 进一次、`loop()` 开头和结尾都还在进、没进 `Default_Handler`、PC 不停在 `b .` ⁴ | `python host/renode/run.py [--only NAME]` | Renode | ✅ |
 | `T3-06` | `R3-09` | 自有库例程在真板上逐个测通 | 每个例程：经 USB CDC 上传后，脚本按表里那一行发输入、等输出，用正则认例程自己的人读输出；要人配合的步骤由脚本提示 ⁵ | `python tools/run_examples.py [--only NAME]` | 真板子 | ⬜ |
 | `T3-07` | `R3-10` | 带单位 AI / AO 套用校准值 | 写入已知系数后换算结果按系数变；魔数错、CRC 错、UID 不符三种都退回标称，日志只打一次 | `$CORE_REPO` 里 `python tests/selfcheck.py`（CTest 的 `T3-07`） | 主机侧，测不到真板子上的读数精度 | ✅ |
 | `T3-08` | `R3-11` | 复位原因交给 app | bootloader 一侧发布的原值，app 一侧读回并译对：看门狗（带复位键标志也算看门狗）、上电、软件复位；校验不对或没写过时返回「未知」 | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（core 那份交接代码 + 假 SRAM4），测不到真芯片的 `RCC->RSR` | ✅ |
@@ -103,7 +103,9 @@ flowchart TD
 
 | `T3-10` | `R3-13` | YMODEM 接收 | 首包取名字和长度；1 KB 和 128 字节两种包；末包按长度截断；CRC 错回 NAK、重复包回 ACK 不重写；EOT 两次收尾，空首包结束整批；连续两个 CAN 中止 | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（真 `openplc_ymodem.c` + 写好的字节流），测不到真串口的时序和 Tera Term / `sb` 的实际行为 | ✅ |
 
-**共 10 条。`T3-05` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` 在主机上跑，其余要真板子。**
+| `T3-11` | `R3-09` | 例程在 Renode 里的行为 | 每个例程按文件头给输入、看输出：DI 逐路拉高只亮那一位；DO、继电器、系统灯按顺序和时长翻转；AO 写进 DAC 的码按 0 / 5 / 10 / 15 / 20 mA；温度按给的电压换算；RS232、RS485、`Serial` 回显；CAN 计数在涨、注入的帧打出来；网口 link、DHCP 地址、发现有应答；SD 读写回读一致、YMODEM 收的文件 CRC-32 对、插拔两行；SDRAM 写入校验 0 错、能 dump ⁶ | `python host/renode/behaviour.py [--only NAME]` | Renode | ✅ |
+
+**共 11 条。`T3-05` `T3-11` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` 在主机上跑，其余要真板子。**
 
 ¹ **自检失败不改变任何控制流。** 板子仍然安全 —— 上传会在 CRC 那步失败、app 区不受影响。
 这行日志的作用只是**把根因直接说出来**，否则 SDRAM 坏掉的症状会表现成
@@ -116,7 +118,9 @@ flowchart TD
 ³ **修之前的后果比「静默掐掉接收」严重得多**：`Serial4.begin()` 会直接**挂死 app、
 板子失联、只能 ST-Link 救**。修法是把 `Serial_Test` 挪到 USART3（同样两个引脚，AF7 而非 AF8）。
 
-⁴ **测不到端口行为**：只证明启动链和主循环没坏。各端口的寄存器读写 2026-09-28 查过一次，结论在 [REN-03](../../maps/renode-simulation/issues/REN-03-run-both-layers-on-all-examples.md)，不自动复查；真实电平、时序和 `Serial` 输出只能上真板。metadata 记录由脚本按 `$BOOT/IAPServer/bootloader_state.c` 的格式拼出，bootloader 每次启动都重新校验它，所以格式对不上会表现为「没跳进 app」。平台是 `$TEST/host/renode/plc_h743.repl`：Renode 自带的 `stm32h743.repl` 加上 `PWR_CR2` 读回 `0x10001`（BREN + BRRDY），否则 bootloader 每次启动在 `bkp_stash_enable()` 里等备份稳压器约 1 s。
+⁴ **测不到端口行为**：只证明启动链和主循环没坏。各端口的寄存器读写 2026-09-28 查过一次，结论在 [REN-03](../../maps/renode-simulation/issues/REN-03-run-both-layers-on-all-examples.md)，不自动复查；真实电平、时序和 `Serial` 输出只能上真板。metadata 记录由脚本按 `$BOOT/IAPServer/bootloader_state.c` 的格式拼出，bootloader 每次启动都重新校验它，所以格式对不上会表现为「没跳进 app」。bootloader 每次从当前 `$BOOT` 源码现编（`$TEST/tools/build_image.py` 的 `build_copy()`），不用 `$BOOT/Debug/` 里不知道哪天的镜像。平台是 `$TEST/host/renode/plc_h743.repl`：Renode 自带的 `stm32h743.repl` 加上 `PWR_CR2` 读回 `0x10001`（BREN + BRRDY），否则 bootloader 每次启动在 `bkp_stash_enable()` 里等备份稳压器约 1 s；两个 ADC 的参考电压改成板上 VREFBUF 的 2.5 V（`OPENPLC_VREF_MV`），Renode 默认 3.3 V 会让读数整体偏小。
+
+⁶ **`T3-11` 和真板二进制的差别**：例程按 USB 菜单「CDC (no generic 'Serial')」另编，`Serial` 落到 UART4（[SIM-01](../../maps/sim-coverage/SIM-01-findings.md)），所以 USB CDC 本身（枚举、DTR、USB 收发、经 USB 上传）测不到；输入由 Renode 给（GPIO 电平、ADC 电压、串口字节、CAN 帧、DHCP 对端），判的是固件对这些输入的反应，**不是真实电平、电流、时序**。`Ethernet_IP` 那一次在 `plc_h743.repl` 之外加 LAN8742 PHY，DHCP 由一个 Python 对端回（[SIM-02](../../maps/sim-coverage/SIM-02-findings.md)）；AO 写进 DAC 的值用 watchpoint 记下；SD 卡是脚本现格式化的 FAT32 镜像（[SIM-03](../../maps/sim-coverage/SIM-03-findings.md)）。**2026-10-04 15 个例程都判得了**；每个例程仍只能上板的部分：DI 的门限电压、DO / 继电器 / AO 的真实电平和电流、温度传感器本身、RS232 / RS485 端子电平、`Serial` 走 USB 的那一段、CAN 的总线电气和对端应答、网口的 PHY 时序和真 DHCP 服务器、真 SD 卡的时序和拔卡途中出错、SDRAM 芯片本身（Renode 只有一块内存）。
 
 ⁵ **判据住在脚本的表里，例程不加机器行**：文案一改用例就断，逼着文件头和实际输出一致。范围和优先级见 [core 里的例程在真板上逐个测通](../../maps/core-examples-on-board/map.md)；要人配合的步骤（先跑、看得出来的自动等、看不出来的按 y/n）见 [要人配合的步骤脚本怎么问](../../maps/core-examples-on-board/issues/EXB-05-how-does-the-script-ask-for-a-human-step.md)。
 
