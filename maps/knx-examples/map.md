@@ -29,6 +29,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Decisions so far
 
+- [所有例程共用一个产品，还是一个例程一个](issues/KEX-02-one-product-for-all-examples-or-one-each.md)：共用一个产品；继电器开关 + 状态占 1–12、DI 占 13–20，已有编号永不改
 ## Not yet specified
 
 - **ETS 参数**：现有产品文件没有参数；要不要做一个演示「在 ETS 里改参数、sketch 读到」的例程，得等产品文件怎么生成定了才看得清代价
@@ -36,6 +37,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **整块板当一个现成的 KNX IO 设备**：如果所有例程共用一个整板产品，它可能自然就是这个；否则另议
 - **板卡包菜单 KNX Role 的默认值**现在是 IP+TP（0x5780），这张图只做 TP：默认值要不要跟着改
 - **旧 5 个例程删掉时**要同步的地方：P5 编译清单、`run_examples.py` 的表、README；库里那份导不进 ETS 的 `OpenPLC_Bridge.knxprod` 怎么处理
+- **厂商号**：产品现在用开源 KNX 项目共用的测试厂商号 `M-00FA`；正式以 Schaeffer 名义发布要换成自己登记的厂商号
 
 ## Out of scope
 
