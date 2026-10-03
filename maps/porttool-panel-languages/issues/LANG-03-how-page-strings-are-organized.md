@@ -32,7 +32,7 @@ Blocked by: LANG-01
 
 - **选 A**：一张总词典，键按原词表名分段（`param.duty`、`value.extloop`），每条三种语言并排；代码里只写键。理由：「每个键三种语言齐全」只需查一张表
 - 板子报上来的日志照旧是英文原文，不进词典（与本图 Out of scope 一致）
-- **词典放 `internal/ptpanel/web/strings.json`（`$TOOL` 里，待建），嵌进 exe**（`panel.go:22` 的 `go:embed web` 自动带上）。不放 exe 旁边：没有人需要不重新编译就改译文，放旁边会有漏拷、版本对不上的问题
+- **词典放 `internal/ptpanel/web/strings.json`（`$PORTTOOL` 里，待建；2026-10-01 起 PortTool 在自己的仓，决策 76），嵌进 exe**（`panel.go:22` 的 `go:embed web` 自动带上）。不放 exe 旁边：没有人需要不重新编译就改译文，放旁边会有漏拷、版本对不上的问题
 - **切换 = 刷新页面**；有通过 / 失败结果、未下发的参数或未保存的方案时先弹窗说明会丢，确认才刷新。理由：只在页面里的状态（`index.html` 的 `verdicts`、`edited`、`plan`）刷新就没了，而当场重画漏掉的地方会静默留在旧语言
 - `<html lang>` 跟着语言变（`zh-CN` / `en` / `de`）
 - **缺某种语言的译文时显示中文原文**。真正防漏译的是「每个键三种语言齐全」那条检查（归 [面板的浏览器用例在三种语言下怎么保持有效](LANG-07-how-the-panel-browser-tests-stay-valid.md)），页面只需不坏

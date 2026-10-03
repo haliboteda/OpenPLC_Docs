@@ -36,6 +36,13 @@ python -c 'import re,glob; fs=[f for f in glob.glob("OpenPLC_PortsTestingTool/in
 
 ## Decisions so far
 
+- [数字、日期、单位的写法跟不跟着语言变](issues/LANG-09-number-and-date-format-per-language.md)：数字、日期一律照现在的写法，不随语言变
+- [和暂停的「面板逐卡片过一遍提示与参数」谁先谁后](issues/LANG-08-order-against-the-paused-wording-audit.md)：现在就译；译文记中文的哈希，中文改了没跟就报错
+- [面板的浏览器用例在三种语言下怎么保持有效](issues/LANG-07-how-the-panel-browser-tests-stay-valid.md)：浏览器脚本只跑中文；另查每个键三种语言齐全
+- [英文和德文谁写、谁审、术语照什么](issues/LANG-06-who-writes-and-reviews-english-and-german.md)：AI 写初稿；德文用硬件资料的德文词；术语表在 `strings.json`；德文审过才上线
+- [日志窗和导出的日志用哪种语言](issues/LANG-05-log-window-and-exported-log-language.md)：屏幕跟界面语言；日志文件和导出一律英文（取词典 `en` 列）
+- [Go 送上来的 74 句在哪一层翻](issues/LANG-04-where-go-side-strings-get-translated.md)：Go 回代号加参数，页面查词典；`err.Error()` 作 `{detail}` 原样
+- [选过的语言存在哪个文件、长什么样](issues/LANG-02-where-the-language-choice-is-kept.md)：新开设置文件；`lang` 取 `zh` / `en` / `de`，读不到按中文
 - [面板上的字从哪几条路到页面上](issues/LANG-01-which-paths-bring-text-to-the-panel.md)：七条路，页面自己 861 条、Go 送上来 74 条；另有两处已经违反决策 11（持续测试日志文件头、导出的日志里夹着中文）
 - [页面上的字怎么组织、切换怎么生效](issues/LANG-03-how-page-strings-are-organized.md)：一张总词典 `web/strings.json` 嵌进 exe，切换即刷新页面，缺译文显示中文
 

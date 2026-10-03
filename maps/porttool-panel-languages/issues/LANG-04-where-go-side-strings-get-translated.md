@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: LANG-01, LANG-03
 
 ## Question
@@ -36,3 +36,11 @@ Blocked by: LANG-01, LANG-03
 ## 怎么算答完
 
 一句话写明选了哪条；逐条说清 `error`、`why`、`[持续]` 行、`simboard.Label`、`err.Error()` 五种各怎么处理；并说明模拟板那 3 句是面板专用还是 CLI 也会打印（查源码回答）。
+
+## Answer
+
+2026-10-03 定（用户：按推荐）：**Go 只回代号加参数**（`{"code":"hold.bad_hours","args":{…}}`），页面查同一张词典拼句；拼进去的 `err.Error()` 作参数 `{detail}` 原样显示。理由：词典只有一处出处，判据句今天已经这么做（Go 回结构化 `check`，页面拼）。
+
+## 引出了什么新的未知
+
+无。

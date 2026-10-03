@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -25,3 +25,11 @@ Blocked by: -
 ## 怎么算答完
 
 一句话写明选了 A / B / C 哪条，另写出：文件名、一个完整的文件内容样例、三种异常（不在 / 读不懂 / 写不进）各自的行为、切换控件的位置。
+
+## Answer
+
+2026-10-03 定（用户：按推荐）：**新开 `porttool_settings.json`**（exe 旁边），只放面板偏好，写 `"lang": "zh"`，取值 `zh` / `en` / `de`；文件不在或内容不对按中文。理由：`porttool_ports.json` 只管「哪个 COM 是哪个」，刻意不和别的设置混（`remember.go:19-21`）。
+
+## 引出了什么新的未知
+
+无。

@@ -6,6 +6,7 @@
 
 | 在等 | 到了之后立刻做 | 来自哪张票 |
 |---|---|---|
+| **德文审稿人**：工装面板的德文译文由谁审（用户 2026-10-03 定「德文审过才上线」） | 把德文初稿交给他审，审过后在面板上打开 Deutsch | [英文和德文谁写、谁审、术语照什么](../maps/porttool-panel-languages/issues/LANG-06-who-writes-and-reviews-english-and-german.md) |
 | **一次示波器** | 量 DO 那颗 VNQ5160K-E 的 PWM 上限：到多少赫兹出不来，极窄/极宽占空比还出不出得来。**数据手册查不到**；顺带量 AO 在上电、复位、掉电那几毫秒的输出电流（bootloader 把 PA4 / PA5 拉低之前、MCU 停了之后），量出来有问题再请硬件工程师在 VIN 加下拉（「AO 在上电和掉电时怎么落到确定值」，用户 2026-10-03 定先测再说） | [问题去哪住](../maps/docs-migration/issues/MIG-09-where-do-defects-and-modules-live.md)（原 DO-PWM-SCOPE-STEPS.md，该文件已删） |
 | **AI 口的硬件改好**（用户 2026-09-30：AI 口还有问题，正在改硬件，先不考虑；原先等的是 JP5/JP6/JP8/JP9 焊上） | 模拟输入两路才测得了；`$TOOL/TestCase/host/porttool_panel/run.py` 里 `EXPECT["ain"]` 从 `either` 改回真实预期 | 同上（原 PORTTOOL-FIRST-BENCH.md 的待填项，该文件已删） |
 | **DI 的 24 V 激励** | 数字输入才测得了，现在读到 0x00 | 同上 |

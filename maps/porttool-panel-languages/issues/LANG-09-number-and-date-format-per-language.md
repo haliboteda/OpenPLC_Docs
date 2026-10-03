@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: LANG-03
 
 ## Question
@@ -17,3 +17,11 @@ Blocked by: LANG-03
 ## 怎么算答完
 
 一句话写明选了哪条，并写明 `index.html` 里那 16 处各按什么写法。
+
+## Answer
+
+2026-10-03 定（用户：按推荐）：**一律照现在的写法**（小数点、不加千分位）；16 处 `toLocaleString` 改成固定格式。理由：屏幕上的数要和日志、协议里的数长得一样；`toLocaleString` 跟的是浏览器语言，不是面板选的语言。
+
+## 引出了什么新的未知
+
+无。

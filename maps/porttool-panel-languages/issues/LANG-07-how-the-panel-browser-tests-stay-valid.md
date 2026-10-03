@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-30
-Status: open
+Status: resolved
 Blocked by: LANG-03
 
 ## Question
@@ -20,3 +20,11 @@ Blocked by: LANG-03
 ## 怎么算答完
 
 一句话写明选了哪条；写明 `BANNED_ON_CARDS` 怎么处理；并写出这个选择**测不到什么**，准备照原话写进 `T4-02` 的判据。
+
+## Answer
+
+2026-10-03 定（用户：按推荐）：**两个浏览器脚本只在中文下跑**，另加检查：词典每个键三种语言都有、都不空；`BANNED_ON_CARDS` 只在中文下查。理由：三种语言各跑要把断言全改成按键查，照样测不出译文对不对。
+
+## 引出了什么新的未知
+
+无。
