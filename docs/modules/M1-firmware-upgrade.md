@@ -348,23 +348,23 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
-| `T1-01` | `R1-08` | 四个发现关键词都应答 | 四个关键词逐个发，都要有应答 | `$TEST/udp_discovery.go` | 真板子 | ✅ |
-| `T1-02` | `R1-09` | 连续多轮发现 | 连发多轮不丢 | 同上 | 真板子 | ✅ |
-| `T1-03` | `R1-10` | 发现回复够快 | 回复落在工具的 2s 超时之内 | 同上 | 真板子 | ✅ |
-| `T1-04` | `R1-11` | 发现长时间浸泡 | 10 分钟连续发现，0 失败 | 同上 | 真板子 | ✅ |
-| `T1-05` | `R1-12` | 发现泛洪限流 | 限流生效，**且正常发现仍然答得出** | 同上 | 真板子 | ✅ |
-| `T1-06` | `R1-15` | 一次只服务一个客户端 | 第二条连接被拒 | `$TEST/tcp_session.go` | 真板子 | ✅ |
-| `T1-07` | `R1-16` | 空闲连接被踢 | 约 60s 后断开 ¹ | 同上 | 真板子 | ✅ |
-| `T1-08` | `R1-17` | 空闲连接不被误踢 | 50s 时仍然连着（反向用例） | 同上 | 真板子 | ✅ |
-| `T1-09` | `R1-02` `R1-18` | 传输中闯入不打断 | 第二条连接被 RST 拒，传输照走完 | 同上 | 真板子 | ✅ |
-| `T1-10` | `R1-19` | 拒绝状态不卡死 | 第一条正常关闭后能再连（反向用例） | 同上 | 真板子 | ✅ |
-| `T1-11` | `R1-23` | 无效签名被拒 | 「没有任何密钥能产生的签名」上传被拒 | `$TEST/signature.go` | 真板子 | ✅ |
-| `T1-12` | `R1-23` | 签方不对被拒 | 「格式完全正确但签方不对」被拒 ² | `$TEST/signature_wrongkey.go` | 真板子 | ✅ |
-| `T1-13` | `R1-26` | 启动时重新验签 | 直接改坏已装好的 app，下次启动必须拒绝启动它 ² | `python tools/run_s3.py` | 真板子 | ✅ |
-| `T1-14` | `R1-25` | 失败上传不伤 app | 上传失败后 app 区**一字节没动** | `python tools/run_case.py --case T1-11 --then-reset` | 真板子 | ✅ |
+| `T1-01` | `R1-08` | 四个发现关键词都应答 | 四个关键词逐个发，都要有应答 | `$TEST/udp_discovery.go` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明发现应答的代码，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-02` | `R1-09` | 连续多轮发现 | 连发多轮不丢 | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明多轮发现，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-03` | `R1-10` | 发现回复够快 | 回复落在工具的 2s 超时之内 | 同上 | 真板子；替身测不了：判的是发现应答的时延，替身的 PC socket 转接本身就有秒级抖动 | ✅ |
+| `T1-04` | `R1-11` | 发现长时间浸泡 | 10 分钟连续发现，0 失败 | 同上 | 真板子；替身测不了：浸泡要抓 lwIP / PHY 长跑问题，替身把这一层换掉了 | ✅ |
+| `T1-05` | `R1-12` | 发现泛洪限流 | 限流生效，**且正常发现仍然答得出** | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明限流的代码，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-06` | `R1-15` | 一次只服务一个客户端 | 第二条连接被拒 | `$TEST/tcp_session.go` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明一次只服务一个，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-07` | `R1-16` | 空闲连接被踢 | 约 60s 后断开 ¹ | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明空闲踢人的计时，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-08` | `R1-17` | 空闲连接不被误踢 | 50s 时仍然连着（反向用例） | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明不误踢，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-09` | `R1-02` `R1-18` | 传输中闯入不打断 | 第二条连接被 RST 拒，传输照走完 | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明传输中闯入不打断，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-10` | `R1-19` | 拒绝状态不卡死 | 第一条正常关闭后能再连（反向用例） | 同上 | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明关闭后能再连，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-11` | `R1-23` | 无效签名被拒 | 「没有任何密钥能产生的签名」上传被拒 | `$TEST/signature.go` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明验签拒绝，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-12` | `R1-23` | 签方不对被拒 | 「格式完全正确但签方不对」被拒 ² | `$TEST/signature_wrongkey.go` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明签方不对被拒，真 lwIP / PHY 仍要真板子 | ✅ |
+| `T1-13` | `R1-26` | 启动时重新验签 | 直接改坏已装好的 app，下次启动必须拒绝启动它 ² | `python tools/run_s3.py` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-13`）证明启动时重新验签（改坏 app 区一个字节），真 flash 擦写仍要真板子 | ✅ |
+| `T1-14` | `R1-25` | 失败上传不伤 app | 上传失败后 app 区**一字节没动** | `python tools/run_case.py --case T1-11 --then-reset` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-14`）证明失败上传前后 app 区逐字节不变，真 flash 擦写仍要真板子 | ✅ |
 | `T1-15` | `R1-20` | 主机侧密码学 | 证书签发、序列号计数、挑战签名三组断言 | `$TOOL`：`go test ./tests/...` | 主机侧 | ✅ |
 | `T1-16` | `R1-20` | bootloader 单元测试 | 拿真实 bootloader 源码跑板子侧的判断逻辑 | `$BOOT/tests`：`ctest --preset local -R T1-16` | 主机侧 | ✅ |
-| `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电前后各取一批 nonce，全部互不相同（nonce 来自 TRNG，决策 66） | `python tools/run_au1.py` | **真板子 + 人工断电** | ✅ |
+| `T1-17` | `R1-20` | nonce 跨掉电不重复 | 真断电前后各取一批 nonce，全部互不相同（nonce 来自 TRNG，决策 66） | `python tools/run_au1.py` | **真板子 + 人工断电**；替身测不了：替身的随机数来自 PC，不是 TRNG | ✅ |
 | `T1-18a` | `R1-21` | 签名密钥就是这块板收的那把 | 板子答的公钥 = 工具签名用的，工具报 `Signing key matches this board` | `host/fakeboard/run_cases.py` | bootloader 替身（主机） | ✅ |
 | `T1-18b` | `R1-21` | 签名密钥不对，工具自己拦 | 板子答另一把公钥，工具拒并说 `verifies against a different signing key` | 同上 | bootloader 替身（主机） | ✅ |
 | `T1-18c` | `R1-21` | ~~老 bootloader 不认这条命令时不卡住~~ | 决策 79（测试阶段不做向后兼容）取消：IAPTool 遇到不认识 `getpubkey` 的 bootloader 改为报错，替身里假扮老 bootloader 的开关已删 | — | — | ⛔ 已作废 |
@@ -376,16 +376,16 @@ M1 的上板用例和契约用例在 `$TEST` 跑；部件测试的命令前写�
 | `T1-20` | `R1-24` | ECDSA 编码交叉验证 | 同上 | 同上 | 主机侧 | ✅ |
 | `T1-21` | `R1-27` | 掉电落在传输期 | 断电后重新上电，**旧 app 照常启动** | `python tools/run_s4.py` ⁴ | **真板子 + 人工断电** | ✅ |
 | `T1-22` | `R1-27` | 掉电落在擦写窗口 | 报 `App signature invalid or absent`，重传能救回 | 同上 ⁴ | **真板子 + 人工断电**；替身（`python host/fakeboard/run_lifecycle.py --only T1-22`，第 1 次擦除后掐断）证明判定和重传，真 flash 的擦写窗口仍要真板子 | ✅ |
-| `T1-23` | `R1-01` `R1-03` | 一次真实上传走完，且擦除在验证之后 | 日志出现 `Staging in SDRAM`，且 `Erasing application region` 在 `Transfer complete, verifying` **之后** | `python tools/upload_and_watch.py --bin <app.bin> --ip <IP>`（或 `--cdc <COM>`） | 真板子 | ✅ |
-| `T1-24` | `R1-22` | 坏 CRC 必须在验签之前被拒 | 板子回 `Checksum Failed` 而**不是** `Signature Failed` —— 「先」过 CRC32 这半句正是它证明的 | `python tools/run_case.py --case T1-24 --bin <app.bin>` | 真板子 | ✅ |
+| `T1-23` | `R1-01` `R1-03` | 一次真实上传走完，且擦除在验证之后 | 日志出现 `Staging in SDRAM`，且 `Erasing application region` 在 `Transfer complete, verifying` **之后** | `python tools/upload_and_watch.py --bin <app.bin> --ip <IP>`（或 `--cdc <COM>`） | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-23`）证明先校验后擦除（网口那支），CDC 那支和真 flash 仍要真板子 | ✅ |
+| `T1-24` | `R1-22` | 坏 CRC 必须在验签之前被拒 | 板子回 `Checksum Failed` 而**不是** `Signature Failed` —— 「先」过 CRC32 这半句正是它证明的 | `python tools/run_case.py --case T1-24 --bin <app.bin>` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-01`）证明坏 CRC 先于验签被拒，真 lwIP / PHY 仍要真板子 | ✅ |
 | `T1-25` | `R1-05` | CDC 上传模式下以太网栈不起来 | 板子进 CDC 模式后不应答 UDP 发现，**且同一轮的正向对照答得出** ¹ | `python tools/run_cdc_does_not_start_ethernet.py --cdc <COM> --ip <IP> --ports <日志口>` | 真板子 | ✅ |
-| `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
+| `T1-26` | `R1-28` | 一次成功升级消耗 7 个 metadata 槽 | 上传前后各复位一次读 `Bootloader state: N/M metadata slots used`，差值 **= 7** ² | `python tools/run_journal_slot_accounting.py --bin <app.bin>` | 真板子 + ST-Link；替身（`python host/fakeboard/run_protocol.py --only T1-26`）证明一次成功上传占 7 格，真 flash 擦写仍要真板子 | ✅ |
 | `T1-27` | `R1-04` | 按住 BOOT0 复位强制进上传模式 | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` ³ | `python tools/run_boot0_upload_mode.py` | **真板子 + 人按住 BOOT0** | ✅ |
-| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复，**且校准值那 8 KiB 原样搬过去** ⁹ | 灌满后板子报 `** Metadata area full - the next successful update reclaims sector 15. **`，一次上传后日志出现 `Reclaiming sector 15 (<n> metadata slots, root area compacted)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link | ✅ |
-| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子 | ✅ |
-| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子 | ✅ |
-| `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子 | ✅ |
-| `T1-32` | `R1-37` | 没有根的板子拒绝 `flashboot` | 恢复出厂后发 `flashboot` → `Refused`，扇区 0 不变，板子照旧启动原 bootloader | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| 真板子 | ⬜ 要按新判据重跑 ¹¹ |
+| `T1-28` | `R1-29` | metadata 区满了能 reclaim 并恢复，**且校准值那 8 KiB 原样搬过去** ⁹ | 灌满后板子报 `** Metadata area full - the next successful update reclaims sector 15. **`，一次上传后日志出现 `Reclaiming sector 15 (<n> metadata slots, root area compacted)`，且板子照常启动 app | `python tools/run_journal_reclaim.py --bin <app.bin>` | 真板子 + ST-Link；替身（`python host/fakeboard/run_protocol.py --only T1-28`）证明灌满后下一次上传回收扇区 15、校准值逐字节保留，真 flash 擦写仍要真板子 | ✅ |
+| `T1-29` | `R1-34` | `flashboot` 换掉 bootloader | 升级后板子报新的 `Boot Loader <版本>`，且照常启动已装的 app | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem>` | 真板子；替身测不了：替身不落盘扇区 0，换 bootloader 只能真板子 | ✅ |
+| `T1-30` | `R1-35` | 叶证书签的 bootloader 镜像被拒 | 用叶密钥签同一个镜像，板子回 `Signature Failed`，**扇区 0 一个字节没动** | `python tools/run_flashboot.py --bin <boot.bin> --key <leaf.pem> --sign-with-leaf` | 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-30`）证明叶钥签的 bootloader 镜像被拒、扇区 0 没写，真扇区 0 仍要真板子 | ✅ |
+| `T1-31` | `R1-36` | 换完 bootloader 所有权还在 | 升级前后各跑一次 `IAPTool getowner`，generation 和根公钥完全一致 | 同 `T1-29`，脚本自带前后对比 | 真板子；替身测不了：依赖 `T1-29` 真写进扇区 0 | ✅ |
+| `T1-32` | `R1-37` | 没有根的板子拒绝 `flashboot` | 恢复出厂后发 `flashboot` → `Refused`，扇区 0 不变，板子照旧启动原 bootloader | `python tools/run_flashboot.py --bin <boot.bin> --key <owner.pem> --unclaimed`（先恢复出厂）| 真板子；替身（`python host/fakeboard/run_protocol.py --only T1-32`，裸命令，IAPTool 发命令前就会拦）证明无根板对 `flashboot` 回 `Refused`；认领后真写扇区 0 仍要真板子 | ⬜ 要按新判据重跑 ¹¹ |
 | `T1-33` | `R1-36` | **压缩留对了东西**：只留当前生效那条和还生效的作废 | 喂一块故意乱掉的根区（合法首条 + 一条坏格式 + 一条签名换主 + 一条**无签名**的高 generation），跑**真实**的 `owner_slot_build_carry()`：留下的只有签名换主那条（**签名被剥掉**），**无签名那条没有被压缩扶正**；点名当任根的 `'R'`（R4 忽略的那种）被丢掉，另两条保留。**再把结果写进擦过的区重扫一遍**，根、generation、作废名单全部不变 ⁸ | `$BOOT/tests`：`ctest --preset local -R T1-33` | 主机侧（要 gcc/clang） | ✅ |
 | `T1-34` | `R1-38` | IDE 那条上传命令在 bootloader 替身上走通：板子在跑 app，未认领 / 已认领 / 密钥不对各一次 | `arduino-cli upload -l network -p <本机网卡 IP> --discovery-timeout 10s`（`upload_method=ethMethod`）上传编好的 `OpenPLC_Ports/DO_Outputs`：①未认领（出厂板，在 bootloader 里）、用户目录里没有密钥 → 在用户目录生成密钥并认领，退出码 0，输出有 `Claimed.`（决策 72）；②已认领、owner 密钥放在用户目录 → 退出码 0；③用户目录里是另一把密钥 → 替身里 app 一侧拒绝重启请求，退出码非 0，输出有 `did not accept the reboot request`。①②还要**替身那边验过整个镜像**（`Checksum and signature OK`），且收完镜像后真的复位、回到 app ¹⁰ | `python host/fakeboard/run_ide_upload.py` | bootloader 替身（本机），**手工跑，不进 selfcheck** ¹⁰ | ✅ |
 | `T1-35` | `R1-38` | IAPTool 自己的主机侧单元测试：密钥查找顺序、串口层、协议常量与绑物理网卡拨号 | 全部 `go test` 通过；密钥按「`--key` → `local_config.json` → 用户配置目录 → exe 旁边」的顺序找到 | `$TOOL`：`go test . ./internal/... ./iapproto/... ./netiface/...` | 主机侧，进 selfcheck | ✅ |

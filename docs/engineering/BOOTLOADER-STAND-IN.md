@@ -35,6 +35,7 @@
 | T1-18a–g 和它里面的 T2-28–T2-30 | `python host/fakeboard/run_cases.py`，selfcheck 的 `T1-18a-T1-18g` 一步就是它 |
 | T1-34 | `python host/fakeboard/run_ide_upload.py`，要 arduino-cli，几分钟，不进 selfcheck |
 | T1-22、T1-38、T2-05、T2-09、T2-19、T2-20、T2-36 | `python host/fakeboard/run_lifecycle.py [--only ID]`，selfcheck 的 `T1-22` `T1-38` `T2-05` `T2-19` 四步就是它 |
+| T1-01、T1-02、T1-05–T1-14、T1-23、T1-24、T1-26、T1-28、T1-30、T1-32、T2-01、T2-03、T2-11、T2-12、T2-14–T2-17、T2-25、T2-26 | `python host/fakeboard/run_protocol.py [--only ID]`，selfcheck 的 `T1-01` `T1-13` `T1-28` `T1-30` `T1-32` `T2-01` `T2-11` `T2-15` 八步就是它 |
 | 单独起一块替身 | `python host/bootstand/bootstand.py --state <目录> --fresh [--root <128 位十六进制公钥>] [--discovery-port 56865] [--uid <24 位十六进制>] [--gesture none\|upload\|factory] [--fail-after-erase N] [--fail-after-program N]` |
 | 按 BOOT0 过开机窗口 | `--gesture`：只作用于这次起电后的第一次启动，照 `$BOOT/Core/Src/main.c` 开机窗口那段：`upload` 留在上传模式，`factory` 先恢复出厂再留在上传模式 |
 | 掉电 | `--fail-after-erase N` / `--fail-after-program N`：一次启动里第 N 次擦 / 写做完后进程立即结束（flash 是映射文件，已写的留着），监管进程随后冷启动，故障不再注入 |

@@ -27,6 +27,8 @@ grep -ohE "\*\*R[1-3]-[0-9]+\*\*" OpenPLC_Docs/docs/modules/M[1-3]-*.md | sort -
 
 2026-10-03 是 M1–M3 的全部需求。关最后一张票前重跑：每一条落在「有模拟用例」「只有主机用例」「只能上板」三类之一，第三类写明为什么。
 
+✅ **2026-10-04 对账完**：57 条 = 有模拟用例 33、只有主机用例 7、只能上板 / 手工 / 静态 17，逐条见 [RECONCILE.md](RECONCILE.md)。替身上新接的协议、归属、撤销用例由 `$TEST/host/fakeboard/run_protocol.py` 跑。
+
 ## Decisions so far
 
 - [替身补齐：驱动、手势、故障注入、撤销、比版本](issues/SIM-07-stand-in-additions.md)：`run_lifecycle.py` 在替身上跑掉电、比版本（`T1-38`）、恢复出厂、撤销，七条全过
@@ -38,10 +40,11 @@ grep -ohE "\*\*R[1-3]-[0-9]+\*\*" OpenPLC_Docs/docs/modules/M[1-3]-*.md | sort -
 - [bootloader 开机把输出置 0，在 Renode 里判](issues/SIM-04-bootloader-outputs-in-renode.md)：用例 `T1-37` 通过，BOR 检查在 Renode 里也能判
 ## Not yet specified
 
-- **KNX 的 IP 那一半**：网口在 Renode 里通了之后（看「例程的网口在 Renode 里通不通」），能不能用 xknx 对着模拟板收发 KNXnet/IP 组报文
-- **USB 上传在模拟里走不走得通**：看「例程的 `Serial` 在 Renode 里怎么看得到」查出的 USB 结论
+（无）
 
 ## Out of scope
 
+- **KNX 的 IP 那一半在模拟里收发**：0.1.3 的 KNX 例程只做 TP 设备（[KNX 例程按正规用法重写](../knx-examples/map.md) 的 Out of scope），没有要在模拟里验的 IP 例程
+- **USB 上传**：查过了，Renode 的 USB 和 ST 协议栈枚举不通，归「只能上板」（[SIM-01](issues/SIM-01-how-to-see-serial-in-renode.md)）
 - **物理量**：AO 实际电流、继电器真吸合、DI 门限电压、BOR 掉电复位、真断电、TRNG 抓包、示波器要量的 —— 模拟没有模拟电路
 - **KNX TP 真总线和 ETS 互通**：Renode 的定时器做不出 104 µs 位时序和输入捕获；链路逻辑已由主机用例 `T3-09` 覆盖
