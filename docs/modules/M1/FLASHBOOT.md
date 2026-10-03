@@ -1,6 +1,6 @@
 # `flashboot` · bootloader 原地升级
 
-> ⚠️ **`flashboot` 的代码已按[决策 72](../../tables/DECISIONS.md) 实施（未提交、未上板验收）**；进度看 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。实施前 `flashboot` 还要搬 owner 区、未认领板子靠按 BOOT0，用 `git log` 取回本文件 2026-09-30 之前的版本。
+> ⚠️ **`flashboot` 的代码已按[决策 72](../../tables/DECISIONS.md) 实施（`$BOOT` `fe653a7`，未上板验收）**；进度看 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。实施前 `flashboot` 还要搬 owner 区、未认领板子靠按 BOOT0，用 `git log` 取回本文件 2026-09-30 之前的版本。
 
 **一条命令把新的 bootloader 写进扇区 0。扇区 0 只放 bootloader 代码**，根区在扇区 15，`flashboot` 不碰它。
 类比 BIOS 升级：**中途不允许断电**。

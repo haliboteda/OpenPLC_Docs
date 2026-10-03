@@ -17,9 +17,9 @@
 | **认领**（`takeown`） | 把一块没有根的板子绑到自己的根上，从此只有自己能往里装固件。第一次经 USB 或网口上传时 IAPTool 自动做（[决策 72](docs/tables/DECISIONS.md)），**不按键、不需要 ST-Link** |
 | **`'O'` 记录 / `'R'` 记录** | owner 区里的两种记录，各占一个 160 字节槽位，**平级、不嵌套**。`'O'` 说「这块板从现在起信这把根」，`'R'` 说「哪些叶证书作废了」。设计在[这张图](maps/owner-revoke-and-boot-upgrade/map.md)，**2026-09-20 已实现并真板子验收通过** |
 | **卡包版本** | 板卡包这一版 release 的编号，唯一出处是 `boards.txt` 的 `build.fw_version`，经 `-DOPENPLC_FW_VERSION` 编进固件。**它说的是「哪一版板卡包编的」，不是用户 sketch 的版本** —— 用户改自己的代码重编，这个数不变 |
-| **app 版本** | 用户在 `.ino` 里用 `OPENPLC_APP_VERSION(1, 0, 0);` 写的那一个，**烧录时比的就是它**。⚠️ **和卡包版本是两个东西**（用户 2026-09-21 定），见 [烧录前比版本 + 校准值住进扇区 15](maps/version-gate-and-calibration/map.md)。⚠️ **还没实现** |
-| **原地升级** | 换 bootloader 而**不丢所有权**：读进 SDRAM → 擦扇区 0 → 写回新镜像 + 旧 owner 记录。⚠️ **还没实现**。今天用 ST-Link 重烧 = 所有权一起被抹掉（两者同扇区） |
-| **压缩**（owner 区的） | 原地升级时顺手回收槽位：**保留完整有效链的 `'O'` 记录**，扔掉历史 `'R'` 快照和垃圾。⚠️ 不能压成一条 —— 链上抽掉中间任何一节，后面就验不下去了 |
+| **app 版本** | 用户在 `.ino` 里用 `OPENPLC_APP_VERSION(1, 0, 0);` 写的那一个，**烧录时比的就是它**。⚠️ **和卡包版本是两个东西**（用户 2026-09-21 定），见 [烧录前比版本 + 校准值住进扇区 15](maps/version-gate-and-calibration/map.md)。已实现：IAPTool 的 `version_gate.go` |
+| **原地升级**（`flashboot`） | 不用 ST-Link，经 IAPTool 把新 bootloader 写进扇区 0，用 owner 根验签。根区在扇区 15（决策 72），所以换 bootloader 不丢所有权。见 [FLASHBOOT.md](docs/modules/M1/FLASHBOOT.md) |
+| **压缩**（根区的） | 根区写满时由扇区 15 的回收顺手做（[SECTOR-15.md](docs/modules/M1/SECTOR-15.md)）：**保留完整有效链的 `'O'` 记录**，扔掉历史 `'R'` 快照和垃圾。⚠️ 不能压成一条 —— 链上抽掉中间任何一节，后面就验不下去了 |
 | **部件测试 / 契约测试 / 整机测试** | 测试的三层（[决策 78](docs/tables/DECISIONS.md)）：**部件**只测一个仓自己的逻辑，住在那个仓；**契约**测两个部件对同一份格式、常量的理解一致；**整机**在真硬件上走用户的路。后两层住 `OpenPLC_Test`。判据：跑它要不要两个以上仓 |
 | **例程 / 用例** | **例程**是板卡包里给用户照抄的 sketch（`libraries/*/examples/`）；**用例**是证明某件事成立的测试，编号 `T<模块>-<序号>`。一个例程上板测通靠一条用例，**两者不是一个东西** |
 | **产品文件**（`.knxprod`） | ETS 导入的设备描述：组对象表、参数、MaskVersion。ETS 照它给板子下载配置，例程里的组对象编号必须和它一致。放在 `OpenPLC_ETS_Prod` |
