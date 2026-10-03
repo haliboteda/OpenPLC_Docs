@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-09-27
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -25,3 +25,15 @@ git 里的修法已知：`Arduino_Tools` 里 `git update-index --chmod=+x linux/
 ## 怎么算答完
 
 选定发布方式；已装 0.1.3 的 Linux 用户按 IDE 的正常操作能拿到能运行的 `IAPTool`，在 Linux 上实测。
+
+## Answer
+
+2026-10-03 定（用户：只针对 0.1.3 修改，保证这个版本全部正常）。不发 0.1.4，原地替换 0.1.3：把 GitHub release `0.1.3` 上原来的 `STM32Tools.tar.gz` 下载下来，只把 `linux/IAPTool`、`macosx/IAPTool` 两个文件的权限从 `0664` 改成 `0775`（和同包 `dfu-util` 一样），其余 85 个文件逐个比对未变；新包 SHA-256 `B2F9D413…`、13,287,279 字节，已替换 release 附件，索引里四行校验值和大小同步更新（`package_index_json` `e58fae2`），`Arduino_Tools` 的 git 也记成 `100755`（`f0d8e547`）。公开根私钥不删：0.1.3 的板子和 IAPTool 要用它，删了 0.1.3 反而坏。
+
+已经装了 0.1.3 的 Linux / macOS 用户，因为版本号没变，IDE 不会自己重新下载：在 IDE 里卸载再装一次板卡包，或者在本机对已装的 `IAPTool` 跑一次 `chmod +x`。新装的用户不用做任何事。
+
+验过：WSL Debian 里解压新包，`IAPTool` 是 `-rwxr-xr-x`、直接运行打出用法；线上索引返回新的校验值。
+
+## 引出了什么新的未知
+
+没验到：macOS（没有机器）；在真的 Linux IDE 里从网上完整装一遍、点 Upload。

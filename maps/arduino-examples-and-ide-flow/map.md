@@ -46,6 +46,7 @@ ls package_index_json/*.json                                  # Board Manager �
 
 ## Decisions so far
 
+- [Linux / macOS 用户怎么拿到能运行的 IAPTool](issues/IDE-15-how-do-linux-and-macos-users-get-an-executable-iaptool.md)：原地替换 0.1.3 的 STM32Tools 包，只改两个 `IAPTool` 的权限；已装用户重装或 `chmod +x` 一次
 - [IDE 上传时用哪把密钥，已认领的板子要用户准备什么](issues/IDE-02-which-key-does-an-ide-upload-use.md)：IDE 不传密钥参数，IAPTool 用工具包里 `keys\fw_signing_key.pem`（加同名 `.cert`）；三种板子状态各放什么已列出
 - [一个发布版今天是怎么到 Board Manager 的](issues/IDE-01-how-does-a-release-reach-board-manager.md)：全手工、对外 6 步；网上的 `0.1.3-pre` 能装但内容是 4 月的，工具包里的 IAPTool 不会签名
 - [假板子要像到什么程度，arduino-cli 的 upload 才能走完](issues/IDE-04-how-real-must-the-fake-board-be.md)：停在 bootloader 时现有假板子已够；跑 app 时补约 25 行，原型已走通
