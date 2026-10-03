@@ -1,6 +1,6 @@
 # ETS 能导入的产品文件怎么做出来 —— 调查发现
 
-票：[ETS 能导入的产品文件怎么做出来](issues/KEX-01-how-to-make-an-ets-importable-product.md)。2026-10-03，**票未答完**：还差在 ETS5 里实际导入一次。
+票：[ETS 能导入的产品文件怎么做出来](issues/KEX-01-how-to-make-an-ets-importable-product.md)。2026-10-03，已在本机 ETS5 导入成功（用户 2026-10-03）。
 
 ## 结论
 
@@ -20,6 +20,5 @@
 
 ## 还没验
 
-- 生成的包能在 ETS5 里导入
 - 导入后 ETS 能给 thelsing 协议栈下载应用（加载过程照 demo 抄的）—— 要等新的 STKNX 数据链路层上板
 （源 XML 和生成物的位置已定：都放 `OpenPLC_ETS_Prod`，用户 2026-10-03）

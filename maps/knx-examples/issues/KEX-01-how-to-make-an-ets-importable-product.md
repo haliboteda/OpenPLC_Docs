@@ -2,7 +2,7 @@
 
 Type: research
 Opened: 2026-10-03
-Status: open
+Status: resolved
 Blocked by: -
 
 ## Question
@@ -18,3 +18,11 @@ Blocked by: -
 - 写出生成步骤，以及工具的出处（名字、版本、从哪来）
 - 生成的一份 TP 产品文件在本机 ETS5 里导入成功，记下 ETS 的提示或日志位置
 - 定下源文件的位置
+
+## Answer
+
+2026-10-03：用 **OpenKNXproducer 4.3.12** 从单个源 XML（命名空间 project/20，ETS 5.7 要求）生成，签名调用本机 ETS 5.7 的 DLL；生成的 `$ETSPROD/OpenPLC_TP.knxprod` 在本机 ETS5 里**导入成功**（用户 2026-10-03 确认）。源和生成物都放 `OpenPLC_ETS_Prod`，两者一起提交。ETS 里厂家显示为「KNX Association」（测试厂商号 `M-00FA`），按产品名 `OpenPLC TP` 或订货号 `OPENPLC-TP` 搜。步骤和依据见 [KEX-01-findings.md](../KEX-01-findings.md)。
+
+## 引出了什么新的未知
+
+- 导入后 ETS 能不能给 thelsing 协议栈下载应用（加载过程照 demo 抄的）—— 要等新的 STKNX 数据链路层上板，归 [用例怎么判、人做哪几步](KEX-06-how-does-each-test-case-judge.md)

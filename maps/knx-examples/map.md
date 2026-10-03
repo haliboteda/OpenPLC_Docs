@@ -29,6 +29,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Decisions so far
 
+- [ETS 能导入的产品文件怎么做出来](issues/KEX-01-how-to-make-an-ets-importable-product.md)：OpenKNXproducer 4.3.12 + 本机 ETS 5.7 签名；ETS5 导入成功；厂家显示为 KNX Association
 - [所有例程共用一个产品，还是一个例程一个](issues/KEX-02-one-product-for-all-examples-or-one-each.md)：共用一个产品；继电器开关 + 状态占 1–12、DI 占 13–20，已有编号永不改
 ## Not yet specified
 

@@ -2,7 +2,7 @@
 
 Type: grilling
 Opened: 2026-10-03
-Status: open
+Status: claimed
 Blocked by: -
 
 ## Question
