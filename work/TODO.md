@@ -26,6 +26,22 @@
 
 | ~~**`run_takeown.py` 把 owner 私钥丢在临时目录**~~ ✅ **已修**（commit `c3f43dc`）—— 现在落在 `$TOOL/Output/owner-keys/<时间戳>/`，并在输出里把路径和后果说清楚 | — | 2026-09-20 跑 `T2-09` 时撞上 |
 
+## 工装调试：上板那天先做这几件（2026-09-30 记）
+
+| 待办 | 怎么算做完 | 来自哪里 |
+|---|---|---|
+| **板子断电了，先恢复**：收工前 ST-Link 量到目标电压 0.00 V，板子不回 `pt.id` | 上电后 `PortTool ports` 能看到 COM12，`pt.id` 回 `porttool=0.10.0` | 2026-09-30 工装调试 |
+| **KNX `frames` 模式重试一次**：`pt.start knx mode=frames` 发出后板子不再应答，随即发现断电，分不清是断电还是固件卡死 | 上电后在面板里跑 `frames` 60 秒：不卡死，且 `crc_raw` 涨、`crc_bad=0` | [HARDWARE-FACTS.md](../docs/hardware/HARDWARE-FACTS.md)「KNX 接口」2026-09-09 的报文层验证 |
+| **KNX `loopback` 的 `bad` 一直涨**：总线有电（`bus=ok vcc=1`），每秒约 30 个 `bad`，`chars` 几乎不涨；方案 `station6-poweron*.json` 的 knx 步要求 `bad=0` | 查清原因，knx 步判过；或改判据并写明理由 | 同上，见 [WAITING-ON.md](../waiting/WAITING-ON.md) |
+| **SD 卡换一张 FAT32 的**：现在这张 60 GB，`sd.probe` 报 `fs=none`（大概率 exFAT） | `sd-card` 步 `fs` 不是 `none`，`sd-integrity` 跑完 | [XPT-03](../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md) 的实测 |
+
+现场记录（09-30 记，2026-10-04 按实际核对）：
+
+- **`$BOOT/Debug/` 现在是 bootloader**（2026-10-03 12:48 编的，早于输出置 0 和 PB14 两次提交，已过期）；工装固件要 `$PORTTOOL/build.py --fixture` 重编。上板前两样都要按当前源码重编
+- **板卡包里的 IAPTool 和 `$TOOL` 一致**：`$TOOL` 没有未提交的改动，P11 2026-10-04 通过
+- **`$PORTTOOL/Output/delivery/` 是 2026-10-01 打的包，已过期**：之后面板加了三种语言，交给硬件工程师前要重打
+- COM 口（09-30 记）：COM12 = PL2303（板子 RS232 控制口），COM16 = CH340（RS485 对端），COM15 = CANable，COM17 = 板子 USB；都在 Windows 这边，没挂进 WSL。换过 USB 口就会变，上板时以 `PortTool ports` 为准
+
 ## 出厂无根、第一次上传自动认领（2026-09-30 定）
 
 **[决策 72](../docs/tables/DECISIONS.md) 的实施项**，来自 [第一次把用户的根写进板子，要不要按住 BOOT0](../maps/root-key-without-bootloader-reflash/issues/ROOT-02-must-the-first-write-of-the-users-root-need-boot0.md) 和同图的方案 5（根区并进扇区 15）。**按阶段做，前一阶段完再进下一阶段；先文档再代码。**
