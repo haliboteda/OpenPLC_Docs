@@ -2829,3 +2829,13 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 **代价**：版本号不变，IDE 不提示已装用户更新，要卸载重装；已有的板子一律用 ST-Link 烧最新的 bootloader（决策 72、81 依赖它），不做旧 bootloader 的升级路（用户同日定）。
 
 **什么情况下重开**：要发第二个版本时。
+
+## 84 · 板卡包自带 SD 卡和文件系统，外壳自己写，不带 GPL 代码
+
+用户 2026-10-04 定（选 B）：**「我希望做到 arduino core 里面有库，例程里面有如何调用库的代码实例。用户怎么使用自己决定，我只提供能力。如果需要封装接口，可以封装」**。
+
+**决定**：板卡包带 FatFs（原样）和 `OpenPLC_SD`：后者只收 STM32SD 里 BSD-3 的驱动部分（`bsp_sd`、`Sd2Card`、`SdFatFs`），外面一层 `SD` / `File` 接口自己写，形状照 Arduino 的 SD 库。例程 `SD_ReadWrite`、`SD_FileReceive` 改用它。
+
+**理由**：STM32SD 的 `SD.cpp`、`STM32SD.h` 是 GPL v3，客户 sketch 一链接就得公开所发固件的源码；FatFs 和其余部分是 BSD-3。
+
+**什么情况下重开**：上游把那一层改成宽松许可证时。

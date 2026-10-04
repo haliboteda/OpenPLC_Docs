@@ -65,11 +65,13 @@ flowchart TD
 | **R3-12** | KNX TP 收发 | `OpenPLC_KNX` 在 TP 总线上按 STKNX 的位时序收发帧、应答、重发，空闲时不占总线（[KNX-TP-DATA-LINK.md](M3/KNX-TP-DATA-LINK.md)） | `T3-09`（上板待验） | 🟡 |
 | **R3-13** | 文件经 RS232 进 SD 卡 | `OpenPLC_Ports` 能按 YMODEM 从 RS232 收一个文件（名字、精确长度、丢包重传），例程 `SD_FileReceive` 把它写进 SD 卡并读回校验（[EXB-03](../../maps/core-examples-on-board/issues/EXB-03-how-does-a-file-get-from-rs232-onto-the-sd-card.md)） | `T3-10`（上板走 `T3-06`） | 🟡 |
 
-**共 13 条。其中 10 条有测试用例直接测它，3 条没有。**
+| **R3-14** | SD 卡和文件系统 | 板卡包自带 SD 卡读写和 FAT32 / exFAT 文件系统（`OpenPLC_SD` + FatFs），接口照 Arduino 的 `SD` / `File`，不含 GPL 代码（决策 84） | `T3-12`（上板走 `T3-06`、Renode 走 `T3-11`） | 🟡 |
+
+**共 14 条。其中 11 条有测试用例直接测它，3 条没有。**
 
 | 「谁证明」是什么 | 条数 | 哪些 |
 |---|---|---|
-| 有 `T3-xx` 用例直接测 | **10** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` `R3-09` `R3-10` `R3-11` `R3-12` `R3-13` |
+| 有 `T3-xx` 用例直接测 | **11** | `R3-01` `R3-03` `R3-05` `R3-06` `R3-08` `R3-09` `R3-10` `R3-11` `R3-12` `R3-13` `R3-14` |
 | 纯手工 | **2** | `R3-02` `R3-07` |
 | 只有静态检查 | **1** | `R3-04` |
 
@@ -105,7 +107,9 @@ flowchart TD
 
 | `T3-11` | `R3-09` | 例程在 Renode 里的行为 | 每个例程按文件头给输入、看输出：DI 逐路拉高只亮那一位；DO、继电器、系统灯按顺序和时长翻转；AO 写进 DAC 的码按 0 / 5 / 10 / 15 / 20 mA；温度按给的电压换算；RS232、RS485、`Serial` 回显；CAN 计数在涨、注入的帧打出来；网口 link、DHCP 地址、发现有应答；SD 读写回读一致、YMODEM 收的文件 CRC-32 对、插拔两行；SDRAM 写入校验 0 错、能 dump ⁶ | `python host/renode/behaviour.py [--only NAME]` | Renode | ✅ |
 
-**共 11 条。`T3-05` `T3-11` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` 在主机上跑，其余要真板子。**
+| `T3-12` | `R3-14` | `OpenPLC_SD` 的文件操作 | 在内存盘上格式化后：写、追加、读回、`seek` / `size`、删、`exists`、建目录、列目录，结果和写进去的一致；`FILE_WRITE` 打开已有文件时接在末尾 | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（真 FatFs + 真 `OpenPLC_SD.cpp`，磁盘是内存），测不到 SDMMC 驱动和真卡 | ✅ |
+
+**共 12 条。`T3-05` `T3-11` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` `T3-12` 在主机上跑，其余要真板子。**
 
 ¹ **自检失败不改变任何控制流。** 板子仍然安全 —— 上传会在 CRC 那步失败、app 区不受影响。
 这行日志的作用只是**把根因直接说出来**，否则 SDRAM 坏掉的症状会表现成

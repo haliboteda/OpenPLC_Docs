@@ -7,7 +7,7 @@
 | 仓 | 测什么 | 入口（在那个仓的根目录跑） |
 |---|---|---|
 | `$BOOT` | bootloader 的主机 C 测试（T1-16、T1-33、T2-22–T2-34 中归 bootloader 的）、P16、P17 | `cd tests && cmake --preset local && cmake --build --preset local && ctest --preset local` |
-| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
+| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
 | `$PORTTOOL` | T4-01 到 T4-04 | `cd TestCase && python tools/selfcheck.py`（`--quick` 跳过浏览器那步） |
 | `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
@@ -190,6 +190,7 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 | `host/fakeboard/` | `python host/fakeboard/run_lifecycle.py [--only ID] [--keep]`，selfcheck 的 `T1-22` `T1-38` `T2-05` `T2-19` 四步就是它 | **T1-22 T1-38 T2-05 T2-09 T2-19 T2-20 T2-36** 在 bootloader 替身上：掉电落在擦写窗口、比版本、恢复出厂（`--gesture factory`）及其后果、连续撤销和重复撤销。判的是真 bootloader 代码的决定；按键、真 flash 擦写窗口、CDC 那支仍要真板子 |
 | `host/fakeboard/` | `python host/fakeboard/run_protocol.py [--only ID] [--keep]`，selfcheck 的 `T1-01` `T1-13` `T1-28` `T1-30` `T1-32` `T2-01` `T2-11` `T2-15` 八步就是它，每步跑一组 | **T1-01 T1-02 T1-05–T1-14 T1-23 T1-24 T1-26 T1-28 T1-30 T1-32 T2-01 T2-03 T2-11 T2-12 T2-14–T2-17 T2-25 T2-26** 在 bootloader 替身上：现成的 Go 用例（`TestCase`）和 IAPTool 驱动的归属、撤销用例。判的是真 IAP 代码的决定；真 lwIP / PHY 时序、真 flash 擦写仍要真板子 |
 | `$TOOL/tests/crypto_ref/` | 在 `$TOOL` 下 `python tests/crypto_ref/run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL/tests/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
+| `$CORE_REPO/tests/sd_lib/` | `$CORE_REPO/tests` 下 `ctest --preset local`，需要 gcc 和 CMake | **T3-12** `OpenPLC_SD` 的文件操作：真 FatFs 跑在内存盘上，格式化后写、追加、读回、删、建目录、列目录 |
 | `$CORE_REPO/tests/variant_check/` | `python tests/variant_check/build.py`，需要 arduino-cli（环境变量 `ARDUINO_CLI` / `ARDUINO_CLI_CONFIG`） | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `$CORE_REPO/tests/examples_build/` | `python tests/examples_build/build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
 | `host/renode/` | `python host/renode/run.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode（`$RENODE`）和 CubeIDE（bootloader 从当前 `$BOOT` 源码现编；`--boot` 给一个现成的镜像就跳过编译） | **T3-05** `OpenPLC_Ports` 的每个例程（2026-10-04 是 14 个）在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），进 selfcheck，`--quick` 跳过** |
