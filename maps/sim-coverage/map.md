@@ -27,7 +27,7 @@ grep -ohE "\*\*R[1-3]-[0-9]+\*\*" OpenPLC_Docs/docs/modules/M[1-3]-*.md | sort -
 
 2026-10-03 是 M1–M3 的全部需求。关最后一张票前重跑：每一条落在「有模拟用例」「只有主机用例」「只能上板」三类之一，第三类写明为什么。
 
-✅ **2026-10-04 对账完**：57 条 = 有模拟用例 33、只有主机用例 7、只能上板 / 手工 / 静态 17，逐条见 [RECONCILE.md](RECONCILE.md)。替身上新接的协议、归属、撤销用例由 `$TEST/host/fakeboard/run_protocol.py` 跑。
+✅ **2026-10-04 对账完**：58 条 = 有模拟用例 36、只有主机用例 7、只能上板 / 手工 / 静态 15，逐条见 [RECONCILE.md](RECONCILE.md)。替身上新接的协议、归属、撤销用例由 `$TEST/host/fakeboard/run_protocol.py` 跑。
 
 ## Decisions so far
 

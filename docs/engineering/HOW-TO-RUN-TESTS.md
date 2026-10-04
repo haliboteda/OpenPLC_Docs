@@ -10,7 +10,7 @@
 | `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
 | `$PORTTOOL` | T4-01 到 T4-04 | `cd TestCase && python tools/selfcheck.py`（`--quick` 跳过浏览器那步） |
-| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
+| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T1-27、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
 | `$PROD` | 文档检查 P7、P8、P9、P12、P13、P14、P18 | `python tools/check_docs.py` |
 
 **下文的 `tools/...`、`host/...`、`onboard/...` 不加前缀时都在 `$TEST` 根目录跑。** 其他仓的命令写明仓名。
@@ -195,6 +195,7 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 | `$CORE_REPO/tests/examples_build/` | `python tests/examples_build/build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
 | `host/renode/` | `python host/renode/run.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode（`$RENODE`）和 CubeIDE（bootloader 从当前 `$BOOT` 源码现编；`--boot` 给一个现成的镜像就跳过编译） | **T3-05** `OpenPLC_Ports` 的每个例程（2026-10-04 是 14 个）在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），进 selfcheck，`--quick` 跳过** |
 | `host/renode/` | `python host/renode/boot_outputs.py`，需要 arduino-cli、Renode 和 CubeIDE（把 `$BOOT` 工作区拷进临时目录编，不碰 `$BOOT/Debug/`） | **T1-37** 开机输出置 0：真 bootloader 跳进 `SystemLED`，DO1–DO8、PA4、PA5、PB14 在五个时刻都是推挽输出、电平为低；BOR 档位不是 3 时串口警告、是 3 时不警告。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **约 11 分钟（编 bootloader 和例程占大头）**，进 selfcheck，`--quick` 跳过 |
+| `host/renode/` | `python host/renode/boot_entry.py`，需要 arduino-cli、Renode 和 CubeIDE（同 T1-37） | **T1-27 / T1-25** 真 bootloader 怎么决定进上传模式：不按 BOOT0 跳进 app；按住 BOOT0 过开机窗口、10 s 前松开 → 上传模式、不恢复出厂；SRAM4 里放 CDC 请求 → CDC 上传模式且 `MX_LWIP_Init` 没跑，放以太网请求的对照里跑了。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md)。⚠️ **十几分钟**，进 selfcheck，`--quick` 跳过 |
 | `host/renode/` | `python host/renode/behaviour.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode 和 CubeIDE | **T3-11** 例程在 Renode 里的行为：按文件头给输入、看输出（`Serial` 另编到 UART4）。判据、和真板的差别、判不了的例程见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 1 小时**（2026-10-04 实测 58 分钟，含编 bootloader），进 selfcheck，`--quick` 跳过 |
 
 ⚠️ **bootloader 替身的上传通道用 61865，不用产品端口 56865**（`$TEST/host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。T1-34 的发现走的是板卡包写死的 56865/UDP，替身在那里也应答。替身每次跑都会先编一遍，要 `HOST_CC` 和 CMake。
