@@ -22,7 +22,7 @@ Blocked by: MIG-03
 
 | 文件 | 改了什么 |
 |---|---|
-| 工作区根 `CLAUDE.md` | 目录表加一行 `OpenPLC_Docs`；开工顺序头两步改成先读本仓的 `README.md` / `WHERE-THINGS-LIVE.md`，再看 `maps/INDEX.md`；「手头没活了」从原 `ISSUES.md` 改成 `work/TODO.md` + `waiting/WAITING-ON.md` |
+| 工作区根 `CLAUDE.md` | 目录表加一行 `OpenPLC_Docs`；开工顺序头两步改成先读本仓的 `README.md` / `WHERE-THINGS-LIVE.md`，再看 `maps/INDEX.md`；「手头没活了」从原 `ISSUES.md` 改成 `work/TODO.md` + `work/TODO.md` |
 | `$BOOT/CLAUDE.md` | 抬头改指本仓；正文里六处文档链接改成 `$PROD/docs/<域>/…`；删掉 `docs/` 那一行（它已经不存在了） |
 | `$TOOL/CLAUDE.md` | 抬头一句短指针 |
 | `core:CLAUDE.md` | 抬头一句短指针 |

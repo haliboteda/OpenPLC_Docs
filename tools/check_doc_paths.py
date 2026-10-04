@@ -186,7 +186,7 @@ def docs(boot, tool, core, skills, prod):
                        (Path(cfg.PORTTOOL_REPO or ""), ["CLAUDE.md", "TestCase/host"]),
                        (Path(cfg.TEST_REPO or ""), ["CLAUDE.md"]),
                        (skills, ["_shared", "CLAUDE.md", "README.md"]),
-                       (prod, ["docs", "maps", "work", "waiting", "README.md",
+                       (prod, ["docs", "maps", "work", "README.md",
                                "WHERE-THINGS-LIVE.md", "CLAUDE.md", "GLOSSARY.md"])):
         if root is None or not str(root) or not root.exists():
             continue

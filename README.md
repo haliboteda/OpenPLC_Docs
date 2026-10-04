@@ -11,7 +11,7 @@ The single entry point for OpenPLC documentation and open questions.
 | `maps/<effort>/map.md` | One effort: its destination, the decisions made so far, and the fog ahead |
 | `maps/<effort>/issues/` | One file per open question |
 | `docs/` | The reference layer: facts and decisions already settled, sorted by problem domain |
-| `work/`, `waiting/` | What is not done yet, and what is waiting on something outside this project |
+| `work/TODO.md` | The one list of what is not done yet and what is waiting on something outside this project (decision 85) |
 
 One effort is one map, and a map ends when its destination is reached.
 A ticket asks a question; it closes when the question is answered, not when work ships.

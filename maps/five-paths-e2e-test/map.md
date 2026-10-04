@@ -11,8 +11,8 @@ python tools/list_wayfinder_map_frontier.py --all
 | 还剩几次 | 要你定什么 | 什么时候会问 |
 |---|---|---|
 | **0** | **五张票全部关掉，眼下没有要你拍板的** | —— |
-| 1 | 跑完的结果记在哪 —— 要一个工具的输出位置，那个工具还不存在 | 已转入 [WAITING-ON](../../waiting/WAITING-ON.md) |
-| 2 | 这份方案进[验收单](../../docs/tables/ACCEPTANCE-CHECKLIST.md)的哪一层（改动后自检 / 发版验收 / 单板出厂） | 已转入 [WAITING-ON](../../waiting/WAITING-ON.md) |
+| 1 | 跑完的结果记在哪 —— 要一个工具的输出位置，那个工具还不存在 | 已转入 [TODO「等外部」](../../work/TODO.md) |
+| 2 | 这份方案进[验收单](../../docs/tables/ACCEPTANCE-CHECKLIST.md)的哪一层（改动后自检 / 发版验收 / 单板出厂） | 已转入 [TODO「等外部」](../../work/TODO.md) |
 
 **不用你定、我自己能办的**：写 `T2-08`–`T2-14` 七条新用例的脚本、登记编号、对账 —— 都在
 [work/TODO.md](../../work/TODO.md) 里，挂在「五条路径里「测安全性」各指什么」那张已关的票下。
@@ -88,7 +88,7 @@ BOOT0 进上传模式（`T1-27`，路径里按 BOOT0 是为了认领，不是为
 
 ## Not yet specified
 
-2026-09-24 清理：条数小结已改准，`T1-18a`–`T1-18g` 的台子改成「假板子」；路径 ③ 改叫「换根、重烧 bootloader」；RTC 备份域那条随决议 66 消失（没有路径依赖它的初值）。日志自相矛盾转入 [TODO](../../work/TODO.md)；结果记在哪、进验收单哪一层两条转入 [WAITING-ON](../../waiting/WAITING-ON.md)。
+2026-09-24 清理：条数小结已改准，`T1-18a`–`T1-18g` 的台子改成「假板子」；路径 ③ 改叫「换根、重烧 bootloader」；RTC 备份域那条随决议 66 消失（没有路径依赖它的初值）。日志自相矛盾转入 [TODO](../../work/TODO.md)；结果记在哪、进验收单哪一层两条转入 [TODO「等外部」](../../work/TODO.md)。
 
 ## Out of scope
 

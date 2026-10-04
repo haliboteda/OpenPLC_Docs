@@ -59,7 +59,7 @@ DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）、KNX 发送脚 PB14 拉�
 板卡包从启动到 sketch 第一次写之前不碰这些脚（`initVariant()` 是空的弱函数，`analogWrite` / `pinMode` 都是第一次调用时才配置）。
 
 引脚出处：`$HW/STM32H743IIK6_GPIO_ASSIGNMENT_Schaeffer_Bridge_20260822.xlsx` 第 92–93 行（AOUT1 / AOUT2）、
-第 99–106 行（HSFET_1–8）。复位到这一行之前的几毫秒、以及掉电时，AO 仍不确定（等示波器实测，见 `waiting/WAITING-ON.md`）。
+第 99–106 行（HSFET_1–8）。复位到这一行之前的几毫秒、以及掉电时，AO 仍不确定（等示波器实测，见 `work/TODO.md`）。
 
 ## 开机检查欠压复位（BOR）档位
 
@@ -157,7 +157,7 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 一整段启动 596 字节里，bootloader 自己那 502 字节**一个坏字节都没有**，
 唯一的非 ASCII 出现在偏移 502 —— 正好是 app 打出第一行的位置（`[` `0xC2`，然后才是完整的 `[BOOT] millis=`）。
 
-**原因未知。** 已排除的假设见 `$PROD/waiting/WAITING-ON.md`；取舍见
+**原因未知。** 已排除的假设见 `$PROD/work/TODO.md`；取舍见
 `$PROD/docs/tables/DECISIONS.md` 第 49 条。
 
 ### 跳转函数必须是 `naked`，这是踩出来的
@@ -257,5 +257,5 @@ MAC[5] = UIDw0 ^ UIDw1 ^ UIDw2
 **用户 app 可以自己另选一个** —— 设备是靠 UID 定位的，不靠地址。
 
 ⚠️ **「两块板算出来的 MAC 真的不同」这件事还没验过**（只有一块板），
-在 `$PROD/waiting/WAITING-ON.md` 里等第二块板。派生算法撞了的话，
+在 `$PROD/work/TODO.md` 里等第二块板。派生算法撞了的话，
 量产时表现为同网段大面积 IP 冲突。

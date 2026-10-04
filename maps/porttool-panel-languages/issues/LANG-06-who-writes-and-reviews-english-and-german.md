@@ -22,8 +22,8 @@ Blocked by: -
 
 ## Answer
 
-2026-10-03 定（用户：按推荐）：**AI 写初稿**；德文术语用硬件资料里的德文词（`$HW/Klemmenbezeichnungen-R.pdf` 只取名字不取端子号），英文用对应英文词；术语表放 `strings.json` 开头一段，和译文同处。**德文要一位读德文的人审过才上线**，审稿人还没定（[WAITING-ON.md](../../../waiting/WAITING-ON.md)）。
+2026-10-03 定（用户：按推荐）：**AI 写初稿**；德文术语用硬件资料里的德文词（`$HW/Klemmenbezeichnungen-R.pdf` 只取名字不取端子号），英文用对应英文词；术语表放 `strings.json` 开头一段，和译文同处。**德文要一位读德文的人审过才上线**，审稿人还没定（[TODO.md「等外部」](../../../work/TODO.md)）。
 
 ## 引出了什么新的未知
 
-- 德文审稿人是谁 —— 在 [WAITING-ON.md](../../../waiting/WAITING-ON.md) 等用户给
+- 德文审稿人是谁 —— 在 [TODO.md「等外部」](../../../work/TODO.md) 等用户给

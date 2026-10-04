@@ -32,7 +32,7 @@ app 收到 `openplc_server_reboot` 之后不重启，继续以 `CUSAPP` 应答 U
 ### 诊断卡在哪
 
 **app 跑起来之后 RS232 收发器是关断的**，`printf` 出不来，所以看不到 app 侧的判断过程
-（这条本身记在 `waiting/WAITING-ON.md` 的「交接时那两个坏字节」一节，2026-09-19 实测过
+（这条本身记在 `work/TODO.md` 的「交接时那两个坏字节」一节，2026-09-19 实测过
 `PB10` 为低）。要看见 app 说什么，得先有一个**主动 `digitalWrite(RS232_EN_Pin, HIGH)`** 的 sketch。
 
 `T1-16` 覆盖不到这条：重启握手在 core 侧的 `udp_server.c` / `iap_auth.c`，

@@ -35,7 +35,7 @@ Blocked by: XPT-01, XPT-02
 | 按 [DECISIONS.md](../../../docs/tables/DECISIONS.md) 第 73 条改完（`$TOOL` 未提交的改动）：Linux `ports` 显示芯片，如 `/dev/ttyUSB0 - USB Serial (ch341-uart)`；没选对端时 RS485 直接报「bind one once in the panel」；在面板里绑上后 Linux 连跑 3 次、Windows 1 次，都是 17 过，和改前 Windows 相同 | `PortTool ports` / `run`；绑定走面板的 `/api/link` |
 | `T4-03`（面板在浏览器里点一遍，Linux 版跑在 WSL）：216 过 3 不过；同一脚本在 Windows 上跑 `T4-02`，结果完全相同。3 条都是台子今天的状态和 `run.py` 里写的预期不符：没插 SD 卡；电脑不在板子的网段（板子 `192.168.0.32`）；AI 判成「过」（`!ain … ch1=3265/124 ch2=6375/243`，即 MCU 引脚上 124 mV / 243 mV），脚本预期 D12/D13 没接信号源、应判不过 | `run.py --wsl Debian --port /dev/ttyUSB0` 与 `run.py --port COM12` |
 | 插上 SD 卡、电脑和板子放进同一网段后重跑：`T4-03`（Linux）和 `T4-02`（Windows）都只剩 AI 一条不过，其余全过 | 同上 |
-| AI 口硬件正在改，本图先不考虑 AI：`run.py` 对 ain 不判过也不判不过 | 用户 2026-09-30，见 [WAITING-ON.md](../../../waiting/WAITING-ON.md) |
+| AI 口硬件正在改，本图先不考虑 AI：`run.py` 对 ain 不判过也不判不过 | 用户 2026-09-30，见 [TODO.md「等外部」](../../../work/TODO.md) |
 | 不判 AI 之后：`T4-03`（Linux）和 `T4-02`（Windows）全部检查通过 | `run.py --wsl Debian --port /dev/ttyUSB0`；`run.py --port COM12` |
 | `usbipd attach` 的先后决定 `ttyUSB` 编号：换一次顺序，PL2303 就从 `ttyUSB1` 变成了 `ttyUSB0` | `PortTool ports` |
 | 没测到：桌面 Linux 上双击打开、`xdg-open` 开浏览器、udev 和串口权限（`T4-03` 的浏览器在 Windows 上） | — |

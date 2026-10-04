@@ -29,7 +29,7 @@
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–84 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 82 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–85 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 83 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
@@ -56,7 +56,7 @@
 
 **表里没有的**：`H3`（`go vet`，卫生检查，见 [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) 的 `CHK-A3`）、
 `M3`（两块板的 MAC 不同，2026-09-28 实测通过，结果记在 `R1-14`）、`EV1`（⛔ 难以构造）三个零散用例号没有定义行。
-`ISS-*` 和 `M1`–`M8` 两套已于 2026-09-16 废除，拆进了票、`$PROD/work/TODO.md` 和 `$PROD/waiting/WAITING-ON.md`。
+`ISS-*` 和 `M1`–`M8` 两套已于 2026-09-16 废除，拆进了票和 `$PROD/work/TODO.md`。
 
 ---
 
@@ -124,4 +124,4 @@
 
 **通用那一条规则不在这里**，在 `AI-Skills/_shared/rules/cite-the-path.md`，它会作为用户级 rule 在每个项目里加载。
 本项目那一半 —— 哪类编号定义在哪个文件 —— 就是上面生成的那张表，**不要在这里加第二份清单**。
-待办和在等什么不是编号，在 `$PROD/work/TODO.md`、`$PROD/waiting/WAITING-ON.md`。
+待办和在等什么不是编号，在 `$PROD/work/TODO.md`。

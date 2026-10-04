@@ -127,7 +127,7 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 
 ## Not yet specified
 
-2026-09-24 清理：本图已归档（metadata 不搬）。`R1-32` 两行塌缩、`P2` 纳入 `build.flash_offset`、bootloader 带 header 三条都以「要搬」为前提，不再成立；`AUTH_FAIL` 环形缓冲那条转入 [WAITING-ON](../../waiting/WAITING-ON.md)。
+2026-09-24 清理：本图已归档（metadata 不搬）。`R1-32` 两行塌缩、`P2` 纳入 `build.flash_offset`、bootloader 带 header 三条都以「要搬」为前提，不再成立；`AUTH_FAIL` 环形缓冲那条转入 [TODO「等外部」](../../work/TODO.md)。
 
 ## Out of scope
 

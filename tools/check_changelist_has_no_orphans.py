@@ -38,6 +38,8 @@ TODO = DOCS / "work" / "TODO.md"
 
 # The banner a CHANGE-LIST must carry, and the line that names one block.
 BANNER = "还没做的那几块，已经搬去"
+# A CHANGE-LIST whose blocks are all finished says so instead.
+BANNER_DONE = "没有还没做的了"
 BLOCK = re.compile(r"[-—]{2}\s*(.+?)。", re.S)
 
 
@@ -70,6 +72,9 @@ def main():
     for cl in lists:
         name = cl.parent.name
         text = cl.read_text(encoding="utf-8", errors="replace")
+        if BANNER_DONE in text:
+            Ok("  %-34s every block finished" % name)
+            continue
         blocks = blocks_from_banner(text)
         if blocks is None:
             Fail("  %s: no banner saying where its unfinished work went" % name)

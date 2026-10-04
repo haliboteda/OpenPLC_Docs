@@ -51,7 +51,7 @@ find . -maxdepth 3 -name .git -not -path '*/node_modules/*'
 
 ## Not yet specified
 
-2026-09-24 清理：编号合并由 [按功能模块重做文档与编号](../docs-restructure/map.md) 做完；`STATUS.md` 已没有「最近结果」栏；之后又开了六张图；归档写进了 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)；`ID-MAP.md` 补登了 `P12`–`P17` 和全部票号前缀。`ID-MAP` 改脚本生成、IAP 协议文档两条转入 [WAITING-ON](../../waiting/WAITING-ON.md)。
+2026-09-24 清理：编号合并由 [按功能模块重做文档与编号](../docs-restructure/map.md) 做完；`STATUS.md` 已没有「最近结果」栏；之后又开了六张图；归档写进了 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)；`ID-MAP.md` 补登了 `P12`–`P17` 和全部票号前缀。`ID-MAP` 改脚本生成、IAP 协议文档两条转入 [TODO「等外部」](../../work/TODO.md)。
 
 ## Out of scope
 
