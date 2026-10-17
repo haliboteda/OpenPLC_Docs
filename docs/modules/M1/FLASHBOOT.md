@@ -1,12 +1,11 @@
 # `flashboot` · bootloader 原地升级
 
-> ⚠️ **`flashboot` 的代码已按[决策 72](../../tables/DECISIONS.md) 实施（`$BOOT` `fe653a7`，未上板验收）**；进度看 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。实施前 `flashboot` 还要搬 owner 区、未认领板子靠按 BOOT0，用 `git log` 取回本文件 2026-09-30 之前的版本。
+> 按[决策 72](../../tables/DECISIONS.md) 实施：根区在扇区 15，没有根就拒绝（`T1-32` 2026-10-08 上板通过）。
 
 **一条命令把新的 bootloader 写进扇区 0。扇区 0 只放 bootloader 代码**，根区在扇区 15，`flashboot` 不碰它。
 类比 BIOS 升级：**中途不允许断电**。
 
-形状定于 2026-09-19（走原地升级、用 owner 根验签、没有有效 owner 就要物理在场），
-线上协议定于 2026-09-22，见[`flashboot` 的线上协议长什么样](../../../maps/owner-revoke-and-boot-upgrade/issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md)。
+线上协议见[`flashboot` 的线上协议长什么样](../../../maps/owner-revoke-and-boot-upgrade/issues/OWN-12-what-does-the-flashboot-wire-protocol-look-like.md)。
 
 ## 线上长什么样
 
@@ -43,8 +42,6 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 那个段就同时可写可执行。这是要的效果，已在 `$TEST/tools/build_image.py`
 的 `KNOWN_WARNINGS` 里按原文匹配放行。
 
-
-
 ## 断在哪会怎样
 
 | 断点 | 板子的状态 | 怎么救 |
@@ -62,4 +59,4 @@ flashboot <size> <crc32hex> <imgsig_hex> <cert_hex> <noncesig_hex>
 
 ## 镜像尺寸
 
-加完 `flashboot`、压缩和 `setowner --wipe` 后 bootloader **106,324 字节**，当时 122,880 的预算还剩 16,556（2026-09-22 实测）。决策 72 之后预算是整个扇区 0（131,072 字节）。
+预算是整个扇区 0（决策 72），构建时的尺寸门禁（`ENG-01`）见 [BOOTLOADER-PROJECT-LAYOUT.md](../../build/BOOTLOADER-PROJECT-LAYOUT.md)。

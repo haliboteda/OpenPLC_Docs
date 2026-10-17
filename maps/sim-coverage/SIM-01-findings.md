@@ -22,7 +22,7 @@ DI_Inputs: prints DI1..DI8 on every change.
 DI1..DI8: 0 0 0 0 0 0 0 0
 ```
 
-UART4 的依据：`boards.txt:82-83`（`usb=CDC` 加 `-DDISABLE_GENERIC_SERIALUSB`）、`WSerial.h` 的 `SERIAL_UART_INSTANCE == 4` 分支、`variant_PLC_H743.h:464-472`（`SERIAL_UART_INSTANCE 4`）。
+UART4 的依据：`boards.txt:56-57`（`usb=CDC` 加 `-DDISABLE_GENERIC_SERIALUSB`）、`WSerial.h` 的 `SERIAL_UART_INSTANCE == 4` 分支、`variant_PLC_H743.h:464-472`（`SERIAL_UART_INSTANCE 4`）。
 
 **USB 这条不通。** `usb=CDCgen`（与真板相同）+ `usb_uart: USB.USB_UART` 接 `usb2`：
 

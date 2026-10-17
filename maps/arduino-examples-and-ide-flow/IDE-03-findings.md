@@ -70,7 +70,7 @@
 |---|---|
 | 轮询，不定义 `FDCAN1_IT0/IT1_IRQHandler` | 链接结果里这两个是弱符号（实测 `nm`），留给用户 |
 | 不定义 `HAL_FDCAN_MspInit`，时钟和 GPIO 在 `begin()` 里直接配（`port_can.c` 本来就这样） | 强符号会和用户自己的冲突 |
-| `begin()` 里先 `enableClock(HSE_CLOCK)` 再选 `FDCANSEL = HSE`，并对外给出句柄（照 `PortCan_Handle()`） | Arduino 下 HSE 是关的（见「共同前提」）；[`libraries/SrcWrapper/src/stm32/clock.c:124-129`](../../../open_plc_arduino/libraries/SrcWrapper/src/stm32/clock.c)。给句柄让用户能用封装没包的功能（过滤器、FD） |
+| `begin()` 里先 `enableClock(HSE_CLOCK)` 再选 `FDCANSEL = HSE`，并对外给出句柄 | Arduino 下 HSE 是关的（见「共同前提」）；[`libraries/SrcWrapper/src/stm32/clock.c:124-129`](../../../open_plc_arduino/libraries/SrcWrapper/src/stm32/clock.c)。给句柄让用户能用封装没包的功能（过滤器、FD） |
 
 `FDCANSEL` 是 FDCAN1/2 共用的，改成 HSE 不影响别人：本板 FDCAN2 没有可用引脚（[HARDWARE-FACTS.md:292](../../docs/hardware/HARDWARE-FACTS.md)）。
 

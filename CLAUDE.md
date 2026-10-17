@@ -35,7 +35,7 @@ python tools/list_wayfinder_map_frontier.py --all    # 连被挡的和已关的�
 
 ## 手头没活了
 
-看 [work/TODO.md](work/TODO.md)：要做的事和在等的事只写在这一处（决策 85）。
+看 [work/TODO.md](work/TODO.md)（IAP）和 [work/TODO-fixture.md](work/TODO-fixture.md)（工装）：要做的事和在等的事只写在这两处（决策 85）。
 
 ## 改完文档跑这个
 

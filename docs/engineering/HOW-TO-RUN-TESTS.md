@@ -7,10 +7,11 @@
 | 仓 | 测什么 | 入口（在那个仓的根目录跑） |
 |---|---|---|
 | `$BOOT` | bootloader 的主机 C 测试（T1-16、T1-33、T2-22–T2-34 中归 bootloader 的）、P16、P17 | `cd tests && cmake --preset local && cmake --build --preset local && ctest --preset local` |
-| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
+| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12、T3-22 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
-| `$PORTTOOL` | T4-01 到 T4-04 | `cd TestCase && python tools/selfcheck.py`（`--quick` 跳过浏览器那步） |
+| `$PORTTOOL` | T4-01 到 T4-05 | `TestCase/test.sh all`（`quick` 跳过浏览器那步） |
 | `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T1-27、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
+| `$ETSPROD` | T3-23 | `python -m unittest discover tests` |
 | `$PROD` | 文档检查 P7、P8、P9、P12、P13、P14、P18 | `python tools/check_docs.py` |
 
 **下文的 `tools/...`、`host/...`、`onboard/...` 不加前缀时都在 `$TEST` 根目录跑。** 其他仓的命令写明仓名。
@@ -19,14 +20,16 @@
 
 ## `$TEST` 的本机配置
 
-⚠️ **机器相关的路径只允许出现在 `$TEST/config/machine.py`**（PortTool 另有自己的一份）。它是 `tools/init_machine.py` 生成的，不要手写、也没有模板可抄；需要新的本机路径时，把它连同探测方式加进那个脚本的 `SETTINGS` 表。
+⚠️ **机器相关的路径只允许出现在 `$TEST/config/machine.py`**（PortTool 的在 `$PORTTOOL` 的 `tools/local.json`，由 `tools/build.sh find-tools` 生成）。它是 `tools/init_machine.py` 生成的，不要手写、也没有模板可抄；需要新的本机路径时，把它连同探测方式加进那个脚本的 `SETTINGS` 表。
+
+**上板脚本按 UID 找板子，不记 IP**（用户 2026-10-13 定）：`config/machine.py` 记板子的 `BOARD_UID`，脚本经 `common.board_ip()` 广播 `openplc_discover`、取 UID 相符那条回复的 IP（最多等 20 秒）。理由：板子 IP 由 DHCP 给、会变。`BOARD_IP` 只作覆盖用，填了就不发现，留给广播过不去的网络；脚本的 `--ip` 优先于两者。
 
 ⚠️ **`init_machine.py` 有单元测试**：`python tools/test_init_machine.py`（**32 个用例**，四组）。
 
 | 组 | 测什么 | 为什么只能这么测 |
 |---|---|---|
 | tables | `SETTINGS` / `PREREQS` / `EXAMPLES` 的列是否齐 | 三张手写表，最常见的编辑错误是加了一行漏一列；不测的话报错发生在你不在场的那台机器上 |
-| ports | `detect_log_ports()` 的 **macOS 分支** | 本项目没有 mac，所以文件系统是假的，只测排序与去重逻辑 |
+| ports | `detect_rs232_ports()` 的 **macOS 分支** | 本项目没有 mac，所以文件系统是假的，只测排序与去重逻辑 |
 | claude dirs | `--write-claude-dirs` 的合并、`ignored_by_own_rules()` 的护栏 | 它改的那个文件装着几百条手工批准的权限规则，**"没弄丢东西"就是被测的性质** |
 | ask_for | 引号剥离、`~` 展开、安装根目录校验 | 提问按定义在自动化里跑不到（只在"stdin 是终端且环境无自动化标记"时发生），只能替换 `input()` |
 
@@ -36,7 +39,7 @@
 python tools/init_machine.py      # 一次性：探测本机路径，生成 config/machine.py（Linux 上是 python3）
 python tools/selfcheck.py         # 不需要板子的检查；--list 先看它跑哪几步
 python tools/flash_bootloader.py  # 命令行编 bootloader、ST-Link 烧写、抓启动日志（CubeIDE 必须关闭）
-python tools/serial_watch.py      # 只看串口，不碰板子
+python tools/serial_watch.py      # 只看板子 USB 口 1（系统日志和 Serial），不碰板子；--ports 改看 RS232
 ```
 
 ⚠️ **测试脚本一律用 Python**（2026-09-01 定）。缺什么会报 `SKIP` 并说清缺什么，**不会静默跳过**。
@@ -57,7 +60,7 @@ TestCase <case-id|all> --ip=<addr> [--port=56865] [--bin=<file.bin>] [--iaptool=
          [--key=<owner.pem>]
 ```
 
-- `--ip` 必填。设备 IP 从串口日志的 `[NET]` 行读，或用 `IAPTool ether` 的广播发现看。
+- `--ip` 必填。设备 IP 从 USB 口 1 的 `[sys][NET]` 行读（见下面「测试从哪读板子的输出」），或用 `IAPTool ether` 的广播发现看。
 - `--bin` T1-09 / T1-11 / T1-12 需要；`--key` T1-11 / T1-12 需要，是板子当前信任的那把私钥。
 - `--iaptool` 默认找 `Output/windows/IAPTool.exe`。
 - 退出码：全过 0，有失败 1，参数错 2。
@@ -107,9 +110,8 @@ T2-01 / T2-03 的动作走出货工具（`IAPTool takeown` / `setowner`），判
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **T2-01** | 认领把板子绑到一把新密钥上 | 板子停在 bootloader，**且这次启动按住过 BOOT0** | 判据见模块文档的测试表 |
-| **T2-02** | BOOT0 没按时认领被拒 | 停在 bootloader，**没按 BOOT0**（用 `enter_bootloader.py` 进） | 回 `Refused`，`getpubkey` **一字节不变** |
-
+| **T2-01** | 认领把没有根的板子绑到一把新密钥上 | 板子停在 bootloader、没有根（不用按键，决策 72） | 判据见模块文档的测试表 |
+| **T2-02** | 已有根的板子拒绝第二次认领 | 停在 bootloader、已有根 | 回 `Refused`，`getpubkey` **一字节不变** |
 | **T2-03** | 换 owner：现任签名才算数 | 板子已被一把**你持有私钥**的密钥认领 | 判据见模块文档的测试表 |
 | **T2-04** | 无签名的高 generation 记录**夺不走**板子 | 同上 | 扫描器看得见那条记录，但 `getpubkey` 仍返回原主人 |
 | **T2-05** | 恢复出厂回到没有根 | 板子已被认领，**有人在板子旁**按住 BOOT0 十秒 | 判据见模块文档的测试表 |
@@ -126,7 +128,7 @@ python tools/inject_owner_record.py --key <hex> --also-unsigned 9   # 夺取攻�
 
 | ID | 验证什么 | 前置条件 | 判据 |
 |---|---|---|---|
-| **T1-17** | nonce 不重复，且**掉电后不从头开始** | 设备停在 bootloader；**要人工断电一次**；VBAT 电池在位 | 两阶段所有 nonce 互不相同；阶段内计数器恰好 +1；断电后的第一个计数器**严格大于**断电前最后一个 |
+| **T1-17** | nonce 不重复，**掉电前后也不重复** | 设备停在 bootloader；**要人工断电一次** | 断电前后两批 nonce 全部互不相同（nonce 来自 TRNG，决策 66） |
 
 ```
 python tools/run_au1.py                 # 编排两个阶段，中间提示你拔电
@@ -149,21 +151,10 @@ IAPTool ether app.bin <ip>
 判据三条，缺一不可：
 
 1. 工具打出 `Certificate was issued by this board's root (<根前16位>...)` —— 不是 `Signing key matches this board`，那是自签路径
-2. 上传成功，串口出现 `Checksum and signature OK`
+2. 上传成功，开机日志出现 `Checksum and signature OK`
 3. **复位后进 `** APP Mod`** —— 证明启动期拿存下来的那张证书重验也过了，不只是上传时过了
 
 反向：把证书换成另一把根签的，工具必须**在传输开始前**就拒，且报的是"这张证书不是这块板的根签的"。
-
-## ⚠️ 上板之前先看测试资产的日期
-
-**`Output/` 下的探针镜像不会自动跟着仓库走**，
-过期的那一份会给出一个看起来像产品故障的失败。
-
-| 踩过的 | 症状 |
-|---|---|
-| `Output/iap_probe_app.bin`（2026-09-18 编） | 早于证书 132→128 字节那次变更，app 侧验不了新证书，**重启握手九次全拒**。当前镜像在 `Output/probe-images/` |
-
-**判断标准**：失败的那一步是「够到板子了吗」还是「板子答错了」。够不到就先查日期。
 
 ## 怎么让设备停在 bootloader
 
@@ -179,8 +170,8 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 
 | 目录 | 怎么跑 | 覆盖什么 |
 |---|---|---|
-| `$TOOL/tests/iapcert/` | 在 `$TOOL` 下 `go test ./tests/...` | 证书布局与根签名覆盖的字节范围（换个范围就验错东西）；serial 计数器从 1 开始、递增、落文件；serial 小端落在偏移 64；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
-| `$TOOL` 根目录、`internal/`、`iapproto/`、`netiface/` | 在 `$TOOL` 下 `go test . ./internal/... ./iapproto/... ./netiface/...` | **T1-35** IAPTool 自己的单元测试：密钥查找顺序（`--key` → `local_config.json` → 用户配置目录 → exe 旁边）、串口层、`internal/iapproto` 的协议常量与绑物理网卡拨号。进 selfcheck |
+| `$TOOL/tests/iapcert/` | 在 `$TOOL` 下 `go test ./tests/...` | **T1-15** 证书布局（叶公钥 64 B + 根签名 64 B）与根签名覆盖的字节范围（换个范围就验错东西）；委托证书；拒绝格式不对的叶公钥；挑战签名覆盖 `sha256(nonce\|\|msg)` 且顺序不可换 |
+| `$TOOL` 根目录、`internal/`、`iapproto/`、`netiface/` | 在 `$TOOL` 下 `go test . ./internal/... ./iapproto/... ./netiface/...` | **T1-35** IAPTool 自己的单元测试：密钥查找顺序（`--key` → `local_config.json` → 用户配置目录 → exe 旁边）、串口层、`internal/iapproto` 的协议常量与绑物理网卡拨号、USB 上传结论判读、`-v` 开关。进 selfcheck |
 | `$BOOT/tests/bootloader_unit/` | `$BOOT/tests` 下 `ctest --preset local -R T1-16`，需要 gcc/clang 和 CMake | 用 stub 在主机上编译**真实的** `sha256.c` / `iap_cert.c` / `fw_verify.c` / `iap_auth.c` 并跑断言。金标证书由出货工具生成，所以过了就等于 C 和 Go 对同一套线格式达成一致。细节见 `$BOOT/tests/bootloader_unit/HOST-C-TESTS.md`（贴着代码放） |
 | `$CORE_REPO/tests/owner_revoke/` | `$CORE_REPO/tests` 下 `ctest --preset local`，需要 gcc/clang 和 CMake | **T2-21** 当前生效的根撤不掉自己（`R4`）。喂一块 RAM 里的假 owner 记录区（按 `owner_slot.h` 的字节布局手搓），在主机上编译并跑**真实的** `owner_root_ro.c`。判据见 [M2 归属与信任](../modules/M2-ownership.md) 的「测试怎么跑」节 |
 | `$BOOT/tests/owner_capacity/` | `$BOOT/tests` 下 `ctest --preset local -R "T2-2|T2-3|T1-33"`，需要 gcc/clang 和 CMake | owner 区容量、压缩、`--wipe`、自撤、出厂无根、恢复出厂、连续 40 次换主（T2-22–T2-33、T1-33、T2-27）。判据见 [M2 归属与信任](../modules/M2-ownership.md) |
@@ -191,14 +182,15 @@ T1-07–T1-10 和 T1-11 都要求设备处于 bootloader 且以太网已起。�
 | `host/fakeboard/` | `python host/fakeboard/run_protocol.py [--only ID] [--keep]`，selfcheck 的 `T1-01` `T1-13` `T1-28` `T1-30` `T1-32` `T2-01` `T2-11` `T2-15` 八步就是它，每步跑一组 | **T1-01 T1-02 T1-05–T1-14 T1-23 T1-24 T1-26 T1-28 T1-30 T1-32 T2-01 T2-03 T2-11 T2-12 T2-14–T2-17 T2-25 T2-26** 在 bootloader 替身上：现成的 Go 用例（`TestCase`）和 IAPTool 驱动的归属、撤销用例。判的是真 IAP 代码的决定；真 lwIP / PHY 时序、真 flash 擦写仍要真板子 |
 | `$TOOL/tests/crypto_ref/` | 在 `$TOOL` 下 `python tests/crypto_ref/run_checks.py [--rounds N]` | SHA-256 构造对 hashlib（309 向量）；IAPTool 真实签名交给一份独立的纯算术 P-256 验证器。对照方法见 `$TOOL/tests/crypto_ref/CROSS-CHECK.md`（贴着代码放） |
 | `$CORE_REPO/tests/sd_lib/` | `$CORE_REPO/tests` 下 `ctest --preset local`，需要 gcc 和 CMake | **T3-12** `OpenPLC_SD` 的文件操作：真 FatFs 跑在内存盘上，格式化后写、追加、读回、删、建目录、列目录 |
+| `$CORE_REPO/tests/knx_role/` | `$CORE_REPO/tests` 下 `ctest --preset local`，需要 gcc 和 CMake | **T3-22** KNX 换角色后的开机恢复：真 `knx/memory.cpp` `device_object.cpp` 读内存里的假数据区，别的角色或不带角色的头部一个字节都不恢复，同角色照常恢复 |
 | `$CORE_REPO/tests/variant_check/` | `python tests/variant_check/build.py`，需要 arduino-cli（环境变量 `ARDUINO_CLI` / `ARDUINO_CLI_CONFIG`） | **P4** Arduino 变体头的编译期断言。目前两个：`m4_fmc_pins`（FMC 保留脚表 39 个自洽）、`uart_routing`（printf 控制台在 USART3/PC10，扩展口留着 UART4/PH13-14）。**编不过就是变体头坏了，不是 sketch 坏了** |
 | `$CORE_REPO/tests/examples_build/` | `python tests/examples_build/build.py [--only LIB]`，需要 arduino-cli | **P5** 编译板卡包里**每一个能在这块板上编的 example**（自有库 + 上游库）。⚠️ **约 45 分钟，故意不进 selfcheck** —— 见下 |
-| `host/renode/` | `python host/renode/run.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode（`$RENODE`）和 CubeIDE（bootloader 从当前 `$BOOT` 源码现编；`--boot` 给一个现成的镜像就跳过编译） | **T3-05** `OpenPLC_Ports` 的每个例程（2026-10-04 是 14 个）在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），进 selfcheck，`--quick` 跳过** |
-| `host/renode/` | `python host/renode/boot_outputs.py`，需要 arduino-cli、Renode 和 CubeIDE（把 `$BOOT` 工作区拷进临时目录编，不碰 `$BOOT/Debug/`） | **T1-37** 开机输出置 0：真 bootloader 跳进 `SystemLED`，DO1–DO8、PA4、PA5、PB14 在五个时刻都是推挽输出、电平为低；BOR 档位不是 3 时串口警告、是 3 时不警告。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **约 11 分钟（编 bootloader 和例程占大头）**，进 selfcheck，`--quick` 跳过 |
+| `host/renode/` | `python host/renode/run.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode（`$RENODE`）和 CubeIDE（bootloader 从当前 `$BOOT` 源码现编；`--boot` 给一个现成的镜像就跳过编译） | **T3-05** `OpenPLC_Ports` 的每个例程在 Renode 里经真 bootloader 启动，判启动链、`setup()`、`loop()`、没跑飞。判据和测不到什么见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 25 分钟（每个例程先编译），进 selfcheck，`--quick` 跳过** |
+| `host/renode/` | `python host/renode/boot_outputs.py`，需要 arduino-cli、Renode 和 CubeIDE（把 `$BOOT` 工作区拷进临时目录编，不碰 `$BOOT/Debug/`） | **T1-37** 开机输出置 0：真 bootloader 跳进 `SystemLED`，DO1–DO8、PA4、PA5、PB14 在五个时刻都是推挽输出、电平为低；BOR 档位不是 3 时开机日志警告、是 3 时不警告。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md) 的「测试怎么跑」节。⚠️ **约 11 分钟（编 bootloader 和例程占大头）**，进 selfcheck，`--quick` 跳过 |
 | `host/renode/` | `python host/renode/boot_entry.py`，需要 arduino-cli、Renode 和 CubeIDE（同 T1-37） | **T1-27 / T1-25** 真 bootloader 怎么决定进上传模式：不按 BOOT0 跳进 app；按住 BOOT0 过开机窗口、10 s 前松开 → 上传模式、不恢复出厂；SRAM4 里放 CDC 请求 → CDC 上传模式且 `MX_LWIP_Init` 没跑，放以太网请求的对照里跑了。判据和测不到什么见 [M1 固件升级](../modules/M1-firmware-upgrade.md)。⚠️ **十几分钟**，进 selfcheck，`--quick` 跳过 |
-| `host/renode/` | `python host/renode/behaviour.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode 和 CubeIDE | **T3-11** 例程在 Renode 里的行为：按文件头给输入、看输出（`Serial` 另编到 UART4）。判据、和真板的差别、判不了的例程见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 1 小时**（2026-10-04 实测 58 分钟，含编 bootloader），进 selfcheck，`--quick` 跳过 |
+| `host/renode/` | `python host/renode/behaviour.py [--only NAME] [--boot BIN]`，需要 arduino-cli、Renode 和 CubeIDE | **T3-11** 例程在 Renode 里的行为：按文件头给输入、看输出（`Serial` 另编到 UART4，`RS232` 在 USART3）。判据、和真板的差别、判不了的例程见 [M3 应用运行环境](../modules/M3-app-runtime.md) 的「测试怎么跑」节。⚠️ **约 1 小时**（2026-10-04 实测 58 分钟，含编 bootloader），进 selfcheck，`--quick` 跳过 |
 
-⚠️ **bootloader 替身的上传通道用 61865，不用产品端口 56865**（`$TEST/host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。T1-34 的发现走的是板卡包写死的 56865/UDP，替身在那里也应答。替身每次跑都会先编一遍，要 `HOST_CC` 和 CMake。
+⚠️ **bootloader 替身的上传通道用 61865，不用产品端口 56865**（`$TEST/host/fakeboard/_common.py` 的 `TEST_PORT`）：本机的 56865/TCP 可能被别的程序占着。复制到临时目录的 IAPTool 也写上这个端口，所以两边对得上；板子和出货的 IAPTool 仍是 56865。起替身前 `resolve_port()` 先试绑这个端口的 UDP 和 TCP，绑不上（常见是落进 Windows 动态排除段）就依次换 `FALLBACK_PORTS` 里动态段（49152 起）以外的冷门端口，本次运行的替身和 IAPTool 都用选中的那个，并打一行说明；全绑不上才退出码 2（[E2E-06](../../maps/five-paths-e2e-test/issues/E2E-06-stand-in-port-in-windows-excluded-range.md)）。T1-34 的发现走的是板卡包写死的 56865/UDP，替身在那里也应答。替身每次跑都会先编一遍，要 `HOST_CC` 和 CMake。
 
 ### P5 · example 不能腐烂
 
@@ -223,7 +215,7 @@ python tests/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P3` | `$CORE_REPO/tests/check_core_sync.py` | `$CORE_LIVE` 与 git 仓库一致 | ✅ `$CORE_REPO` |
 | `P4` | `$CORE_REPO/tests/variant_check/build.py` | Arduino 变体头的编译期断言 | ✅ `$CORE_REPO` |
 | `P5` | `$CORE_REPO/tests/examples_build/build.py` | 板卡包里每个能在这块板上编的 example 都编得过 | ⛔ 约 45 分钟，故意不进 |
-| `P7` | `$PROD/tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG`。第三头 2026-09-21 才加 —— 在那之前，一个步骤可以每次都在跑却没有任何文档 | ✅ `$PROD` |
+| `P7` | `$PROD/tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG` | ✅ `$PROD` |
 | `P8` | `$PROD/tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ `$PROD` |
 | `P9` | `$PROD/tools/check_doc_paths.py` | 文档里点名的每条路径都存在，链接的锚点和路径型链接文字也对得上 | ✅ `$PROD` |
 | `P10` | `$TEST/tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
@@ -235,11 +227,10 @@ python tests/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P16` | `$BOOT/tests/checks/check_icache_is_restored.py`（`ctest -R P16`） | **关掉 I-cache 之后，每条出口都要重新打开** —— `SCB_DisableICache()` 与 `SCB_EnableICache()` 之间不许有 `return`，且 `HAL_FLASH_Lock()` 要排在重开之前。跳转到 app 那一处显式豁免（跳走不回来） | ✅ `$BOOT` |
 | `P17` | `$BOOT/tests/checks/check_cproject_ld.py`（`ctest -R P17`） | **`.cproject` 的链接脚本必须是 `${PLC_LD_SCRIPT}` 变量，不是写死的文件名** —— CubeMX 每次生成都会写死它，写死之后工装镜像编不出来。生成后的自动修在 `$BOOT/tools/restore_ld_script.bat`，这道检查兜它失效的情况。见 [../build/CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | ✅ `$BOOT` |
 | `P18` | `$PROD/tools/gen_id_map.py --check` | **`ID-MAP.md` 的现行编号表和各文档里真正定义的编号一致** —— 那张表由这个脚本扫出来写进去（决议 69），手改或者新增编号忘了重新生成，都会报红。修法：`python tools/gen_id_map.py --write` | ✅ `$PROD` |
-| `P19` | `$CORE_REPO/tests/check_no_sector15_writes.py` | **core 里没有代码写扇区 15** —— 扫 `$CORE_REPO` 的 `cores/`、`libraries/`、`variants/`，见到 `0x081E0000`、`FLASH_SECTOR_7` 与 `FLASH_BANK_2` 同文件、或 `FLASH_SECTOR_TOTAL - 1` 就报红。扇区 15 只有 bootloader 能写，见 [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md)「Flash 分区」 | ✅ `$CORE_REPO` |
+| `P19` | `$CORE_REPO/tests/check_no_sector15_writes.py` | **core 里没有代码写扇区 15** —— 扫 `$CORE_REPO` 的 `cores/`、`libraries/`、`variants/`，见到 `0x081E0000`、`FLASH_SECTOR_7` 与 `FLASH_BANK_2` 同文件、或 `FLASH_SECTOR_TOTAL - 1` 就报红；`FLASH_EraseInitTypeDef` 变量没设 `VoltageRange` 也报红（残值会把扇区擦除变成整 bank 擦除，[KEX-13](../../maps/knx-examples/issues/KEX-13-ets-download-erased-bank2.md)）。扇区 15 只有 bootloader 能写，见 [BOOTLOADER-PROJECT-LAYOUT.md](../build/BOOTLOADER-PROJECT-LAYOUT.md)「Flash 分区」 | ✅ `$CORE_REPO` |
 | `P20` | `$TEST/tools/check_golden_vectors.py` | `$BOOT` 提交的 `golden_vectors.h` 和出货 IAPTool 现在生成的同一结构 | ✅ `$TEST` |
 
-⚠️ **这张表和 `$TOOL`、`$TEST` 两个 `selfcheck.py` 的 `CATALOG` 由 `P7` 对账**（2026-09-21 补的第三头）。
-`P14` 曾经从这个缝里漏过去：它进了 `CATALOG`、每次都在跑，文档里却一个字都没有。
+⚠️ **这张表和 `$TOOL`、`$TEST` 两个 `selfcheck.py` 的 `CATALOG` 由 `P7` 对账。**
 **新加一个步骤要同时动三处** —— `CATALOG`、这张表、以及模块文档里引用它的那条需求；
 少一处 `P7` 就红。
 
@@ -299,10 +290,8 @@ python tools/check_doc_dupes.py          # 在 $PROD 下；加 --min 40 只看�
 
 **`$PROD/maps/` 不扫。** 一张票的 `## Answer` 按设计就会摘述别处的结论，
 两张图的 `Paused because:` 按约定就是同一句话 —— 纳进来这些全变成永久红灯。
-实测数据：纳入会多 47 份文件、报 11 处重复，其中只有 2 处是真的。
 
-⚠️ **一个 named 路径找不到文件时，这条检查现在直接失败**（退出码 2），不再静默跳过。
-静默跳过让它从 2026-09-16 到 09-17 只扫 21 个文件、一份 `$PROD` 的文档都没扫，**却一直报 PASS**。
+⚠️ **点名的路径找不到文件时直接失败**（退出码 2），不静默跳过 —— 静默跳过曾让它一份 `$PROD` 文档都没扫却报 PASS。
 
 ### P9 · 文档里提到的路径必须存在
 
@@ -320,9 +309,9 @@ python tools/check_doc_paths.py          # 在 $PROD 下；加 --list 打印它 
 python tools/check_tool_sync.py           # 在 $TEST 下；加 --list 连两份 usage 一起打
 ```
 
-修法一条命令：在 `$TOOL` 下 `python tools/install_tool.py`（`compile_tool.sh` 末尾会自动跑它，所以正常情况下不用手动敲）。
+修法一条命令：在 `$TOOL` 下 `python tools/install_tool.py`（`build.py` 末尾会自动跑它，所以正常情况下不用手动敲）。
 
-**IDE 的 Upload 按钮跑的不是我们构建的那份 IAPTool**，而是板卡包里的副本（`$A15/packages/OpenPLC_Alpha/tools/STM32Tools/<版本>/<平台>/IAPTool`，`keys/` 也在它旁边）。所以客户手上那个二进制可以比这里所有用例测的那个落后几周，而没有任何东西会说话。比的不是哈希（同一份源码两次构建逐字节都不同，一个哭喊的检查等于没有检查），是**两个二进制自己报出来的子命令集合**：仓库有、包里没有的动词就是缺陷 —— 菜单到不了那个功能。退出码：0 包里能做到仓库能做的全部，1 落后了，2 有一份二进制不存在。
+**IDE 的 Upload 按钮跑的不是我们构建的那份 IAPTool**，而是板卡包里的副本（`$A15/packages/OpenPLC_Alpha/tools/STM32Tools/<版本>/<平台>/IAPTool`，`keys/` 也在它旁边）。所以客户手上那个二进制可以比这里所有用例测的那个落后几周，而没有任何东西会说话。比的不是哈希（同一份源码两次构建逐字节都不同，一个哭喊的检查等于没有检查），是**两个二进制自己报出来的子命令集合**：仓库有、包里没有的动词就是缺陷 —— 菜单到不了那个功能。另比两项：包里各平台的 IAPTool（`win`、`linux`、`macosx/IAPTool-amd64`、`macosx/IAPTool-arm64`）是同一次构建（vcs.revision 相同）；`macosx/IAPTool` 和 `$TOOL/tools/macos-launcher.sh` 逐字节相同。退出码：0 全过，1 落后、不是同一次构建或启动脚本不一致，2 有一份二进制不存在。
 
 ### P20 · 黄金向量和出货的 IAPTool 对得上
 
@@ -344,39 +333,64 @@ python tools/check_allow_hygiene.py --fail-over 400   # 超过这个数才算失
 
 **这条不是发版门禁**——`settings.local.json` 本机专属、不进 git，不同机器天然不同，没法当"必须全绿"的检查。默认只打印、退出码 0；只有 `--fail-over` 指定阈值且真的超了才返回 1。**判据只看"像不像一次性"**（是否带绝对路径、是否带 `-First N` 这种烤进去的输出切片），会把一些合理的本机安装路径也点出来。
 
+## 测试从哪读板子的输出（决策 147 落地后）
+
+RS232 不再有系统日志以后（[测试靠什么看板子内部](../../maps/usb-for-debug-rs232-for-devices/issues/USB-04-how-tests-see-inside-the-board.md)）：
+
+| 谁 | 读哪 | 要点 |
+|---|---|---|
+| 上板脚本 | USB 口 1，只认 `[sys]` 开头的行 | 交权时口会断开重连，脚本按 VID / PID + 板子 UID 重新找口、重开；开机最早那段靠缓存在口打开时吐出。公共函数是 `$TEST/tools/common.py` 的 `open_board_log()` |
+| 板子停在 bootloader 的上板脚本 | 经 ST-Link 读 SRAM4 缓存（`read_boot_log_swd()`），只看操作之后新写的记录 | bootloader 没有口 1；已经用 ST-Link 复位、烧写的脚本也一律这么读。过渡做法（用户 2026-10-17 定），bootloader 有了口 1（IDE-17 双 CDC）后改读口 1 |
+| Renode | 例程用「CDC (no generic 'Serial')」编，`Serial` 落 UART4（`Serial4`）；bootloader 的行和 core 的系统日志在跑完后用 `sysbus` 从 SRAM4 读出 | Renode 不模拟 USB |
+| bootloader 替身 | 照旧读 PC 程序的标准输出 | 不受影响 |
+| 判据 | 行的内容不变，只换通道：「RS232 上出现 X」改成「口 1 上出现 `[sys]…X`」 | 各用例表统一改一次 |
+| RS232 端子 | 只有测 RS232 本身的用例（T3-03、`RS232_Echo` 的回显）和用 `RS232` 打印的板上 sketch 读，口配在 `RS232_PORT` | |
+
+USB 坏了时人工改从网口读缓存（IAPTool 命令）；网口也不通时插 ST-Link 看 SWO。SWO 不进自动测试。
+
 ## 板上测试（`$TEST/onboard/`）
 
 | 目录 | 是什么 | 怎么用 |
 |---|---|---|
 | `rs232/SerialPort/` | UART + USB-CDC 回显 sketch | 用 Arduino IDE/CLI 编译上传，往端子 C05/C06 发字符看回显 |
-| `rs232/M5_SerialConflict/` | **T3-03**：`Serial4.begin()` 之后 `Serial_Test` 还能不能收 | 判据见模块文档的测试表 |
+| `rs232/M5_SerialConflict/` | **T3-03**：`Serial4.begin()` 之后 `RS232` 还能不能收 | 判据见模块文档的测试表 |
 | `sdram/SDRAM_Acceptance/` | **T3-02**：`OpenPLC_SDRAM` 封装的 19 条断言 + 清零速率测量 | `python tools/run_sdram.py` |
+| `calibration/T3_21_Calibration/` | **T3-21**：校准值在真板子上生效（写已知系数 / 擦空两种） | 判据和跑法见模块文档的测试表 |
+| `sdram/RAM_Speed/` | DTCM、AXI SRAM、SDRAM 三处的读写和 `memcpy` 速率，D-cache 关、开各一遍（决策 124；结果在 `OpenPLC_SDRAM` 的 README） | 见下面「RAM 速率实验」 |
 
 ### T3-02 · SDRAM 封装（需求 R3-03）
 
 sketch 打 `RESULT <名字> PASS|FAIL` 和 `MEASURE <名字> <数>`，脚本按行判。**任何 FAIL、缺 `DONE`（说明跑一半挂了）、或一条 RESULT 都没有，都算失败。**
 
-2026-08-17 实测：`begin()` 1.4 ms，清零 **91 MB/s**（清满 64MB ≈ 701 ms），`allocUninitialized()` 0 µs。
 
-### T3-03 · 诊断串口不被用户 sketch 掐掉（需求 R3-05）
+### RAM 速率实验
+
+测量，不判对错。sketch 每项打一行 `ROW <cache> <region> <op> <bytes> <cycles> <MiB/s> <check>`（列名见 `COLS` 行），之前的 `INFO` 行是当时的 CPU 频率、cache 和 MPU 状态，最后 `DONE`；`check` 是读回校验，FAIL 说明那一行的数不可信。
+
+```
+# 在 $TEST 下；<build> 换成任意空目录
+arduino-cli compile --warnings all --config-file <ARDUINO_CLI_CONFIG> --fqbn OpenPLC_Alpha:stm32:OPEN-PLC:pnum=PLC_H743,usb=CDCgen,upload_method=cdcMethod --build-path <build> onboard/sdram/RAM_Speed
+python tools/upload_and_watch.py --bin <build>/RAM_Speed.ino.bin --key Output/five-paths-keys/wipe/wipe_root.pem --ports COM12 --tail-seconds 20
+```
+
+`upload_and_watch.py` 经网口上传并把板子的输出原样打出来，它自带的判据是给 SDRAM 暂存用的，这里只看打出来的 `ROW` 行。结果表写进 `OpenPLC_SDRAM` 的 `README.md` 和 `README.zh-CN.md`，同时写明当时的 cache / MPU 状态（`INFO` 行）。
+
+| 测的 | 怎么测 |
+|---|---|
+| 区域 | DTCM `0x20000000`（链接脚本不往这放东西，整块 128 KiB 可用）、AXI SRAM（`.bss` 里 256 KiB 数组）、SDRAM（`SDRAM.allocUninitialized()` 256 KiB） |
+| 操作 | 32 位顺序写、32 位顺序读（求和并校验）、`memcpy`（前半拷到后半，`bytes` 是拷的字节数）；都用 DWT 周期计数，5 次取最快 |
+| cache | 关一遍、开一遍，跑完恢复开机状态；开 cache 期间屏蔽网口中断，结果在 cache 恢复后再打 |
+| 读结果要知道 | `memcpy` 是工具链的 newlib-nano 版（`--specs=nano.specs`），反汇编看是逐字节拷。板卡包构建 D-cache 关（`boards.txt` 的 `-DD_CACHE_DISABLED`，`cores/arduino/main.cpp` 的 `premain()`），I-cache 开；app 不配 MPU，bootloader 跳转前关掉了它（`$BOOT` `IAPServer/IAP_server.c` 的 `server_jump_to_app()`），所以 SDRAM `0xC0000000` 落在 ARMv7-M 默认内存映射的 Device 区，开 D-cache 也不缓存它 —— 以 `INFO mpu_ctrl` 的实测为准 |
+
+### T3-03 · 用户的 `RS232` 不被别的 UART 抢（需求 R3-05）
 
 | 判据 | 前置条件 |
 |---|---|
-| sketch 调过 `Serial4.begin()` 之后，往端子发 5 个字节，`Serial_Test` **全部回显** | 板子在线、COM5 接在端子上、`$ARDUINO_CLI` 已配 |
+| sketch 调过 `Serial4.begin()` 之后，往端子发 5 个字节，`RS232` **全部回显** | 板子在线、RS232 适配器接在端子上（`RS232_PORT`）、`$ARDUINO_CLI` 已配 |
 
-## 板级端口 · RS485（`$BOOT/TestCase/RS485/rs485_test.c`）
+## 板级端口 · RS485
 
-跑在 **bootloader** 里，不是 app：`Core/Src/main.c` 的 `RS485_TEST_ENABLE` 置 1，`python tools/flash_bootloader.py` 编译烧写，然后 `python tools/rs485_echo.py --port <适配器口> --listen 8`。USART2 经 SP3485EN 出到端子。
-
-**前置条件**：USB-RS485 适配器 A 接端子 A10（J11-3）、B 接 A11（J11-2）；日志看端子 C05/C06（UART4）。**必须有第二台设备在 A/B 上**：PD4 同时驱动 `/RE` 和 `DE`，板子听不见自己。
-
-⚠️ **必须有第二台设备在 A/B 上。** PD4 同时驱动 `/RE` 和 `DE`（同一条网），发的时候收就是关的，**板子听不见自己** —— 没有适配器时 R2/R4 一条都判不了。
-
-| 编号 | 判据 | 不接线能不能判 |
-|---|---|---|
-| R1 | PD4 / PD5 当普通 GPIO 推 0 和 1，读回来一致 | ✅ 能，专门用来分开"没接线"和"这个脚是死的" |
-| R2 | 适配器上每 **3 s** 收到一帧 `RS485 HELLO <n>` | ❌ 要适配器 |
-| R4 | 主机发一串探针，板子原样发回；同时在日志口打出 **ASCII + hex** 两列 | ❌ 要适配器 |
+由工装测：链路回环是 `rs485` 会话，PD4 / PD5 引脚回读是 `pt.run rs485.pins`，见 [PORTTOOL-FLOW.md B.8](../modules/M4/PORTTOOL-FLOW.md)。原来 `TestCase/RS485` 的独立测试已删（[决策 87](../tables/DECISIONS.md)）。
 
 ## T1-21 / T1-22 · 掉电中断，怎么跑
 
@@ -385,10 +399,7 @@ python3 tools/run_s4.py --case a --bin <app.bin> --pad-to 1835008 --retry 3
 python3 tools/run_s4.py --case b --bin <app.bin> --pad-to 1835008 --retry 3
 ```
 
-⚠️ **`--pad-to` 两条都要，而且要补到 app 区上限 1835008。** 不补零时窗口只有几秒，
-人抓不住；补满之后传输窗口约 34 秒、擦写窗口约 20 秒。**旧写法给 `T1-21` 写 1200000、
-给 `T1-22` 完全不写，两个都不够** —— 脚本自己的文件头就写着 1200000 对擦写窗口太短。
-2026-09-18 实测：补到 1835008，`T1-21` 一次命中，`T1-22` 第三次命中。
+⚠️ **`--pad-to` 两条都要，而且要补到 app 区上限 1835008。** 不补零时窗口只有几秒，人抓不住；补满之后传输窗口约 34 秒、擦写窗口约 20 秒。
 
 | | |
 |---|---|
@@ -399,10 +410,10 @@ python3 tools/run_s4.py --case b --bin <app.bin> --pad-to 1835008 --retry 3
 ## T1-27 · 按住 BOOT0 强制进上传模式，怎么跑
 
 ```bash
-python3 tools/run_boot0_upload_mode.py --ports COM5
+python3 tools/run_boot0_upload_mode.py
 ```
 
-脚本只捕获日志并判定，**一次复位都不发**。整个手势由人做：
+脚本只读日志并判定，**一次复位都不发**；板子停在 bootloader，日志经 ST-Link 读 SRAM4 缓存，所以要接 ST-Link。整个手势由人做：
 
 1. 按一下复位键并松开
 2. **一看到系统指示灯快闪就按住 BOOT0**
@@ -411,7 +422,7 @@ python3 tools/run_boot0_upload_mode.py --ports COM5
 | | |
 |---|---|
 | **判据** | 日志同时出现 `** UPLOAD Mod ... (BOOT0 held)` 和 `** Reset cause: PIN` |
-| **为什么复位不能由 ST-Link 驱动** | BOOT0 是**启动模式引脚**。按住它的时候复位，芯片去启动 ST 自带的 DFU，我们的 bootloader 根本不执行 —— 串口全程静默，USB 上出现 `DFU in FS Mode`，要等下一次「BOOT0 为低」的复位才退出。2026-09-18 这么试了 11 次，每次都报「没按」，而板子其实在 DFU 里 |
+| **为什么复位不能由 ST-Link 驱动** | BOOT0 是**启动模式引脚**。按住它的时候复位，芯片去启动 ST 自带的 DFU，我们的 bootloader 根本不执行 —— 开机日志没有新记录，USB 上出现 `DFU in FS Mode`，要等下一次「BOOT0 为低」的复位才退出 |
 | **为什么用指示灯当信号** | `Core/Src/main.c` 的 `boot_window()` 让系统指示灯快闪 2 秒，**灯闪的那 2 秒就是窗口本身**；开机不动任何继电器（决策 71）。PC 这边看不见它。⚠️ **期间根本不看 BOOT0**，只在 2 秒那一刻读一次 |
 | ⛔ **破坏性** | 长按超过 10 秒会**武装恢复出厂，松手就执行**。而这条用例需要长按，两者分不开。**在已认领的板子上跑会抹掉 owner 密钥** |
 
@@ -446,7 +457,7 @@ python3 tools/run_journal_reclaim.py --inspect     # 只读，报告当前槽数
 > ⚠️ **整轮只要人到板子跟前 1 次**：路径 ② 复位后按住 BOOT0 超过 10 秒。放在 ② 是为了把唯一的动手步骤提到最前面，之后全部无人值守。
 > 回到出厂态走 ST-Link，不用人按；路径 ① 要一根接到板子 USB 口的线。
 
-⚠️ **2026-09-22 那一轮整轮通过记的是决策 72 之前的规则**（公开根、按 BOOT0 认领、`rotate_keys.sh`）。**这份新剧本还没上板跑过。**
+⚠️ 决策 72 之后，路径 ①② 的用例 `T2-35` `T2-36` 2026-10-08 上板通过（见 [M2](../modules/M2-ownership.md) 用例表）；这份剧本整轮连跑有没有做过，没有记录。
 
 ### 怎么跑
 
@@ -458,7 +469,7 @@ python3 tools/run_five_paths.py --only 1 2                        # 只跑这几
 ```
 
 ⚠️ **破坏性**：整片擦除（校准值先读出再写回）、前后认领两次。
-⚠️ **`$BOOT/Debug/` 可能是工装镜像**（`PORTTOOL_ENABLE=1`），所以用 `--elf` 指定 bootloader；脚本见到工装镜像会拒绝烧。
+⚠️ 用 `--elf` 指定 bootloader；脚本见到工装镜像（`PORTTOOL_ENABLE=1`）会拒绝烧。工装从决策 86 起不再编进 `$BOOT/Debug/`，但旧的构建可能还留在那里。
 ⚠️ **上板前先用当前 core 重编 `Output/probe-images/` 里的两个探针镜像** —— 旧镜像里的 `owner_root_ro.c` 读的是旧地址。
 
 自动认领时脚本把 IAPTool 的用户配置目录挪进 `--keydir`，生成的私钥落在那里，**本机真正的私钥不会被读到或覆盖**。
@@ -493,7 +504,7 @@ python3 tools/reset_board_to_factory_state.py --elf <boot.elf>  # 擦除 + 烧 b
 python3 tools/reset_board_to_factory_state.py --check-only      # 只验证，绝不写
 ```
 
-**判据要两类证据，缺一不判 PASS** —— 一类读 flash（走 SWD），一类读串口，互不经过对方：
+**判据要两类证据，缺一不判 PASS** —— 一类读 flash，一类读开机日志（出厂板子停在 bootloader，日志经 SWD 读 SRAM4 缓存），互相印证：
 
 | 类别 | 判据 |
 |---|---|
@@ -515,16 +526,13 @@ python3 tools/reset_board_to_factory_state.py --check-only      # 只验证，�
 
 | 测不到 | 为什么 |
 |---|---|
-| 两块板的 MAC 是否真的不同 | 手上只有一块板 |
+| 两块板的 MAC 是否真的不同 | 归 `R1-14`，2026-09-28 两块板实测过 |
 | 掉电中断 | 归 `T1-21`/`T1-22`；扇区 15 回收中途断电归 `T2-34`（主机）和上板断电那一项 |
 | 精确作废单张叶证书 | 归 `T2-15`–`T2-20` |
 
-## 未覆盖
-
 ## R1-31 · 备份域失效能被发现：已实地验证，没有脚本
 
-**没有专门的脚本，也不打算写** —— 2026-09-19 排查 `T1-17` 时正负两个方向都真实触发过，
-证据比脚本更硬。判据在 `$BOOT/IAPServer/iap_auth.c` 的 `iap_auth_report_backup_domain()`。
+**没有专门的脚本，也不打算写** —— 2026-09-19 正负两个方向都在真板子上触发过。判据在 `$BOOT/IAPServer/iap_auth.c` 的 `iap_auth_report_backup_domain()`。
 
 | 方向 | 怎么出现的 | bootloader 打的 |
 |---|---|---|
@@ -537,7 +545,6 @@ python3 tools/reset_board_to_factory_state.py --check-only      # 只验证，�
 ⚠️ **要再现得自己制造一次备份域丢失。** core 自带 `resetBackupDomain()`
 （`$CORE_REPO/cores/arduino/stm32/backup.h`）能清整个域，不必拆电池。
 
-**完整的覆盖矩阵和每条待补用例的设计骨架在 [docs/STATUS.md](../tables/STATUS.md)**，这里只留摘要：
+## 未覆盖
 
-| ID | 内容 | 为什么还没做 |
-|---|---|---|
+还没有用例的需求和每条的状态在 [STATUS.md](../tables/STATUS.md)。

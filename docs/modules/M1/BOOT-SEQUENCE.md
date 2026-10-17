@@ -2,7 +2,7 @@
 
 **这份回答一件事：一次复位之后，板子怎么决定跑 app 还是留在 bootloader，以及怎么把硬件交出去。**
 
-2026-09-16 从固件注释里整理出来。判据和用例在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`，
+判据和用例在 `$PROD/docs/engineering/HOW-TO-RUN-TESTS.md`，
 已拍板的取舍在 `$PROD/docs/tables/DECISIONS.md`，flash 上那本账在 [SECTOR-15.md](SECTOR-15.md)。
 
 ## 两个阶段，分开的理由
@@ -12,8 +12,7 @@
 | **Phase 1** | **只决定，不动手**：跑 app 还是留下，返回答案 | `$BOOT/IAPServer/IAP_server.c` 的 `server_decide()` |
 | **Phase 2** | 按上一阶段的结论**打开对应的命令通道** | 同文件 `IAP_servers_start()` |
 
-**Phase 1 刻意不跳转**，跳转由调用方自己做（`server_jump_to_app()`），
-这样它可以在跳之前先干自己的事，比如开机蜂鸣。
+**Phase 1 刻意不跳转**，跳转由调用方自己做（`server_jump_to_app()`）。
 
 ### Phase 1 为什么能在任何外设初始化之前跑完
 
@@ -29,10 +28,10 @@ USB、以太网、FMC 一个都不用碰。
 
 | 阶段 | 接入点 | 那时已经起来的东西 |
 |---|---|---|
-| Phase 1 | `USER CODE BEGIN SysInit` | 只有最小 GPIO + UART4 |
+| Phase 1 | `USER CODE BEGIN SysInit` | 只有最小 GPIO；`RS232_Enable`（PB10）留在低，收发器从不打开，UART4 不初始化（`R1-43`）。`printf` 只进 SWO（ITM）和 SRAM4 开机缓存（[BOOT-LOG.md](BOOT-LOG.md)）。工装镜像（`PORTTOOL_ENABLE=1`）例外：它另开收发器和 UART4 当命令口 |
 | Phase 2 | `USER CODE BEGIN 2` | 这个模式需要的外设都起来之后 |
 
-Phase 1 里先在开机窗口（系统指示灯快闪那 2 秒）内反复轮询 BOOT0，再把结果交给 `server_decide()`；
+Phase 1 里先过开机窗口（系统指示灯快闪那 2 秒，`main.c` 的 `boot_window()`），窗口结束那一刻读一次 BOOT0：没按就是不按；按着就留在 bootloader，之后只继续看是否长按到 10 秒武装恢复出厂。结果交给 `server_decide()`；
 返回 `IAP_NONE` 就直接 `server_jump_to_app()`。
 
 ## BOOT0 按住的话，别的都不算
@@ -42,7 +41,7 @@ Phase 1 里先在开机窗口（系统指示灯快闪那 2 秒）内反复轮询
 
 ⚠️ **即便如此，那两次读取仍然必须发生**：
 - `boot_handoff_take()` 是消费请求记录的唯一动作 —— 不读，那条请求会把**下一次**启动也钉在这里
-- 签名结果要喂给开机蜂鸣和 UDP 服务名，这两件事都不参与这次决定
+- 签名结果要喂给 UDP 发现的角色名和 `getapprevoked`，这两件事都不参与这次决定
 
 ## 输出一开机就置 0，一直保持到 sketch 接管（决策 81）
 
@@ -64,8 +63,8 @@ DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）、KNX 发送脚 PB14 拉�
 ## 开机检查欠压复位（BOR）档位
 
 3.3 V 掉到 BOR 门限以下时芯片由硬件直接复位，复位后输出全为 0（[IEC-06](../../../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md)）。
-门限存在选项字节里，**bootloader 只读不写**：`MX_UART4_Init()` 之后 `bor_level_report()`（`$BOOT/IAPServer/bor_check.c`）读
-`FLASH->OPTSR_CUR` 的 `BOR_LEV`（第 3:2 位），不是 3 档（2.7 V）就在串口打一行警告。
+门限存在选项字节里，**bootloader 只读不写**：`MX_GPIO_Init()` 之后 `bor_level_report()`（`$BOOT/IAPServer/bor_check.c`）读
+`FLASH->OPTSR_CUR` 的 `BOR_LEV`（第 3:2 位），不是 3 档（2.7 V）就在开机日志里打一行警告。
 
 | `BOR_LEV` | 门限（`stm32h7xx_hal_flash_ex.h` 里 `OB_BOR_LEVELx` 的注释） |
 |---|---|
@@ -80,7 +79,7 @@ DO1–DO8 置 0、AO 的 PA4 / PA5 拉低（AO 0 mA）、KNX 发送脚 PB14 拉�
 STM32_Programmer_CLI -c port=SWD -ob BOR_LEV=3
 ```
 
-⚠️ 这条命令的写法照 STM32CubeProgrammer 的选项字节语法，**还没在本板上跑过**；写完后板子上电，串口不再打那行警告就算写对了。
+⚠️ 这条命令的写法照 STM32CubeProgrammer 的选项字节语法，**还没在本板上跑过**；写完后板子上电，开机日志里不再有那行警告就算写对了。
 
 ## 复位原因交给 app（决策 80）
 
@@ -94,11 +93,9 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 **一个正在跑的镜像要求「下次复位后留在上传模式」，只有这一条通道** ——
 `$BOOT/IAPServer/IAP_boot_handoff.h` 的 `boot_handoff_request()`，bootloader 只读 `boot_handoff_take()`。
 
-四条理由，其中第一条是踩出来的：
-
 | | 为什么不是 RTC 备份寄存器 |
 |---|---|
-| **没有前置条件** | 写 RTC 备份寄存器时，只要 `PWR_CR1.DBP` 恰好没置位就**静默失效**，编译器和 HAL 返回值都不会告诉你。⚠️ **以太网升级路径曾经就这么静默坏掉**：`iap_auth` 的 nonce 计数器在最后一步清了 DBP，几毫秒后那次写根本没落地，板子直接又启动回 app |
+| **没有前置条件** | 写 RTC 备份寄存器时，只要 `PWR_CR1.DBP` 恰好没置位就**静默失效**，编译器和 HAL 返回值都不会告诉你。以太网升级路径曾因此静默坏过一次 |
 | **不需要初始化** | SRAM4 不用开时钟、不用 MPU 区、不用外设配置，所以启动决策能在**任何东西初始化之前**做完 |
 | **生命期正好** | RAM 挺得过热复位、挺不过掉电，而「进一次上传模式」正好是热复位范围的请求。带电池的寄存器会把过期请求留到下一次上电 |
 | **不依赖 VBAT 和 RTC 配置** | — |
@@ -124,11 +121,9 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 **不管正在跑的镜像怎么配置了它的 cache，这个文件都是对的，而且不需要任何 MPU 区。**
 （这条正是 `$PROD/docs/modules/M3/CONSTRAINTS.md` 那条约束的落地：不能依赖 app 恰好关掉了什么。）
 
-### 读回校验：旧方案缺的就是这一条
+### 读回校验
 
-写完再读回来确认。**RTC 备份寄存器那套缺的正是它** ——
-一次被硬件丢弃的写和一次成功的写**长得一模一样**，于是板子带着旧标志复位、启动进错误的模式，
-而且哪儿都没有记录。
+写完再读回来确认 —— 一次被硬件丢弃的写和一次成功的写**长得一模一样**，不读回就会带着旧标志复位、启动进错误的模式。
 
 ### 认不出来的时候怎么办
 
@@ -146,46 +141,21 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 只有 `server_decide()` 返回 `IAP_NONE` 时才走这条路，而且**只在启动路径上**——
 上传完成走的是复位，不是跳转，这也是 I-cache 不掺和进来的原因。
 
-| 步 | 做什么 | 为什么 |
-|---|---|---|
-| 1 | `HAL_MPU_Disable()` | 我们的 MPU 区描述的是 bootloader 的 lwIP 缓冲，对 app 毫无意义；而那条 4GB 的禁止访问毯子会让 app 用不了外部 SDRAM。**一条寄存器写，不像外设反初始化那样有东西可漏** |
-| 2 | **先关收发器** `Disable_RX_RS232()` | ⚠️ **顺序不能反。** UART4 的 MspDeInit 会把 PC10（MAX3221 的数据输入）留成浮空，而**浮空输入接在仍然带电的收发器上，会把它拾到的任何东西驱动到线上** |
-| 3 | `HAL_UART_DeInit(&huart4)` | UART4 是 Phase 1 唯一初始化过的外设（为了启动日志）。它的 MspDeInit 顺带释放 PC10/PC11；MAX3221 的使能是普通 GPIO，得单独交还，这样 app 看到的收发器状态和冷启动的板子一样 |
-| 4 | 关中断、停 SysTick、交回干净的 cache | I-cache 关着时是空操作 |
+交还硬件的步骤、顺序和每步的理由在 [M3 应用运行环境](../M3-app-runtime.md) 第 1 节，这里不抄。
 
-⚠️ **交接的那一瞬间，串口上会多出两个坏字节。** 2026-09-16 实测：
-一整段启动 596 字节里，bootloader 自己那 502 字节**一个坏字节都没有**，
-唯一的非 ASCII 出现在偏移 502 —— 正好是 app 打出第一行的位置（`[` `0xC2`，然后才是完整的 `[BOOT] millis=`）。
+⚠️ **交接那一瞬间串口上多两个坏字节**（偏移 502，`[` `0xC2`，bootloader 自己的输出里没有），原因未知，功能无影响；待办在 `$PROD/work/TODO.md`「优先级最低」，取舍见 `$PROD/docs/tables/DECISIONS.md` 第 49 条。
 
-**原因未知。** 已排除的假设见 `$PROD/work/TODO.md`；取舍见
-`$PROD/docs/tables/DECISIONS.md` 第 49 条。
+### 跳转函数必须是 `naked`
 
-### 跳转函数必须是 `naked`，这是踩出来的
-
-**在普通 C 函数里调 `__set_MSP()` 是不安全的**，只要那个函数后面还有代码要跑：
-编译器不知道硬件栈指针刚被挪走，仍然按**旧栈**生成它的收尾代码（恢复被调用者保存的寄存器、释放局部变量）。
-
-> 真实发生过：`server_jump_to_app()` 编译器生成的收尾（`add sp,#0xA0` + `ldmia sp!,{r4-r9,sl,lr}`）
-> 在 MSP 已经指向 app 的新栈之后才执行，把 SP 弄成 `app_msp+0xA0`（`0x240800A0`，正好越过 AXI SRAM 末尾），
-> 在弹寄存器时总线错误。
-
-`naked` 函数没有任何编译器生成的开头和收尾，**所以设置 MSP 和跳转之间不可能插进任何东西**。
+普通 C 函数里改了 MSP 之后，编译器仍按**旧栈**生成收尾代码（恢复寄存器、释放局部变量），SP 被弄乱后总线错误 —— 在 `server_jump_to_app()` 上真发生过。`naked` 的 `jump_to_app()` 没有编译器生成的开头和收尾，**设置 MSP 和跳转之间插不进任何东西**。
 
 ## 命令分帧：必须等到结束符
 
-一条文本命令由结尾的 `'
-'` 或 `'
-'` 分帧，两种都收
-（上位机发 `'
-'`；只发 `'
-'` 的裸终端也要能用）。
+一条文本命令由结尾的 `'\n'` 或 `'\r'` 分帧，两种都收（只发 `'\r'` 的裸终端也要能用）。
 
 **不等结束符会怎样**：一条比一个 USB CDC 包或一个 TCP 段更长的命令 ——
 例如 `flash <size> <crc32> <128-hex-sig> <cert_hex> <noncesig_hex>`，约 610 字节 ——
-会拆成好几次 `IAP_data_recv()` 送达。
-
-> 真实发生过：旧写法每次回调都从偏移 0 覆写接收缓冲，于是轮到解析时**只剩最后一个分片**，
-> 这就是第一次在真硬件上端到端测试时 `flash` 被当成「Unknown command」的原因。
+会拆成好几次 `IAP_data_recv()` 送达；每次回调都从偏移 0 覆写的话，解析时只剩最后一个分片，`flash` 会被当成 `Unknown command`。
 
 兜底有两层：缓冲写满也算一帧；结束符永远不来则由 `IAP_task()` 的陈旧缓冲检查兜住。
 
@@ -212,6 +182,10 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 | **不是持有者发来的数据直接丢弃** | 而不是混进正在接收的镜像里 |
 | **安静超过 60 秒就断** | 一个卡住的对端不能一直占着那唯一的会话槽。计时用 lwIP 的 500 ms 粗粒度 tick，所以是每秒轮询一次、60 秒放弃 |
 
+## 「link is DOWN」要等 5 秒才下结论
+
+`$BOOT/IAPServer/IAP_server.c` 的 `IAP_link_report()`。lwIP 初始化时只读一次 PHY 状态，那时自协商常常还没完成；所以开通道后 **5 秒链路仍没起来**才打这句；早于此判会先报 DOWN 再拿到 IP。2026-10-10 真板子核实：插网线不报，拔网线约 5 秒后报。
+
 ## 网络发现：限流，以及那条日志为什么必须闭嘴
 
 `$BOOT/IAPServer/udp_server.c` 的 `discovery_reply_allowed()`。
@@ -227,14 +201,12 @@ bootloader 开机先读走并清掉 `RCC->RSR`，app 再读它就是空的。所
 理由是四步，缺一步就看不出必要性：
 
 1. 有人用发现请求猛灌板子
-2. 如果**每丢一个包就打印一行**，那些 `printf` 要从 **UART4** 出去
-3. **UART4 是 115200 波特 ≈ 每秒 11.5 KB**（`$BOOT/Core/Src/usart.c` 里 `huart4.Init.BaudRate`），
+2. 如果**每丢一个包就打印一行**，那些 `printf` 都要进日志：bootloader 是 SRAM4 开机缓存 + SWO（[BOOT-LOG.md](BOOT-LOG.md)）
+3. **开机缓存只有 4 KB**，几十行就把开机记录和故障记录整条挤掉；接着调试器时每个字符还要等 SWO 腾出位置，
    比以太网灌进来的速度慢几个量级，板子会卡在 `printf` 里
-4. **于是这条日志本身，就比它要报告的那次洪水更像一次拒绝服务**
+4. **于是这条日志本身，就比它要报告的那次洪水更像一次拒绝服务**，还抹掉了真正要看的记录
 
-> ⚠️ **2026-09-16 发现：这段论证两边注释已经分叉。** 代码一字不差，
-> 但 core 那份把「at 115200 baud」删了 —— 少了第 3 步，整个推理就断了一环。
-> **现在论证只在这里写一份，两边注释各留一句结论并指过来。**
+论证只在这里写一份，两边代码注释各留一句结论指过来。
 
 ## MAC 地址从芯片 UID 派生
 
@@ -256,6 +228,4 @@ MAC[5] = UIDw0 ^ UIDw1 ^ UIDw2
 
 **用户 app 可以自己另选一个** —— 设备是靠 UID 定位的，不靠地址。
 
-⚠️ **「两块板算出来的 MAC 真的不同」这件事还没验过**（只有一块板），
-在 `$PROD/work/TODO.md` 里等第二块板。派生算法撞了的话，
-量产时表现为同网段大面积 IP 冲突。
+两块板算出的 MAC 不同，2026-09-28 实测（`R1-14`，每块板 MAC 互不相同，见 [M1-firmware-upgrade.md](../M1-firmware-upgrade.md) 功能表）。

@@ -51,7 +51,7 @@ UPSTREAM = "上游第三方代码自带的，不属于本产品，不动"
 # (prefix or regex, destination, why: which repos it needs)
 RULES = [
     (C + "system/Middlewares/OpenAMP/", UPSTREAM, "OpenAMP 自带"),
-    (B + "TestCase/", FIRMWARE, "只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件"),
+    (B + "TestCase/", FIRMWARE, "只用 `$BOOT`；由 `PORTTOOL_ENABLE` 编进工装固件"),
     (B + "tests/", BOOT_U, "T1-16、owner 区各组、T2-34、P16、P17：只编或只扫 `$BOOT`"),
     (C + "tests/", CORE_U, "P3、P4、P5、P15、P19、T2-21：只用板卡包（和 `arduino-cli`）"),
     (D + "tools/", DOCS, "P7、P8、P9、P12、P13、P14、P18：查 `$PROD`"),
@@ -77,6 +77,7 @@ RULES = [
     (X, INFRA, "本机配置、平台层、烧录、抓串口、板子状态、端口小工具、本仓说明"),
     # PortTool repo
     (P + "TestCase/host/porttool_caps/", PT_U, "T4-01 / 模拟板：编工装固件，决策 78 的例外"),
+    (P + "TestCase/host/porttool_demo/", PT_U, "T4-05：模拟板 + 板卡包的 FixtureDemo，三个仓；按决策 78 的例外留在 PortTool（决策 104）"),
     (P + "TestCase/host/porttool_plan/", PT_U, "T4-04：假板子 + 已提交的能力表"),
     (P + "TestCase/host/porttool_panel/", PT_U, "T4-02 / T4-03：面板 + 模拟板，决策 78 的例外"),
     (P + "TestCase/plans/", PT_SHIP, "随 PortTool 发出去的方案文件"),

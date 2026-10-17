@@ -20,9 +20,13 @@ Blocked by: KEX-02, KEX-03
 | 问题 | 定了什么 | 一句理由 |
 |---|---|---|
 | 几个例程 | `KNX_Switch`（继电器 1–6，对象 1–12）、`KNX_Inputs`（DI 1–8，对象 13–20）；编程不单独成例程，两个例程开机都打印地址和配没配置 | 编程键和系统灯由库统一处理，单独一个例程只剩打印地址 |
-| 串口打印（USB） | 开机 `KNX: address 1.1.20, configured` 或 `KNX: not configured - program it with ETS`；收发各一行，如 `KNX RX relay 3 switch = 1`、`KNX TX relay 3 status = 1`、`KNX TX DI 2 = 1` | 不开 ETS 也看得到发生了什么，用例也靠它判 |
+| 串口打印（决策 100 起走 RS232） | 开机 `KNX: address 1.1.20, configured` 或 `KNX: not configured - program it with ETS`；收发各一行，如 `KNX RX relay 3 switch = 1`、`KNX TX relay 3 status = 1`、`KNX TX DI 2 = 1` | 不开 ETS 也看得到发生了什么，用例也靠它判 |
 | 什么时候发 | 继电器状态在开关真正改变后发、被读时回答；DI 每 20 ms 采样、变了就发、被读时回答；开机不主动发、不周期发 | 只做必要的 |
-| 写法 | 直接用板卡包脚名 `REL_1`…`REL_6`、`DIN_1`…`DIN_8`；不用库里只管两路的继电器配置；文件头写接线、所用对象、ETS 步骤（链到 `OpenPLC_ETS_Prod` 的 README）、预期打印；**KNX Role 不是 TP 时编译报错** | 产品是 `MV-07B0`，角色选错要到 ETS 下载时才暴露 |
+| 写法 | 直接用板卡包脚名 `REL_1`…`REL_6`、`DIN_1`…`DIN_8`；不用库里只管两路的继电器配置；文件头写接线、所用对象、ETS 步骤（链到 `OpenPLC_ETS_Prod` 的 README）、预期打印；**KNX Role 不是 TP 时编译报错**（2026-10-17 起角色由例程自己写 `OPENPLC_KNX_ROLE(TP_DEVICE);`，这条检查已删，见 [M3](../../../docs/modules/M3-app-runtime.md) `R3-24`） | 产品是 `MV-07B0`，角色选错要到 ETS 下载时才暴露 |
+
+2026-10-09 [决策 95](../../../docs/tables/DECISIONS.md)：TP 设备仍是默认角色，下表照旧成立；另加 IP 网关例程和 `KNX_BusMonitor`。
+
+2026-10-10 加 `KNX_Temperature`（测试盒用例「温度传到 PLC」「按温度联动」，用户认可）：对象 21 温度输入（DPT 9.001，总线写入、开机和每 60 s 发读请求），对象 22 开关输出（DPT 1.001，温度过阈值时发，回差 0.5 °C）；已有编号不变（KEX-02），应用版本 2 → 3。
 
 ## 引出了什么新的未知
 

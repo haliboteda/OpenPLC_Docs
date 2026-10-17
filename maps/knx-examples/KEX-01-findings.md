@@ -16,9 +16,9 @@
 1. 解压 `OpenKNXproducer-4.3.12.zip`
 2. 源 XML 写成单个文件（Catalog、ApplicationPrograms、Hardware 放在同一个 `<Manufacturer>` 下），命名空间 project/20，ID 末尾 4 位写 `0000`（签名时会替换成哈希）
 3. `OpenKNXproducer-x64.exe knxprod -V <knx_project_20.xsd> -o out.knxprod src.xml`（XSD 从 `Knx.Ets.Xml.ObjectModel.dll` 里取出；不加 `-V` 就跳过校验）
-4. 在 ETS5 里导入 —— **没测**
+4. 在 ETS5 里导入（2026-10-03 成功）
 
-## 还没验
+## 后来验证的
 
-- 导入后 ETS 能给 thelsing 协议栈下载应用（加载过程照 demo 抄的）—— 要等新的 STKNX 数据链路层上板
+- 导入后 ETS 能给 thelsing 协议栈下载应用：2026-10-12 在真总线上下载成功（板子跑 `KNX_Temperature`，见 [KEX-04-findings.md](KEX-04-findings.md)「2026-10-12」）
 （源 XML 和生成物的位置已定：都放 `OpenPLC_ETS_Prod`，用户 2026-10-03）

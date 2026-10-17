@@ -1,14 +1,6 @@
 # 扇区 15 设计说明
 
-> ⚠️ **代码已按[决策 72](../../tables/DECISIONS.md) 实施并提交（2026-10-01），还没上板验收**，见 [work/TODO.md](../../../work/TODO.md)「出厂无根、第一次上传自动认领」。实施前的布局（没有根区，metadata 从 `0x081E2000` 起）用 `git log` 取回本文件 2026-09-30 之前的版本。
-
-> ✅ **2026-09-21：代码已按这份实现并上板验收通过。**
-> 实测：`Bootloader state: 28/3840 metadata slots used`，一次上传占 **7 格**（决策 72 之前的布局；现在共 3583 格）。
-> ⚠️ **仍未验证的只有一处** —— reclaim 搬运校准值那条分支，因为校准值区还是空的。
-> 决策见 `DECISIONS.md` 第 61 条和[烧录前比版本 + 校准值住进扇区 15](../../../maps/version-gate-and-calibration/map.md)。
->
-> **这份文件原名 `JOURNAL.md`。** 改名是因为事件日志删掉之后，这个扇区不再是 journal，
-> 它装的是 firmware metadata 和校准值两样东西；决策 72 之后还装根区（owner 链和撤销记录）。
+> 布局按[决策 72](../../tables/DECISIONS.md)，2026-10-08 上板通过；回收时搬运校准值 2026-09-22 上板验过（`T1-28`）。本文件原名 `JOURNAL.md`。
 
 Flash 最后一个扇区（`IAP_STATE_SECTOR_ADDR` = `0x081E0000`，128 KiB）。
 代码在 `IAPServer/bootloader_state.{c,h}`，判定链在 `IAPServer/IAP_server.c` 的 `server_decide()`。
@@ -26,7 +18,7 @@ Bootloader 不能靠看 app 的头几个字节猜「这像不像一个合法程�
 ```
 0x081E0000  ┌─ 校准值区  8 KiB ─────────────────────────┐
             │  固定地址，不 append                       │
-            │  工装经 JLINK 写；固件不提供写入命令        │
+            │  工装固件 pt.calw 写；bootloader、app 不写  │
 0x081E2000  ├─ 根区  8 KiB ─────────────────────────────┤
             │  'O' 段 32 × 160 B：认领 / 换主 / 恢复出厂  │
             │  'R' 段 96 × 32 B：被撤销的叶              │
@@ -70,7 +62,7 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 
 其余字节保持 `0xFF`。
 
-**系数的含义**：`实测 ≈ gain × 板子的标称值 + offset`，和工装的拟合同一个方向（`$PORTTOOL/internal/ptcal`）。单位：AI1 是 mV，AI2、AO1、AO2 是 mA。
+**系数的含义**：`实测 ≈ gain × 板子的标称值 + offset`，和工装的拟合同一个方向（`$PORTTOOL/src/ptcal`）。单位跟这一路的档位走：电压档 mV、电流档 mA（[决策 134](../../tables/DECISIONS.md)），AI、AO 都一样；档位记在 PC 的登记里（[决策 102](../../tables/DECISIONS.md)）。
 输入直接套这条式子；输出要反过来算：要出目标值，写给硬件的是 `(目标 − offset) / gain`。
 
 | 读到的情况 | 判为 | app 怎么做 |
@@ -83,7 +75,7 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 
 | 路径 | 谁在场 | 多久一次 | 擦什么 | 掉电后果 |
 |---|---|---|---|---|
-| **工装写校准值** | **人在场** | 出厂 + 偶尔重校 | PC 经 JLINK 读出扇区 15 → 换掉前 8 KiB → 擦整扇区 → 写回（[修正值怎么写进板子](../../../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md)） | 当场重来；PC 上按 UID 留着存档 |
+| **研发烧校准值** | **人在场** | 出厂 + 偶尔重校 | 面板经控制口发 `pt.calw`，工装固件读出扇区 15 → 换掉前 8 KiB → 擦整扇区 → 写回 → 读回比对（[决策 142](../../tables/DECISIONS.md)，取代经 ST-Link 烧；[修正值怎么写进板子](../../../maps/per-board-calibration/issues/CAL-04-how-do-values-get-onto-the-board-and-survive-the-reflash.md)、[决策 97](../../tables/DECISIONS.md)） | 当场重来；PC 上按 UID 留着存档 |
 | **升级写 metadata** | 无人值守 | 511 次里的 510 次 | **不擦**，纯 append | 零风险 |
 | **认领 / 换主 / 撤销** | 无人值守 | 每次一条 | **不擦**，往根区 append | 最多留一条半写的记录，被忽略 |
 | **回收**（三种触发，见下） | 无人值守 | 见下 | 整扇区 | 见「回收时掉电」 |
@@ -111,7 +103,9 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 不带签名读起来就是一条首次认领 —— 理由同今天的 `setowner --wipe`（[M2](../M2-ownership.md)「`setowner --wipe`」）。
 签名在动第一个字节之前已经验过。
 
-**备份 SRAM 只靠 VBAT 时保持内容，前提是 bootloader 置位 `PWR_CR2.BREN` 并等 `BRRDY`；擦一个扇区典型 1 s、最长 2 s（x64）**，出处见 [ROOT-05-findings.md](../../../maps/root-key-without-bootloader-reflash/ROOT-05-findings.md)。⚠️ 系统复位后是否保持、tamper 是否会擦，手册没直说，要上板验。
+**备份 SRAM 只靠 VBAT 时保持内容，前提是 bootloader 置位 `PWR_CR2.BREN` 并等 `BRRDY`；擦一个扇区典型 1 s、最长 2 s（x64）**，出处见 [ROOT-05-findings.md](../../../maps/root-key-without-bootloader-reflash/ROOT-05-findings.md)。系统复位后、断主电只靠 VBAT 时都保持内容，2026-10-08 已上板验证；⚠️ tamper 是否会擦，手册没直说，没验。
+
+**每次读写备份 SRAM 前都要重新置位 `PWR_CR1.DBP`**：`iap_auth_report_backup_domain()` 写完 RTC 备份寄存器会清掉它，之后写备份 SRAM 会出 BusFault（2026-10-08 上板 `T2-25` 复现）。
 
 ### 开机判断
 
@@ -130,19 +124,20 @@ M 记录占 7 格而不是 4 格，是为了把授权这个镜像的**那张 128
 | 掉电发生在 | 电池正常 | 电池也没电 |
 |---|---|---|
 | ①–② | 什么都没丢 | 同左 |
-| ③–⑤ | 从暂存恢复根区和 M 记录；校准值由工装按 UID 存的副本重写 | **根和 M 记录丢失**：回到没有根，等同恢复出厂，下次上传自动认领、重传固件 |
+| ③–⑤ | 从暂存恢复根区和 M 记录；校准值由 PC 上按 UID 的存档重写 | **根和 M 记录丢失**：回到没有根，等同恢复出厂，下次上传自动认领、重传固件 |
 | ⑥ | 完整标记在，暂存被忽略 | 同左 |
 
 **备份 SRAM 稳压器没就绪（`BRRDY` 不亮）时，回收照做，只打一条警告。**
 不就绪就拒绝的话，这块板就再也恢复不了出厂、也换不了主；代价是回收途中掉电时暂存可能丢，后果同上表「电池也没电」那一列（用户 2026-09-30 定）。
 
-⚠️ **校准值在回收窗口里只在 RAM 里**，靠「工装按板子 UID 留一份副本」兜住 ——
-把后果从「回产线重新标定」降成「重写一次」。
+⚠️ **校准值在回收窗口里只在 RAM 里**，靠 PC 上按板子 UID 留的存档兜住 —— 后果是「重写一次」，不是「重新标定」。
 
 ### 为什么只能在这几处擦
 
 回收只在 bootloader 自己手里、且上一步已经通过授权时发生（上传、认领、换主、撤销都要先验签），
 所以远程调用者逼不出一次擦除。**被拒绝的命令一律不写 flash**，见下。
+
+工装固件的 `pt.calw` 也擦整个扇区 15，但它只在工装镜像里、只收 RS232 控制口的命令，产品的 bootloader 和 app 里没有它（[决策 142](../../tables/DECISIONS.md)）。
 
 ## 上电：扫一遍
 
@@ -176,7 +171,7 @@ crypto 自检过了吗？（sha256_selftest）
   │
   └─ 有 ──► app_size 在 (0, IAP_APP_MAX_SIZE] 吗？
              └─► 按 app_size 现算 app 区的 SHA-256
-                  └─► 用 signature + cert 验签，并查这张叶有没有被撤销
+                  └─► 用 signature + cert 验签（不查撤销：撤销只挡下一次上传，决策 60）
                        ├─ 过 ───► app 有效 ──► 跳转进 app ✅
                        └─ 不过 ─► 停在 bootloader，身份报 BOOTLD-INVALID
 ```
@@ -211,22 +206,7 @@ ST-Link 直接重烧整片。这是刻意的取舍，见 `DECISIONS.md` 第 62 �
 | 情况 | 扫描时看到 | 串口现象 | 恢复 |
 |---|---|---|---|
 | **出厂空板 / 刚擦过** | 第一格就是 `0xFF` | `metadata absent` | 第一次上传就正常 |
-| **上传中断 / 签名不过 / 叶被撤销** | 有 `M`，但验签失败 | `metadata present` + `App signature invalid` | 重传 |
+| **上传中断 / 签名不过 / 换过根** | 有 `M`，但验签失败 | `metadata present` + `App signature invalid` | 重传 |
 
 ⚠️ **事件日志删掉之后，这两种和「换了新 bootloader 读到旧布局」不再有独立的日志痕迹可查** ——
 第三种会表现成第一种（旧记录认不出 → 擦掉 → 看起来像空板）。这是删日志的已知代价。
-
-## 相对改动前的变化
-
-下表左列是 2026-09-21 之前的行为，供查旧板子/旧日志时对照：
-右列是 2026-09-21 实现并上板验过的版本（决策 72 之前）；现在的代码是上文「布局」那一版：3583 格、511 次（`$BOOT/IAPServer/bootloader_state.c:33-41`）。
-
-| | 改动前 | 现在（已实现并验过） |
-|---|---|---|
-| 扇区起点 | 整个 128 KiB 都是 journal，metadata 从 `0x081E0000` 起 | 前 8 KiB 给校准值，metadata 从 `0x081E2000` 起 |
-| 事件日志 | **有**，八种事件、`'L'` 记录、`prev_hash` 防篡改链 | **全删** |
-| 容量 | 4096 格，一次升级 8 格（7 + 1 条日志），约 512 次 | 3840 格，一次升级 7 格，**548 次** |
-| 满了怎么办 | `journal_reclaim()` 整扇区擦，再记一条 `JOURNAL_RECLAIMED` | 先读出校准值 8 KiB，擦，写回校准值 + 新 metadata |
-| 校准值 | **还没实现** | 固定地址，工装经 JLINK 写 |
-
-**要查改动前的行为，用 `git log` 取回本文件改名前的版本** —— 它当时叫 `JOURNAL.md`，同目录，2026-09-21 随本次改名删除。

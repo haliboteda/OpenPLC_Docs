@@ -25,6 +25,8 @@ Blocked by: EXB-01
 | 写对的判据 | 写完关文件，从卡上读回算 CRC32，USB 串口打 `SD: wrote NAME, N bytes, crc32=XXXXXXXX`；PC 拿原文件算一遍比对 | YMODEM 每包校验证明不了卡上的内容 |
 | 插拔和日志 | 每 50 ms 读卡检测脚 PE6（低 = 插着），连续两次一样才算数；插入时重新 `SD.begin()`；打 `SD: card inserted` / `SD: card removed`。**日志全走 USB 串口，RS232 只走 YMODEM**；文件头写明传文件时不接网线最稳 | 板卡包拿到 IP 时会在 RS232 上打一行 `[NET]`（`cores/arduino/main.cpp`），YMODEM 发送端当噪声重传 |
 
+2026-10-11 改（[决策 100](../../../docs/tables/DECISIONS.md)）：文件改经 USB 传，日志改走 RS232；其余照旧。
+
 ## 引出了什么新的未知
 
 无。

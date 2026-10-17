@@ -8,7 +8,7 @@ python tools/list_wayfinder_map_frontier.py --all
 
 ## Destination
 
-自有库的 20 个例程（`OpenPLC_Ports` 13、`OpenPLC_KNX` 5、`OpenPLC_SDRAM` 2）各有一条真板用例并全部通过：PC 侧脚本编译、上传、读串口、照工装的方式判过不过，要人配合的步骤由脚本提示。其次，上游例程里和本板有关的也测通；和本板无关的从 core 里删掉。
+自有库的 23 个例程（`OpenPLC_Ports` 15、`OpenPLC_KNX` 6、`OpenPLC_SDRAM` 2；2026-10-10 加了 `DO_PWM`）各有一条真板用例并全部通过：PC 侧脚本编译、上传、读串口、照工装的方式判过不过，要人配合的步骤由脚本提示。其次，上游例程里和本板有关的也测通；和本板无关的从 core 里删掉。
 
 ## Notes
 
@@ -17,7 +17,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **判定方式照工装**：板子只报原始值，上位机判（[决策 22](../../docs/tables/DECISIONS.md)）。例程本身不加自检，这和 [Arduino 例程与 IDE 烧录流程](../arduino-examples-and-ide-flow/map.md) 定的「例程不自己判过不过」不冲突
 - **人工配合**（用户 2026-09-29 定）：AO、DO 用户自己量；DI 用户按脚本提示从 0 到 24 V 加电压；KNX 用户在 ETS 里看总线、手动往总线发数据
 - **台子**（用户 2026-09-29 说）：板子通电，RS485、CAN、KNX 都接上了，KNX 只接了总线电源；AO1、AO2 各接 470 Ω
-- 现有的相关用例：P5 只编译、仿真用例 `T3-05` 只看启动，见 [HOW-TO-RUN-TESTS.md](../../docs/engineering/HOW-TO-RUN-TESTS.md)、[M3-app-runtime.md](../../docs/modules/M3-app-runtime.md)；工装判据在 `$PORTTOOL/TestCase/plans/station6-poweron.json`
+- 现有的相关用例：P5 只编译、仿真用例 `T3-05` 只看启动，见 [HOW-TO-RUN-TESTS.md](../../docs/engineering/HOW-TO-RUN-TESTS.md)、[M3-app-runtime.md](../../docs/modules/M3-app-runtime.md)；工装判据在 `$PORTTOOL/src/plans/station6-poweron.json`
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
 ## 全集
@@ -30,6 +30,8 @@ find open_plc_arduino -name "*.ino"
 
 ## Decisions so far
 
+- [给用户的接口统一成一种约定](issues/EXB-11-one-consistent-user-api.md)：B —— 有状态的一个对象 + `begin()`（`RS232` 取代 `Serial_Test`），无状态的 `openplcXxx()`，引脚无 `_Pin` 后缀
+
 - [文件怎么经 RS232 传到板子上写进 SD 卡](issues/EXB-03-how-does-a-file-get-from-rs232-onto-the-sd-card.md)：YMODEM（接收端在 `OpenPLC_Ports`，T3-10）；新增 `SD_FileReceive`；读回算 CRC32 比对；PE6 检测插拔；日志走 USB
 - [要人配合的步骤脚本怎么问](issues/EXB-05-how-does-the-script-ask-for-a-human-step.md)：固定提示框；看得出来的自动等、看不出来的按 y/n；不录数值；DI 逐路；要人的放最前
 - [KNX 库的 TP 收发怎么在本板上发出合法帧](issues/EXB-08-how-does-the-knx-library-drive-stknx.md)：现有 USART 路径不可能对；新写 STKNX 数据链路层用定时器收发 TP1，位时序照搬工装固件
@@ -37,6 +39,10 @@ find open_plc_arduino -name "*.ino"
 - [测试脚本怎么判一个例程过没过](issues/EXB-01-how-does-the-script-judge-an-example.md)：认例程现有输出、判据在 Python 表里、经 USB CDC 上传、用例 `T3-06`
 
 - [上游例程哪些和本板有关](issues/EXB-04-which-upstream-examples-relate-to-this-board.md)：测 2、留着不测 11、建议删 19；删前逐个问用户；`EEPROM` 和 KNX 会擦扇区 15
+
+- [Relays 例程不停地切继电器，怎么不白耗寿命](issues/EXB-10-relays-example-wears-relays.md)：默认 1 轮、每路 1 s 后停；轮数和时长串口可设，超过 100 轮或短于 1 s 提醒不拦
+
+- [台子接线核对](issues/EXB-06-bench-wiring-checklist.md)：每个对端都对到 COM 口或 `machine.py` 的一项（RS485 新加 `RS485_PORT`）；板子 IP 由 DHCP 给、会变
 
 - [KNX 和 SDRAM 例程写死的引脚和本板对得上吗](issues/EXB-07-do-knx-and-sdram-examples-use-this-boards-pins.md)：引脚号基本对；KNX 例程头注释 19 处错、不开 RS232 使能所以无输出、库用 UART 驱动 STKNX 可能发不出合法帧
 

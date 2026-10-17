@@ -85,7 +85,7 @@ USART3 会先被配成 9600 半双工，之后 `Serial_Test.begin()` 再把它�
 `core:cores/arduino/main.cpp` 今天在启动早期就 `begin(115200)`，所以正常顺序下不成问题，
 **但这条没有在板子上验证过** —— 本票的改动全部只做到编译期。
 
-⚠️ **`PB10` 仍然要 sketch 自己拉高**，这条改动不碰它（见 HARDWARE-FACTS「默认是关的」）。
+`PB10` 这条改动不碰它；决策 100 起由 core 拉高（见 HARDWARE-FACTS「app 里由 core 打开」）。
 
 
 ## 2026-09-21 复测：真板子 30 秒窗口，两个通道各 30 行
@@ -94,5 +94,4 @@ USART3 会先被配成 9600 半双工，之后 `Serial_Test.begin()` 再把它�
 `alive via printf` **30 行**，一比一。基线是 printf 0 行 / `Serial_Test` 18 行。
 
 ⚠️ **这证明的是 `DEBUG_UART` 改对了**（printf 从 `PH13` 挪到了 RS232 的 `PC10`）。
-**收发器仍然要 app 自己开** —— 探针里那句 `digitalWrite(RS232_EN_Pin, HIGH)` 不能省，
-客户的 app 不写它照样什么都看不到。
+当时收发器要 app 自己开；决策 100 起 core 开。

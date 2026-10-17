@@ -1,32 +1,34 @@
 # bootloader 替身：用真代码代替手写假板子
 
-**是什么**：把 `$BOOT/IAPServer` 的真源码，加板卡包 `OpenPLC_IAP/src/udp_server.c`（app 一侧的重启握手），编成两个 PC 程序：`bootstand_boot`（bootloader 那一半）和 `bootstand_app`（app 那一半），由 `bootstand.py` 在每次模拟复位时轮流启动，和真板子上两个程序轮流运行一样。IAPTool 的契约测试（T1-18a–g、T1-34）对着它跑，不再对着手写的 `fake_board.py`。
+**是什么**：把 `$BOOT/IAPServer` 的真源码，加板卡包 `OpenPLC_IAP/src/udp_server.c`（app 一侧的重启握手），编成两个 PC 程序：`bootstand_boot`（bootloader 那一半）和 `bootstand_app`（app 那一半），由 `bootstand.py` 在每次模拟复位时轮流启动，和真板子上两个程序轮流运行一样。IAPTool 的契约测试（T1-18a–g、T1-34）对着它跑，不再对着手写的假板子 fake_board.py（已删）。
 
-**为什么**：手写假板子是 bootloader 协议的第二份实现，已经和真 bootloader 有 6 处不一致（`flash` 不验认证、`getowner` 回值不同等）。用真代码，不一致就不存在了。决定见 [IAPTool 测试用的假板子](../../maps/test-architecture/issues/TA-06-should-the-fake-board-become-real-bootloader-code.md) 和 [真 bootloader 替身覆盖不到的几例怎么办](../../maps/test-architecture/issues/TA-13-what-the-real-bootloader-stand-in-cannot-cover.md)。
+**为什么**：手写假板子是 bootloader 协议的第二份实现，必然和真 bootloader 漂开（换掉前查出 6 处不一致）；用真代码就没有第二份。决定见 [IAPTool 测试用的假板子](../../maps/test-architecture/issues/TA-06-should-the-fake-board-become-real-bootloader-code.md) 和 [真 bootloader 替身覆盖不到的几例怎么办](../../maps/test-architecture/issues/TA-13-what-the-real-bootloader-stand-in-cannot-cover.md)。
 
 ## 住哪、怎么编
 
 | 项 | 定案 |
 |---|---|
 | 位置 | `$TEST/host/bootstand/`。要 `$BOOT`、`$CORE_REPO`、`$TOOL` 三个仓，按决策 78 归契约层 |
+| 平台 | 只在 Windows 上跑（决策 143） |
 | 构建 | CMake，和 `$BOOT/tests` 同一套写法；源码只读引用 `$BOOT` 和 `$CORE_REPO`，不拷贝。分两个程序：bootloader 和板卡包各有一份同名函数（`iap_auth`、`iap_cert`、`sha256`、`uECC`，跨仓镜像），放不进一次链接 |
 | 驱动 | `$TEST/host/fakeboard/` 的 `run_cases.py`（T1-18）和 `run_ide_upload.py`（T1-34）改为启动替身 |
-| 端口 | 和假板子一样：烧写和命令走 61865，发现另外在 56865/UDP 应答（见 HOW-TO-RUN-TESTS 的假板子端口说明） |
+| 端口 | 和假板子一样：烧写和命令走 61865（绑不上自动换冷门端口），发现另外在 56865/UDP 应答（见 HOW-TO-RUN-TESTS 的假板子端口说明） |
 
 ## 真的是什么，替掉的是什么
 
 | 真代码（只读编进来） | 替身自己写的 |
 |---|---|
-| `$BOOT/IAPServer`：`IAP_server.c`、`tcp_server.c`、`udp_server.c`、`bootloader_state.c`、`bkp_stash.c`、`owner_slot.c`、`iap_auth.c`、`iap_cert.c`、`iap_keyderive.c`、`fw_verify.c`、`sha256.c`、`net_rand.c`、`uecc/uECC.c` | lwIP raw API（`udp_*`、`tcp_*`、`pbuf_*`）桥到 PC 的 socket |
-| 板卡包 `OpenPLC_IAP/src/udp_server.c`：app 在跑时的重启挑战与重启 | HAL 桩（flash 擦写、CRC、RNG、复位等）；CRC 是标准 CRC-32 IEEE 再取反，和 `$BOOT/Core/Src/crc.c` 的配置一致 |
-| | flash、SDRAM、备份 SRAM 放在源码里的原地址（`0x08000000`、`0xC0000000`、`0x38800000`），由 PC 在固定地址上分配；整个程序链接在 4 GiB 以下，因为固件是 32 位的，真 flash 驱动把地址当 `uint32_t` 传；flash 内容存成文件，模拟复位后还在 |
+| `$BOOT/IAPServer`：`IAP_server.c`、`tcp_server.c`、`udp_server.c`、`bootloader_state.c`、`bkp_stash.c`、`owner_slot.c`、`iap_auth.c`、`iap_cert.c`、`iap_keyderive.c`、`fw_verify.c`、`sha256.c`、`net_rand.c`、`uecc/uECC.c`、`IAP_boot_handoff.c`、`boot_log.c` | lwIP raw API（`udp_*`、`tcp_*`、`pbuf_*`）桥到 PC 的 socket |
+| 板卡包 `OpenPLC_IAP/src/udp_server.c`：app 在跑时的重启挑战与重启；它读开机缓存，所以 `cores/arduino/stm32/boot_log.c` 一起编 | HAL 桩（flash 擦写、CRC、RNG、复位等）；CRC 是标准 CRC-32 IEEE 再取反，和 `$BOOT/Core/Src/crc.c` 的配置一致 |
+| | flash、SDRAM、SRAM4（交接记录和开机缓存）、备份 SRAM 放在源码里的原地址（`0x08000000`、`0xC0000000`、`0x38000000`、`0x38800000`），由 PC 在固定地址上分配；整个程序链接在 4 GiB 以下，因为固件是 32 位的，真 flash 驱动把地址当 `uint32_t` 传；flash 内容存成文件，模拟复位后还在 |
+| | 真代码的 `printf` 直接上 stdout，不进开机缓存；开机缓存只照 `main.c` 的顺序初始化，跳 app 前的刷新是空函数 |
 | | 角色切换：没有有效 app 时跑 bootloader 那一半；收完镜像、模拟复位后，镜像有效就切到 app 那一半 |
 
-## 两处特别处理
+## 一处特别处理
 
 | 情况 | 怎么做 | 为什么 |
 |---|---|---|
-| `jump_to_app` 是 ARM 汇编 | `$BOOT/IAPServer/IAP_server.c` 加主机测试开关，开关打开时不编那段汇编 | 照 `bootloader_state.c` 的 `BOOTLOADER_STATE_HOST_TEST` 先例；固件编出来不变 |
+| `jump_to_app` 是 ARM 汇编 | `$BOOT/IAPServer/IAP_server.c` 的 `IAP_SERVER_HOST_TEST` 打开时不编那段汇编，改调替身的 `iap_server_host_jump_to_app()` | 照 `bootloader_state.c` 的 `BOOTLOADER_STATE_HOST_TEST` 先例；固件编出来不变 |
 
 ## 怎么跑
 
@@ -44,6 +46,6 @@
 
 ## 测不到什么
 
-真 lwIP、MAC、PHY 和时序；复位时 MAC 一起被拉掉（所以真板子烧写成功收不到 `OK`）；`flashboot`（替身直接拒绝，T1-18 / T1-34 不发它）；USB CDC 通道；Linux 上固定地址分配没验证过。替身不跑 `MX_RTC_Init()`，所以每次启动都会打一行 `Backup domain was lost`，只是日志，不影响判定。
+真 lwIP、MAC、PHY 和时序；复位时 MAC 一起被拉掉（所以真板子烧写成功收不到 `OK`）；`flashboot`（替身直接拒绝，T1-18 / T1-34 不发它）；USB CDC 通道。替身不跑 `MX_RTC_Init()`，所以每次启动都会打一行 `Backup domain was lost`，只是日志，不影响判定。
 
 ⚠️ 换成真代码后，原来在假板子上过的用例如果失败，**先当成 IAPTool 或用例判据的问题去查**，不改替身去迁就用例：那正是要找的不一致。

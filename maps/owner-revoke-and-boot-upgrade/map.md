@@ -1,5 +1,7 @@
 # 撤销叶证书 + bootloader 原地升级
 
+> ⚠️ **决策 72 之后部分结论已被取代**：根区搬到扇区 15（`flashboot` 不再搬 owner 区），出厂无根、第一次上传自动认领（不再「要物理在场」）。现状以 [M2 归属与信任](../../docs/modules/M2-ownership.md) 和 [FLASHBOOT.md](../../docs/modules/M1/FLASHBOOT.md) 为准。
+
 ## 怎么看进度（不用问任何人）
 
 两条，加起来就是全部状态：
@@ -63,6 +65,8 @@ grep -rln --include=*.c --include=*.h --include=*.go --include=*.py --include=*.
 | `CHALLENGE-AUTH.md` 和 `SECURITY.md` | 两份都在讲证书怎么用 |
 
 ## Decisions so far
+
+- [对着正在跑 app 的 IP 发 getowner 这类查询，IAPTool 怎么办](issues/OWN-13-query-commands-against-a-running-app.md)：只把报错说清楚，不自动重启
 
 - **撤销之后客户怎么知道哪几块板要重传**（2026-09-22，用户直接定，没开票）：**新命令 `getapprevoked`，一块板一次询问**。
   ⚠️ 顺带发现这条原来的记法已经过时 —— 它写着「板子启动时已经在算那个布尔值，报出来就行」，

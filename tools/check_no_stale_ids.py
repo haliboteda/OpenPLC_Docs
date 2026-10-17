@@ -47,7 +47,7 @@ ALLOW = {
     # gates on Lower Deck T2-T7, and PE2 -> terminal A2. Every file here was
     # read once; what is excluded is hardware naming, not unread files.
     "HARDWARE-FACTS.md", "FIXTURE-INTERFACE.md", "PORTTOOL-FLOW.md",
-    "BOARD-BRINGUP-CASES.md", "PROD-CONFIG-ITEMS.md", "PRODUCTION-FRAMEWORK.md",
+    "PROD-CONFIG-ITEMS.md", "PRODUCTION-FRAMEWORK.md",
     # Uses B12 as the example of a silkscreen name two ports both claim.
     "CONVENTIONS.md",
     # "any C11 compiler" -- the language standard, not requirement C11.
@@ -58,8 +58,6 @@ ALLOW = {
     "check_no_stale_ids.py",
     # Its range expander is documented with the old K1-K7 ids it was written for.
     "check_status_sync.py",
-    # D3-D8 / R3-R8 there are diode and resistor designators on the relay board.
-    "relay_test.h",
     # A dated run record. It quotes the board's own log verbatim, and the
     # sketch that was installed prints "[M5] ready" -- a sketch name taken
     # from the old case id, not a document citing one. Quoting the log is
@@ -67,6 +65,12 @@ ALLOW = {
     "2026-09-18-boot-iap-full-run.md",
     # Third-party OpenAMP sources; A7 is a register field there.
     "mbox_ipcc.c", "mbox_ipcc_template.c",
+}
+# Same reason as the terminal-label entries above, for files whose name is too
+# common to allow outright: the port tables name RS485 terminals C10 / C11.
+ALLOW_PATHS = {
+    "libraries/OpenPLC_Ports/README.md", "libraries/OpenPLC_Ports/README.zh-CN.md",
+    "libraries/OpenPLC_KNX/README.md", "libraries/OpenPLC_KNX/README.zh-CN.md",
 }
 # maps/ is the record of how each decision was reached. Citing the id that was
 # current when a ticket was written is correct there, so it is not scanned.
@@ -160,6 +164,8 @@ def scan(ids):
                 if suffix not in SCAN_EXT or fn in ALLOW:
                     continue
                 p = Path(dirpath) / fn
+                if any(p.as_posix().endswith(a) for a in ALLOW_PATHS):
+                    continue
                 if str(p) in seen:
                     continue
                 seen.add(str(p))

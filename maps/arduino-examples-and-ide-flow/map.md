@@ -55,10 +55,15 @@ ls package_index_json/*.json                                  # Board Manager �
 - [IDE 上传用的密钥放在哪、怎么放进去](issues/IDE-13-where-does-the-ide-upload-key-live.md)：`%AppData%\openplc\keys\`，公开根私钥随包兜底，找不到或不对时报出路径
 - [模拟台上走通 IDE 烧录](issues/IDE-11-ide-upload-on-the-simulator.md)：用例 `T1-34`，arduino-cli 对跑 app 的假板子上传，未认领 / 已认领 / 密钥不对三种都按预期，手工跑
 - [0.1.3 怎么命名、按什么顺序发](issues/IDE-14-how-is-0-1-3-named-and-released.md)：tag `0.1.3`、工具包也升 0.1.3、客户用一个固定索引地址
-- 端口例程（[数字量](issues/IDE-06-digital-io-examples.md)、[模拟量](issues/IDE-07-analog-examples.md)、[串口](issues/IDE-08-serial-examples.md)、[以太网](issues/IDE-09-ethernet-example.md)、[CAN 和 SD](issues/IDE-10-can-and-sd.md)）：13 个例程在 `OpenPLC_Ports`，`P5` 全绿，未上板
+- 端口例程（[数字量](issues/IDE-06-digital-io-examples.md)、[模拟量](issues/IDE-07-analog-examples.md)、[串口](issues/IDE-08-serial-examples.md)、[以太网](issues/IDE-09-ethernet-example.md)、[CAN 和 SD](issues/IDE-10-can-and-sd.md)）：13 个例程在 `OpenPLC_Ports`，`P5` 全绿；上板走 `T3-06`（[M3](../../docs/modules/M3-app-runtime.md)）
 - [发一个版本，像用户一样从网上装](issues/IDE-12-release-and-install-like-a-user.md)：`0.1.3` 已发布，从固定索引地址装上后例程齐全、`T1-34` 全过
 
 ## Not yet specified
+
+- [板子进 bootloader 后要等 PC 先 ARP 它才回得了话](issues/IDE-16-board-cannot-answer-until-the-pc-arps-it.md)：用户 2026-10-16 定先抓包查根因（TODO #85），查完再定改不改
+- [USB 和网口共用一套上传流程，怎么拆](issues/IDE-17-usb-and-ethernet-share-one-upload-flow.md)：等用户选 G1 / B1 / V1（推荐）和 1200 bps 复位请求认不认证
+- [三平台：要定目标或要真机才能做的几件](issues/IDE-18-three-platforms-targets-and-real-machines.md)：arm64 已定（只加 macOS）；非 Python 脚本按决策 144 处理（已定）；其余等 Linux / macOS 真机
+- [用户怎么分清电脑上的一堆串口](issues/IDE-19-tell-serial-ports-apart.md)：已关；工装用暗号（决策 146），Arduino 侧 `boards.txt` 声明 USB ID + 打开 COM 口时心跳灯闪（`R3-25`）
 
 - **KNX、SDRAM 现有的 7 个例程要不要改成统一格式** —— 要等「一个例程长什么样」定了才说得清
 

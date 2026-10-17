@@ -20,12 +20,12 @@ AO 只有 mA：两路都是电流输出（XTR111），硬件上没有电压输�
 | 步 | 做什么 |
 |---|---|
 | 1 | 第一次调用时打开内部 2.5 V 基准、读一次扇区 15 的校准值区，之后不再读 |
-| 2 | 标称换算：AI1 = 引脚电压 × 90.6k / 22.6k；AI2 = 引脚电压 / 124 Ω；AO 引脚电压 = 目标电流 × 1024 Ω / 10 |
+| 2 | 标称换算：AI 读一次 16 位原始值，引脚电压 = 原始值 × 2500 / 65535（和工装算校准时的标称同一个式子，`$PORTTOOL` `src/calstore/spec.go` 的 `Range.AINominal`）；AI1 = 引脚电压 × 90.6k / 22.6k；AI2 = 引脚电压 / 124 Ω；AO 引脚电压 = 目标电流 × 1024 Ω / 10 |
 | 3 | 套校准值：输入取 `gain × 标称值 + offset`；输出写给硬件的是 `(目标 − offset) / gain` |
-| 4 | 校准值无效（没写过、写坏了、不是这块板的）时第 3 步用 `gain 1 / offset 0`，并在诊断串口打一行日志，**只打一次** |
+| 4 | 校准值无效（没写过、写坏了、不是这块板的）时第 3 步用 `gain 1 / offset 0`，并打一行系统日志（USB 口 1 的 `[sys]` 行，`R3-22`），**只打一次** |
 
-函数内部把 ADC / DAC 分辨率设成 12 位并保持在 12 位；同一个 sketch 里再用 `analogRead()` 的人要知道这一点。
-`analogRead()` / `analogWrite()` 本身不动，仍是原始值。
+读 AI 时把 `analogRead()` 分辨率设成 16 位、写 AO 时把 `analogWrite()` 设成 12 位，并保持不改回；同一个 sketch 里再用它们的人要知道这一点。
+ADC 时钟和采样时间与工装固件一致：时钟源 `CLKP`（HSI 64 MHz）异步 4 分频、采样 387.5 周期，由 `boards.txt` 的 `-DADC_CLOCK_DIV` `-DADC_SAMPLINGTIME` 和变体 `generic_clock.c` 对所有 `analogRead()` 生效（决策 124）。`analogRead()` / `analogWrite()` 仍是原始值。
 
 ## 测试
 

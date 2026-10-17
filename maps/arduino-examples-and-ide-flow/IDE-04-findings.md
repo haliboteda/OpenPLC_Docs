@@ -25,7 +25,7 @@
 | # | 步骤 | 线上是什么 | 代码 | FB 现状 |
 |---|---|---|---|---|
 | 0 | arduino-cli 把端口地址交给 IAPTool | `IAPTool ether <build>/<name>.bin <serial.port> [--force]`，地址原样放进 `{serial.port}` | [platform.txt:249](../../../open_plc_arduino/platform.txt)；`--force` 来自 [boards.txt:97-99](../../../open_plc_arduino/boards.txt)；入口 [app.go:246-251](../../../IAPTranfer_Tool/app.go)（先写上传锁） | 不涉及 |
-| 1 | IDE 端口菜单 / `-l network` 的端口查找 | discovery 从每块物理网卡的 IP 往子网广播地址发 `openplc_server_where_r_y`，按回包源 IP 列端口 | [network_discovery.go:187-223, 348-360, 228-275](../../../open_plc_arduino/tools/discovery/network_discovery.go) | ✅ 已有（FB:53-69 绑 `0.0.0.0`，对四个关键字都回） |
+| 1 | IDE 端口菜单 / `-l network` 的端口查找 | discovery 从每块物理网卡的 IP 往子网广播地址发 `openplc_server_where_r_y`，按回包源 IP 列端口。同一 IP、同一 UID 回的角色或版本变了（如 `CUSAPP` → `BOOTLD`），先发 `remove` 再发 `add`，端口标签跟着换 —— pluggable discovery 协议没有「变更」事件（2026-10-13 补） | [network_discovery.go:187-223, 366-378, 228-280](../../../open_plc_arduino/tools/discovery/network_discovery.go) | ✅ 已有（FB:53-69 绑 `0.0.0.0`，对四个关键字都回） |
 | 2 | 单播 identify，最多 3 次、间隔 2.5 s | UDP 发 `openplc_server_where_r_y` 到给定 IP，回包要以 `STM32H743` 开头 | IAPTool:74, 299-330；解析 241-271（≥4 段即可，第五段是 app 版本） | ✅ 已有，但只回四段 `…_BOOTLD_0.1.3`，没有第五段 `-` |
 | 3 | 版本门 | 只在角色是 `CUSAPP` 且有第五段时比较：镜像版本（`<name>.version`，postbuild 生成）比板上老就拒 | IAPTool:95-97；[version_gate.go:123-178](../../../IAPTranfer_Tool/version_gate.go) | ⚠️ 要补：角色 `CUSAPP` + 第五段版本号 |
 | 4 | 取身份（私钥 + 证书，自签或委托） | 纯本地；IDE 不传 `--key`，用 IAPTool 旁边 `keys/` 里的默认钥 | IAPTool:103；[auth.go:36-89](../../../IAPTranfer_Tool/auth.go)；[sign.go:45-59](../../../IAPTranfer_Tool/sign.go) | 不涉及 |
@@ -61,7 +61,7 @@
 | 坑 | 现象 | 出处 | 模拟台怎么办 |
 |---|---|---|---|
 | `-l network` 的端口查找默认只等 1 s，discovery 在 Windows 上启动要约 1.3 s（先跑一次 PowerShell 给网卡分类） | 同样的命令时好时坏：`port not found` | [iface_windows.go:26-29](../../../open_plc_arduino/tools/discovery/iface_windows.go)；[network_discovery.go:193](../../../open_plc_arduino/tools/discovery/network_discovery.go)；`arduino-cli upload --help` 的 `--discovery-timeout (default 1s)` | 加 `--discovery-timeout 8s` 后稳定；或者不带 `-l` |
-| 失败的上传会留下上传锁，之后 90 s 内 discovery 不广播 | 一个用例失败后，下一个 `-l network` 用例 `port not found` | [uploadlock.go:19-26](../../../IAPTranfer_Tool/uploadlock.go)（`logf(true)` 退出不跑 defer，这是写明了的取舍）；[network_discovery.go:336-351](../../../open_plc_arduino/tools/discovery/network_discovery.go) | 用例之间删掉 `%TEMP%/openplc-iap-upload.lock`，或串行等过 90 s |
+| 失败的上传会留下上传锁，之后 90 s 内 discovery 不广播 | 一个用例失败后，下一个 `-l network` 用例 `port not found` | [uploadlock.go:19-26](../../../IAPTranfer_Tool/uploadlock.go)（`logf(true)` 退出不跑 defer，这是写明了的取舍）；[network_discovery.go:354-369](../../../open_plc_arduino/tools/discovery/network_discovery.go) | 用例之间删掉 `%TEMP%/openplc-iap-upload.lock`，或串行等过 90 s |
 | 假板子在最后一个 `OK` 后 100 ms 内关 TCP，IAPTool 报 `read ack error: EOF` | 原型第一版踩到 | IAPTool:685-712（`readWithIdleGap` 把非超时错误连同已读内容一起返回，`sendAndWaitOK` 当失败） | 假板子「复位」时不要立刻关连接，停几百毫秒或干脆不关 |
 
 ## 这条模拟测不到什么
@@ -72,7 +72,7 @@
 | 固件真的被写进去、新 sketch 真的跑起来 | FB 只数字节 |
 | 真实的复位时序、MAC 掉线、发现限流（同一源 2 s 内只回一次）、UDP 丢包 | FB 没有限流、不丢包；IAPTool 的重试间隔（IAPTool:49-52）和上传锁要防的碰撞都靠这些才会被触发 |
 | 真的局域网：板子在另一台机器上、多网卡、VPN 抢路由、源地址钉在物理网卡上（IAPTool:391-440） | 本机回环时「对端」就是本机网卡 IP，`LocalIPFor` 永远命中自己的网卡 |
-| 没有物理网卡时 discovery 的 `255.255.255.255` 兜底（[network_discovery.go:373-384](../../../open_plc_arduino/tools/discovery/network_discovery.go)） | 本机有物理网卡，没走到 |
+| 没有物理网卡时 discovery 的 `255.255.255.255` 兜底（[network_discovery.go:391-402](../../../open_plc_arduino/tools/discovery/network_discovery.go)） | 本机有物理网卡，没走到 |
 | IDE 图形界面里 Tools → Port 和 Upload 按钮 | 只测了 `arduino-cli`；IDE 用的是常驻的 arduino-cli 守护进程，discovery 常开，1 s 竞态可能不存在 —— **没验证** |
 | Linux / macOS | 只在 Windows 上跑过；广播回环给本机 socket 在别的系统上是否成立 **没验证** |
 

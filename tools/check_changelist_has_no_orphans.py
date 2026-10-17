@@ -34,7 +34,8 @@ from _doccheck_common import Fail, Ok, Section, Warn, cfg  # noqa: E402
 
 DOCS = Path(cfg.DOCS_REPO)
 MAPS = DOCS / "maps"
-TODO = DOCS / "work" / "TODO.md"
+# Decision 85: IAP work in TODO.md, fixture work in TODO-fixture.md.
+TODOS = [DOCS / "work" / "TODO.md", DOCS / "work" / "TODO-fixture.md"]
 
 # The banner a CHANGE-LIST must carry, and the line that names one block.
 BANNER = "还没做的那几块，已经搬去"
@@ -58,10 +59,11 @@ def blocks_from_banner(text):
 
 def main():
     Section("CHANGE-LIST orphans")
-    if not TODO.exists():
-        Fail("no work/TODO.md at %s" % TODO)
+    missing = [t for t in TODOS if not t.exists()]
+    if missing:
+        Fail("missing: %s" % ", ".join(str(t) for t in missing))
         return 1
-    todo = TODO.read_text(encoding="utf-8", errors="replace")
+    todo = "\n".join(t.read_text(encoding="utf-8", errors="replace") for t in TODOS)
 
     lists = sorted(MAPS.glob("*/CHANGE-LIST.md"))
     if not lists:
@@ -93,7 +95,7 @@ def main():
             if key.strip("`") in todo:
                 Ok("  %-34s %s" % (name, b))
             else:
-                Fail("  %-34s %s -- not found in work/TODO.md" % (name, b))
+                Fail("  %-34s %s -- not found in work/TODO*.md" % (name, b))
                 Fail("     either put it in TODO, or drop it from the banner")
                 problems += 1
 

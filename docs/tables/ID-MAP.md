@@ -17,40 +17,40 @@
 
 | 编号 | 是什么 | 条数 | 定义在哪 |
 |---|---|---|---|
-| `R1-01`–`R1-40` | 需求（一句可判定的话） | 40 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
+| `R1-01`–`R1-43` | 需求（一句可判定的话） | 43 | [M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `R2-01`–`R2-04` | 需求（一句可判定的话） | 4 | [M2-ownership.md](../modules/M2-ownership.md) |
-| `R3-01`–`R3-14` | 需求（一句可判定的话） | 14 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
+| `R3-01`–`R3-25` | 需求（一句可判定的话） | 25 | [M3-app-runtime.md](../modules/M3-app-runtime.md) |
 | `R4-01`–`R4-03` | 需求（一句可判定的话） | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-38` | 测试用例 | 44 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
-| `T3-01`–`T3-12` | 测试用例 | 12 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| `T4-01`–`T4-04` | 测试用例 | 4 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
+| `T3-01`–`T3-24` | 测试用例 | 24 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
+| `T4-01`–`T4-05` | 测试用例 | 5 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `P1`–`P5` `P7`–`P20` | 静态检查（不碰硬件，看源码和文档） | 19 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–85 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 83 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–151 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 149 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
-| `E2E-01`–`E2E-05` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 5 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
-| `EXB-01`–`EXB-09` | wayfinder 的票，属于「core 里的例程在真板上逐个测通」 | 9 | [core-examples-on-board/issues/](../../maps/core-examples-on-board/issues) |
+| `E2E-01`–`E2E-06` | wayfinder 的票，属于「出厂到五条用户路径的端到端测试方案」 | 6 | [five-paths-e2e-test/issues/](../../maps/five-paths-e2e-test/issues) |
+| `EXB-01`–`EXB-11` | wayfinder 的票，属于「core 里的例程在真板上逐个测通」 | 11 | [core-examples-on-board/issues/](../../maps/core-examples-on-board/issues) |
 | `FG-01`–`FG-03` | wayfinder 的票，属于「补记录框架自己的洞」 | 3 | [framework-gaps/issues/](../../maps/framework-gaps/issues) |
 | `HDR-01`–`HDR-06` | wayfinder 的票，属于「metadata 从 journal 扇区搬进 app 头部」 | 6 | [app-header-replaces-journal/issues/](../../maps/app-header-replaces-journal/issues) |
-| `IDE-01`–`IDE-15` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 15 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
+| `IDE-01`–`IDE-19` | wayfinder 的票，属于「Arduino 例程与 IDE 烧录流程」 | 19 | [arduino-examples-and-ide-flow/issues/](../../maps/arduino-examples-and-ide-flow/issues) |
 | `IEC-01`–`IEC-06` | wayfinder 的票，属于「出厂状态符合 IEC 61131-2」 | 6 | [iec-61131-2-factory-state/issues/](../../maps/iec-61131-2-factory-state/issues) |
-| `KEX-01`–`KEX-06` | wayfinder 的票，属于「KNX 例程按正规用法重写」 | 6 | [knx-examples/issues/](../../maps/knx-examples/issues) |
+| `KEX-01`–`KEX-15` | wayfinder 的票，属于「KNX 例程按正规用法重写」 | 15 | [knx-examples/issues/](../../maps/knx-examples/issues) |
 | `LANG-01`–`LANG-09` | wayfinder 的票，属于「工装面板可选中文 / English / Deutsch」 | 9 | [porttool-panel-languages/issues/](../../maps/porttool-panel-languages/issues) |
 | `MIG-01`–`MIG-09` | wayfinder 的票，属于「把文档收编进 OpenPLC_Docs，换成问题导向的框架」 | 9 | [docs-migration/issues/](../../maps/docs-migration/issues) |
-| `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-12` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 10 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
-| `PTG-01`–`PTG-02` | wayfinder 的票，属于「产线测试补齐」 | 2 | [production-test-gap/issues/](../../maps/production-test-gap/issues) |
-| `PUI-01`–`PUI-06` | wayfinder 的票，属于「工装面板的提示与功能核对 + 上板联调」 | 6 | [porttool-ui-audit/issues/](../../maps/porttool-ui-audit/issues) |
+| `OWN-01`–`OWN-03` `OWN-05`–`OWN-09` `OWN-11`–`OWN-13` | wayfinder 的票，属于「撤销叶证书 + bootloader 原地升级」 | 11 | [owner-revoke-and-boot-upgrade/issues/](../../maps/owner-revoke-and-boot-upgrade/issues) |
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `ROOT-01`–`ROOT-06` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 6 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
 | `SIM-01`–`SIM-07` | wayfinder 的票，属于「0.1.3 在模拟环境里能测的都测掉」 | 7 | [sim-coverage/issues/](../../maps/sim-coverage/issues) |
+| `STG-01`–`STG-43` | wayfinder 的票，属于「工装六步测试」 | 43 | [fixture-test-stages/issues/](../../maps/fixture-test-stages/issues) |
 | `TA-01`–`TA-13` | wayfinder 的票，属于「测试按部件、契约、整机三层重新分布」 | 13 | [test-architecture/issues/](../../maps/test-architecture/issues) |
+| `USB-01`–`USB-04` | wayfinder 的票，属于「USB 管调试和升级，RS232 留给设备」 | 4 | [usb-for-debug-rs232-for-devices/issues/](../../maps/usb-for-debug-rs232-for-devices/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |
-| `XPT-01`–`XPT-04` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 4 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
+| `XPT-01`–`XPT-06` | wayfinder 的票，属于「工装在 Linux / macOS 上运行」 | 6 | [porttool-on-linux-and-macos/issues/](../../maps/porttool-on-linux-and-macos/issues) |
 
 <!-- END generated -->
 
@@ -106,7 +106,7 @@
 | 看到 | 可能是 | 怎么分辨 |
 |---|---|---|
 | **`M3`** | ① **用例**：两块板的 MAC 不同<br>② **设计模块**：app 侧 SDRAM 库 | 上下文提"MAC"或"第二块板"→ 用例（已做完，见 `R1-14`）；提"SDRAM 库"或"链接脚本"→ 模块。两者不相关 |
-| **`T3-03`** | ① **用例**：`Serial_Test` 抗 `Serial4.begin()`<br>② **设计模块**：串口冲突 | **两者是同一个主题**，不会导致误解 |
+| **`T3-03`** | ① **用例**：`RS232` 抗 `Serial4.begin()`<br>② **设计模块**：串口冲突 | **两者是同一个主题**，不会导致误解 |
 | **`D1`** | **硬件网络名**：SDRAM 的第 1 根数据线（`PD15`）。原来的需求号和 `ISS-D1` 都已不存在 | ⚠️ `D0`–`D15` 整套都是网络名 |
 
 `CHK-B1`/`CHK-B2`/`CHK-B3` 和 `P1`/`P2`/`P3` **是同一批检查的两个名字**（`TEST-CASES.md` 明说了"前三个对应发版检查单的 B1/B2/B3"）。**没有合并** —— 按 `$PROD/docs/repo/CONVENTIONS.md` 的「不要擅自 dedup 或删除」，这个要单独问过再动。

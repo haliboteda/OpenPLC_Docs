@@ -29,11 +29,12 @@ MAX3221EIPWR（U5），网名 `TXD_RS232_PC10`、`RXD_RS232_PC11`、`ENABLE_RS23
 
 ⚠️ 函数名 `Enable_RX_RS232` 只描述了 `EN`（接收器三态）那一半，漏掉了 `FORCEOFF`（整片开关）这更重要的一半，容易误判成"只影响接收"。
 
-### 默认是关的
+### app 里由 `RS232.begin()` 打开
 
-Arduino core 的 `cores/arduino/main.cpp` 只做了 `pinMode(PB_10, OUTPUT)`，从不写电平，所以引脚停在低位、收发器**默认关闭**。sketch 必须自己 `digitalWrite(RS232_EN_Pin, HIGH)`。
+core 开机不碰 PB10（保持 R68 下拉的低，芯片关断）；`RS232.begin()` 配好 PC10 / PC11 之后再拉高，`RS232.end()` 拉低（`R3-23`，[M3](../modules/M3-app-runtime.md)）。
 
-bootloader 侧在 `Core/Src/main.c:174` 显式调 `Enable_RX_RS232()`，**在 `MX_UART4_Init()` 和所有 printf 之前**，所以 bootloader 的日志（含 `bootloader_state_init()` 在 `server_decide()` 里打的那些）是通的。
+bootloader 不拉高 PB10（`R1-43`）；只有工装镜像（`PORTTOOL_ENABLE=1`）为了把 UART4 当命令口才打开。
+
 
 ### 电荷泵余电：关了收发器之后仍有几个字节能出来
 
@@ -41,16 +42,16 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 
 | 现象 | 机制 |
 |---|---|
-| bootloader 交权前关了收发器，app 的 `[BOOT] millis=12` 仍然出得来 | 交权后 12 ms，余电还够 |
+| bootloader 交权前关了收发器，app 的 `[BOOT] millis=12` 仍然出得来（2026-09-19 实测，决策 100 之前） | 交权后 12 ms，余电还够 |
 
-⚠️ **这是"能出来"，不是"保证能出来"。** 成立条件是「app 从交权到打印那行的耗时」<「电容放电到不足以产生有效电平的时间」。电容容差、温度、app 启动变慢，任何一个都能让这行消失。**在 core 里加启动打印之前要想清楚这一条。**
+余电只决定收发器关掉后还能漏出几个字节。现在的代码上电到 app 的逐步时序见 [USB-02](../../maps/usb-for-debug-rs232-for-devices/issues/USB-02-what-appears-on-rs232-at-power-up.md)。
 
 ## UART4 与 USART3：同两个引脚，两个复用功能
 
 `PC10 / PC11` 上有两个可选功能：**AF8 = UART4，AF7 = USART3**。
 
-- bootloader 的 printf 控制台走 **UART4**，到 MAX3221 再到 RS232 端子 C05/C06
-- core 里的 `Serial_Test` 走 **USART3**（`core:cores/arduino/main.cpp` 的 `HardwareSerial Serial_Test(PC_11_ALT1, PC_10_ALT1)`）。**`ALT1` 就是选 AF7 的写法**，线一根没变
+- bootloader 的 printf 控制台现在走 **UART4**，到 MAX3221 再到 RS232 端子 C05/C06（`R1-43` 落地后不再往 RS232 打印）
+- core 里的 `RS232` 走 **USART3**（`core:cores/arduino/main.cpp` 的 `HardwareSerial RS232(PC_11_ALT1, PC_10_ALT1)`）。**`ALT1` 就是选 AF7 的写法**，线一根没变
 
 `PH13 / PH14` 那一对也是 UART4（接到扩展口 JunctionLink J4-11 / J4-12）。**同一个 UART 外设只有一个句柄槽位，最后一次 `begin()` 赢** —— 所以 app 侧的控制台放在 USART3 上，扩展口才拿得住 UART4（下表）。
 
@@ -59,8 +60,10 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 | 谁 | 外设 | 引脚 | 出口 |
 |---|---|---|---|
 | `printf` / stdout（`DEBUG_UART`） | **USART3** AF7 | PC10 / PC11 | RS232 端子 C05 / C06 |
-| `Serial_Test` | **USART3** AF7 | PC10 / PC11 | 同上 —— 和 `printf` 共用同一个句柄 |
+| `RS232` | **USART3** AF7 | PC10 / PC11 | 同上 —— 和 `printf` 共用同一个句柄 |
 | `Serial1`（`PIN_SERIAL_TX` / `PIN_SERIAL_RX`） | **UART4** AF8 | PH13 / PH14 | JunctionLink 扩展口 J4-11 / J4-12 |
+
+⚠️ `printf` 走 RS232 端子是现在的代码；`R3-22` 要求 core 不往 RS232 写，落地时这一行跟着改。
 
 `printf` 不走 UART4，是因为 UART4 已经是扩展口那一组的外设，两边会抢同一个句柄槽位。
 `DEBUG_PINNAME_TX` 必须显式写成 `PC_10_ALT1`：不写的话 core 会取 `PeripheralPins.c` 里第一个
@@ -113,7 +116,7 @@ USART3 TX，那是 **PB10 —— 本板的 RS232 使能脚**。
 
 1. BOOT0 网静态为低 → 复位必然从 flash 启动，不会进 ROM DFU
 2. `boot0_is_pressed()` 的 active-high 判断**正确**（SW2 按下拉到 3V3）
-3. PG9 **不需要**配成输出。曾经的推挽输出配置有隐患（按下 SW2 = 3V3 经引脚对地短路）—— ✅ **2026-08-18 已改成输入**，隐患消除
+3. PG9 **只能配成输入**：配成推挽输出时按下 SW2 = 3V3 经引脚对地短路
 
 PG9 配成 input 不影响复位行为：**复位那一刻 MCU 所有 GPIO 都回到默认态**，固件配的推挽输出在那个瞬间并不存在，压住这条网的始终只有 R58 那个 10k 下拉。
 
@@ -166,24 +169,24 @@ Arduino core 不配这个脚，它停在复位默认值，而**模拟模式断�
 
 ## RTC 走 LSE，实测 180 s 不差秒
 
-2026-09-10 用户在 CubeMX 里改完并重新生成之后实测。决定在 [DECISIONS.md 第 36 条](../tables/DECISIONS.md)，操作和必查项在 [RTC-LSE-CHANGE.md](../build/RTC-LSE-CHANGE.md)。
+2026-09-10 用户在 CubeMX 里改完并重新生成之后实测。决定在 [DECISIONS.md 第 36 条](../tables/DECISIONS.md)，重新生成后的必查项在 [CUBEMX-RULES.md](../build/CUBEMX-RULES.md)。RTC 走时校准只在 LSE 上才有意义。
 
 | 项 | 实测 |
 |---|---|
 | 时钟源 | `pt.run rtc.read` 回 **`clk=lse`**。⚠️ 这个字段读的是 `RCC_BDCR.RTCSEL`，不是写死的文字 —— 它**曾经**是写死的 `lsi`，换 LSE 那天就变成了谎话 |
 | 走时 | **RTC 走 180 s，PC 时钟走 180.0 s**。⚠️ RTC 只报到秒，所以这只能说明「误差 < 1 s / 180 s」。**够用了** —— LSI 的 ±5% 在 180 s 上是 ±9 s，一眼就能看出来，而这里看不出来 |
 | 起振 | **没有 5 秒停顿。** 复位后板子立刻出 banner。晶振要是没起振，`HAL_RCC_OscConfig()` 会阻塞到 `LSE_TIMEOUT_VALUE`（5000 ms） |
-| 掉电保持 | ✅ **`T1-17`（nonce 跨掉电不重复）2026-09-19 真断电验收通过** —— ST-Link 量到 0.00V，计数器不归零。⚠️ **两边 RTC 时钟源必须一致**，否则每次 bootloader ↔ app 切换都会清空备份域，见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md) |
+| 掉电保持 | ✅ 2026-09-19 真断电（ST-Link 量到 0.00V）后备份寄存器里的值还在。⚠️ **两边 RTC 时钟源必须一致**，否则每次 bootloader ↔ app 切换都会清空备份域，见 [DECISIONS.md 第 57 条](../tables/DECISIONS.md) |
 
 ## SRAM4 的 no-init 机制
 
-链接脚本 `STM32H743IIKX_FLASH.ld` 第 58 行把 SRAM4 前 32 字节挖出来给 boot handoff 记录（`RAM_D3 ORIGIN = 0x38000020`）。
+bootloader 的两个链接脚本（`STM32H743IIKX_FLASH.ld`、`STM32H743IIKX_FLASH_PORTTOOL.ld`）和板卡包的 `ldscript.ld` 都把 SRAM4 前 32 字节挖出来给 boot handoff 记录（`RAM_D3 ORIGIN = 0x38000020`）。
 
 启动代码不碰这 32 字节，所以放在那里的变量**能活过软复位**（掉电仍然丢）。
 
 **将来需要"跨软复位保留、又不想依赖 VBAT"的状态时，用这个机制扩展即可**，不要另起炉灶去用 RTC 备份寄存器。
 
-工程里只有这一个链接脚本，`CMakeLists.txt` 和 `cmake/gcc-arm-none-eabi.cmake` 都指向它。
+`CMakeLists.txt` 和 `cmake/gcc-arm-none-eabi.cmake` 用的是 `STM32H743IIKX_FLASH.ld`。
 
 ## Digital In 八路：MCU 侧有外部 10k 上拉，固件不要再开内部上拉
 
@@ -233,11 +236,37 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 
 **实测 SCALE0 = 2493 mV**（标称 2.5 V，VREFINT 原始值 32235）。选 2.5 V 不是随便挑的 —— 模拟前端两条路径都正好配这个满量程，见下。
 
-⚠️ 使能 VREFBUF 的前提是 VREF+ 没有被外部驱动。本板成立：VREFINT 读到满量程 → VREF+ < 1.216 V → 引脚是悬空的，不是被接到 3V3。
+⚠️ **VRR 置位时输出还没稳，置位后固定再等 20 ms 才读**（`$BOOT/TestCase/common/port_vref.c:35-38`）：2026-08-28 VRR 一置位就测，一次开机 2493 mV、下一次 2763 mV，这个误差会乘进每个 ADC 读数、温度和 DAC 码值。
+
+⚠️ 使能 VREFBUF 的前提是 VREF+ 没有被外部驱动。本板成立：VREFINT 读到满量程 → VREF+ < 1.216 V → 引脚是悬空的，不是被接到 3V3。2026-10-08 原理图核实（Bridge 原理图第 2 页 `SHEET02-Power`）：VREF+（P1）网络 `STM_VREF+` 只接 C44 1 µF、C45 100 nF、TP3，接 VDDA 的 R28 是 `0 R DNP`（贴片表 `Pick Place for 1436_01_SCHAE-BR-PCB.txt` 同为 DNP）；这条网络经 Bridge J1-27 → UpperDeck J7-17 引到 UpperDeck 的 `/VREF`（JP3-2、JP4-2）。**所以 DAC 满量程 = VREFBUF 输出，不是 3.3 V。**
 
 ### PC3_C 的 SYSCFG 模拟开关：模拟用途要「开」
 
 `SYSCFG_PMCR.PC3SO` 复位默认是**关**（PC3_C 与数字 PC3 单元相连）。2026-08-27 同一个节点两种状态各读一次：**开路 raw ≈ 10200，闭合 raw ≈ 8600，差约 16%** —— 闭合时数字单元会加载这个节点。**模拟采样一律置 1（开路）。**
+
+## 模拟输出 AOUT1 / AOUT2：XTR111，JP1 / JP2 选电压档，JP3 / JP4 加偏置
+
+2026-10-15 核实：UpperDeck 原理图 `OpenPLC_UpperDeck_R3.pdf` 第 3 页「Analoger Ausgang」+ 网表 `netlist.ipc` + BOM，XTR111 手册（TI SBOS375D）§5.5、§7.1.3、§7.1.4。没上板量过。
+
+| 元件（AO1 / AO2） | 值 | 作用 |
+|---|---|---|
+| R13 / R16 | 10 kΩ 5% | DAC 脚（PA4 / PA5）→ XTR111 VIN |
+| R17 / R18 | 1 kΩ 1% | DAC 脚对地 |
+| R9 / R10 | 1024 Ω 1% | R_SET：SET 脚对地 |
+| R11 / R14 + JP3 / JP4 | 40.2 kΩ 1% | JP 闭合时把 VREF（2.5 V，见上节）接到 VIN，给 4–20 mA 加偏置（手册 §7.1.4 的两电阻网络） |
+| JP1 / JP2 | 焊接跳线 | 闭合时 SET 脚接到输出端子 = 电压输出档；开路 = 电流档（手册 §7.1.3 Figure 7-2「Current (open) or Voltage (closed)」） |
+
+算法（V_DAC = DAC 码 × 2500 / 4095 mV）：
+
+| | JP3 / JP4 开路 | JP3 / JP4 闭合 |
+|---|---|---|
+| VIN | = V_DAC | = (40.2 × V_DAC + 10 × VREF) / 50.2 ≈ 0.801 V_DAC + 498 mV |
+| 电流档（JP1 / JP2 开路）：I = 10 × VIN / 1024 Ω | 0–24.4 mA，20 mA 时 V_DAC = 2048 mV | 约 4.86–24.4 mA：码值 0 时也有 4.86 mA，到不了 4 mA |
+| 电压档（JP1 / JP2 闭合）：端子电压 = VIN | 0–2.5 V | 约 0.50–2.5 V |
+
+⚠️ **0 码时到不了 0**（2026-10-16 真板实测，AO1 电流档 470 Ω）：DAC 缓冲开时设 0 端子上约 0.16 mA，缓冲关或通道关时约 1 µA；缓冲关又带不动 R17 / R18，所以只能开着。见 [STG-41](../../maps/fixture-test-stages/issues/STG-41-where-does-the-ao-noise-come-from.md)。
+
+⚠️ 电压档的满量程只有约 2.5 V（VREF），不是 0–10 V。产品目标是 0–10 V / 0–20 mA，电路会调整去达到（用户 2026-10-15，决策 134「量程目标」）。R17 / R18 的 1 kΩ 是 DAC 输出的负载，对精度的影响没量过，由校准修正。
 
 ## 模拟输入前端：九个焊接跳线出厂全开路
 
@@ -296,7 +325,7 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 
 ## CAN 接口（PB9 / PI9，Upper Deck）
 
-2026-08-26 从原理图 / 网表 / BOM 核实，为写 `TestCase/CAN/` 而查。**bootloader 不用 CAN**，这一节纯粹是硬件事实登记。
+2026-08-26 从原理图 / 网表 / BOM 核实，为写 CAN 端口测试而查。**bootloader 不用 CAN**，这一节纯粹是硬件事实登记。
 
 | 项 | 事实 | 出处 |
 |---|---|---|
@@ -307,7 +336,7 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 | 隔离侧地 | `CAN_GND`，与数字地 `GNDD` 分开。`R83`/`R84` 是 **0R DNP**，贴上就破坏隔离 —— **不要贴** | `netlist.ipc:426-427, 445-446`；BOM `:42` |
 | 测试点 | `TP_CAN_VDD1`（隔离 5V）、`TP_CAN_GND1`。⚠️ **CAN_H / CAN_L 上没有测试点**，示波器只能夹 J10 螺丝端子 | `netlist.ipc:599, 593` |
 | LED | **没有。** 网表里 CAN 相关网络上没有任何 D 器件 | 网表全扫 |
-| 内核时钟 | 本工程从未配过 `FDCANSEL`。**复位默认是 `FDCANSEL=00` = HSE。** 在目标上核实过：`D2CCIP1R` 读 `0x00000000`，而 `RCC_FDCANCLKSOURCE_HSE` 就是 0（`Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h:1442`）。`TestCase/CAN/can_test.c` 仍显式选 HSE = 25 MHz（125k/250k/500k/1M 四档 prescaler=1 整除） | 在线读寄存器；HAL 头文件 |
+| 内核时钟 | 本工程从未配过 `FDCANSEL`。**复位默认是 `FDCANSEL=00` = HSE。** 在目标上核实过：`D2CCIP1R` 读 `0x00000000`，而 `RCC_FDCANCLKSOURCE_HSE` 就是 0（`Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h:1442`）。`TestCase/common/port_can.c` 仍显式选 HSE = 25 MHz（125k/250k/500k/1M 四档 prescaler=1 整除） | 在线读寄存器；HAL 头文件 |
 
 ### 端子号
 
@@ -325,7 +354,7 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 
 ⚠️ **`Klemmenbezeichnungen-R.pdf` 和 `Klemmblockzuordnung.pdf` 这两张图在这里是错的**（用户 2026-09-11 确认）：它们**漏标了 `CAN_GND`**，于是 09 号往后整体错开一位，把 RS485 A/B 标成了 C09/C10。正确的是 **C09=CAN_GND、C10=RS485 A、C11=RS485 B**。同一份图还把 **A08 的 "Digital Out 6" 印成 "Digital Out 3"**。图纸不改（要和生产方对得上），以这里为准。
 
-> 这处陷阱最早写在 `TestCase/CAN/can_test.h:59-63` 的注释里，但一直没传出来 —— 2026-09-11 发现时，错的 C09/C10 还住在 `FIXTURE-INTERFACE.md`、`PORTTOOL-FLOW.md`（两处）、PORT-BRINGUP-PLAN.md（四处，含一条让人接线的指令；该文件已删）、固件两处 `term=`、面板的接线提示、以及两份假板子测试夹具里。
+> 这处陷阱最早只写在 CAN 旧端口测试的头注释里（该测试已按决策 87 删除），一直没传出来 —— 2026-09-11 发现时，错的 C09/C10 还住在 `FIXTURE-INTERFACE.md`、`PORTTOOL-FLOW.md`（两处）、PORT-BRINGUP-PLAN.md（四处，含一条让人接线的指令；该文件已删）、固件两处 `term=`、面板的接线提示、以及两份假板子测试夹具里。
 
 CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_PI9）**（`netlist.ipc:391-392`）。
 
@@ -337,7 +366,7 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 
 ## KNX 接口（STKNX U9，Upper Deck）
 
-出处：`Production/Bridge/1436_01_SCHAE-BR.pdf` p5、`Production/UpperDeck/netlist.ipc`、`Schematics/OpenPLC_UpperDeck_R3.pdf` p4。实现在 `TestCase/KNX/`。
+出处：`Production/Bridge/1436_01_SCHAE-BR.pdf` p5、`Production/UpperDeck/netlist.ipc`、`Schematics/OpenPLC_UpperDeck_R3.pdf` p4。实现：工装 `$BOOT/TestCase/KNX/`，app 侧 `$CORE_REPO/libraries/OpenPLC_KNX/`（[KNX-TP-DATA-LINK.md](../modules/M3/KNX-TP-DATA-LINK.md)）。
 
 **U9 = STKNX，是裸模拟 TP1 收发器，不是 TP-UART** —— 没有字节级主机协议，**TP1 的位时序要 MCU 自己产生**。STKNX 全部工作电源取自 KNX 总线（pin 11 `KNX_A`），总线不供电时整个隔离侧是死的。
 
@@ -357,9 +386,9 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 - **TX**：`+3V3 → U12 LED 阳极；阴极 → R88 332R → PB14`。PB14 低点亮 LED；U12（TLP2362）反相开集，LED 亮则输出低；R94 10k 上拉到 VCCCORE。**净结果 PB14 高 → STKNX pin 24 高 → 有源脉冲。**
 - **RX**：`VCCCORE → R89 332R → U13 LED 阳极；阴极 → STKNX pin 23`。pin 23 低点亮 LED，U13 开集输出把 PA10 拉低。`/KNX_RX` 是**低有效**：pin 23 空闲为高 → LED 灭 → PA10 被 MCU 内部上拉拉高；有源脉冲时 pin 23 低 → LED 亮 → PA10 低。**所以 PA10 空闲为高、有脉冲为低。**
 
-⚠️ **收进来的位要取反，发出去的不用**（用户 2026-09-09 确认，代码里就是这样）。取反在 `knx_slot_level()`（`TestCase/KNX/knx_test.c:733`）：`slots` 位为 1 返回 0。加上上面 RX 那一路的反相，一共反了两次，所以字符解码是对的、环回能通 —— 但**引脚层的极性理解一直是反的**，两处后果：
+⚠️ **收进来的位要取反，发出去的不用**（用户 2026-09-09 确认，代码里就是这样）。取反在 `knx_slot_level()`（`TestCase/KNX/knx_test.c:618`）：`slots` 位为 1 返回 0。加上上面 RX 那一路的反相，一共反了两次，所以字符解码是对的、环回能通 —— 但**引脚层的极性理解一直是反的**，两处后果：
 
-1. `TIM1_CC_IRQHandler`（`TestCase/KNX/knx_test.c:415`）把上升沿当脉冲起点，按实际极性那是脉冲**终点**，于是 `w_avg` / `d_avg` 的角色整个互换。实测 `w_avg=152 d_avg=37`：`porttool_knx.c:27` 说 `w_avg` 应接近 35 µs，实际是 **`d_avg=37` 才是那个 35 µs**
+1. `TIM1_CC_IRQHandler`（`TestCase/KNX/knx_test.c:295`）把上升沿当脉冲起点，按实际极性那是脉冲**终点**，于是 `w_avg` / `d_avg` 的角色整个互换。实测 `w_avg=152 d_avg=37`：`porttool_knx.c:27` 说 `w_avg` 应接近 35 µs，实际是 **`d_avg=37` 才是那个 35 µs**
 2. `knx_bus_state()` 原来判「总线供电、空闲」要求 PA10 为低，于是这块板子恒判 `bus=odd`。**2026-09-09 已改成只看 PH12**，`ok=`/`idle=` 照旧报出来但不参与判定
 
 **报文级已经端到端验证过了（2026-09-09），所以极性这件事不影响 KNX 可用性：**
@@ -445,6 +474,20 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 
 `DIN1`–`DIN8` 在表里的信号名带编码器后缀（`DIN1_PC6-Enc1a` … `DIN8_PI6-Enc4b`），八路兼作四组编码器 A/B 相。
 
+## 主控板（Bridge）上的三个 LED
+
+2026-10-13 按 Bridge 原理图 `$HW/Production/Bridge/1436_01_SCHAE-BR.pdf` 第 5 页、BOM `1436_01_SCHAE-BR.xlsx`、贴片坐标 `Pick Place for 1436_01_SCHAE-BR-PCB.txt` 核实；三个都在 BOM 里、都贴（顶层）。
+
+| 位号 | 颜色 | 丝印旁的名字 | 接在哪 | 什么时候亮 | 位置（贴片坐标 mm） |
+|---|---|---|---|---|---|
+| LED1 | 绿 | 3V3 OK | 3V3 → R61 330R → LED1 → GND | 上电就常亮 | (32.1, 16.3)，和 LED2 挨着，在 BOOT0 键 SW2 (28.0, 25.7) 旁边 |
+| LED2 | 黄 | 5V0 OK | 5V0 → R62 750R → LED2 → GND | 上电就常亮 | (33.2, 16.3) |
+| LED3 | 绿 | HBEAT | **PE2** → R63 330R → LED3 → GND，**高亮低灭** | 只有固件把 PE2 拉高时 | (64.7, 39.1)，离另两个远，R63 在它旁边 (64.8, 36.4) |
+
+⚠️ **`$HW/Bridge_overview.txt` 写的是「5V0 OK(绿)、3V3 OK(黄)」，颜色和原理图 / BOM 相反**：BOM 里 LED2（5V0 OK）是黄（150040YS73220），LED1（3V3 OK）是绿。以原理图和 BOM 为准；那份概览的错报给用户，不在 `$HW` 里改。
+
+⚠️ **2026-10-13 用户在一块真板子上看到 LED3 从没亮过，跑「闪灯」时也不亮**（另两个常亮）。原理图和固件（`TestCase/common/port_led.c` 推挽输出、置高点亮；bootloader 开机窗口也闪它，`Core/Src/main.c` `boot_window`）都没看出问题，原因只能在板子上查：面板命令框发 `pt.led fault=1`（LED3 应常亮），万用表量 R63 靠 MCU 那头对地 —— 约 3.3 V 说明 MCU 在推，问题在 R63 / LED3 本身（没焊好、方向贴反、坏）；0 V 说明 PE2 没推出来。未核实。
+
 ## 两路板载温度是 LM50 线性传感器
 
 2026-09-28 按下层板网表 `$HW/Production/LowerDeck/netlist.ipc` 核实。
@@ -465,6 +508,22 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | 3.3 V 由谁产生 | Junction Link 上的 IC1，LMR50410 降压（`bom.csv`：IC1/IC2/IC3 都是 LMR50410XDBVR，三路分别出 3.3 V、5 V、5 V_EXT） | BOM + 网表 |
 | 它的输入 | 直接接 `24V0`（netlist 第 202–203 行：IC1 的第 4、5 脚都在 `24V0` 上）；第 3 脚 `/3V3FB`、第 6 脚 `/3V3SW` | 网表 |
 | 有没有外部欠压门限 | **没有**：第 4、5 脚同接 `24V0`，也就是使能脚直接接输入，没有分压电阻设门限 | 网表（第 4、5 脚谁是 EN 不影响这个结论，两脚同网） |
-| 24 V 掉到多少 3.3 V 才开始掉 | **未核实**。没有外部门限，所以只看 LMR50410 自己：输入低到接近 3.3 V 加上压差、或低于芯片自带的欠压锁定时，3.3 V 才会掉。具体电压要查 LMR50410 数据手册（本机没有），并上板慢慢降压实测 | — |
+| 24 V 掉到多少 3.3 V 才开始掉 | 输入约 10 V 时 3.3 V 仍为 3.27 V、正常启动；再往下（约 9 V 起）**开机时每秒约 16 次反复复位**，每次只到开机窗口（疑为开机负载把 3.3 V 拉过 BOR，未核实）；约 3 V 时 3.3 V 跌到 1.1 V 后关断。均在额定输入范围之外 | 2026-10-08 上板：手调电源（电压为用户读数，约值）+ ST-Link 每 0.7 s 量 3.3 V + 串口日志 |
 
 含义：24 V 从额定值往下掉的大部分区间里 3.3 V 还在，MCU 照常跑；3.3 V 真正掉到芯片的欠压复位（BOR，[IEC-06](../../maps/iec-61131-2-factory-state/issues/IEC-06-what-happens-on-undervoltage.md) 定在 2.7 V）时，24 V 已经接近没电。
+
+## 继电器 RY1–RY6 是 HF41F/005-HST：一组常开，AgSnO2 触点
+
+2026-10-12 按 `$HW/Production/LowerDeck/bom.csv:17`（RY1–RY6 = `HF41F/005-HST`）和宏发 HF41F 手册（2025 Rev. 2.00，[宏发官网英文版](https://source.hongfa.com/Uploads/Product/PDF/HF41F_en.pdf)，2026-10-14 和中文版核对一致；`$HW` 里没有这份手册）核实；原理图 `OpenPLC_LowerDeck_R3.pdf` 同型号，2026-10-14 用户看过实物也是这个件。
+
+| 事 | 手册原值 |
+|---|---|
+| 型号拆解 | `005` 线圈 5 VDC；`H` 一组常开；无 `8` 垂直安装；`S` 塑封型；`T` AgSnO2 触点 |
+| 机械耐久性 | 1 x 10^7 次（不加载） |
+| 电耐久性 | H 型 6 x 10^4 次，**只给了 AgNi 触点**（6 A 250 VAC / 30 VDC 阻性、85 °C、1 s 通 9 s 断）；**AgSnO2 的电寿命手册没给**（特性曲线也全是 AgNi 测的；手册注明其他负载可向宏发索取） |
+| 最高动作频率 | **手册没给**；电寿命按 1 s 通 9 s 断标定 |
+| 动作 / 释放时间 | ≤ 8 ms / ≤ 4 ms（额定电压下） |
+
+代码、面板、文档里用到继电器寿命的，只引用这一节、只用手册给了的数，没给的就写没给（用户 2026-10-12：「不要猜，用器件信息来同步」）。
+
+⚠️ 文档里原来写的「机械寿命 3 万次」不对：3 x 10^4 是 Z 型（一组转换）常开触点的 AgNi 电寿命，本板是 H 型。

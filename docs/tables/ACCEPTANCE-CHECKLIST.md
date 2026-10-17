@@ -22,7 +22,7 @@
 | CHK-A2 | 主机侧 C 测试（用例 **T1-16**） | 全过 | `$BOOT/tests`：`ctest --preset local -R T1-16`（编译器写在 gitignored 的 `CMakeUserPresets.json`） |
 | CHK-A3 | 整模块静态检查（用例 **H3**） | 无输出 | `$TOOL` 和 `$TEST` 各自：`go vet ./...`（都在各自的 selfcheck 里） |
 | CHK-A4 | bootloader 构建 | **0 errors 0 warnings**，且 `.bin` ≤ **131,072 B**（整个扇区 0，链接脚本 `FLASH LENGTH = 128K`） | `$TEST`：`python tools/build_image.py`（自己按链接脚本判尺寸），或 `python tools/flash_bootloader.py` 的构建阶段 |
-| CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，链接用的是 `STM32H743IIKX_FLASH_PORTTOOL.ld`。不设大小上限：工装镜像由 ST-Link 整片写入，不走 IAP | `$PORTTOOL` 里 `python TestCase/tools/build_fixture.py`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
+| CHK-A4b | 工装镜像构建 | **0 errors**，只许有那条刻意的 `#warning`，链接用的是 `STM32H743IIKX_FLASH_PORTTOOL.ld`。不设大小上限：工装镜像由 ST-Link 整片写入，不走 IAP | `$PORTTOOL` 里 `tools/build.sh fixture`。⚠️ **2026-09-08 之前这一项是不通过的** —— 溢出 47,608 字节（当时记在已删的第一次上板清单里） |
 | CHK-A5 | 烧写 + 启动日志 | 见 [T3-01](#t3-01--启动门禁) | `$TEST`：`python tools/flash_bootloader.py` |
 | CHK-A6 | 设备行为用例 | 全过 | `$TEST`：`TestCase all --ip=<板子IP> --bin=<app.bin> --key=<板子信任的 .pem>` |
 | CHK-A7 | 变体断言（用例 **P4**） | 全过 | `$CORE_REPO`：`python tests/selfcheck.py` |
@@ -89,7 +89,7 @@ CHK-A4 的上限是整个扇区 0，因为根区 2026-09-30 起在扇区 15（�
 
 ⚠️ 同一个 UID 有两种字序：porttool 的 `uid=` 是 w0 w1 w2（`$BOOT/TestCase/porttool/porttool.c`），发现报文的 `hardwareId` 是 w2 w1 w0（`$BOOT/IAPServer/iap_keyderive.c`）。
 
-⚠️ **CHK-C3 的「和已出货记录比对」还判不了**：出货记录存在哪没定，见 [逐板验收记录存在哪](../../maps/production-test-gap/map.md)（等工装反馈，暂停中）。
+⚠️ **CHK-C3 的「和已出货记录比对」**：出货记录的位置 2026-10-10 已定为 `records/<UID>/`，见 [逐板结果记在哪](../../maps/fixture-test-stages/issues/STG-08-where-per-board-results-go-in-a-full-run.md)。
 
 ---
 
@@ -103,7 +103,7 @@ CHK-A4 的上限是整个扇区 0，因为根区 2026-09-30 起在扇区 15（�
 |---|---|---|
 | `SDRAM staging buffer OK (2 MiB at C0000000)` | ✅ 暂存区可用 | 继续 |
 | `** SDRAM SELF-TEST FAILED at offset ... **` | ❌ FMC 或上电时序坏了 | **停**。先修 FMC，上传测试全部无意义 |
-| 串口一个字节都没有 | 日志口被占用，或 UART4 没接 | 看脚本提示的占用进程；或改用 SWO/ITM |
+| USB 口 1 一个字节都没有 | 口被别的程序占着，或 USB 没枚举 | 看脚本提示的占用进程；或经网口读开机缓存，再不行看 SWO（[HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)「测试从哪读板子的输出」） |
 
 **当前状态：✅ 通过。**
 

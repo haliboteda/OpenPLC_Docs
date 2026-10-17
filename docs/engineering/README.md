@@ -23,7 +23,6 @@
 |---|---|
 | [CUBEMX-RULES.md](../build/CUBEMX-RULES.md) | 改这个 CubeIDE 工程的硬规矩 —— **CubeMX 重新生成后必查的几处** |
 | [CONVENTIONS.md](../repo/CONVENTIONS.md) | 写文档的约定 |
-| [RTC-LSE-CHANGE.md](../build/RTC-LSE-CHANGE.md) | RTC 换 LSE 要在 CubeMX 里点哪几下，之后查什么 |
 | [ARCHITECTURE.md](../repo/ARCHITECTURE.md) | 三仓布局、路径变量、跨仓镜像清单、RTC 备份寄存器分配 |
 
 这一节没有 `ENG-xx` 需求 —— 它们是**做法**，不是可判定的主张。
@@ -87,5 +86,7 @@
 
 [HOW-TO-RUN-TESTS.md](HOW-TO-RUN-TESTS.md) —— 跨用例的操作说明：怎么让设备停在 bootloader、
 手上没板子时怎么用模拟板联调、各静态检查怎么跑。**单条用例的判据和跑法在各模块文档的测试表里**，这份只装跨用例的部分。
+
+[PORTTOOL-DEMO-ON-BOARD.md](PORTTOOL-DEMO-ON-BOARD.md) —— 工装软件真板子演示那天的操作单：动手准备、三层演示、出问题时退回模拟板。
 
 [BOOTLOADER-STAND-IN.md](BOOTLOADER-STAND-IN.md) —— IAPTool 契约测试用的 bootloader 替身：哪些是真代码、哪些是桩、测不到什么。

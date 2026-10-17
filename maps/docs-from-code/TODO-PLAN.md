@@ -52,7 +52,7 @@
 
 ## 去重有现成的靶子
 
-`porttool.h:35-39`（C）和 `internal/ptpanel/hold.go:3-14`（Go）
+`porttool.h:35-39`（C）和 `src/ptpanel/hold.go:3-14`（Go）
 **把同一个决策各写了一遍长文**，而那个决策已经是 `DECISIONS.md` 第 37 条。
 三处讲同一件事 —— 这正是「精炼去重」要收的。
 

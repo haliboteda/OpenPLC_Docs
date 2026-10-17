@@ -38,25 +38,25 @@
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/build.py` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/caps_golden.txt` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/sim_main.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/analog_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/can_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/dout_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/entries_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/hal_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/knx_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip/dhcp.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip/netif.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip/tcp.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip_fake.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/lwip_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/rs485_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/stm32h7xx_hal.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usb_device.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usb_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usbd_cdc_if.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
-| `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/stubs/usbd_def.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/sim_main.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/analog_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/can_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/dout_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/entries_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/hal_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/knx_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip/dhcp.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip/netif.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip/tcp.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip_fake.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/lwip_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/rs485_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/stm32h7xx_hal.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/usb_device.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/usb_stub.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/usbd_cdc_if.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
+| `OpenPLC_PortsTestingTool/src/simboard/c/stubs/usbd_def.h` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/harness/test_main.c` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/ptboard_test.go` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_caps/pthold_test.go` | `$PORTTOOL` 部件测试 | T4-01 / 模拟板：编工装固件，决策 78 的例外 |
@@ -67,24 +67,24 @@
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/fake_board_test.go` | `$PORTTOOL` 部件测试 | T4-04：假板子 + 已提交的能力表 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/panel_plan_test.go` | `$PORTTOOL` 部件测试 | T4-04：假板子 + 已提交的能力表 |
 | `OpenPLC_PortsTestingTool/TestCase/host/porttool_plan/plan_test.go` | `$PORTTOOL` 部件测试 | T4-04：假板子 + 已提交的能力表 |
-| `OpenPLC_PortsTestingTool/TestCase/plans/bench-smoke.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
-| `OpenPLC_PortsTestingTool/TestCase/plans/station6-poweron-relaxed.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
-| `OpenPLC_PortsTestingTool/TestCase/plans/station6-poweron.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
+| `OpenPLC_PortsTestingTool/src/plans/bench-smoke.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
+| `OpenPLC_PortsTestingTool/src/plans/station6-poweron-relaxed.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
+| `OpenPLC_PortsTestingTool/src/plans/station6-poweron.json` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 随 PortTool 发出去的方案文件 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/build_fixture.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 编工装镜像，交付要用 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/common.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` 和本机配置 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/init_machine.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` 和本机配置 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/make_delivery.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 打交付包 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/md2html.py` | 不是测试：`$PORTTOOL` 的产品数据或发版工具 | 交付包里的说明页 |
 | `OpenPLC_PortsTestingTool/TestCase/tools/selfcheck.py` | `$PORTTOOL` 自己的测试基础设施（保留，见「部件仓要不要本机配置」） | 本仓的 `common` / `init_machine` / `selfcheck` 和本机配置 |
-| `OpenPLC_PortsTestingTool/internal/calarea/calarea_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/ptcal/ptcal_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/ptecho/ptecho_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/ptpanel/link_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/ptpanel/net_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/serialx/ioreg_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/serialx/steady_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/serialx/sysfs_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
-| `OpenPLC_PortsTestingTool/internal/simboard/simboard_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/calarea/calarea_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/ptcal/ptcal_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/ptecho/ptecho_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/ptpanel/link_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/ptpanel/net_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/serialx/ioreg_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/serialx/steady_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/serialx/sysfs_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
+| `OpenPLC_PortsTestingTool/src/simboard/simboard_test.go` | `$PORTTOOL` 部件测试 | 只用 `$PORTTOOL` |
 | `open_plc_cube_ide/TestCase/ADC/adc_test.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/ADC/adc_test.h` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |
 | `open_plc_cube_ide/TestCase/CAN/can_test.c` | 不是测试：留在 `$BOOT`（编进固件的板上自测 / 工装固件源码） | 只用 `$BOOT`；由 `KNX_TEST_ENABLE` / `PORTTOOL_ENABLE` 等编进固件 |

@@ -17,21 +17,21 @@
 |---|---|---|---|
 | 板卡包 zip | `https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/v<版本>.zip` | **GitHub 按 tag 自动生成**，不是上传的 | tag `v0.1.3-pre` → `7b22679 add knx lib`（2026-04-23）；GitHub release `v0.1.3-pre` 没有任何附件 |
 | STM32Tools（内含 IAPTool） | `https://github.com/haliboteda/Arduino_Tools/releases/download/v0.1.2/STM32Tools.tar.gz` | **手工**：把 IAPTool 二进制提交进 `Arduino_Tools` 仓（commit `4a833bf5 update iaptool`，2026-03-25），打 tag `v0.1.2`，把 `Arduino_Tools-0.1.2/` 打成 tarball 手工上传成 release 附件 | release 创建于 2026-03-25，附件 digest 和索引一致 |
-| 网络发现程序 | `open_plc_arduino/tools/discovery/bin/*/network_discovery[.exe]` | **手工**跑 `tools/discovery/build.sh`，二进制**直接提交进 git**，随 tag zip 一起出去 | 首次加进来是 `d6552fc`（2026-08-11），**不在 `v0.1.3-pre` tag 里** |
+| 网络发现程序 | `open_plc_arduino/tools/discovery/bin/*/network_discovery[.exe]` | **手工**跑 `tools/discovery/build.py`，二进制**直接提交进 git**，随 tag zip 一起出去 | 首次加进来是 `d6552fc`（2026-08-11），**不在 `v0.1.3-pre` tag 里** |
 | 索引 JSON | `package_index_json/package_openplc_alp_index.json`，**客户实际用的是 release 附件** `.../package_index_json/releases/download/v<版本>/package_openplc_alp_index.json` | **手工**改 JSON（checksum/size 手算），commit + 打 tag + 把 JSON 作为 release 附件上传 | 本机 IDE 配的地址就是 v0.1.3-pre 那个附件（`~/.arduinoIDE/arduino-cli.yaml`） |
 
 ⚠️ **IAPTool 不在 `IAPTranfer_Tool` 仓发 release**（`gh release list -R haliboteda/IAPTranfer_Tool` 为空）。
-`compile_tool.sh:61-75` 调 `TestCase/tools/install_tool.py`，**只把二进制拷进本机** `$A15/.../STM32Tools/<ver>/`，不碰 `Arduino_Tools` 仓，也不碰任何 release。
+`build.py` 末尾调 `tools/install_tool.py`，**只把二进制拷进本机** `$A15/.../STM32Tools/<ver>/`，不碰 `Arduino_Tools` 仓，也不碰任何 release。
 
 ## 2. 今天发一个版的每一步（按实物反推，无文档）
 
 | # | 仓 | 动作 | 手工 / 脚本 | 对外？ |
 |---|---|---|---|---|
-| 1 | `IAPTranfer_Tool` | `compile_tool.sh` 编 IAPTool（win/darwin/linux amd64） | 脚本 | 否 |
+| 1 | `IAPTranfer_Tool` | `build.py` 编 IAPTool（win / linux amd64，darwin amd64 + arm64） | 脚本 | 否 |
 | 2 | `Arduino_Tools` | 把 `Output/<os>/IAPTool*` 拷进 `win/` `macosx/` `linux/` 并提交 | **手工**（没有脚本做这一步） | 否 |
 | 3 | `Arduino_Tools` | 打 tag `v<工具版本>`，push 到 GitHub `origin` | 手工 | **是：push + tag** |
 | 4 | `Arduino_Tools` | 打出 `STM32Tools.tar.gz`（根目录 `Arduino_Tools-<版本>/`），建 GitHub release 并上传 | 手工 | **是：release** |
-| 5 | `open_plc_arduino` | `tools/discovery/build.sh` 编四个 discovery 二进制并提交 | 手工触发脚本 | 否 |
+| 5 | `open_plc_arduino` | `tools/discovery/build.py` 编四个 discovery 二进制并提交 | 手工触发脚本 | 否 |
 | 6 | `open_plc_arduino` | 跑发版检查 `CHK-B1`（三处版本号一致）/ `CHK-B2`（跨仓镜像代码一致）/ `CHK-B3`（`$CORE_LIVE` 与仓库一致），见 [ACCEPTANCE-CHECKLIST.md](../../docs/tables/ACCEPTANCE-CHECKLIST.md) | 脚本 | 否 |
 | 7 | `open_plc_arduino` | 打 tag `v<版本>`，push 到 GitHub `origin`（不是 `internal` —— 索引指向 GitHub） | 手工 | **是：push + tag** |
 | 8 | `open_plc_arduino` | 建 GitHub release（历史上一直有，但**没有附件**，Board Manager 不读它） | 手工 | 是：release（可省） |

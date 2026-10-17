@@ -6,16 +6,11 @@
 python tools/list_wayfinder_map_frontier.py --all
 ```
 
-## 还要你拍几次板（**提前列出来，免得被逐个突袭**）
+## 还要你拍板的
 
-| 还剩几次 | 要你定什么 | 什么时候会问 |
-|---|---|---|
-| **0** | **五张票全部关掉，眼下没有要你拍板的** | —— |
-| 1 | 跑完的结果记在哪 —— 要一个工具的输出位置，那个工具还不存在 | 已转入 [TODO「等外部」](../../work/TODO.md) |
-| 2 | 这份方案进[验收单](../../docs/tables/ACCEPTANCE-CHECKLIST.md)的哪一层（改动后自检 / 发版验收 / 单板出厂） | 已转入 [TODO「等外部」](../../work/TODO.md) |
+没有。方案进发版验收 `CHK-B9`（[决策 69](../../docs/tables/DECISIONS.md)，[ACCEPTANCE-CHECKLIST.md](../../docs/tables/ACCEPTANCE-CHECKLIST.md)）；新增用例 `T2-09`–`T2-14` 已实施（`T2-08` 作废），状态见 [M2](../../docs/modules/M2-ownership.md)。
 
-**不用你定、我自己能办的**：写 `T2-08`–`T2-14` 七条新用例的脚本、登记编号、对账 —— 都在
-[work/TODO.md](../../work/TODO.md) 里，挂在「五条路径里「测安全性」各指什么」那张已关的票下。
+> ⚠️ 决策 72 之后 `takeown` 不再要按 BOOT0（出厂无根、第一次上传认领），下面票里「按住 BOOT0 做 `takeown`」的步骤以 M2 为准。
 
 ## Destination
 
@@ -85,6 +80,7 @@ BOOT0 进上传模式（`T1-27`，路径里按 BOOT0 是为了认领，不是为
 - [五条路径共用一块板，顺序怎么排](issues/E2E-03-what-order-do-the-five-paths-run-in.md)：**按叙事顺序 ①②③④⑤ 跑，整轮要人到板子跟前 2 次**（两次都是按住 BOOT0 做 `takeown`）。②→③ 不用额外重置 —— ③ 的重烧本身就擦掉 owner 记录
 - [路径三换根之后 `T2-06` 必然失败，算不算](issues/E2E-05-is-t2-06-failing-after-rotate-expected.md)：**算预期** —— 依据是 `check_public_root.py` 自己写的「In a customer's fork the two are SUPPOSED to differ」。路径 ③ 要把它**显式记成 SKIPPED 并打理由**，不是静默略过
 - [现有用例哪些能直接复用，哪些有盲区](issues/E2E-04-which-existing-cases-can-be-reused.md)：**41 条，只有 29 条碰过真硬件**；18 条没被任何路径引用到；8 条盲区，其中三条会直接挡住路径 ③ 和 ④。全表在 [E2E-04-findings.md](E2E-04-findings.md)
+- [替身的 UDP 端口落进 Windows 排除段时，用例怎么报](issues/E2E-06-stand-in-port-in-windows-excluded-range.md)：**起替身前先试绑端口**，61865 绑不上就自动换一个动态段以外的冷门端口（2026-10-12 由「直接报错」改）
 
 ## Not yet specified
 
