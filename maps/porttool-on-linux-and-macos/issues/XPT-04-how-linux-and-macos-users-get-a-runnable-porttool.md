@@ -35,6 +35,8 @@ Blocked by: XPT-02
 - `$TOOL/README.md` 新增「Building from source」一节：本机编译、交叉编译、`plans/` 要拷到可执行文件旁边、Linux 要 `dialout` 组
 - 实测（WSL Debian 13，Go 1.23.1）：全新 clone → `go build` → 两个文件都是 `-rwxr-xr-x`；面板能起并列出方案；接真板子 `bench-smoke.json` 7/7 过。WSL 里访问不了 HTTPS，依赖模块是从 Windows 那次全新下载的缓存拷进来的，「第一次联网下载依赖」只在 Windows 上验过
 
+**2026-10-16 用户更正**：开源项目，**源码和编译好的可执行文件都提供**，可执行文件的发布单独处理；调试时自己编。上面「不发可执行文件」作废，发布包怎么带可执行文件见 [交付包怎么带上 Linux 版](XPT-05-delivery-package-for-linux.md)。
+
 ## 引出了什么新的未知
 
 - Mac 上自己编译、运行：没有 Mac，归 [在哪几台真机上验、用例怎么写](XPT-03-which-real-machines-and-what-the-test-case-is.md)

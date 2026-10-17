@@ -17,8 +17,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **这张图重开了决策 11**：那条的「什么情况下重开」写的就是「补一个语言开关，不是把中文换掉」。票定完后在 [DECISIONS.md](../../docs/tables/DECISIONS.md) 追加一条新决策，不改第 11 条原文
 - **执行时要同步改的规矩**：`$PORTTOOL/CLAUDE.md`「面板上的字一律说大白话」写的是「而且是中文」，多语言落地后要改成「默认中文，另两种同样说大白话」
 - **大白话规矩对三种语言一样成立**：不抄协议字面量、不露内部名 —— 见 `$PORTTOOL/CLAUDE.md` 同一节
-- 现状：页面是一个 `go:embed` 的文件 `$PORTTOOL/internal/ptpanel/web/index.html`（`<html lang="zh-CN">`，4145 行）；面板监听 `127.0.0.1:0` 随机端口（`$PORTTOOL/internal/ptpanel/panel.go:772`），所以浏览器的 `localStorage` 换一次端口就是另一个源、存不住；exe 旁边已有一个面板自己的记忆文件 `porttool_ports.json`（`$PORTTOOL/internal/portmap/portmap.go:38`）
-- 和暂停的 [工装面板的提示与功能核对 + 上板联调](../porttool-ui-audit/map.md) 有交叠：那边「面板逐卡片过一遍提示与参数」还开着，会改中文原文 —— 先后见本图的票
+- 现状：页面是一个 `go:embed` 的文件 `$PORTTOOL/src/ptpanel/web/index.html`（`<html lang="zh-CN">`，4145 行）；面板监听 `127.0.0.1:0` 随机端口（`$PORTTOOL/src/ptpanel/panel.go:772`），所以浏览器的 `localStorage` 换一次端口就是另一个源、存不住；exe 旁边已有一个面板自己的记忆文件 `porttool_ports.json`（`$PORTTOOL/src/portmap/portmap.go:38`）
 - **要用到的 skill**：`grilling`（本图的 grilling 票）、`codebase-design`（字串放哪一层、Go 和页面之间的缝）、`prototype`（如果要先拿一张卡片试切换）；术语进 [GLOSSARY.md](../../GLOSSARY.md)
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
 
@@ -27,10 +26,10 @@ python tools/list_wayfinder_map_frontier.py --all
 在工作区根目录跑（bash）。按「面板上人看得见的中文字串」找：页面里的字面量和 HTML 文本，加上面板服务端和模拟板会送到页面上的 Go 字串（去掉整行注释和测试文件）：
 
 ```
-python -c 'import re,glob; fs=[f for f in glob.glob("OpenPLC_PortsTestingTool/internal/ptpanel/**/*.*",recursive=True)+["OpenPLC_PortsTestingTool/internal/simboard/simboard.go"] if f.endswith((".go",".html")) and not f.endswith("_test.go")]; pat=re.compile(r"\"[^\"\n]*[一-鿿][^\"\n]*\"|\x27[^\x27\n]*[一-鿿][^\x27\n]*\x27|\x60[^\x60\n]*[一-鿿][^\x60\n]*\x60|>[^<>\n]*[一-鿿][^<>\n]*<"); [print(f,i,m,sep="\t") for f in fs for i,l in enumerate(open(f,encoding="utf-8"),1) if not l.lstrip().startswith("//") for m in pat.findall(l)]'
+python -c 'import re,glob; fs=[f for f in glob.glob("OpenPLC_PortsTestingTool/src/ptpanel/**/*.*",recursive=True)+["OpenPLC_PortsTestingTool/src/simboard/simboard.go"] if f.endswith((".go",".html")) and not f.endswith("_test.go")]; pat=re.compile(r"\"[^\"\n]*[一-鿿][^\"\n]*\"|\x27[^\x27\n]*[一-鿿][^\x27\n]*\x27|\x60[^\x60\n]*[一-鿿][^\x60\n]*\x60|>[^<>\n]*[一-鿿][^<>\n]*<"); [print(f,i,m,sep="\t") for f in fs for i,l in enumerate(open(f,encoding="utf-8"),1) if not l.lstrip().startswith("//") for m in pat.findall(l)]'
 ```
 
-2026-09-30 是 935 条：`index.html` 861，`internal/ptpanel/*.go` 70，`simboard.go` 4。关最后一张票前重跑，每一条都要落在「三种语言都有」「明确不译」两类之一。
+2026-09-30 是 935 条：`index.html` 861，`src/ptpanel/*.go` 70，`simboard.go` 4。关最后一张票前重跑，每一条都要落在「三种语言都有」「明确不译」两类之一。
 
 ⚠️ 这条命令抓不到**不含中文、却会上屏的字**：Go 拼进中文句子里的 `err.Error()`、板子报上来的名字、Windows 给的串口描述。它们归 [面板上的字从哪几条路到页面上](issues/LANG-01-which-paths-bring-text-to-the-panel.md) 那张表管。
 
@@ -39,7 +38,7 @@ python -c 'import re,glob; fs=[f for f in glob.glob("OpenPLC_PortsTestingTool/in
 - [数字、日期、单位的写法跟不跟着语言变](issues/LANG-09-number-and-date-format-per-language.md)：数字、日期一律照现在的写法，不随语言变
 - [和暂停的「面板逐卡片过一遍提示与参数」谁先谁后](issues/LANG-08-order-against-the-paused-wording-audit.md)：现在就译；译文记中文的哈希，中文改了没跟就报错
 - [面板的浏览器用例在三种语言下怎么保持有效](issues/LANG-07-how-the-panel-browser-tests-stay-valid.md)：浏览器脚本只跑中文；另查每个键三种语言齐全
-- [英文和德文谁写、谁审、术语照什么](issues/LANG-06-who-writes-and-reviews-english-and-german.md)：AI 写初稿；德文用硬件资料的德文词；术语表在 `strings.json`；德文审过才上线
+- [英文和德文谁写、谁审、术语照什么](issues/LANG-06-who-writes-and-reviews-english-and-german.md)：AI 写初稿；德文用硬件资料的德文词；术语表在 `strings.json`；德文审前也上线、标「（未审）」（[决策 82](../../docs/tables/DECISIONS.md) 2026-10-13 补记）
 - [日志窗和导出的日志用哪种语言](issues/LANG-05-log-window-and-exported-log-language.md)：屏幕跟界面语言；日志文件和导出一律英文（取词典 `en` 列）
 - [Go 送上来的 74 句在哪一层翻](issues/LANG-04-where-go-side-strings-get-translated.md)：Go 回代号加参数，页面查词典；`err.Error()` 作 `{detail}` 原样
 - [选过的语言存在哪个文件、长什么样](issues/LANG-02-where-the-language-choice-is-kept.md)：新开设置文件；`lang` 取 `zh` / `en` / `de`，读不到按中文
@@ -49,7 +48,6 @@ python -c 'import re,glob; fs=[f for f in glob.glob("OpenPLC_PortsTestingTool/in
 ## Not yet specified
 
 - **悬停里的协议原值**（`title` 里的 `duty` / `mode=extloop`）：现在是「中文 + 悬停英文原文」，换到英文界面后两者可能长得一样，是否还要悬停没想清楚
-- **暂停中的「端口列表怎么组织」**（`porttool-ui-audit` 那张图）一旦重排列表，会整批改分组名和说明 —— 和本图的先后要等那张图恢复时再看
 
 ## Out of scope
 

@@ -4,7 +4,9 @@
 
 产线测试指南（`OPLC-MFG-TEST-001`）3.6 / 3.10 反复出现「PC external companion board」。那块板目前不存在，而 AI/AO 校准、DI 激励、高边与继电器的电压电流判定**全部指向它** —— 没有它，那几项落不了地。分工已定：**板归硬件做，软件按这份清单写驱动**（[DECISIONS.md 第 19 条](../tables/DECISIONS.md)）。
 
-逐项差距在 `$PROD/maps/production-test-gap/GAP-AS-OF-2026-09-16.md`（那是当天的快照），本文不重复。引脚与端子事实以 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 为准，本文只引结论。
+> ⚠️ **2026-10-09 第 19 条已被第 89 条取代**：标准值改由人工输入、仪器或标准机提供，见 [工装六步测试](../../maps/fixture-test-stages/map.md)。
+
+引脚与端子事实以 [HARDWARE-FACTS.md](../hardware/HARDWARE-FACTS.md) 为准，本文只引结论。
 
 ---
 
@@ -33,7 +35,7 @@
 
 **这不是可选的** —— 档位由锡桥决定（AIN1 桥 JP9 脚2-3 + JP5 脚1-2；AIN2 桥 JP8 脚1-2 + JP6 脚2-3），**出厂全开路，焊上不可逆**。所以工装板**不需要**每通道两种档都支持，一路电压源 + 一路电流源就够。
 
-⚠️ **产线必须确认每块板都按这个档位焊了。** 没焊的话 MCU 引脚彻底悬空，读到的约 380 mV（抖动 200–650 LSB）是悬空脚，不是端子信号 —— 软件侧会当「悬空带」报出来，但那是**兜底不是判据**。
+⚠️ **产线必须确认每块板都按这个档位焊了。** 没焊的话 MCU 引脚彻底悬空，读到的是悬空脚，不是端子信号。软件不拿读数推跳线（悬空读数两次测得不一样）：没焊的那一路读数项判不过，校准拟合的增益离谱会拒存（决策 106）。
 
 ---
 
@@ -167,7 +169,5 @@
 > Accuracy 0.1 % — **Requires 24 V supply and full-temperature calibration**；mainstream AO typically specifies 0.3 % / 0.6 % grade target.
 
 **这条决定两件事**：工装板的测量精度要求，以及**要不要做逐板校准**。松到 0.3 % 的话，逐板校准很可能整件事不需要，工装板的精度要求也跟着降一档。
-
-背景与三条备选路在 `$PROD/maps/production-test-gap/GAP-AS-OF-2026-09-16.md` 的 Q2。
 
 **2026-09-28 用户定**：每块板都校准，指标按 IEC 61131-2 定成硬指标、数值还在定（[决策 70](../tables/DECISIONS.md)，[每块板校准那张图](../../maps/per-board-calibration/map.md)）。

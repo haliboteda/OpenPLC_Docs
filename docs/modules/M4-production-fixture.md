@@ -27,31 +27,21 @@ flowchart LR
     style J fill:#ccffcc
 ```
 
-> **完整的协议时序图在 `docs/modules/M4/PORTTOOL-FLOW.md` 的「A.7 一次完整会话的时序」**
-> —— 八条命令、四类应答行、热改参数、交权给 CAN 深度诊断那条不归路，都在那里。
-> **这里不抄一份**：那份文档是这套协议的家，抄过来就会分叉。
+> **完整的协议时序图（八条命令、四类应答行、热改参数、交权给 CAN 深度诊断）在 `docs/modules/M4/PORTTOOL-FLOW.md`「A.7 一次完整会话的时序」**，这里不抄。
 
-**三条铁律**（从固件那条「不许假通过」来的，上位机必须跟着守）：
-
-| | 规矩 |
-|---|---|
-| 1 | **参数给了但写错，拒绝启动，并把原因说清楚** —— 不静默沿用旧值。沿用了就是在读别的引脚，**而面板上看不出来**。上位机必须**原样显示 ERR 文本**，不要归纳成「启动失败」 |
-| 2 | **`!` 帧永远带完整位域** —— 一条采样自己就说得清来自哪个脚，不依赖上位机记得当初选了什么 |
+**两条铁律**（参数写错就拒绝、`!` 帧带完整位域）见 [PORTTOOL-FLOW.md「A.6 两条铁律」](M4/PORTTOOL-FLOW.md#a6-两条铁律)。
 
 ## 2 · 功能表
 
 | # | 阶段 | 要做到什么 | 谁证明 | 状态 |
 |---|---|---|---|---|
-| **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` `T4-04` | 🔨 |
+| **R4-01** | — | 硬件工程师能烧一个固件、双击一个 exe，就逐路测板上每个端口 | `T4-01` `T4-02` `T4-04` `T4-05` | 🔨 |
 | **R4-02** | — | 工装（`PortTool`）在 Windows、Linux、macOS 上都能运行，三个平台的可执行文件一条命令一次生成（用户 2026-09-30 定） | `T4-03`（Linux）；macOS 还没有用例，见 [工装在 Linux / macOS 上运行](../../maps/porttool-on-linux-and-macos/map.md) | ❌ |
-| **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | —`T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$PORTTOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
+| **R4-03** | — | 串口列表每个口显示它是什么芯片 / 设备；对端串口由用户选、记在本机，方案文件不写口名（[DECISIONS.md](../tables/DECISIONS.md) 第 73 条） | `T4-03`（单元测试 `$TOOL/internal/serialx/sysfs_test.go`、`$PORTTOOL/TestCase/host/porttool_plan/plan_test.go` 的 `TestSerialPeer*`；实机见 [XPT-03](../../maps/porttool-on-linux-and-macos/issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)) | ✅ |
 
 **共 3 条。**
 
-> ⚠️ **`🔨` 这个符号没有定义。** `docs/tables/STATUS.md` 开头只定义了六个状态符号
-> （✅ ⚠️ 🟡 ❌ ⬜ ⛔），`🔨` 是第七个，从来没写下它是什么意思。
-> 这里**原样照抄**，不替它发明含义 —— 读的人现在没有办法判断它和 🟡 差在哪。
-> **这个符号要么补进定义表，要么换成已定义的一个。**
+> ⚠️ **`🔨` 没有定义**：`docs/tables/STATUS.md` 只定义了 ✅ ⚠️ 🟡 ❌ ⬜ ⛔ 六个，这里原样照抄；要么补进定义表，要么换成已定义的一个。
 
 `R4-01` 是这张表里唯一一条**还在做**的需求，期一、期二已完成：
 八个会话（`din` `dout` `relay` `ain` `aout` `temp` `rs232` `rs485`）、
@@ -64,37 +54,34 @@ flowchart LR
 
 | # | 对应需求 | 测什么 | 判据 | 跑法 | 条件 | 状态 |
 |---|---|---|---|---|---|---|
-| `T4-01` | `R4-01` | 端口工装的**协议契约** | C harness 拿真实固件源码跑，产出能力表并逐项比对 ¹ | `cd host/porttool_caps && python build.py`（要 gcc/clang） | 主机侧 | ✅ |
-| `T4-02` | `R4-01` | 面板在**真浏览器**里点一遍 | 10 组断言，含「改了参数就不给结论」「卡片上不许剩协议词」「看门狗真的在续期」 ² | `cd host/porttool_panel && python run.py --port sim`（模拟板）或 `--port COMx`（真板子），都要 playwright + Chrome | 主机侧 ³ / 真板子 | ✅ |
-| `T4-03` | `R4-02` `R4-03` | **Linux 版**面板在真浏览器里点一遍，接真板子 | 同 `T4-02`，加一条：带 VID 的串口行都写着它是什么（Linux 上是厂商 / 产品名和驱动名）⁴ | 串口先用 `usbipd` 挂进 WSL，再 `python run.py --wsl Debian --port /dev/ttyUSBx` | 真板子 + WSL | ✅ |
-| `T4-04` | `R4-01` | **方案执行器与方案页** | 六个通用字段的语义（`execute_condition` 的门、重试、前后延时、超时）、四种步骤类型、报告每次尝试都留、面板拒跑不合固件的方案（决策 77） | `$PORTTOOL` 里 `go test ./TestCase/host/porttool_plan/`，本仓 selfcheck 的 GO-TEST 一步包含它 | 主机侧（假板子），测不到真板子上的时序 | ✅ |
+| `T4-01` | `R4-01` | 端口工装的**协议契约** | C harness 拿真实固件源码跑，产出能力表并逐项比对 ¹ | `$PORTTOOL` 里 `TestCase/test.sh t4-01`（`go test -race ./TestCase/host/porttool_caps/ -args -build`，要 gcc/clang） | 主机侧 | ✅ |
+| `T4-02` | `R4-01` | 面板在**真浏览器**里点一遍 | 按段 ①–⑫，见 ² | `go run ./TestCase/host/porttool_panel --port sim`（模拟板）或 `--port COMx`（真板子），要 Chrome | 主机侧 ³ / 真板子 | ✅ |
+| `T4-03` | `R4-02` `R4-03` | **Linux 版**面板在真浏览器里点一遍，接真板子 | 同 `T4-02`，加一条：带 VID 的串口行都写着它是什么（Linux 上是厂商 / 产品名和驱动名）⁴ | 串口先用 `usbipd` 挂进 WSL，再 `go run ./TestCase/host/porttool_panel --wsl Debian --port /dev/ttyUSBx` | 真板子 + WSL | ✅ |
+| `T4-04` | `R4-01` | **方案执行器与面板接口** | 六个通用字段的语义（`execute_condition` 的门、重试、前后延时、超时）、四种步骤类型、报告每次尝试都留、面板拒跑不合固件的方案（决策 77）；工装完整测试的记录、续跑、停下和安规卡片，校准值经 ST-Link 烧录 | `$PORTTOOL` 里 `go test ./TestCase/host/porttool_plan/`，本仓 selfcheck 的 GO-TEST 一步包含它 | 主机侧（假板子、ST-Link 替身），测不到真板子上的时序和 CubeProgrammer 的真实擦写 | ✅ |
+| `T4-05` | `R4-01` | 第 6 步的 **demo 和工装固件讲同一套协议**（决策 93） | 同一份 Go 测试对工装固件的模拟板和 demo 的主机版各跑一遍，用 `src/ptproto` 解析：`pt.id`、`pt.caps` 表头与 demo 标记、demo 每个端口的形状和固件一致、拒绝原文一致、回环计数、帧字段和 `pt.run` 应答字段（差别只许是 [PORTTOOL-FLOW.md](M4/PORTTOOL-FLOW.md)「A.9」列的那些）、`pt.cal` 长度、RS232 切波特率的应答和切过去后的帧、ETH 满速率回送原样送回；另把测试项目录里用户级的每一项（目标和默认判据方案的判据步骤）在两边各跑一遍，判据要的字段缺了就不过（[决策 127](../tables/DECISIONS.md)；RS485 的 `overrun` 带 `if_present`，demo 不报时不判，STG-07） | `$PORTTOOL` 里 `TestCase/test.sh t4-05`（`go test ./TestCase/host/porttool_demo/ -args -build`，要 gcc / g++） | 主机侧：demo 的协议核心原样编译，板卡包 API 换成桩，所以测不到板卡包 API 本身（那部分只由 `P5` 编译）、USB 的满速率回送，以及真的 PHY、SD 卡、SDRAM、校准值区、串口切波特率 | ✅ |
 
-**共 3 条。**
+**共 5 条。**
 
 ¹ 判据贴着代码放在 `$PORTTOOL:TestCase/host/porttool_caps/PORTTOOL-CAPS-TEST.md`，**没有搬进文档仓**。
 
-² 完整的十条判据在 [HOW-TO-RUN-PORTTOOL-TESTS.md](../engineering/HOW-TO-RUN-PORTTOOL-TESTS.md) 的 `T4-02` 行，**这里不抄**。
-其中第 ⑧ 条是 2026-09-11 用户实测撞出来的：勾 DO3、占空比改成 50，1.4 秒出一个假失败 ——
-**改了参数就不该给结论，要说清哪一项和方案不一样。**
+² 判据在 [HOW-TO-RUN-PORTTOOL-TESTS.md](../engineering/HOW-TO-RUN-PORTTOOL-TESTS.md)「T4-02 的判据」，这里不抄。
 
-³ ⚠️ **`--port sim` 跑得过不等于真板子跑得过。**
-模拟板**自己扮演所有对端**，所以「绑对了适配器才闭合链路」这件事在模拟板上永远成立 ——
-**只有真工位能证明它。** 覆盖不到的还有**真外观**：颜色、间距好不好看只能人看。
+³ ⚠️ `--port sim` 过不等于真板子过，模拟板测不到什么见 [HOW-TO-RUN-PORTTOOL-TESTS.md「T4-02 的判据」](../engineering/HOW-TO-RUN-PORTTOOL-TESTS.md#t4-02-的判据)。
 
 ⁴ 面板跑在 WSL 里，浏览器是 Windows 上的 Chrome。**测不到**：桌面 Linux 上双击打开、`xdg-open` 开浏览器、udev 和串口权限。
 
 ## 4 · 为什么这里没有「证据日期」和「最近结果」
 
 状态一列的规矩见 [M1 §5](M1-firmware-upgrade.md)。
+
 ## 5 · 这个模块的边界
 
 **测得了什么**：八个会话端口 + 14 个一次性目标，2026-09-08 在真板子上跑过 ——
 SDRAM 三项、SD 认卡、以太网 PHY、CAN 内外回环、RS232 自回环、温度、DI、高侧、继电器逐路、AO。
 
-**测不了什么**（写出来，因为不写就会有人以为测了）：
+**测不了什么**：
 
-- **三条一直没在真环境验过**：USB-RS232 驱动要在干净机器上插真适配器、
-  整套没上过真板、VNQ5160K-E 的 PWM 上限**数据手册查不到**，要示波器
+- **三条没在真环境验过**：USB-RS232 驱动（要干净机器插真适配器）、面板整套没在真板子上点过（T4-02 对真板子，[TODO-fixture.md](../../work/TODO-fixture.md) 第 24 条）、DO 高侧开关的 PWM 上限（见 [PORTTOOL-FLOW.md B.6「坑 · 高侧开关」](M4/PORTTOOL-FLOW.md#b6-dout--数字输出会话-)）
 - **交权给 CAN 深度诊断是一条不归路** —— 进去之后**只有复位才能回到工装**
 - **`🔨` 状态本身说不清还差多少**（见功能表下面那条警告）
 
@@ -106,16 +93,14 @@ SDRAM 三项、SD 认卡、以太网 PHY、CAN 内外回环、RS232 自回环、
 | 这些端口给 app 用的时候是什么样 | [M3 应用运行环境](M3-app-runtime.md) |
 | 逐板出厂要检查哪七项 | 工程约束层的出厂检查单 `CHK-C1`–`CHK-C7` |
 
-> **引用别的模块一律只写指针，不抄内容。** 这是「一个事实只有一个家」的落地方式，
-> 引用规矩见 [M1 §6](M1-firmware-upgrade.md)。
+> 引用别的模块只写指针，不抄内容，规矩见 [M1 §6](M1-firmware-upgrade.md)。
 
 ## 7 · 这个模块的细节文档
 
-主文档是骨架，下面这些是深度。**它们在 `M4/` 子目录里，一个事实只有一个家 —— 这里是指针，不是摘要。**
+在 `M4/` 子目录里，这里只是指针。
 
 | 文档 | 讲什么 |
 |---|---|
 | [PORTTOOL-FLOW.md](M4/PORTTOOL-FLOW.md) | 工装的控制模型与逐端口测试规程，**含完整的协议时序图** |
 | [PRODUCTION-FRAMEWORK.md](M4/PRODUCTION-FRAMEWORK.md) | 产线测试框架：方案文件的结构与步骤序列 |
 | [PROD-CONFIG-ITEMS.md](M4/PROD-CONFIG-ITEMS.md) | 产测配置项总表 |
-| [BOARD-BRINGUP-CASES.md](M4/BOARD-BRINGUP-CASES.md) | 板级点亮用例：接什么线、看什么现象算通 |

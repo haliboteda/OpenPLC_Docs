@@ -2,7 +2,7 @@
 
 **这份文件定义上位机产线侧的形状**：一份方案文件怎么写、有哪些步骤类型、执行语义是什么。
 
-- 要什么 vs 有什么 → `$PROD/maps/production-test-gap/`（那条线 2026-09-16 起 ⏸ 等使用反馈）
+- 要什么 vs 有什么 → [工装六步测试](../../../maps/fixture-test-stages/map.md)「Not yet specified」里那条「对着生产测试指导文件逐条核一遍差距」
 - `pt.*` 协议本身 → [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) 的 A 部分
 - 取舍理由 → [DECISIONS.md](../../tables/DECISIONS.md) 第 22–25 条
 
@@ -100,20 +100,20 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 **`limit_version` 必须有**：产线测试指南 2.6 要求每站记录「软件 / 限值版本」。方案文件改了就要动这个字段。
 
-**运行时从哪读**：PortTool 找 exe 旁边的 `plans/`，找不到才退回当前目录下的 `TestCase/plans`（从仓库根跑的情况）。`compile_tool.sh` 每次构建把 `$PORTTOOL/TestCase/plans/*.json` 拷进 `Output/<平台>/plans/` —— **仓库那份是源头，`Output/` 那份是产物，会被下次构建覆盖**；产线自己新写的方案文件留在原地不动。方案页的「保存」写的也是这个目录，且**先验后写**：不通过校验的方案根本到不了磁盘，因为一份读不进来的方案迟早有人拿去跑。
+**运行时从哪读**：PortTool 找 exe 旁边的 `plans/`，找不到才退回当前目录下的 `src/plans`（从仓库根跑的情况）。`$PORTTOOL/tools/build.sh tool` 每次编 PortTool 都把 `$PORTTOOL/src/plans/*.json` 拷进 `Output/bin/<平台>/plans/` —— **仓库那份是源头，`Output/` 那份是产物，会被下次构建覆盖**；产线自己新写的方案文件留在原地不动。面板只列这个目录里的方案供页头「判据来自哪份方案」选择，不编辑、不运行（[决策 102](../../tables/DECISIONS.md)）。
 
-### 精度指标（`calibration`）
+### 校准通道（`calibration`）
 
-方案顶层可以带一个 `calibration` 块，写每块板校准后要达到的精度（[决策 70](../../tables/DECISIONS.md)、[AI / AO 的精度指标定多少](../../../maps/per-board-calibration/issues/CAL-02-what-accuracy-do-we-promise.md)）。换一份方案文件就换了指标（决策 30）。
+方案顶层可以带一个 `calibration` 块，列出校准的四路和各自的单位、满量程。**它不是判据**：校准只取最小二乘的 k、b，不判残差、不拦 k、b；±1 % FS 是 AI / AO 读数 / 输出测试的判据（[决策 99](../../tables/DECISIONS.md)，改了[决策 90](../../tables/DECISIONS.md) 的「精度」一行）。
 
 ```json
 "calibration": {
   "temperature_c": 25,
   "channels": [
-    { "channel": "AI1", "unit": "mV", "full_scale": 10000, "max_residual_pct_fs": 0.1 },
-    { "channel": "AI2", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.1 },
-    { "channel": "AO1", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.3 },
-    { "channel": "AO2", "unit": "mA", "full_scale": 20,    "max_residual_pct_fs": 0.3 }
+    { "channel": "AI1", "unit": "mV", "full_scale": 10000 },
+    { "channel": "AI2", "unit": "mA", "full_scale": 20 },
+    { "channel": "AO1", "unit": "mA", "full_scale": 20 },
+    { "channel": "AO2", "unit": "mA", "full_scale": 20 }
   ]
 }
 ```
@@ -121,12 +121,25 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 | 字段 | 意思 |
 |---|---|
 | `channel` | `AI1`、`AI2`、`AO1`、`AO2` 之一，和校准值区的四路一致；不许重复 |
-| `unit` | 拟合用的单位，必须和校准值区那一路的单位一样（AI1 是 mV，其余是 mA） |
-| `full_scale` | 满量程，判据按它算百分比：AI1 0–10 V，AI2、AO 0–20 mA |
-| `max_residual_pct_fs` | 拟合后最大残差占满量程的百分比上限，超了这一路判不过 |
-| `temperature_c` | 指标对应的温度，只记录不判：全温指标还没定 |
+| `unit` | 拟合用的单位，跟这一路登记的档位走：电压档 mV、电流档 mA（[决策 134](../../tables/DECISIONS.md)）；只收这两个 |
+| `full_scale` | 满量程，单位同 `unit`（电压档 10000 mV、电流档 20 mA）。最大残差按它换算成 % FS，只显示、只存档 |
+| `temperature_c` | 校准时的温度，只记录不判 |
 
-判定在 `ptcheck` 里：`|最大残差| / full_scale × 100 ≤ max_residual_pct_fs`。方案里没有这个块，拟合照算、照存档，但不判过不过，也不出扇区 15 镜像。
+方案里没有这个块，拟合照算、照存档、四路齐了照出扇区 15 镜像，只是残差不换算成 % FS。
+
+### 安规问卷（`safety`）
+
+方案顶层可以带一个 `safety` 块，列出工装完整测试第 5 步安规卡片上要人逐条答「是 / 否」的题目（[安规测试预留什么](../../../maps/fixture-test-stages/issues/STG-09-what-the-safety-test-stage-reserves.md)）。题目还没人给出，随附的方案里是空列表；没有这个块等于没有题目。卡片怎么用、答案进报告哪里见 [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md)「C.3.4」。
+
+```json
+"safety": {
+  "questions": []
+}
+```
+
+| 字段 | 意思 |
+|---|---|
+| `questions` | 题目，一条一个字符串，原样显示在卡片上；不许空字符串、不许重复 |
 
 ### 六个通用字段的语义
 
@@ -150,14 +163,68 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 | `op` | `range`（`min`/`max`）· `eq` · `ne` · `contains` · `count_zero`（必须为 0，用于 `miss` / `junk` / `errors`） |
 | `min` / `max` / `value` | 按 `op` 取用 |
 | `unit` | 只用于报告显示，不参与判定 |
+| `if_present` | `true` 时帧里没有这个字段算过，有就照常判；默认缺字段判不过。只给某种固件报不出的字段用（RS485 的 `overrun`，[STG-07](../../../maps/fixture-test-stages/issues/STG-07-how-the-arduino-demo-speaks-the-fixture-protocol.md)） |
 
 **`eq` / `ne` 两边都是数字时按数值比**，所以固件打 `v=0xFF`、方案里写 `255` 也相等。都不是数字时按大小写不敏感的字符串比。
 
 ⚠️ **`ch<n>` 有的端口是复合串**（`ain` 是 `raw/mV`、`aout` 是 `asked/量化/µA`、`temp` 是 `mV/deci℃`），判据要能指到第几段。用下标形式，**下标从 0 开始**：`ain` 的 `ch1[0]` 是 raw、`ch1[1]` 是 mV。
 
+**`peer_*`：PC 端量出来的字段。** `eth` / `usb` 的 `mode=mirror` 步骤（[PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) B.9），三个数在 PC 上算，执行器在判之前把它们并进最后一帧：
+
+| 字段 | 是什么 |
+|---|---|
+| `peer_sent` / `peer_echoed` | PC 发出的包数 / 原样收回的包数 |
+| `peer_lost` | 发出后没收回的包数；丢包率判 0 就判它 `eq 0` |
+| `peer_bad` | 收回来但内容不对的包数 |
+| `peer_kbps` | 收回的有效字节折成 kbit/s |
+| `peer_rtt_min_us` / `peer_rtt_avg_us` / `peer_rtt_max_us` | 每包往返时间，微秒 |
+
+板子的帧里没有 `peer_` 开头的字段，两边不会撞名。
+
+**另外三个合成字段**（板子的帧里没有 `_` 开头的字段）：
+
+| 字段 | 在哪种步骤上 | 是什么 |
+|---|---|---|
+| `_changes_<字段>` | 标准机上的会话（`on: "ref"`，见下一节） | 判的那段时间里，这个字段在相邻两帧之间变了几次。DO 方波数翻转次数就判它，如 `_changes_ch3` |
+| `value` | `UserReading` | 人填的数，原样进报告 |
+
 ⚠️ **字段不存在算失败，不算跳过。** 方案里写了固件已经不报的字段，必须当场看见 —— 静默跳过的限值就是没测过的板子。
 
 ⚠️ **`loop=ctrl` 的端口，`seq/rx/miss` 不是该端口的判据** —— 它们只说明控制口活着（见 [PORTTOOL-FLOW.md](PORTTOOL-FLOW.md) A 部分）。方案文件里给这些端口写 `miss` 判据是**假判据**，校验器应该报警。
+
+### 在标准机上跑（`on`）
+
+标准机是执行器的第二条板子连接（[决策 103](../../tables/DECISIONS.md)、[STG-18](../../../maps/fixture-test-stages/issues/STG-18-how-a-plan-drives-the-reference-board.md)）。步骤写 `"on": "ref"` 就发给标准机，不写或写 `"dut"` 发给被测板。
+
+| 事 | 定案 |
+|---|---|
+| 哪些类型能写 | `PtSession`、`PtRun`、`PtRaw`；其余类型只能是 `dut` |
+| `PtRun` / `PtRaw` 写 `ref` | 照常跑，只是对着标准机 |
+| `PtSession` 写 `ref` | **陪下一步跑**：执行器先在标准机上起会话、等到它第一帧，再跑紧跟着的被测板步骤，跑完才停标准机。下一步必须是 `dut` 的 `PtSession` / `PtRun` / `PtRaw` |
+| 判标准机那一步 | 用被测板那一步读完之后、停端口之前标准机的最后一帧；读完后再等标准机两帧，盖住它一个采样周期的延迟 |
+| 门和开关 | 两步算一对：门、`sleep_before_ms` 看标准机那一步；被测板那一步不许写 `execute_condition`，两步的 `enabled` 必须相同；重试只在被测板那一步上，标准机那一步不许写 `retry_count` |
+| 一对之后的门 | 两步里有一步没过，后面 `PASS` 门的步骤就不跑 |
+| 看门狗 | 标准机会话期间执行器给标准机武装 `pt.hold`、每 2 秒续期，停会话后解除 —— 和面板持续测试同一套（[PROD-CONFIG-ITEMS.md](PROD-CONFIG-ITEMS.md)「F · 安全联锁」），因为标准机的 DO 在出 24 V |
+| 没接标准机 | 标准机那一步记 ERROR，陪的那一步记 SKIPPED；不会拿被测板代跑 |
+| 离线校验 | `CheckAgainstCaps` 只查被测板的步骤，标准机的步骤对标准机自己的 `pt.caps` 查 |
+
+⚠️ **CAN 接标准机时 `miss` 不能当判据**：被测板 `mode=normal` 要对端原样送回才闭环，标准机 `mode=echo` 回的是加一，所以 `miss` 一直涨；判据用被测板的 `rx_frames`（回来的帧数）。出处 `$BOOT/TestCase/porttool/porttool_can.c` 的 `can_collect()` 和 `PortTool_EchoTick()`。
+
+### 上位机当对端（`peer`）
+
+`PtSession` 的 `peer` 说链路另一头由这台电脑上的什么来答，执行器在这一步里起它、停它：
+
+| 字段 | 是什么 |
+|---|---|
+| `tcp` | `auto`（用帧里的 `ip=`、`port=`）或 `host:port` |
+| `serial` | 用面板绑过的串口适配器，方案里不写口名（[决策 73](../../tables/DECISIONS.md)） |
+| `usb` | 板子自己的 CDC 口，按 USB id 找 |
+| `baud` | 串口对端的波特率，0 用默认 |
+| `can` | 上位机的 CANable 2.0（SLCAN，按 USB id `16D0:117E` 找），和标准机 `mode=echo` 一样回：同一标识符、同一长度、负载加一。位速率取这一步的 `params.baud`，没写用 500000 |
+
+**对端什么时候算起来**（`$PORTTOOL/src/ptseq/peer.go:68-71`、`ptseq.go:453-470`）：每来一帧试一次打开对端，连上后这一步的帧数从 0 重新计；从这一步开始算 10 s 内对端还没起来，帧数够了也接着等（`peerGrace`）。宽限按时间不按帧数，帧停了的会话也能出结论而不是超时；10 s 盖住板子 DHCP 拿地址的 5–6 s。
+
+⚠️ **TCP 对端「已连上」不等于板子在答**（`peer.go:158-159`、`:189-198`）：TUN 模式的 VPN 会接受到任意地址的 TCP connect，所以对端显示连上了却收到 0 字节。这种情况报告里写明「没东西回来，多半是 VPN 或代理占了默认路由」，不当成板子的 `conn=0` 故障。
 
 ---
 
@@ -179,6 +246,7 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 |---|---|---|
 | `Tool` | 起外部进程（JLINK、程控电源 CLI、工装板工具），判输出或退出码 | `tool_name` · `tool_args` · `tool_dir` · `checks` |
 | `UserConfirm` | 问人。**没人可问时是 ERROR 不是 PASS** —— 一个因为「只有人能看见」而存在的步骤自己判自己通过，是最坏的结果 | `prompt` |
+| `UserReading` | 让人填一个数（万用表读数这类），走 `checks` 判，字段名 `value`；报告的 `extra.value` 留原样（[决策 103](../../tables/DECISIONS.md)、[STG-19](../../../maps/fixture-test-stages/issues/STG-19-manual-reading-step-in-a-plan.md)）。填的不是数、或没人可问，都是 ERROR | `prompt` · `unit`（只显示）· `checks` |
 | `ReadSN` | 从外部拿 SN：`arg` / `stdin` / `file:<路径>` | `source` · `checks`（可校验 SN 的形状） |
 | `PushResult` | 把报告交出去：`file:<路径>` / `dir:<目录>` | `sink` |
 
@@ -222,17 +290,17 @@ Tool     ToolFileName      = MK-TMYYMK-01(ADB)_1.3…
 
 一次运行出一份结构化文件（CSV 给人看、JSON 给系统读），至少包含：
 
-方案名与 `limit_version` · 工装软件版本 · 固件版本（`pt.caps` 报的）· 板子 UID（`pt.id` 报的）· SN（若有 `ReadSN` 步骤）· 起止时间 · 逐步骤：id / 类型 / 结果 / 每次尝试的原始值 / 判据本身 / 耗时。
+方案名与 `limit_version` · 工装软件版本 · 固件版本（`pt.caps` 报的）· 板子 UID（`pt.id` 报的）· 接了标准机时它的固件版本和 UID（`ref_firmware`、`ref_uid`）· SN（若有 `ReadSN` 步骤）· 起止时间 · 逐步骤：id / 类型 / 结果 / 每次尝试的原始值 / 判据本身 / 耗时。
 
 **判据本身要进报告**，不只是「PASS」—— 否则事后拿到一份报告没法知道当时是按什么标准判的。
 
 ---
 
-## 六、方案页做不到的
+## 六、方案只在命令行跑
 
-- **不合固件的方案拒跑**（决策 77）—— 面板和 CLI 一样：`CheckAgainstCaps` 报出问题就不跑，列出哪一步、为什么
-
-- **`UserConfirm` 步骤在方案页上直接判失败** —— 一次运行是一个同步 HTTP 请求，没有地方安放这个问句。要人回答的方案走 CLI：`porttool run <方案> --port COMx` 在 stdin 上问 `pass? [y/N]`，`--yes` 全部当通过
+- 面板不再编辑和运行方案（[决策 102](../../tables/DECISIONS.md)）；`porttool run <方案> --port COMx` 照旧，`UserConfirm` 在 stdin 上问 `pass? [y/N]`，`--yes` 全部当通过
+- `--ref COMy` 接标准机（两头都写 `sim` 时是两块模拟板，DO 和 DI 按 [STG-02](../../../maps/fixture-test-stages/issues/STG-02-what-the-reference-board-is.md) 交叉接好）；`UserReading` 在 stdin 上要一个数，不是数就再问，`--yes` 不替人填数
+- **不合固件的方案拒跑**（决策 77）：`CheckAgainstCaps` 报出问题就不跑，列出哪一步、为什么
 
 ## 七、还没定的
 

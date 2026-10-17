@@ -17,10 +17,11 @@ python tools/list_wayfinder_map_frontier.py --all
 - **用户 2026-09-30**：目前没有 Linux 实机和 Mac 实机；**先做 Linux**（WSL + `usbipd-win` 接真板子），没问题后再定 macOS —— 细节归 [在哪几台真机上验、用例怎么写](issues/XPT-03-which-real-machines-and-what-the-test-case-is.md)
 - **用户 2026-09-30**：对端串口由用户选、记在本机，方案不写口名；串口列表要显示芯片 —— [DECISIONS.md](../../docs/tables/DECISIONS.md) 第 73 条
 - **用户 2026-09-30**：本图的改动全部测通后再提交，中途不提交
+- **用户 2026-10-16**：macOS 先不编，先把 Windows、Linux 做完
 - **「一次生成」是硬约束**：排除给 macOS 开 cgo（开了 Mac 版只能在 Mac 上编）
 - 现状（`$TOOL` 在 `9187f59`，2026-09-30 在 Windows 上交叉编译，未在 Linux / macOS 上运行）：
-  - linux/amd64、linux/arm64、darwin/amd64、darwin/arm64 都编得过；`$TOOL/compile_tool.sh:14–35` 已一次出三个平台，但 `GOARCH=amd64` 写死
-  - 浏览器、ping、模拟板文件名已按平台分开（`$PORTTOOL/internal/ptpanel/panel.go:797`、`net.go:144`、`$PORTTOOL/internal/simboard/simboard.go:40`）
+  - linux/amd64、linux/arm64、darwin/amd64、darwin/arm64 都编得过；`$TOOL` 的 `compile_tool.sh:14–35`（2026-10-16 并进 `build.py`，决策 144）已一次出三个平台，但 `GOARCH=amd64` 写死
+  - 浏览器、ping、模拟板文件名已按平台分开（`$PORTTOOL/src/ptpanel/panel.go:797`、`net.go:144`、`$PORTTOOL/src/simboard/simboard.go:40`）
 - 和 [Linux / macOS 用户怎么拿到能运行的 IAPTool](../arduino-examples-and-ide-flow/issues/IDE-15-how-do-linux-and-macos-users-get-an-executable-iaptool.md) 是同一类发布问题（可执行位），先后见本图的票
 - **要用到的 skill**：`grilling`（本图的票）
 - 开票 / 关票 / 算前沿照 [图与票的约定](../MAP-AND-TICKET-CONVENTION.md)
@@ -30,7 +31,7 @@ python tools/list_wayfinder_map_frontier.py --all
 在工作区根目录跑（bash，要 `go`）。按「`PortTool` 自己的代码里行为随操作系统变的地方」找：`PortTool` 依赖的本仓各包里的平台构建标签、`runtime.GOOS` 分支、调外部程序、写死的 Windows 名字（`.exe`、`COMn`），加上发版脚本里的平台和架构：
 
 ```
-(cd OpenPLC_PortsTestingTool && for d in $(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/porttool | grep '^PortTool' | sed 's#^PortTool#.#'); do grep -nE '//go:build|runtime\.GOOS|exec\.Command|\.exe"|COM[0-9]' $d/*.go | grep -v '_test\.go:'; done; grep -nE 'GOOS|GOARCH|PLATFORMS=' compile_tool.sh)
+(cd OpenPLC_PortsTestingTool && for d in $(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./src/cmd/porttool | grep '^PortTool' | sed 's#^PortTool#.#'); do grep -nE '//go:build|runtime\.GOOS|exec\.Command|\.exe"|COM[0-9]' $d/*.go | grep -v '_test\.go:'; done; grep -nE 'GOOS|GOARCH|TARGETS' build.py)
 ```
 
 2026-09-30 是 28 行：Go 源码 24 行（12 个文件），`compile_tool.sh` 4 行。关最后一张票前重跑，每一行都要落在「三个平台都验过」「明确与平台无关」两类之一。
@@ -40,12 +41,16 @@ python tools/list_wayfinder_map_frontier.py --all
 ## Decisions so far
 
 - [macOS 上串口没有描述和 VID 怎么办](issues/XPT-01-macos-serial-port-without-description-or-vid.md)：调系统自带的 `ioreg` 补 VID / PID，不开 cgo
-- [要不要出 arm64 版](issues/XPT-02-whether-to-ship-arm64.md)：只给 PortTool 加 `Output/darwin-arm64/`，Linux 不出 arm64
-- [Linux / macOS 用户怎么拿到能运行的 PortTool](issues/XPT-04-how-linux-and-macos-users-get-a-runnable-porttool.md)：用户 clone 源码仓库自己 `go build`，README 有编译说明
+- [要不要出 arm64 版](issues/XPT-02-whether-to-ship-arm64.md)：只给 PortTool 加 `Output/bin/darwin-arm64/`，Linux 不出 arm64
+- [Linux / macOS 用户怎么拿到能运行的 PortTool](issues/XPT-04-how-linux-and-macos-users-get-a-runnable-porttool.md)：源码和编译好的可执行文件都提供，可执行文件的发布单独处理；调试时自己 `go build`（用户 2026-10-16 更正，原「不发可执行文件」作废）
+
+- [macOS 上 KNX USB 接口怎么接](issues/XPT-06-knx-usb-on-macos.md)：purego 调 IOKit，不开 cgo
+- [交付包怎么带上 Linux 版](issues/XPT-05-delivery-package-for-linux.md)：Windows、Linux 同一个文件夹，`bash start.sh`
+- 模拟板的 Linux / macOS 版用 zig cc 在 Windows 上交叉编（[XPT-05](issues/XPT-05-delivery-package-for-linux.md) 第 2 件）
 
 ## Not yet specified
 
-- **帮助文本和面板里写死的 `COM7` / `COM16` 示例**（`$PORTTOOL/cmd/porttool/run.go`）在 Linux / macOS 上要不要换成本平台的写法：等真机上看过面板和 CLI 才知道还有哪些类似的地方
+- 无（命令行帮助的 `COM7` 示例 2026-10-16 定：同时写 `/dev/ttyUSB0`）
 
 ## Out of scope
 

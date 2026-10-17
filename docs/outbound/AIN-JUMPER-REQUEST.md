@@ -65,7 +65,6 @@
 ## 五、不焊会怎样
 
 - **AIN1 / AIN2 永久无法测试。** 工装里 `analog-in` 这一步会一直「如实失败」，报告上永远是红的
-- 板级 bring-up 的 case 3（Analog In）也一直是**只打印、不判 PASS/FAIL** 的状态 —— 原因就写在 ../../TestCase/ADC/adc_test.h（`$BOOT/TestCase/ADC/adc_test.h`） 的头注释里：「the input divider ratio depends on four solder jumpers whose factory state is not documented」
 - 不影响任何别的东西。**模拟输出（AO）和这四处跳线无关，一直是通的**
 
 ---
@@ -80,7 +79,7 @@
 
 | | 事实 | 出处 |
 |---|---|---|
-| AO 是电流源 | XTR111AIDGQT（U1/U2），RSET = 1024R 1%（R9/R10），Iout = Vin × 10 / 1024 | UpperDeck BOM，../../TestCase/DAC/dac_test.h（`$BOOT/TestCase/DAC/dac_test.h`） |
+| AO 是电流源 | XTR111AIDGQT（U1/U2），RSET = 1024R 1%（R9/R10），Iout = Vin × 10 / 1024 | UpperDeck BOM，port_dac.h（`$BOOT/TestCase/common/port_dac.h`） |
 | **XTR111 供电 = +24 V** | `netlist.ipc:851, 867` —— U1/U2 的 1 脚接 `+24V` | UpperDeck 网表 |
 | AIN2 电流档负载 | 374R + 124R = **498 Ω**；20 mA 时其上压降约 **9.96 V** | 本文件第二节的网表图 |
 
@@ -95,7 +94,7 @@
 - **开路**（我们假设的状态）：0–20 mA，`mv=1:500` 应读 4.883 mA、`mv=1:1500` 应读 14.648 mA
 - **桥上**：XTR111 的输入变成和 `/VREF` 的求和节点，变成 **4–20 mA live-zero**，DAC 给 0 时约 4.85 mA，上面那两个期望值都不成立
 
-**固件读不回这个状态**，../../TestCase/DAC/dac_test.h（`$BOOT/TestCase/DAC/dac_test.h`） 因此故意不判 PASS/FAIL。**请硬件告诉我们 JP3/JP4 到底焊了没有**，我们才能把 AO 的判据写死。
+**固件读不回这个状态**，工装的 `aout`（porttool_aout.c（`$BOOT/TestCase/porttool/porttool_aout.c`））因此只报应有电流，不判 PASS/FAIL。**请硬件告诉我们 JP3/JP4 到底焊了没有**，我们才能把 AO 的判据写死。
 
 ---
 

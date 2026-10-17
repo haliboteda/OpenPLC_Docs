@@ -25,7 +25,7 @@
 |---|---|---|
 | SDRAM 压力 | `sdram.probe` + `sdram.sweep` | `size` `ready` `databus` `addrbus` / `patterns` `mismatches` |
 | SDRAM 保持 | `sdram` 会话 | `cycles` `failed` |
-| SDRAM 读回校验 | `sdram.crc` | `ready` `offset` `bytes` |
+| SDRAM 读回校验 | `sdram.sweep` 逐字写读比对（窗口 CRC 已去掉，[决策 141](../tables/DECISIONS.md)） | `mismatches` |
 | SD 读写压力 | `sd.probe` `sd.integrity`（`passes=` 决定几轮）`sd.speed` | `fs` `identical` `passes` `passed` |
 | SD 检测脚 | `sd` 会话 | `detected` |
 | 以太网 | `eth.link` + `eth` 会话 | `found` `link` `speed` / `conn` `miss` |
@@ -35,7 +35,7 @@
 | RS232 | `rs232` 会话 | `miss` `rxlines` |
 | RS485 引脚级 | `rs485.pins` | `checked` `busy` `follows` |
 | RS485 链路 | `rs485` 会话 | `miss` `junk` `overrun` |
-| CAN | `can` 会话 `mode=extloop` —— 过收发器和隔离器，不需要第二个节点 | `miss` `rx_frames` `junk` `lec` |
+| CAN | `can` 会话 `mode=extloop` —— 不需要第二个节点，但**不证明收发器和隔离器**（控制器内部回环、不看 RX 脚）；要证明它们得用 `mode=normal` 加一个对端节点 | `miss` `rx_frames` `junk` `lec` |
 | KNX | `knx` 会话 `mode=frames` | `bus` `vcc` `chars` `bad` |
 
 ### 自证，但要一根跳线（2 项）
@@ -77,4 +77,4 @@
 
 ## 四、文档里还没有数的
 
-**所有限值都是 TBD** —— 功耗、模拟精度、速率门限。判据文件的形状已经有了（`$PORTTOOL/TestCase/plans/*.json` 每一步自带 `checks`），缺的是数。**这些数由硬件/质量填进方案文件**，不写进代码（[DECISIONS.md 44](../tables/DECISIONS.md)）。
+**所有限值都是 TBD** —— 功耗、模拟精度、速率门限。判据文件的形状已经有了（`$PORTTOOL/src/plans/*.json` 每一步自带 `checks`），缺的是数。**这些数由硬件/质量填进方案文件**，不写进代码（[DECISIONS.md 44](../tables/DECISIONS.md)）。
