@@ -98,11 +98,11 @@ def _core_live():
 
 
 class _Repos:
-    """Same attribute names the checks used under IAPTranfer_Tool's config."""
+    """Same attribute names the checks used under the old IAPTool repo config."""
     DOCS_REPO = str(DOCS)
     BOOT_REPO = _sibling("BOOT_REPO", "OpenPLC_BootLoader")
     CORE_REPO = _sibling("CORE_REPO", "open_plc_arduino")
-    TOOL_REPO = _sibling("TOOL_REPO", "IAPTranfer_Tool")
+    TOOL_REPO = _sibling("TOOL_REPO", "OpenPLC_IAPTool")
     PORTTOOL_REPO = _sibling("PORTTOOL_REPO", "OpenPLC_PortsTestingTool")
     TEST_REPO = _sibling("TEST_REPO", "OpenPLC_Test")
     HW_REPO = _sibling("HW_REPO", "Hardware")

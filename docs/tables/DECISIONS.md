@@ -3930,3 +3930,14 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 | 只为 Claude 服务的代码 | `$TEST` 的 P10（`check_allow_hygiene.py`）搬进私有仓 `OpenPLC_AI/tools/`，只查 `OpenPLC_AI` 那一份 settings；`init_machine.py --write-claude-dirs` 和 `SKILLS_REPO` 删掉（Claude 只从 `OpenPLC_AI` 启动，各仓不再有自己的 settings）；「别弹提问」改由 `OpenPLC_AI` 的 settings 设 `INIT_MACHINE_NO_INPUT=1` |
 
 **理由**：公开仓里不能有 Claude 的东西（决策 153），这两件工具只检查、只改 Claude 的配置。
+
+## 155 · IAPTool 迁到 `OpenPLCs/OpenPLC_IAPTool`，`$TOOL` 指向它，许可证保持 Apache-2.0
+
+用户 2026-10-22 定。照决策 153 的做法：快照提交（分支 `main`、`v0.1.1`、`v0.1.2`、`v0.1.3` 和旧仓一致），不含 Claude 的东西，作者 `openplc-s`。
+
+| 事 | 定案 |
+|---|---|
+| `$TOOL` | 工作区根的 `OpenPLC_IAPTool`（`$TEST/tools/init_machine.py` 的 `IAPTOOL_REPO`、`$PORTTOOL/tools/ptbuild/local.go` 的 `TOOL_REPO`、`$TEST/go.mod` 的 `replace` 都按这个名字） |
+| 许可证 | 保持旧仓原有的 Apache-2.0 |
+
+**理由**：旧版本已按 Apache-2.0 公开发布过，沿用不需要重新授权。

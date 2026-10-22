@@ -50,7 +50,7 @@ python tools/serial_watch.py      # 只看板子 USB 口 1（系统日志和 Ser
 go build -o Output/windows/TestCase.exe .
 ```
 
-`go.mod` 用 `replace IAPTool => ../IAPTranfer_Tool` 引用 IAPTool 的公开包（`iapcert`、`iapproto`、`netiface`），所以 IAPTranfer_Tool 要放在旁边。
+`go.mod` 用 `replace IAPTool => ../OpenPLC_IAPTool` 引用 IAPTool 的公开包（`iapcert`、`iapproto`、`netiface`），所以 OpenPLC_IAPTool 要放在旁边。
 
 ## 运行
 

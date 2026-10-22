@@ -21,6 +21,10 @@ python tools/list_wayfinder_map_frontier.py --all
 - **用户 2026-10-22**：`OpenPLCs` 的新仓里不放任何 Claude 文件，提交内容（含提交说明，如 `Co-Authored-By: Claude`）也不带 Claude；`OpenPLC_AI` 和其他仓并排放在工作区根，按这个目录结构处理
 - **用户 2026-10-22 定的结构**：会话从 `OpenPLC_AI` 启动；根约定在 `OpenPLC_AI/CLAUDE.md`，各仓的在 `OpenPLC_AI/<仓名>/CLAUDE.md`，由根约定 `@` 全部导入（经 junction 读文件不会自动加载子目录约定，见「已验证」）；`OpenPLC_AI/<仓名>/repo` 是指向 `../<仓名>` 的 junction，`link.py` 重建。已落地：根约定、`OpenPLC_BootLoader`；工作区根原来的 `CLAUDE.md`、`.claude/` 已移走
 - **用户 2026-10-22**：和新仓同名的 `OpenPLC_PortsTestingTool`、`OpenPLC_Test`、`OpenPLC_ETS_Prod` 照 bootloader 的做法迁（快照提交、BSD-3、`openplc-s` 作者），本地原地切换远端；新仓分支和旧仓一样（都是 `master`）；`OpenPLC_AI` 的结构跟着同步。`OpenPLC_Test` 里只为 Claude 服务的代码：P10 搬进 `OpenPLC_AI/tools/`，`--write-claude-dirs` 删掉（决策 154）
+- **用户 2026-10-22 确认对应关系**：`IAPTranfer_Tool` → `OpenPLCs/OpenPLC_IAPTool`，`open_plc_arduino` → `OpenPLC_Arduino_PKG`，`package_index_json` → `OpenPLC_Arduino_PKG_Json`，`Arduino_Tools` → `OpenPLC_Arduino_Tool`；`OpenPLC_Instruction` 对应什么未定
+- **用户 2026-10-22 定**：`OpenPLC_Docs` 要拆。设计方面的文档和记录进 `OpenPLCs/OpenPLC_Instruction`（公开）；项目开发进度、AI 需要的文档进 `OpenPLCs/OpenPLC_AI`（私有）
+- **用户 2026-10-22 定拆分去向**：进 Instruction —— `docs/` 下硬件、模块、构建、标准、测试工程、`ARCHITECTURE.md`、`tables/`（`DECISIONS` 只留决定和理由、`STATUS`、`ID-MAP`、`ACCEPTANCE-CHECKLIST`、`DEFERRED-DESIGNS`）、`GLOSSARY` 的产品术语、查文档的检查（P8、P9、P13、P18）；进 AI —— `maps/`、`work/`、`docs/agents/`、`CLAUDE.md`、`WHERE-THINGS-LIVE.md`、`CONVENTIONS.md`、`docs/outbound/`、`GLOSSARY` 的工作方法术语、查票的检查（P12、P14、地图前沿）
+- **用户 2026-10-22 定引用方向**：产品设计都在 Instruction；AI 里的流程记录是为了实现 Instruction，所以只能 AI 记录引用 Instruction，Instruction 不引用 AI。Instruction 里指向地图、票、待办的 204 处要去掉，需要的理由写进 Instruction 自己；公开代码里指向 `maps/`、`work/` 的 47 处同样去掉或改指 Instruction
 - **用户 2026-10-22**：以后的开发全部迁到 `OpenPLCs` 组织下的新仓，`haliboteda` 的私有仓变成新仓的 fork；公开仓的历史只带版本快照（每个版本一个干净提交并打 tag），不带原始提交
 - **用户 2026-10-14**：继续用自己维护的 board 包，不改成 library 方式；core 留在 STM32duino 2.4.0，需要的上游修复单条摘（与本图无关，只是同一次讨论）
 
@@ -122,6 +126,8 @@ grep -rlE '\.claude|CLAUDE\.md' --include=*.py */tools 2>/dev/null
 - ~~公开仓带多少历史~~：已定，只带版本快照（用户 2026-10-22，见 Notes）
 - ~~`OpenPLC_BootLoader` 的许可证~~：已定 BSD-3-Clause（用户 2026-10-22，决策 153），版权人 Schaeffer AG
 - **`OpenPLC_BootLoader` 里指向私有文档的引用**：`v0.1.3.2` 分支有 52 个文件引用 `$PROD` / `OpenPLC_Docs`，公开读者打不开；保留、删掉还是公开部分文档，等用户定。推荐先保留：不影响编译，代码里的理由按约定必须带引用位置，删掉就丢了出处
+- **`OpenPLC_IAPTool` 的许可证**：旧仓 4 个分支都已带 Apache-2.0 的 `LICENSE`，迁移准备时按 BSD-3 替换了（等于改许可证）。推荐保留 Apache-2.0：旧版本已按它公开发布过，Apache 还带专利授权；等用户定
+- **`OpenPLC_Instruction` 的许可证**：文档不是代码，BSD-3 不太合适；推荐 CC BY 4.0（可转载、要署名）；等用户定
 - **CubeIDE 工程名**：`.project`、`.ioc`、`.launch` 里仍叫 `open_plc_cube_ide`；不改不影响编译，改不改等用户定
 - **`haliboteda` 旧仓怎么处理**：旧仓现在是 public，完整历史里有 Claude 文件和署名；GitHub 上 public 仓的 fork 只能是 public，已有的仓也不能改成 fork。要定：旧仓转 private / archive，再另 fork 一份新的，还是别的做法
 - **私有仓叫什么、放在哪**：`OpenPLC_AI` 是暂名；也可以并进已有的 `AI-Skills`
