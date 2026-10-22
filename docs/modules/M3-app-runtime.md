@@ -61,7 +61,7 @@ flowchart TD
 | **R3-07** | 网络不被 sketch 卡住 | sketch 在 `delay()` 里等待时，板子照样应答网络、能经网口上传 | 手工 | ✅ |
 | **R3-08** | 例程起得来 | `OpenPLC_Ports` 的每个例程经 bootloader 启动后，`setup()` 走完、`loop()` 一直在转、不进 fault | `T3-05` | ✅ |
 | **R3-09** | 例程在真板上 | 自有库每个例程（`OpenPLC_Ports` `OpenPLC_KNX` `OpenPLC_SDRAM`）在真板上的输出和端子行为与它文件头写的一致 | `T3-06` `T3-11`（`T3-11` 只在 Renode 里，见 ⁶） | 🟡 `OpenPLC_Ports` `OpenPLC_SDRAM` 上板已过；`OpenPLC_KNX` 等 `T3-13`–`T3-20` |
-| **R3-10** | 模拟量带单位 | `OpenPLC_Ports` 给 mV / mA 的 AI、AO 读写，并套用这块板的校准值；校准值无效时退回标称换算并打一行日志（[CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md)） | `T3-07` `T3-21` | ✅ |
+| **R3-10** | 模拟量带单位 | `OpenPLC_Ports` 给 mV / mA 的 AI、AO 读写，并套用这块板的校准值；校准值无效时退回标称换算并打一行日志（[CALIBRATED-ANALOG.md](M3/CALIBRATED-ANALOG.md)） | `T3-07` `T3-21` `T3-25` | ✅ |
 | **R3-11** | 复位原因 | sketch 能知道上次复位的原因（看门狗、上电、复位键、软件复位），用来自己决定看门狗复位之后怎么办（决策 80） | `T3-08`（真板子 2026-10-09 `$TEST` `run_t3_08.py` 过） | ✅ |
 | **R3-12** | KNX TP 收发 | `OpenPLC_KNX` 在 TP 总线上按 STKNX 的位时序收发帧、应答、重发，空闲时不占总线（[KNX-TP-DATA-LINK.md](M3/KNX-TP-DATA-LINK.md)） | `T3-09` | 🟡 主机侧已过；上板 2026-10-12 `KNX_BusMonitor` 手动收发都通（[KEX-08](../../maps/knx-examples/issues/KEX-08-board-sees-no-bus-pulses.md)） |
 | **R3-13** | 文件经串口进 SD 卡 | `OpenPLC_Ports` 能按 YMODEM 从串口收一个文件（名字、精确长度、丢包重传），例程 `SD_FileReceive` 经 USB（`Serial`）收，把它写进 SD 卡并读回校验（[EXB-03](../../maps/core-examples-on-board/issues/EXB-03-how-does-a-file-get-from-rs232-onto-the-sd-card.md)） | `T3-10`（上板走 `T3-06`） | ✅ |
@@ -145,8 +145,9 @@ flowchart TD
 | `T3-22` | `R3-20` | KNX 换角色后的开机恢复 | 用本角色写出的数据区开机：数据恢复；用另一角色写的、或 hardwareType 全 0 的头部开机：一个字节都不恢复、个体地址是默认值、不越界；`knx_nvm_sector_write()` 在任意一次 flash word 写入后断电，头部都还是 `0xFF` | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（真 `knx/memory.cpp` `device_object.cpp` `knx_nvm.cpp` + 内存里的假数据区和假 flash 驱动），测不到真 flash 的擦写时序和 ETS 下载 | ✅ 2026-10-17 |
 | `T3-23` | `R3-21` | 映射生成工具 | 用仓里的 `knx_objects.json` 生成的 XML，组对象和现在的 `OpenPLC_TP.xml` 一致；改已有对象的编号、DPT、标志或删掉对象时打 warning、照常生成，新增对象不提示；没写 `application_version` 报错退出、什么都不生成；对象改了而版本号没变再打一条 warning；只找到 ETS6、没有 ETS 5.7 时报「暂只支持 ETS 5.7」 | `$ETSPROD` 下 `python -m unittest discover tests` | 主机侧，测不到签名和 ETS 导入（人工：ETS 5.7 导入生成的 `.knxprod`） | ✅ 2026-10-17 |
 | `T3-24` | `R3-22` | 开机日志缓存 | 乱码时静默初始化、上电冷启动不读直接清空；写入后热复位仍在、序号连续、去掉行尾换行；写满从最旧整条丢；超过 200 字节拆开拼回一致；记录坏、头校验坏、版本比自己新都整块重置并只剩一条 `[sys][LOG]`；只吐没吐过的、`sent` 跨热复位保留且不回退（格式见 [BOOT-LOG.md](M1/BOOT-LOG.md)） | `$CORE_REPO/tests`：`python tests/selfcheck.py` | 主机侧（真 `boot_log.c` + 内存代替 SRAM4，PRIMASK、清 cache 是桩），测不到 ECC、D-cache、中断抢占 | ⬜ |
+| `T3-25` | `R3-10` | AO 设 0 关 DAC 缓冲（决策 152） | 假 DAC 上依次写 非 0 → 0 → 非 0 → 0：0 时缓冲关、非 0 时开；切换时先关通道再改缓冲；非 0 到非 0 不断通道 | `$CORE_REPO` 里 `python tests/selfcheck.py`（CTest 的 `T3-25`） | 主机侧；测不到真芯片的输出电平，那由上板看 | ✅ |
 
-**共 24 条。`T3-05` `T3-11` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` `T3-12` `T3-22` `T3-23` `T3-24` 在主机上跑，其余要真板子。**
+**共 25 条。`T3-05` `T3-11` 在 Renode 里跑，`T3-07` `T3-08` `T3-09` `T3-10` `T3-12` `T3-22` `T3-23` `T3-24` `T3-25` 在主机上跑，其余要真板子。**
 
 ¹ **自检失败不改变任何控制流。** 板子仍然安全 —— 上传会在 CRC 那步失败、app 区不受影响。
 这行日志的作用只是**把根因直接说出来**，否则 SDRAM 坏掉的症状会表现成

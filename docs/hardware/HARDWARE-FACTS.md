@@ -59,13 +59,11 @@ MAX3221 的 ±5.5V 线电平由**电荷泵**用几只外部电容产生。PB10 �
 
 | 谁 | 外设 | 引脚 | 出口 |
 |---|---|---|---|
-| `printf` / stdout（`DEBUG_UART`） | **USART3** AF7 | PC10 / PC11 | RS232 端子 C05 / C06 |
-| `RS232` | **USART3** AF7 | PC10 / PC11 | 同上 —— 和 `printf` 共用同一个句柄 |
+| `printf` / stdout、`core_debug` | 不走 UART | — | 系统日志：SRAM4 开机缓存 + USB 口 1（就是 `Serial`），`R3-22`；代码在 `$CORE_REPO/cores/arduino/Print.cpp` 的 `_write` |
+| `RS232` | **USART3** AF7 | PC10 / PC11 | RS232 端子 C05 / C06，只归 sketch |
 | `Serial1`（`PIN_SERIAL_TX` / `PIN_SERIAL_RX`） | **UART4** AF8 | PH13 / PH14 | JunctionLink 扩展口 J4-11 / J4-12 |
 
-⚠️ `printf` 走 RS232 端子是现在的代码；`R3-22` 要求 core 不往 RS232 写，落地时这一行跟着改。
-
-`printf` 不走 UART4，是因为 UART4 已经是扩展口那一组的外设，两边会抢同一个句柄槽位。
+工装固件不一样：它的命令和日志都走 RS232 端子（UART4 接在同一对脚上，决策 147 的例外），见 [STG-17](../../maps/fixture-test-stages/issues/STG-17-rs232-is-the-control-port.md)。
 `DEBUG_PINNAME_TX` 必须显式写成 `PC_10_ALT1`：不写的话 core 会取 `PeripheralPins.c` 里第一个
 USART3 TX，那是 **PB10 —— 本板的 RS232 使能脚**。
 
@@ -264,7 +262,7 @@ while ((VREFBUF->CSR & VREFBUF_CSR_VRR) == 0U) { }
 | 电流档（JP1 / JP2 开路）：I = 10 × VIN / 1024 Ω | 0–24.4 mA，20 mA 时 V_DAC = 2048 mV | 约 4.86–24.4 mA：码值 0 时也有 4.86 mA，到不了 4 mA |
 | 电压档（JP1 / JP2 闭合）：端子电压 = VIN | 0–2.5 V | 约 0.50–2.5 V |
 
-⚠️ **0 码时到不了 0**（2026-10-16 真板实测，AO1 电流档 470 Ω）：DAC 缓冲开时设 0 端子上约 0.16 mA，缓冲关或通道关时约 1 µA；缓冲关又带不动 R17 / R18，所以只能开着。见 [STG-41](../../maps/fixture-test-stages/issues/STG-41-where-does-the-ao-noise-come-from.md)。
+⚠️ **0 码时到不了 0**（2026-10-16 真板实测，AO1 电流档 470 Ω）：DAC 缓冲开时设 0 端子上约 0.16 mA，缓冲关或通道关时约 1 µA；缓冲关又带不动 R17 / R18 的非 0 输出，所以**软件只在设 0 时关缓冲**（[决策 152](../tables/DECISIONS.md)）。见 [STG-41](../../maps/fixture-test-stages/issues/STG-41-where-does-the-ao-noise-come-from.md)。
 
 ⚠️ 电压档的满量程只有约 2.5 V（VREF），不是 0–10 V。产品目标是 0–10 V / 0–20 mA，电路会调整去达到（用户 2026-10-15，决策 134「量程目标」）。R17 / R18 的 1 kΩ 是 DAC 输出的负载，对精度的影响没量过，由校准修正。
 

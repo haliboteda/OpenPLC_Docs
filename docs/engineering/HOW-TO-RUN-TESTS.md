@@ -6,8 +6,8 @@
 
 | 仓 | 测什么 | 入口（在那个仓的根目录跑） |
 |---|---|---|
-| `$BOOT` | bootloader 的主机 C 测试（T1-16、T1-33、T2-22–T2-34 中归 bootloader 的）、P16、P17 | `cd tests && cmake --preset local && cmake --build --preset local && ctest --preset local` |
-| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12、T3-22 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
+| `$BOOT` | bootloader 的主机 C 测试（T1-16、T1-33、T2-22–T2-34 中归 bootloader 的）、T4-06（工装 DAC 缓冲）、P16、P17 | `cd tests && cmake --preset local && cmake --build --preset local && ctest --preset local` |
+| `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12、T3-22、T3-25 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
 | `$PORTTOOL` | T4-01 到 T4-05 | `TestCase/test.sh all`（`quick` 跳过浏览器那步） |
 | `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T1-27、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |

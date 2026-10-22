@@ -23,13 +23,13 @@
 | `R4-01`–`R4-03` | 需求（一句可判定的话） | 3 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `T1-01`–`T1-17` `T1-18a`–`T1-18g` `T1-19`–`T1-38` | 测试用例 | 44 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M1-firmware-upgrade.md](../modules/M1-firmware-upgrade.md) |
 | `T2-01`–`T2-36` | 测试用例 | 36 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md)、[M2-ownership.md](../modules/M2-ownership.md) |
-| `T3-01`–`T3-24` | 测试用例 | 24 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| `T4-01`–`T4-05` | 测试用例 | 5 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
+| `T3-01`–`T3-25` | 测试用例 | 25 | [M3-app-runtime.md](../modules/M3-app-runtime.md)、[ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
+| `T4-01`–`T4-06` | 测试用例 | 6 | [M4-production-fixture.md](../modules/M4-production-fixture.md) |
 | `P1`–`P5` `P7`–`P20` | 静态检查（不碰硬件，看源码和文档） | 19 | [HOW-TO-RUN-TESTS.md](../engineering/HOW-TO-RUN-TESTS.md) |
 | `CHK-A1`–`CHK-A7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-B1`–`CHK-B9` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 9 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
 | `CHK-C1`–`CHK-C7` | 验收单的一项（A 改动后自检 / B 发版 / C 单板出厂） | 7 | [ACCEPTANCE-CHECKLIST.md](ACCEPTANCE-CHECKLIST.md) |
-| 第 1–39 41–51 53–151 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 149 | [DECISIONS.md](DECISIONS.md) |
+| 第 1–39 41–51 53–152 条 | 决议（定了就不重开，除非出现它写明的重开条件） | 150 | [DECISIONS.md](DECISIONS.md) |
 | `CAL-01`–`CAL-06` | wayfinder 的票，属于「每块板校准 AI/AO，修正值写进扇区 15 并在 app 里生效」 | 6 | [per-board-calibration/issues/](../../maps/per-board-calibration/issues) |
 | `DFC-01`–`DFC-06` | wayfinder 的票，属于「把设计、需求、测试从代码注释里提出来」 | 6 | [docs-from-code/issues/](../../maps/docs-from-code/issues) |
 | `DR-01`–`DR-10` | wayfinder 的票，属于「按功能模块重做文档与编号」 | 10 | [docs-restructure/issues/](../../maps/docs-restructure/issues) |
@@ -46,7 +46,7 @@
 | `REN-01`–`REN-03` | wayfinder 的票，属于「没有板子时用 Renode 验证固件」 | 3 | [renode-simulation/issues/](../../maps/renode-simulation/issues) |
 | `ROOT-01`–`ROOT-06` | wayfinder 的票，属于「用户换自己的根，不用重烧 bootloader」 | 6 | [root-key-without-bootloader-reflash/issues/](../../maps/root-key-without-bootloader-reflash/issues) |
 | `SIM-01`–`SIM-07` | wayfinder 的票，属于「0.1.3 在模拟环境里能测的都测掉」 | 7 | [sim-coverage/issues/](../../maps/sim-coverage/issues) |
-| `STG-01`–`STG-43` | wayfinder 的票，属于「工装六步测试」 | 43 | [fixture-test-stages/issues/](../../maps/fixture-test-stages/issues) |
+| `STG-01`–`STG-44` | wayfinder 的票，属于「工装六步测试」 | 44 | [fixture-test-stages/issues/](../../maps/fixture-test-stages/issues) |
 | `TA-01`–`TA-13` | wayfinder 的票，属于「测试按部件、契约、整机三层重新分布」 | 13 | [test-architecture/issues/](../../maps/test-architecture/issues) |
 | `USB-01`–`USB-04` | wayfinder 的票，属于「USB 管调试和升级，RS232 留给设备」 | 4 | [usb-for-debug-rs232-for-devices/issues/](../../maps/usb-for-debug-rs232-for-devices/issues) |
 | `VER-01`–`VER-07` | wayfinder 的票，属于「烧录前比版本 + 校准值住进扇区 15」 | 7 | [version-gate-and-calibration/issues/](../../maps/version-gate-and-calibration/issues) |

@@ -27,7 +27,7 @@ demo 和工装固件用同一套协议（决策 93）。它放在板卡包的哪
 
 ### 协议子集
 
-实现完整测试要用的命令：`pt.id`、`pt.caps`、`pt.cal`、`pt.list`、`pt.start` / `pt.set` / `pt.stop`、`pt.echo`、`pt.hold`、`pt.led`、`pt.run`，应答和采样帧照 [PORTTOOL-FLOW.md](../../../docs/modules/M4/PORTTOOL-FLOW.md)「A.4」「A.5」。控制口仍是 RS232 115200 8N1：app 里 `printf` / `Serial` 走 USART3，物理上就是工装控制口的 C05 / C06 端子（[HARDWARE-FACTS.md](../../../docs/hardware/HARDWARE-FACTS.md)「app 侧三条通道各走哪个外设」）。`pt.caps` 表头和 `pt.id` 带 `demo=<例程版本>`，面板凭它分清 demo 和工装固件。和工装固件逐条的差别见 PORTTOOL-FLOW.md「A.9」。
+实现完整测试要用的命令：`pt.id`、`pt.caps`、`pt.cal`、`pt.list`、`pt.start` / `pt.set` / `pt.stop`、`pt.echo`、`pt.hold`、`pt.led`、`pt.run`，应答和采样帧照 [PORTTOOL-FLOW.md](../../../docs/modules/M4/PORTTOOL-FLOW.md)「A.4」「A.5」。控制口仍是 RS232 115200 8N1：demo 用 `RS232`（USART3），物理上就是工装控制口的 C05 / C06 端子；`printf` 进系统日志走 USB 口 1（`R3-22`）（[HARDWARE-FACTS.md](../../../docs/hardware/HARDWARE-FACTS.md)「app 侧三条通道各走哪个外设」）。`pt.caps` 表头和 `pt.id` 带 `demo=<例程版本>`，面板凭它分清 demo 和工装固件。和工装固件逐条的差别见 PORTTOOL-FLOW.md「A.9」。
 
 ### 覆盖的测试项
 
