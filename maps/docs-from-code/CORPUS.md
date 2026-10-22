@@ -217,7 +217,7 @@
 | 4 | `rs485_echo.py`（2026-10-11 已删，决策 87） |
 | 4 | `OpenPLC_PortsTestingTool/TestCase/tools/md2html.py` |
 | 4 | `$TEST/tools/enter_bootloader.py` |
-| 4 | `$TEST/tools/check_allow_hygiene.py` |
+| 4 | `OpenPLC_AI/tools/check_allow_hygiene.py`（原 `$TEST` 下，决策 154） |
 | 4 | `OpenPLC_PortsTestingTool/src/simboard/c/stubs/usb_device.h` |
 | 4 | `$BOOT/tests/bootloader_unit/stubs/owner_slot_stub.h` |
 | 3 | `open_plc_cube_ide/IAPServer/udp_server.h` |

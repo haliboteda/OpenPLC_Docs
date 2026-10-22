@@ -20,6 +20,7 @@ python tools/list_wayfinder_map_frontier.py --all
 - **2026-10-22 现状**：新仓都在组织 `github.com/OpenPLCs`（`haliboteda`、`openplc-s` 都是成员，`haliboteda` 是 admin）；私有仓 `OpenPLCs/OpenPLC_AI` 已建，本地在工作区根的 `OpenPLC_AI/`；`OpenPLC_BootLoader` 本地在工作区根的 `OpenPLC_BootLoader/`
 - **用户 2026-10-22**：`OpenPLCs` 的新仓里不放任何 Claude 文件，提交内容（含提交说明，如 `Co-Authored-By: Claude`）也不带 Claude；`OpenPLC_AI` 和其他仓并排放在工作区根，按这个目录结构处理
 - **用户 2026-10-22 定的结构**：会话从 `OpenPLC_AI` 启动；根约定在 `OpenPLC_AI/CLAUDE.md`，各仓的在 `OpenPLC_AI/<仓名>/CLAUDE.md`，由根约定 `@` 全部导入（经 junction 读文件不会自动加载子目录约定，见「已验证」）；`OpenPLC_AI/<仓名>/repo` 是指向 `../<仓名>` 的 junction，`link.py` 重建。已落地：根约定、`OpenPLC_BootLoader`；工作区根原来的 `CLAUDE.md`、`.claude/` 已移走
+- **用户 2026-10-22**：和新仓同名的 `OpenPLC_PortsTestingTool`、`OpenPLC_Test`、`OpenPLC_ETS_Prod` 照 bootloader 的做法迁（快照提交、BSD-3、`openplc-s` 作者），本地原地切换远端；新仓分支和旧仓一样（都是 `master`）；`OpenPLC_AI` 的结构跟着同步。`OpenPLC_Test` 里只为 Claude 服务的代码：P10 搬进 `OpenPLC_AI/tools/`，`--write-claude-dirs` 删掉（决策 154）
 - **用户 2026-10-22**：以后的开发全部迁到 `OpenPLCs` 组织下的新仓，`haliboteda` 的私有仓变成新仓的 fork；公开仓的历史只带版本快照（每个版本一个干净提交并打 tag），不带原始提交
 - **用户 2026-10-14**：继续用自己维护的 board 包，不改成 library 方式；core 留在 STM32duino 2.4.0，需要的上游修复单条摘（与本图无关，只是同一次讨论）
 

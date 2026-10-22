@@ -3918,3 +3918,15 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 | 公开仓内容 | 不含任何 Claude 文件或提交署名；Claude 的约定在私有仓 `OpenPLCs/OpenPLC_AI`（见 [project-ai-overhaul](../../maps/project-ai-overhaul/map.md)） |
 
 **理由**：公开仓名就是对外的名字，工程名、产物名和它一致，读者和脚本只认一个名字。
+
+## 154 · PortTool、整体测试、ETS 三个仓迁到 `OpenPLCs`，分支保持 `master`
+
+用户 2026-10-22 定。照决策 153 的做法：每个仓一个不含 Claude 东西的快照提交，BSD-3-Clause（版权人 Schaeffer AG），作者 `openplc-s`。
+
+| 事 | 定案 |
+|---|---|
+| 仓 | `OpenPLCs/OpenPLC_PortsTestingTool`、`OpenPLCs/OpenPLC_Test`、`OpenPLCs/OpenPLC_ETS_Prod`，本地目录名不变 |
+| 分支 | 和旧仓一样，只有 `master`，也是默认分支 |
+| 只为 Claude 服务的代码 | `$TEST` 的 P10（`check_allow_hygiene.py`）搬进私有仓 `OpenPLC_AI/tools/`，只查 `OpenPLC_AI` 那一份 settings；`init_machine.py --write-claude-dirs` 和 `SKILLS_REPO` 删掉（Claude 只从 `OpenPLC_AI` 启动，各仓不再有自己的 settings）；「别弹提问」改由 `OpenPLC_AI` 的 settings 设 `INIT_MACHINE_NO_INPUT=1` |
+
+**理由**：公开仓里不能有 Claude 的东西（决策 153），这两件工具只检查、只改 Claude 的配置。

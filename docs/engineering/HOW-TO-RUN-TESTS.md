@@ -10,7 +10,7 @@
 | `$CORE_REPO` | P3、P4、P5、P15、P19、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12、T3-22、T3-25 | `python tests/selfcheck.py`（`--full` 加上约 45 分钟的 P5） |
 | `$TOOL` | T1-15、T1-35、T1-19 / T1-20 | `python tests/selfcheck.py` |
 | `$PORTTOOL` | T4-01 到 T4-05 | `TestCase/test.sh all`（`quick` 跳过浏览器那步） |
-| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T1-27、T3-05）、P10 | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
+| `$TEST` | 契约（P1、P2、P11、P20、T1-18）、整机（`TestCase.exe`、上板脚本、T1-34、T1-37、T1-27、T3-05） | `python tools/selfcheck.py`（`--quick` 跳过慢的；上板脚本不进自检） |
 | `$ETSPROD` | T3-23 | `python -m unittest discover tests` |
 | `$PROD` | 文档检查 P7、P8、P9、P12、P13、P14、P18 | `python tools/check_docs.py` |
 
@@ -24,13 +24,12 @@
 
 **上板脚本按 UID 找板子，不记 IP**（用户 2026-10-13 定）：`config/machine.py` 记板子的 `BOARD_UID`，脚本经 `common.board_ip()` 广播 `openplc_discover`、取 UID 相符那条回复的 IP（最多等 20 秒）。理由：板子 IP 由 DHCP 给、会变。`BOARD_IP` 只作覆盖用，填了就不发现，留给广播过不去的网络；脚本的 `--ip` 优先于两者。
 
-⚠️ **`init_machine.py` 有单元测试**：`python tools/test_init_machine.py`（**32 个用例**，四组）。
+⚠️ **`init_machine.py` 有单元测试**：`python tools/test_init_machine.py`（**16 个用例**，三组）。
 
 | 组 | 测什么 | 为什么只能这么测 |
 |---|---|---|
 | tables | `SETTINGS` / `PREREQS` / `EXAMPLES` 的列是否齐 | 三张手写表，最常见的编辑错误是加了一行漏一列；不测的话报错发生在你不在场的那台机器上 |
 | ports | `detect_rs232_ports()` 的 **macOS 分支** | 本项目没有 mac，所以文件系统是假的，只测排序与去重逻辑 |
-| claude dirs | `--write-claude-dirs` 的合并、`ignored_by_own_rules()` 的护栏 | 它改的那个文件装着几百条手工批准的权限规则，**"没弄丢东西"就是被测的性质** |
 | ask_for | 引号剥离、`~` 展开、安装根目录校验 | 提问按定义在自动化里跑不到（只在"stdin 是终端且环境无自动化标记"时发生），只能替换 `input()` |
 
 退出码：0 全过，1 有失败，2 全过但 ask_for 那组因这台机器没有真 CubeIDE / Arduino IDE 而跳过 —— **不假装通过**。
@@ -218,7 +217,7 @@ python tests/examples_build/build.py --only SDRAM  # 只挑一个库
 | `P7` | `$PROD/tools/check_status_sync.py` | **三头对账**：需求表 ↔ 用例表 ↔ `selfcheck.py` 的 `CATALOG` | ✅ `$PROD` |
 | `P8` | `$PROD/tools/check_doc_dupes.py` | 同一条主张没有写在两份文档里 | ✅ `$PROD` |
 | `P9` | `$PROD/tools/check_doc_paths.py` | 文档里点名的每条路径都存在，链接的锚点和路径型链接文字也对得上 | ✅ `$PROD` |
-| `P10` | `$TEST/tools/check_allow_hygiene.py` | 本机 `.claude/` 权限配置 | ⛔ 纯建议性，本机专属不进 git |
+| `P10` | 私有仓 `OpenPLC_AI/tools/check_allow_hygiene.py` | `OpenPLC_AI/.claude/settings.local.json` 的权限配置 | ⛔ 纯建议性，本机专属不进 git |
 | `P11` | `$TEST/tools/check_tool_sync.py` | 板卡包里的 `IAPTool` 不落后于仓库 | ✅ `$TEST` |
 | `P12` | `$PROD/tools/check_wayfinder_ticket_hygiene.py` + `check_no_orphan_placeholders.py` | 票关得诚不诚实、占位符有没有人认领 | ✅ `$PROD` |
 | `P13` | `$PROD/tools/check_no_stale_ids.py` | 改过名的编号没有残留引用 | ✅ `$PROD` |
@@ -324,7 +323,7 @@ python tools/check_golden_vectors.py      # 在 $TEST 下
 ### P10 · allow 列表不许攒字面命令
 
 ```
-python tools/check_allow_hygiene.py                  # 每个仓库一行汇报
+python tools/check_allow_hygiene.py                  # 在 OpenPLC_AI 里跑，汇报它那一份
 python tools/check_allow_hygiene.py --list            # 连被点名的条目也打出来
 python tools/check_allow_hygiene.py --fail-over 400   # 超过这个数才算失败
 ```

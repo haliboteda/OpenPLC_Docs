@@ -7,7 +7,7 @@ Blocked by: -
 
 ## Question
 
-`$PORTTOOL/.claude/settings.json`（进 git、团队共用）的允许列表里有 4 条指向已删的东西：`./compile_tool.sh`、`bash compile_tool.sh`、两条旧路径的 `TestCase/host/porttool_caps/build.py`（[决策 149](../../../docs/tables/DECISIONS.md) 重组后已不在）。
+`OpenPLC_PortsTestingTool/.claude/settings.json`（当时进 git、团队共用；决策 154 后并进 `OpenPLC_AI/.claude/settings.json`）的允许列表里有 4 条指向已删的东西：`./compile_tool.sh`、`bash compile_tool.sh`、两条旧路径的 `TestCase/host/porttool_caps/build.py`（[决策 149](../../../docs/tables/DECISIONS.md) 重组后已不在）。
 
 | 选项 | 做法 | 风险 |
 |---|---|---|

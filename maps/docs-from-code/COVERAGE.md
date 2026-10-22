@@ -62,7 +62,7 @@
 | 3–5 | `$CORE_REPO/tests/variant_check/build.py` | 11 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `$TEST/tools/build_image.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `can_watch.py`（2026-10-11 已删，决策 87） | 1 | 0 | **0 段，查过没有可搬的** |
-| 3–5 | `$TEST/tools/check_allow_hygiene.py` | 4 | 0 | **0 段，查过没有可搬的** |
+| 3–5 | `OpenPLC_AI/tools/check_allow_hygiene.py`（原 `$TEST` 下，决策 154） | 4 | 0 | **0 段，查过没有可搬的** |
 | 3–5 | `$CORE_REPO/tests/check_core_sync.py` | 22 | 1 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `$PROD/tools/check_doc_dupes.py` | 22 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
 | 3–5 | `$PROD/tools/check_doc_paths.py` | 32 | 2 | `docs/engineering/TEST-DESIGN.md`（汇总） |
