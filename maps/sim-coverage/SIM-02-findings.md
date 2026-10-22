@@ -1,6 +1,6 @@
 # 例程的网口在 Renode 里通不通（调研记录）
 
-回答 [SIM-02](issues/SIM-02-does-ethernet-work-in-renode.md)。2026-10-03，Renode 1.17.0，板卡包 0.1.3，bootloader 为当天 `$BOOT/Debug/open_plc_cube_ide.bin`。
+回答 [SIM-02](issues/SIM-02-does-ethernet-work-in-renode.md)。2026-10-03，Renode 1.17.0，板卡包 0.1.3，bootloader 为当天 `open_plc_cube_ide/Debug/open_plc_cube_ide.bin`（当时的 `$BOOT`）。
 例程 `Ethernet_IP`，FQBN 与 `$TEST/tools/run_examples.py` 相同（`usb=CDCgen`，`--warnings all` 编过）。flash 布局直接调用 `$TEST/host/renode/run.py`（用例 `T3-05`：每个例程经真 bootloader 启动）的 `flash_banks()`。
 原型全在会话 scratch（`sim02/`：`UdpFrameBridge.cs`、`netpeer.py`、`drive.py`、`noncesig/`），不进仓。
 

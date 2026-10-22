@@ -8,7 +8,7 @@
 
 | 变量 | 指什么 |
 |---|---|
-| `$BOOT` | `open_plc_cube_ide` 的 clone —— bootloader 的 CubeIDE 工程 |
+| `$BOOT` | `OpenPLC_BootLoader` 的 clone（公开仓 `OpenPLCs/OpenPLC_BootLoader`，决策 153）—— bootloader 的 CubeIDE 工程 |
 | `$CORE_REPO` | `open_plc_arduino` 的 clone —— 板卡包，在版本控制下 |
 | `$CORE_LIVE` | Arduino IDE **真正加载**的那份板卡包（`$A15/packages/.../stm32/<版本>`），**不在版本控制下** |
 | `$TOOL` | `IAPTranfer_Tool` 的 clone —— IAPTool 和它自己的单元测试 |

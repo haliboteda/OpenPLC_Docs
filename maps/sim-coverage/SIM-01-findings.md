@@ -1,6 +1,6 @@
 # 例程的 `Serial` 在 Renode 里怎么看得到（调研记录）
 
-回答 [SIM-01](issues/SIM-01-how-to-see-serial-in-renode.md)。2026-10-03，Renode 1.17.0，板卡包 0.1.3，bootloader 为当天 `$BOOT/Debug/open_plc_cube_ide.bin`。
+回答 [SIM-01](issues/SIM-01-how-to-see-serial-in-renode.md)。2026-10-03，Renode 1.17.0，板卡包 0.1.3，bootloader 为当天 `open_plc_cube_ide/Debug/open_plc_cube_ide.bin`（当时的 `$BOOT`）。
 实验脚本和全部输出在会话 scratch（`sim01/exp.py`），不进仓；做法与 `$TEST/host/renode/run.py`（用例 `T3-05`：每个例程经真 bootloader 启动）相同，只多了下文说的 `pwr` 补丁。
 
 ## 结论

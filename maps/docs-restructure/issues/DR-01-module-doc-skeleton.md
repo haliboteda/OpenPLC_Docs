@@ -56,7 +56,7 @@ Blocked by: -
 ## 引出了什么新的未知
 
 1. **⛔ `check_doc_dupes.py`（P8，一个说法不许写进两份文档）自 2026-09-16 文档搬迁起就是假绿。**
-   它走的是 `$BOOT/docs`，而那个目录现在 **0 份 markdown**；`OpenPLC_Docs/docs` 那 32 份
+   它走的是 `open_plc_cube_ide/docs`（当时的 `$BOOT`），而那个目录现在 **0 份 markdown**；`OpenPLC_Docs/docs` 那 32 份
    **它一份都没扫**，`maps/` `work/` `waiting/` 也没扫。实际只扫 21 份：13 条 AI-Skills 规矩、
    5 个仓的 `CLAUDE.md`、`AI-Skills` 的两份、`RELEASE-NOTES.md`。
    它的 named 清单里还写着 `TEST-CASES.md` 和 `acceptance/checklist.md`，那两个路径也已经不存在、

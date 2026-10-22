@@ -16,6 +16,11 @@ python tools/list_wayfinder_map_frontier.py --all
 ## Notes
 
 - **用户 2026-10-14**：产品仓要提供给用户，不给用户 Claude 的东西；不想放进 `.gitignore`；换电脑时 Claude 的东西要能同步过去
+- **用户 2026-10-22**：开源代码发布到新账号 `github.com/openplc-s`，仓名以新仓为准，对应关系不清楚的问用户；不一定要全部历史，可以不要历史；新仓里不能有一丁点 Claude 相关的东西，Claude 的东西另建私有仓；先拿 `OpenPLC_BootLoader` 做实验，方案定了再动
+- **2026-10-22 现状**：新仓都在组织 `github.com/OpenPLCs`（`haliboteda`、`openplc-s` 都是成员，`haliboteda` 是 admin）；私有仓 `OpenPLCs/OpenPLC_AI` 已建，本地在工作区根的 `OpenPLC_AI/`；`OpenPLC_BootLoader` 本地在工作区根的 `OpenPLC_BootLoader/`
+- **用户 2026-10-22**：`OpenPLCs` 的新仓里不放任何 Claude 文件，提交内容（含提交说明，如 `Co-Authored-By: Claude`）也不带 Claude；`OpenPLC_AI` 和其他仓并排放在工作区根，按这个目录结构处理
+- **用户 2026-10-22 定的结构**：会话从 `OpenPLC_AI` 启动；根约定在 `OpenPLC_AI/CLAUDE.md`，各仓的在 `OpenPLC_AI/<仓名>/CLAUDE.md`，由根约定 `@` 全部导入（经 junction 读文件不会自动加载子目录约定，见「已验证」）；`OpenPLC_AI/<仓名>/repo` 是指向 `../<仓名>` 的 junction，`link.py` 重建。已落地：根约定、`OpenPLC_BootLoader`；工作区根原来的 `CLAUDE.md`、`.claude/` 已移走
+- **用户 2026-10-22**：以后的开发全部迁到 `OpenPLCs` 组织下的新仓，`haliboteda` 的私有仓变成新仓的 fork；公开仓的历史只带版本快照（每个版本一个干净提交并打 tag），不带原始提交
 - **用户 2026-10-14**：继续用自己维护的 board 包，不改成 library 方式；core 留在 STM32duino 2.4.0，需要的上游修复单条摘（与本图无关，只是同一次讨论）
 
 ## 方案
@@ -80,6 +85,9 @@ E:\WorkSpace\Schaeffer-AG\
 | 工作区根目录 `CLAUDE.md` 照常加载 | ✅ |
 | git 穿过 junction 看到已跟踪文件 | ⚠️ 是，所以要先做改造步骤 2 |
 | `CLAUDE.md` 里的 HTML 注释 | Claude 看不到，写给 AI 的内容不能放在注释里 |
+| 从 `AI/` 启动，读 `AI/X/repo/`（junction 指向项目）里的文件（2026-10-22，Claude Code 2.1.307） | ❌ 不会自动加载 `AI/X/CLAUDE.md`；读 `AI/X/` 下的普通文件会加载 |
+| 在 junction 里面启动 | ❌ 祖先目录的 `CLAUDE.md` 一份都不加载 |
+| `AI/CLAUDE.md` 里写 `@X/CLAUDE.md` | ✅ 启动时就加载 |
 
 ### 要跟着改的
 
@@ -110,7 +118,11 @@ grep -rlE '\.claude|CLAUDE\.md' --include=*.py */tools 2>/dev/null
 
 ## Not yet specified
 
-- **用户拿到的是 git 仓库还是打包文件**：决定要不要用 `git filter-repo` 清历史
+- ~~公开仓带多少历史~~：已定，只带版本快照（用户 2026-10-22，见 Notes）
+- ~~`OpenPLC_BootLoader` 的许可证~~：已定 BSD-3-Clause（用户 2026-10-22，决策 153），版权人 Schaeffer AG
+- **`OpenPLC_BootLoader` 里指向私有文档的引用**：`v0.1.3.2` 分支有 52 个文件引用 `$PROD` / `OpenPLC_Docs`，公开读者打不开；保留、删掉还是公开部分文档，等用户定。推荐先保留：不影响编译，代码里的理由按约定必须带引用位置，删掉就丢了出处
+- **CubeIDE 工程名**：`.project`、`.ioc`、`.launch` 里仍叫 `open_plc_cube_ide`；不改不影响编译，改不改等用户定
+- **`haliboteda` 旧仓怎么处理**：旧仓现在是 public，完整历史里有 Claude 文件和署名；GitHub 上 public 仓的 fork 只能是 public，已有的仓也不能改成 fork。要定：旧仓转 private / archive，再另 fork 一份新的，还是别的做法
 - **私有仓叫什么、放在哪**：`OpenPLC_AI` 是暂名；也可以并进已有的 `AI-Skills`
 - **`settings.local.json` 怎么拆**：本机路径（`additionalDirectories`）留本机；`git commit` / `git push` / 上板脚本这类与机器无关的 allow 规则要不要挪进 `settings.json`
 - **记忆目录用 junction 还是改 `autoMemoryDirectory`**：后者能省一个链接，但是否支持相对路径没验证

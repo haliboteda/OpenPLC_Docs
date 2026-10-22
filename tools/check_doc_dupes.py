@@ -47,7 +47,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from _doccheck_common import Fail, Ok, Section, Warn, cfg, skills_repo  # noqa: E402
+from _doccheck_common import Fail, Ok, Section, Warn, cfg, entry_doc, skills_repo  # noqa: E402
 
 
 # Markdown noise: two copies of one claim rarely agree on bolding or punctuation.
@@ -132,7 +132,7 @@ def docs():
         if not root:
             Warn("  SKIP %s: not cloned beside OpenPLC_Docs" % key)
             continue
-        named += [Path(root) / f for f in files]
+        named += [entry_doc(root) if f == "CLAUDE.md" else Path(root) / f for f in files]
     boot = Path(cfg.BOOT_REPO) if cfg.BOOT_REPO else None
     skills = skills_repo()
     if skills:

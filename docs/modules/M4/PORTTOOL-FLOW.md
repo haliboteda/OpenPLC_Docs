@@ -1414,7 +1414,7 @@ AI、AO、DO 的会话开时写明全部通道（`ch=1,2` / `ch=1,…,8`）：�
 | `PortTool`、`start.sh` | Linux 版：`$PORTTOOL` 的 `Output/bin/linux/PortTool`；`start.sh` 是 `start.cmd` 的 Linux 版（UTF-8、LF），一开头给 `PortTool`、`stage6/IAPTool`、`porttool_simboard` 补可执行位，所以说明里只写 `bash start.sh` | 不打包 |
 | `porttool_simboard.exe` | 模拟板（C 外壳 `$PORTTOOL/src/simboard/c/`，打包时现编进 `Output/bin/windows/`）；放在 `PortTool.exe` 旁边，`simboard.Find` 先找 exe 旁边，所以交付包拷到哪都能选「sim」（决策 112） | 不打包 |
 | `porttool_simboard` | Linux 模拟板：打包时用 zig cc 交叉现编进 `Output/bin/linux/`（同 `tools/build.sh sim --os linux`），静态链接 | 不打包 |
-| `stage6/bootloader.hex` | `$BOOT/Debug/open_plc_cube_ide.hex`；同目录的 `.elf` 带工装命令表（`pt.caps`）就拒打包 | 不打包 |
+| `stage6/bootloader.hex` | `$BOOT/Debug/OpenPLC_BootLoader.hex`；同目录的 `.elf` 带工装命令表（`pt.caps`）就拒打包 | 不打包 |
 | `stage6/IAPTool.exe` | `$TOOL/Output/windows/IAPTool.exe`（`$TOOL` 的 `build.py` 编出、也是装进板卡包的那份） | 不打包 |
 | `stage6/IAPTool` | Linux 版：`$TOOL/Output/linux/IAPTool` | 不打包 |
 | `stage6/FixtureDemo.ino.bin` | 打包时用 `arduino-cli` 从板卡包例程 `FixtureDemo` 现编（`$PORTTOOL` 的 `tools/local.json` 的 arduino-cli 和它的配置，FQBN 从 `$CORE_REPO/tests/_common.py` 读，同 `$CORE_REPO/tests/examples_build/build.py`） | 不打包 |

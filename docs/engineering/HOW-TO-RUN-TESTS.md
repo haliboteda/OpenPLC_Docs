@@ -405,7 +405,7 @@ python3 tools/run_s4.py --case b --bin <app.bin> --pad-to 1835008 --retry 3
 |---|---|
 | **判据 T1-21** | 传输窗口内断电 → 重新上电后**旧 app 照常启动**（日志出现 `APP Mod`，且**没有** `App signature invalid or absent`）|
 | **判据 T1-22** | 擦写窗口内断电 → 上电报 `App signature invalid or absent`，**且重传一次能恢复** |
-| **窗口锚点** | `Staging in SDRAM` 之后 / `Erasing application region` 之前 = T1-21；`Erasing application region` 之后 = T1-22。字符串对齐 `open_plc_cube_ide/IAPServer/IAP_server.c` |
+| **窗口锚点** | `Staging in SDRAM` 之后 / `Erasing application region` 之前 = T1-21；`Erasing application region` 之后 = T1-22。字符串对齐 `OpenPLC_BootLoader/IAPServer/IAP_server.c` |
 
 ## T1-27 · 按住 BOOT0 强制进上传模式，怎么跑
 

@@ -54,7 +54,7 @@ CHK-A4 的上限是整个扇区 0，因为根区 2026-09-30 起在扇区 15（�
 | CHK-B2 | 跨仓镜像代码同步（用例 **P2**） | `$PROD/docs/repo/ARCHITECTURE.md`「跨仓镜像的代码」表里每一项两边一致 | `$TEST`：`python tools/check_mirror_sync.py` |
 | CHK-B3 | Arduino 包已同步进 git（用例 **P3**） | `$CORE_LIVE` 与 `$CORE_REPO` 逐文件一致（比对命令在 ARCHITECTURE.md） | `$CORE_REPO`：`python tests/check_core_sync.py` |
 | CHK-B4 | **出厂板第一次上传就被认领**（用例 **T2-35**） | 一块刚造好出厂态的板子，本机没有私钥：经 USB 上传 → IAPTool 打印生成的私钥路径并认领 → app 起来；之后 `getpubkey` 返回那把公钥。见 [M2 归属与信任](../modules/M2-ownership.md) | 上板，人在场 |
-| CHK-B5 | 捆绑升级风险已写进发布说明 | `open_plc_cube_ide/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的布局**相符：校准值 8 KiB、根区、metadata、完成标记（[SECTOR-15.md](../modules/M1/SECTOR-15.md)，决策 72） | 人工对照 `$BOOT/RELEASE-NOTES.md` |
+| CHK-B5 | 捆绑升级风险已写进发布说明 | `OpenPLC_BootLoader/RELEASE-NOTES.md` 的 Upgrade rules 与**当前扇区 15 的布局**相符：校准值 8 KiB、根区、metadata、完成标记（[SECTOR-15.md](../modules/M1/SECTOR-15.md)，决策 72） | 人工对照 `$BOOT/RELEASE-NOTES.md` |
 | CHK-B6 | 全新板子路径 | 一块从未烧过 app 的板子：`BOOTLD-INVALID` → 上传（没有根时自动认领）→ 正常启动 | 上板，人在场 |
 | CHK-B8 | **清空重写走一遍**（`setowner --wipe`） | 一块已认领、且至少作废过一个叶的板子：`IAPTool setowner <ip> --current-key=... --new-key=... --wipe` → 板子复位 → `getowner` 报新根、generation 延续、启动日志 `96/96 revoke slot(s) free`。板子回收的是扇区 15，不碰扇区 0 | `$TOOL` 编出的 IAPTool，命令见左 |
 | CHK-B7 | 升级路径 | 一块跑着**上一版**的板子：先烧 bootloader，再传 app，正常启动 | 上板，人在场 |

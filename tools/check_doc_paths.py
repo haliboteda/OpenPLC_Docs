@@ -67,7 +67,7 @@ from urllib.parse import unquote
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from _doccheck_common import Fail, Ok, Section, Warn, cfg, docs_repo, prod_docs, skills_repo  # noqa: E402
+from _doccheck_common import Fail, Ok, Section, Warn, cfg, docs_repo, entry_doc, prod_docs, skills_repo  # noqa: E402
 
 
 MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)\s]+)\)")
@@ -191,7 +191,7 @@ def docs(boot, tool, core, skills, prod):
         if root is None or not str(root) or not root.exists():
             continue
         for s in subs:
-            p = root / s.replace("/", os.sep)
+            p = entry_doc(root) if s == "CLAUDE.md" else root / s.replace("/", os.sep)
             if p.is_file():
                 out.append((p, root))
             elif p.is_dir():
@@ -244,6 +244,8 @@ def resolve(token, doc, doc_root, boot, tool, core, skills, prod):
         # A repo not cloned here cannot be checked; that is a skip, not a dead path.
         if not base or not str(base) or str(base) == "." or not base.exists():
             return None
+        if m.group(2) == "CLAUDE.md":
+            return entry_doc(base)
         return base / m.group(2).replace("/", os.sep)
 
     if token.startswith("docs/"):

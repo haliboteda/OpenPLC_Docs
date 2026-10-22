@@ -19,7 +19,7 @@ from pathlib import Path
 WS = Path(__file__).resolve().parents[2]
 OUT = WS / "OpenPLC_Docs" / "maps" / "test-architecture" / "TA-01-inventory.md"
 PAT = re.compile(r"(^|/)(TestCase|tests?|host|onboard)/|_test\.(go|c|py)$|(^|/)(check_|run_|selfcheck)[^/]*\.py$", re.I)
-REPOS = ("IAPTranfer_Tool", "OpenPLC_PortsTestingTool", "open_plc_cube_ide", "open_plc_arduino", "OpenPLC_Docs", "OpenPLC_Test")
+REPOS = ("IAPTranfer_Tool", "OpenPLC_PortsTestingTool", "OpenPLC_BootLoader", "open_plc_arduino", "OpenPLC_Docs", "OpenPLC_Test")
 
 files = []
 for r in REPOS:
@@ -31,7 +31,7 @@ for r in REPOS:
                          capture_output=True, text=True).stdout
     files += ["%s/%s" % (r, f) for f in out.splitlines() if r == "OpenPLC_Test" or PAT.search(f)]
 
-T, P, B, C, D, X = ("IAPTranfer_Tool/", "OpenPLC_PortsTestingTool/", "open_plc_cube_ide/", "open_plc_arduino/",
+T, P, B, C, D, X = ("IAPTranfer_Tool/", "OpenPLC_PortsTestingTool/", "OpenPLC_BootLoader/", "open_plc_arduino/",
                     "OpenPLC_Docs/", "OpenPLC_Test/")
 
 # Destinations, in the order the summary prints them.

@@ -449,7 +449,7 @@ CAN 两根信号跨板走 Upper Deck **J8 pin2（CAN_TXD_PB9）/ pin3（CAN_RXD_
 | 事实 | 谁说了算 | 为什么 |
 |---|---|---|
 | **信号名、BGA 球号、备用功能** | **这份 xlsx** | 全仓库文档里的球号已和它逐条比对，**没有一处不一致** |
-| 外设怎么配（时钟、AF、模式） | `open_plc_cube_ide.ioc` | CubeMX 工程定义，见 [CUBEMX-RULES.md](../build/CUBEMX-RULES.md) |
+| 外设怎么配（时钟、AF、模式） | `OpenPLC_BootLoader.ioc` | CubeMX 工程定义，见 [CUBEMX-RULES.md](../build/CUBEMX-RULES.md) |
 | 端子号、跨板连接器、板上是否真的布了线 | `Hardware/Production/*/netlist.ipc` + 原理图 | **xlsx 只说 MCU 这一侧**，它列出一个信号不等于板子上接了 |
 
 ### 已知的三处出入

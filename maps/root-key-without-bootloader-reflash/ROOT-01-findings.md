@@ -1,7 +1,7 @@
 # ROOT-01 调研结论：H743 有没有能存根公钥的 OTP / 保护存储
 
 票：[ROOT-01 H743 的 OTP 区能不能存根公钥](issues/ROOT-01-can-the-h743-otp-area-hold-the-root.md)。
-芯片型号 **STM32H743IIK6**：`$HW/Hardware_overview.txt` 与 `$BOOT/open_plc_cube_ide.ioc`（`Mcu.CPN=STM32H743IIK6`）一致。
+芯片型号 **STM32H743IIK6**：`$HW/Hardware_overview.txt` 与 `$BOOT/OpenPLC_BootLoader.ioc`（`Mcu.CPN=STM32H743IIK6`）一致。
 
 出处只用 ST 原件：**RM0433 Rev 8**（2023-01，适用 STM32H742/743/753/750）、**DS12110 Rev 11**（2026-01，STM32H742xI/G、H743xI/G）。
 RM0433 全文检索 "OTP" / "one-time" 在 flash 章节零命中（唯一的 "one-time programmable" 是 USB OTG 的一个寄存器位，无关）。

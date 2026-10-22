@@ -2365,7 +2365,7 @@ KNX Data Security 的序列号防重放绑在共享对称密钥上——`securit
 `$TEST/acceptance/2026-09-18-boot-iap-full-run.md`。
 
 **什么情况下重开**：出现一条不经过 bootloader 就能启动的 app 路径时 ——
-LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:463-466`），app 侧不自己开，
+LSE 振荡器由 bootloader 打开（`$BOOT/Core/Src/main.c:464-467`），app 侧不自己开，
 否则 `HAL_RCCEx_PeriphCLKConfig` 会等满 5 秒再报错。
 
 ## 58 · `'R'` 记录压到一个 flash word，owner 区改成两段定长
@@ -3905,3 +3905,16 @@ app 侧 **RNG 句柄归 `OpenPLC_Net`**（对外 `openplc_rng_words()`），`Ope
 **理由**：不改硬件就让 0 码到 0；切换只在 0 与非 0 之间发生，断开几微秒期间 R17 把输出拉到 0 V。
 
 **什么情况下重开**：R17 / R18 改了、缓冲关也能带动负载时。
+
+## 153 · bootloader 迁到公开仓 `OpenPLCs/OpenPLC_BootLoader`，`$BOOT` 指向它，CubeIDE 工程名同步改
+
+用户 2026-10-22 定。开源代码发布在组织 `github.com/OpenPLCs`，以后在新仓开发；旧仓 `open_plc_cube_ide` 不再开发。
+
+| 事 | 定案 |
+|---|---|
+| `$BOOT` | 工作区根的 `OpenPLC_BootLoader`（`$TEST/tools/init_machine.py`、`$PORTTOOL/tools/ptbuild/local.go` 按这个名字找） |
+| 工程名 | `.project`、`.ioc`、`.launch`、`CMakeLists.txt` 统一叫 `OpenPLC_BootLoader`，产物是 `Debug/OpenPLC_BootLoader.{elf,bin,hex,map}` |
+| 许可证 | BSD-3-Clause，版权人 Schaeffer AG，和自带的 ST HAL 同一种（用户 2026-10-22）；第三方代码保留各自的许可证 |
+| 公开仓内容 | 不含任何 Claude 文件或提交署名；Claude 的约定在私有仓 `OpenPLCs/OpenPLC_AI`（见 [project-ai-overhaul](../../maps/project-ai-overhaul/map.md)） |
+
+**理由**：公开仓名就是对外的名字，工程名、产物名和它一致，读者和脚本只认一个名字。

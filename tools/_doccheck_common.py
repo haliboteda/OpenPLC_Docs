@@ -100,7 +100,7 @@ def _core_live():
 class _Repos:
     """Same attribute names the checks used under IAPTranfer_Tool's config."""
     DOCS_REPO = str(DOCS)
-    BOOT_REPO = _sibling("BOOT_REPO", "open_plc_cube_ide")
+    BOOT_REPO = _sibling("BOOT_REPO", "OpenPLC_BootLoader")
     CORE_REPO = _sibling("CORE_REPO", "open_plc_arduino")
     TOOL_REPO = _sibling("TOOL_REPO", "IAPTranfer_Tool")
     PORTTOOL_REPO = _sibling("PORTTOOL_REPO", "OpenPLC_PortsTestingTool")
@@ -139,3 +139,12 @@ def docs_repo():
 def prod_docs():
     """$PROD: this repo. A citation reads $PROD/docs/tables/STATUS.md."""
     return DOCS
+
+
+def entry_doc(root):
+    """A repo's CLAUDE.md. A public OpenPLCs repo keeps none; its copy lives in
+    the private OpenPLC_AI beside it, as OpenPLC_AI/<repo>/CLAUDE.md (decision 153)."""
+    root = Path(root)
+    own = root / "CLAUDE.md"
+    ai = root.parent / "OpenPLC_AI" / root.name / "CLAUDE.md"
+    return ai if not own.is_file() and ai.is_file() else own
